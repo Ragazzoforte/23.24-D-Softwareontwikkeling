@@ -7,7 +7,3 @@ Bugfix Branches: bugfix/.
 Hotfix Branches: hotfix/.
 Release Branches: release/.
 Documentation Branches: docs/.
-
-
-
-HALLOOO

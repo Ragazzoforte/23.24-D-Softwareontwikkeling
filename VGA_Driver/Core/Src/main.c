@@ -71,6 +71,8 @@ void MX_USB_HOST_Process(void);
 /**
   * @brief  The application entry point.
   * @retval int
+  * 
+  * main loop hier zit ook de blink
   */
 int main(void)
 {
@@ -107,10 +109,6 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  /**
-   * @brief hier gaat hij blinken
-   * 
-   */
   while (1)
   {
     /* USER CODE END WHILE */

@@ -49,9 +49,9 @@ jobs:
             packages: doxygen doxygen-doc doxygen-latex graphviz
             version: 1.0
 
-        - name: Install toolchain & Doxygen
-          run: |
-            sudo apt install doxygen doxygen-doc doxygen-latex graphviz
+        # - name: Install toolchain & Doxygen
+        #   run: |
+        #     sudo apt install doxygen doxygen-doc doxygen-latex graphviz
 
         - name: Build doxygen documentation
           run: |
@@ -61,14 +61,14 @@ jobs:
           uses: actions/cache/save@v4
           id: doxygen_cache
           with:
-              path: ./Doxy/html
+              path: ./Doc/html
               key: ${{ runner.os }}-build-doxygen
         # download
         - name: Archive production artifacts
           uses: actions/upload-artifact@v4
           with:
             name: doxygen-out
-            path: ./Doxy
+            path: ./Doc
   deploy:
       needs: compile
       environment:
@@ -85,14 +85,14 @@ jobs:
           uses: actions/cache/restore@v4
           id: doxygen_cache
           with:
-              path: ./Doxy
+              path: ./Doc
               key: ${{ runner.os }}-build-doxygen
 
         - name: Upload artifact
           uses: actions/upload-pages-artifact@v3
           with:
             # Upload entire repository
-            path: './Doxy'
+            path: './Doc'
         - name: Deploy to GitHub Pages
           id: deployment
           uses: actions/deploy-pages@v4

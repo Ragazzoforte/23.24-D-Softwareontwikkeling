@@ -31,14 +31,6 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-#   delete_cache:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Delete Doxygen cache
-#         uses: prantlf/delete-cache-action@v2
-#         with:
-#           key: ${{ runner.os }}-build-doxygen
-
   compile:
     runs-on: ubuntu-latest
     steps:
@@ -62,7 +54,7 @@ jobs:
           id: doxygen_cache
           with:
               path: ./Doc
-              key: ${{ runner.os }}-build-doxygen
+              key: build_doxygen_${{ github.event.repository.pushed_at }}
         # # download
         # - name: Archive production artifacts
         #   uses: actions/upload-artifact@v4
@@ -78,6 +70,7 @@ jobs:
       steps:
         - name: Checkout
           uses: actions/checkout@v4
+
         - name: Setup Pages
           uses: actions/configure-pages@v5
 
@@ -86,13 +79,13 @@ jobs:
           id: doxygen_cache
           with:
               path: ./Doc
-              key: ${{ runner.os }}-build-doxygen
+              key: build_doxygen_${{ github.event.repository.pushed_at }}
 
         - name: Upload artifact
           uses: actions/upload-pages-artifact@v3
           with:
-            # Upload entire repository
             path: './Doc/html'
+
         - name: Deploy to GitHub Pages
           id: deployment
           uses: actions/deploy-pages@v4

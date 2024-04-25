@@ -1,0 +1,753 @@
+\doxysection{arm\+\_\+mat\+\_\+mult\+\_\+opt\+\_\+q31.\+c}
+\hypertarget{arm__mat__mult__opt__q31_8c_source}{}\label{arm__mat__mult__opt__q31_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/MatrixFunctions/arm\_mat\_mult\_opt\_q31.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/MatrixFunctions/arm\_mat\_mult\_opt\_q31.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_mat\_mult\_opt\_q31.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Q31\ matrix\ multiplication}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 3\ Nov\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.10.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/matrix\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00065\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \textcolor{preprocessor}{\#define\ MATRIX\_DIM2\ 2}}
+\DoxyCodeLine{00068\ \textcolor{preprocessor}{\#define\ MATRIX\_DIM3\ 3}}
+\DoxyCodeLine{00069\ \textcolor{preprocessor}{\#define\ MATRIX\_DIM4\ 4}}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \_\_STATIC\_INLINE\ arm\_status\ arm\_mat\_mult\_opt\_q31\_2x2\_mve(}
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pSrcA,}
+\DoxyCodeLine{00073\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pSrcB,}
+\DoxyCodeLine{00074\ \ \ \ \ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pDst)}
+\DoxyCodeLine{00075\ \{}
+\DoxyCodeLine{00076\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \textcolor{comment}{/*\ input\ data\ matrix\ pointer\ B\ */}}
+\DoxyCodeLine{00077\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \textcolor{comment}{/*\ input\ data\ matrix\ pointer\ A\ */}}
+\DoxyCodeLine{00078\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pOut\ =\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \ \textcolor{comment}{/*\ output\ data\ matrix\ pointer\ */}}
+\DoxyCodeLine{00079\ \ \ \ \ uint32x4\_t\ \ \ vecColBOffs;}
+\DoxyCodeLine{00080\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInA0\ =\ pInA;}
+\DoxyCodeLine{00081\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInA1\ =\ pInA0\ +\ MATRIX\_DIM2;}
+\DoxyCodeLine{00082\ \ \ \ \ q63\_t\ \ \ \ \ \ \ \ acc0,\ acc1;}
+\DoxyCodeLine{00083\ \ \ \ \ q31x4\_t\ \ \ \ \ \ vecB,\ vecA0,\ vecA1;}
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{comment}{/*\ enable\ predication\ to\ disable\ half\ of\ vector\ elements\ */}}
+\DoxyCodeLine{00085\ \ \ \ \ mve\_pred16\_t\ p0\ =\ vctp32q(MATRIX\_DIM2);}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ vecColBOffs\ =\ vidupq\_u32((uint32\_t)0,\ 1);}
+\DoxyCodeLine{00088\ \ \ \ \ vecColBOffs\ =\ vecColBOffs\ *\ MATRIX\_DIM2;}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ pInB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{comment}{/*\ load\ 1st\ B\ column\ (partial\ load)\ */}}
+\DoxyCodeLine{00093\ \ \ \ \ vecB\ =\ vldrwq\_gather\_shifted\_offset\_z\_s32(pInB,\ vecColBOffs,\ p0);}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \ \ \textcolor{comment}{/*\ load\ A\ rows\ */}}
+\DoxyCodeLine{00096\ \ \ \ \ vecA0\ =\ vldrwq\_s32(pInA0);}
+\DoxyCodeLine{00097\ \ \ \ \ vecA1\ =\ vldrwq\_s32(pInA1);}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \ \ acc0\ =\ vrmlaldavhq(vecA0,\ vecB);}
+\DoxyCodeLine{00100\ \ \ \ \ acc1\ =\ vrmlaldavhq(vecA1,\ vecB);}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \ \ acc0\ =\ asrl(acc0,\ 23);}
+\DoxyCodeLine{00103\ \ \ \ \ acc1\ =\ asrl(acc1,\ 23);}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \ pOut[0\ *\ MATRIX\_DIM2]\ =\ (q31\_t)\ acc0;}
+\DoxyCodeLine{00106\ \ \ \ \ pOut[1\ *\ MATRIX\_DIM2]\ =\ (q31\_t)\ acc1;}
+\DoxyCodeLine{00107\ \ \ \ \ pOut++;}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{comment}{/*\ move\ to\ next\ B\ column\ */}}
+\DoxyCodeLine{00110\ \ \ \ \ pInB\ =\ pInB\ +\ 1;}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ vecB\ =\ vldrwq\_gather\_shifted\_offset\_z\_s32(pInB,\ vecColBOffs,\ p0);}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \ \ acc0\ =\ vrmlaldavhq(vecA0,\ vecB);}
+\DoxyCodeLine{00115\ \ \ \ \ acc1\ =\ vrmlaldavhq(vecA1,\ vecB);}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ \ acc0\ =\ asrl(acc0,\ 23);}
+\DoxyCodeLine{00118\ \ \ \ \ acc1\ =\ asrl(acc1,\ 23);}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ pOut[0\ *\ MATRIX\_DIM2]\ =\ (q31\_t)\ acc0;}
+\DoxyCodeLine{00121\ \ \ \ \ pOut[1\ *\ MATRIX\_DIM2]\ =\ (q31\_t)\ acc1;}
+\DoxyCodeLine{00122\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00123\ \textcolor{comment}{\ \ \ \ \ *\ Return\ to\ application}}
+\DoxyCodeLine{00124\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00125\ \ \ \ \ \textcolor{keywordflow}{return}\ (ARM\_MATH\_SUCCESS);}
+\DoxyCodeLine{00126\ \}}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \_\_STATIC\_INLINE\ arm\_status\ arm\_mat\_mult\_opt\_q31\_3x3\_mve(}
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pSrcA,}
+\DoxyCodeLine{00132\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pSrcB,}
+\DoxyCodeLine{00133\ \ \ \ \ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pDst)}
+\DoxyCodeLine{00134\ \{}
+\DoxyCodeLine{00135\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \textcolor{comment}{/*\ input\ data\ matrix\ pointer\ B\ */}}
+\DoxyCodeLine{00136\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \textcolor{comment}{/*\ input\ data\ matrix\ pointer\ A\ */}}
+\DoxyCodeLine{00137\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pOut\ =\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \ \textcolor{comment}{/*\ output\ data\ matrix\ pointer\ */}}
+\DoxyCodeLine{00138\ \ \ \ \ uint32x4\_t\ \ \ vecColBOffs;}
+\DoxyCodeLine{00139\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInA0\ =\ pInA;}
+\DoxyCodeLine{00140\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInA1\ =\ pInA0\ +\ MATRIX\_DIM3;}
+\DoxyCodeLine{00141\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInA2\ =\ pInA1\ +\ MATRIX\_DIM3;}
+\DoxyCodeLine{00142\ \ \ \ \ q63\_t\ \ \ \ \ \ \ \ acc0,\ acc1,\ acc2;}
+\DoxyCodeLine{00143\ \ \ \ \ q31x4\_t\ \ \ \ \ \ vecB,\ vecA;}
+\DoxyCodeLine{00144\ \ \ \ \ \textcolor{comment}{/*\ enable\ predication\ to\ disable\ last\ (4th)\ vector\ element\ */}}
+\DoxyCodeLine{00145\ \ \ \ \ mve\_pred16\_t\ p0\ =\ vctp32q(MATRIX\_DIM3);}
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00147\ \ \ \ \ vecColBOffs\ =\ vidupq\_u32((uint32\_t)0,\ 1);}
+\DoxyCodeLine{00148\ \ \ \ \ vecColBOffs\ =\ vecColBOffs\ *\ MATRIX\_DIM3;}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \ \ \ \ pInB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00152\ \ \ \ \ vecB\ =\ vldrwq\_gather\_shifted\_offset\_z\_s32(pInB,\ vecColBOffs,\ p0);}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA0);}
+\DoxyCodeLine{00155\ \ \ \ \ acc0\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00156\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA1);}
+\DoxyCodeLine{00157\ \ \ \ \ acc1\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00158\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA2);}
+\DoxyCodeLine{00159\ \ \ \ \ acc2\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ acc0\ =\ asrl(acc0,\ 23);}
+\DoxyCodeLine{00162\ \ \ \ \ acc1\ =\ asrl(acc1,\ 23);}
+\DoxyCodeLine{00163\ \ \ \ \ acc2\ =\ asrl(acc2,\ 23);}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ \ \ \ \ pOut[0\ *\ MATRIX\_DIM3]\ =\ (q31\_t)\ acc0;}
+\DoxyCodeLine{00166\ \ \ \ \ pOut[1\ *\ MATRIX\_DIM3]\ =\ (q31\_t)\ acc1;}
+\DoxyCodeLine{00167\ \ \ \ \ pOut[2\ *\ MATRIX\_DIM3]\ =\ (q31\_t)\ acc2;}
+\DoxyCodeLine{00168\ \ \ \ \ pOut++;}
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \ \ \ \ \textcolor{comment}{/*\ move\ to\ next\ B\ column\ */}}
+\DoxyCodeLine{00171\ \ \ \ \ pInB\ =\ pInB\ +\ 1;}
+\DoxyCodeLine{00172\ }
+\DoxyCodeLine{00173\ \ \ \ \ vecB\ =\ vldrwq\_gather\_shifted\_offset\_z\_s32(pInB,\ vecColBOffs,\ p0);}
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00175\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA0);}
+\DoxyCodeLine{00176\ \ \ \ \ acc0\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00177\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA1);}
+\DoxyCodeLine{00178\ \ \ \ \ acc1\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00179\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA2);}
+\DoxyCodeLine{00180\ \ \ \ \ acc2\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00182\ \ \ \ \ acc0\ =\ asrl(acc0,\ 23);}
+\DoxyCodeLine{00183\ \ \ \ \ acc1\ =\ asrl(acc1,\ 23);}
+\DoxyCodeLine{00184\ \ \ \ \ acc2\ =\ asrl(acc2,\ 23);}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \ \ \ \ pOut[0\ *\ MATRIX\_DIM3]\ =\ (q31\_t)\ acc0;}
+\DoxyCodeLine{00187\ \ \ \ \ pOut[1\ *\ MATRIX\_DIM3]\ =\ (q31\_t)\ acc1;}
+\DoxyCodeLine{00188\ \ \ \ \ pOut[2\ *\ MATRIX\_DIM3]\ =\ (q31\_t)\ acc2;}
+\DoxyCodeLine{00189\ \ \ \ \ pOut++;}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \ \ \ \ \textcolor{comment}{/*\ move\ to\ next\ B\ column\ */}}
+\DoxyCodeLine{00192\ \ \ \ \ pInB\ =\ pInB\ +\ 1;}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00194\ \ \ \ \ vecB\ =\ vldrwq\_gather\_shifted\_offset\_z\_s32(pInB,\ vecColBOffs,\ p0);}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA0);}
+\DoxyCodeLine{00197\ \ \ \ \ acc0\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00198\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA1);}
+\DoxyCodeLine{00199\ \ \ \ \ acc1\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00200\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA2);}
+\DoxyCodeLine{00201\ \ \ \ \ acc2\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00203\ \ \ \ \ acc0\ =\ asrl(acc0,\ 23);}
+\DoxyCodeLine{00204\ \ \ \ \ acc1\ =\ asrl(acc1,\ 23);}
+\DoxyCodeLine{00205\ \ \ \ \ acc2\ =\ asrl(acc2,\ 23);}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00207\ \ \ \ \ pOut[0\ *\ MATRIX\_DIM3]\ =\ (q31\_t)\ acc0;}
+\DoxyCodeLine{00208\ \ \ \ \ pOut[1\ *\ MATRIX\_DIM3]\ =\ (q31\_t)\ acc1;}
+\DoxyCodeLine{00209\ \ \ \ \ pOut[2\ *\ MATRIX\_DIM3]\ =\ (q31\_t)\ acc2;}
+\DoxyCodeLine{00210\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00211\ \textcolor{comment}{\ \ \ \ \ *\ Return\ to\ application}}
+\DoxyCodeLine{00212\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00213\ \ \ \ \ \textcolor{keywordflow}{return}\ (ARM\_MATH\_SUCCESS);}
+\DoxyCodeLine{00214\ \}}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00216\ \_\_STATIC\_INLINE\ arm\_status\ arm\_mat\_mult\_opt\_q31\_4x4\_mve(}
+\DoxyCodeLine{00217\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pSrcA,}
+\DoxyCodeLine{00218\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pSrcB,}
+\DoxyCodeLine{00219\ \ \ \ \ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pDst)}
+\DoxyCodeLine{00220\ \{}
+\DoxyCodeLine{00221\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \textcolor{comment}{/*\ input\ data\ matrix\ pointer\ B\ */}}
+\DoxyCodeLine{00222\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \textcolor{comment}{/*\ input\ data\ matrix\ pointer\ A\ */}}
+\DoxyCodeLine{00223\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pOut\ =\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \ \textcolor{comment}{/*\ output\ data\ matrix\ pointer\ */}}
+\DoxyCodeLine{00224\ \ \ \ \ uint32x4\_t\ \ \ vecColBOffs;}
+\DoxyCodeLine{00225\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInA0\ =\ pInA;}
+\DoxyCodeLine{00226\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInA1\ =\ pInA0\ +\ MATRIX\_DIM4;}
+\DoxyCodeLine{00227\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInA2\ =\ pInA1\ +\ MATRIX\_DIM4;}
+\DoxyCodeLine{00228\ \ \ \ \ q31\_t\ \ \ \ \ \ \ *pInA3\ =\ pInA2\ +\ MATRIX\_DIM4;}
+\DoxyCodeLine{00229\ \ \ \ \ q63\_t\ \ \ \ \ \ \ \ acc0,\ acc1,\ acc2,\ acc3;}
+\DoxyCodeLine{00230\ \ \ \ \ q31x4\_t\ \ \ \ \ \ vecB,\ vecA;}
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00232\ \ \ \ \ vecColBOffs\ =\ vidupq\_u32((uint32\_t)0,\ 4);}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ \ \ \ \ pInB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ \ \ \ \ vecB\ =\ vldrwq\_gather\_shifted\_offset\_s32(pInB,\ vecColBOffs);}
+\DoxyCodeLine{00237\ }
+\DoxyCodeLine{00238\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA0);}
+\DoxyCodeLine{00239\ \ \ \ \ acc0\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00240\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA1);}
+\DoxyCodeLine{00241\ \ \ \ \ acc1\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00242\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA2);}
+\DoxyCodeLine{00243\ \ \ \ \ acc2\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00244\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA3);}
+\DoxyCodeLine{00245\ \ \ \ \ acc3\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00246\ }
+\DoxyCodeLine{00247\ \ \ \ \ acc0\ =\ asrl(acc0,\ 23);}
+\DoxyCodeLine{00248\ \ \ \ \ acc1\ =\ asrl(acc1,\ 23);}
+\DoxyCodeLine{00249\ \ \ \ \ acc2\ =\ asrl(acc2,\ 23);}
+\DoxyCodeLine{00250\ \ \ \ \ acc3\ =\ asrl(acc3,\ 23);}
+\DoxyCodeLine{00251\ }
+\DoxyCodeLine{00252\ \ \ \ \ pOut[0\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc0;}
+\DoxyCodeLine{00253\ \ \ \ \ pOut[1\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc1;}
+\DoxyCodeLine{00254\ \ \ \ \ pOut[2\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc2;}
+\DoxyCodeLine{00255\ \ \ \ \ pOut[3\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc3;}
+\DoxyCodeLine{00256\ \ \ \ \ pOut++;}
+\DoxyCodeLine{00257\ }
+\DoxyCodeLine{00258\ \ \ \ \ \textcolor{comment}{/*\ move\ to\ next\ B\ column\ */}}
+\DoxyCodeLine{00259\ \ \ \ \ pInB\ =\ pInB\ +\ 1;}
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00261\ \ \ \ \ vecB\ =\ vldrwq\_gather\_shifted\_offset\_s32(pInB,\ vecColBOffs);}
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00263\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA0);}
+\DoxyCodeLine{00264\ \ \ \ \ acc0\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00265\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA1);}
+\DoxyCodeLine{00266\ \ \ \ \ acc1\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00267\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA2);}
+\DoxyCodeLine{00268\ \ \ \ \ acc2\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00269\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA3);}
+\DoxyCodeLine{00270\ \ \ \ \ acc3\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00271\ }
+\DoxyCodeLine{00272\ \ \ \ \ acc0\ =\ asrl(acc0,\ 23);}
+\DoxyCodeLine{00273\ \ \ \ \ acc1\ =\ asrl(acc1,\ 23);}
+\DoxyCodeLine{00274\ \ \ \ \ acc2\ =\ asrl(acc2,\ 23);}
+\DoxyCodeLine{00275\ \ \ \ \ acc3\ =\ asrl(acc3,\ 23);}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00277\ \ \ \ \ pOut[0\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc0;}
+\DoxyCodeLine{00278\ \ \ \ \ pOut[1\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc1;}
+\DoxyCodeLine{00279\ \ \ \ \ pOut[2\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc2;}
+\DoxyCodeLine{00280\ \ \ \ \ pOut[3\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc3;}
+\DoxyCodeLine{00281\ }
+\DoxyCodeLine{00282\ \ \ \ \ pOut++;}
+\DoxyCodeLine{00283\ }
+\DoxyCodeLine{00284\ \ \ \ \ \textcolor{comment}{/*\ move\ to\ next\ B\ column\ */}}
+\DoxyCodeLine{00285\ \ \ \ \ pInB\ =\ pInB\ +\ 1;}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00287\ \ \ \ \ vecB\ =\ vldrwq\_gather\_shifted\_offset\_s32(pInB,\ vecColBOffs);}
+\DoxyCodeLine{00288\ }
+\DoxyCodeLine{00289\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA0);}
+\DoxyCodeLine{00290\ \ \ \ \ acc0\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00291\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA1);}
+\DoxyCodeLine{00292\ \ \ \ \ acc1\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00293\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA2);}
+\DoxyCodeLine{00294\ \ \ \ \ acc2\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00295\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA3);}
+\DoxyCodeLine{00296\ \ \ \ \ acc3\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00297\ }
+\DoxyCodeLine{00298\ \ \ \ \ acc0\ =\ asrl(acc0,\ 23);}
+\DoxyCodeLine{00299\ \ \ \ \ acc1\ =\ asrl(acc1,\ 23);}
+\DoxyCodeLine{00300\ \ \ \ \ acc2\ =\ asrl(acc2,\ 23);}
+\DoxyCodeLine{00301\ \ \ \ \ acc3\ =\ asrl(acc3,\ 23);}
+\DoxyCodeLine{00302\ }
+\DoxyCodeLine{00303\ \ \ \ \ pOut[0\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc0;}
+\DoxyCodeLine{00304\ \ \ \ \ pOut[1\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc1;}
+\DoxyCodeLine{00305\ \ \ \ \ pOut[2\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc2;}
+\DoxyCodeLine{00306\ \ \ \ \ pOut[3\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc3;}
+\DoxyCodeLine{00307\ }
+\DoxyCodeLine{00308\ \ \ \ \ pOut++;}
+\DoxyCodeLine{00309\ }
+\DoxyCodeLine{00310\ \ \ \ \ \textcolor{comment}{/*\ move\ to\ next\ B\ column\ */}}
+\DoxyCodeLine{00311\ \ \ \ \ pInB\ =\ pInB\ +\ 1;}
+\DoxyCodeLine{00312\ }
+\DoxyCodeLine{00313\ \ \ \ \ vecB\ =\ vldrwq\_gather\_shifted\_offset\_s32(pInB,\ vecColBOffs);}
+\DoxyCodeLine{00314\ }
+\DoxyCodeLine{00315\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA0);}
+\DoxyCodeLine{00316\ \ \ \ \ acc0\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00317\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA1);}
+\DoxyCodeLine{00318\ \ \ \ \ acc1\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00319\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA2);}
+\DoxyCodeLine{00320\ \ \ \ \ acc2\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00321\ \ \ \ \ vecA\ =\ vldrwq\_s32(pInA3);}
+\DoxyCodeLine{00322\ \ \ \ \ acc3\ =\ vrmlaldavhq(vecA,\ vecB);}
+\DoxyCodeLine{00323\ }
+\DoxyCodeLine{00324\ \ \ \ \ acc0\ =\ asrl(acc0,\ 23);}
+\DoxyCodeLine{00325\ \ \ \ \ acc1\ =\ asrl(acc1,\ 23);}
+\DoxyCodeLine{00326\ \ \ \ \ acc2\ =\ asrl(acc2,\ 23);}
+\DoxyCodeLine{00327\ \ \ \ \ acc3\ =\ asrl(acc3,\ 23);}
+\DoxyCodeLine{00328\ }
+\DoxyCodeLine{00329\ \ \ \ \ pOut[0\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc0;}
+\DoxyCodeLine{00330\ \ \ \ \ pOut[1\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc1;}
+\DoxyCodeLine{00331\ \ \ \ \ pOut[2\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc2;}
+\DoxyCodeLine{00332\ \ \ \ \ pOut[3\ *\ MATRIX\_DIM4]\ =\ (q31\_t)\ acc3;}
+\DoxyCodeLine{00333\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00334\ \textcolor{comment}{\ \ \ \ \ *\ Return\ to\ application}}
+\DoxyCodeLine{00335\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00336\ \ \ \ \ \textcolor{keywordflow}{return}\ (ARM\_MATH\_SUCCESS);}
+\DoxyCodeLine{00337\ \}}
+\DoxyCodeLine{00338\ }
+\DoxyCodeLine{00339\ }
+\DoxyCodeLine{00340\ arm\_status\ \mbox{\hyperlink{group___matrix_mult_gae9ef4cf0a04c7c0c6814f5235ecdc14f}{arm\_mat\_mult\_opt\_q31}}(}
+\DoxyCodeLine{00341\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pSrcA,}
+\DoxyCodeLine{00342\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pSrcB,}
+\DoxyCodeLine{00343\ \ \ \ \ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pDst,}
+\DoxyCodeLine{00344\ \ \ \ \ q31\_t\ *pState)}
+\DoxyCodeLine{00345\ \{}
+\DoxyCodeLine{00346\ \ \ \ \ q31\_t\ \ \ \ \ \ \ \ \ \ *pInA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \ \ \ \ \ \ \textcolor{comment}{/*\ input\ data\ matrix\ pointer\ A\ */}}
+\DoxyCodeLine{00347\ \ \ \ \ q31\_t\ \ \ \ \ \ \ \ \ \ *pInB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \ \ \ \ \ \ \textcolor{comment}{/*\ input\ data\ matrix\ pointer\ B\ */}}
+\DoxyCodeLine{00348\ \ \ \ \ q31\_t\ \ \ \ \ \ \ \ \ \ *pInA2;}
+\DoxyCodeLine{00349\ \ \ \ \ q31\_t\ \ \ \ \ \ \ \ \ \ *pInB2;}
+\DoxyCodeLine{00350\ \ \ \ \ q31\_t\ \ \ \ \ \ \ \ \ \ *px;\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ output\ data\ matrix\ pointer\ */}}
+\DoxyCodeLine{00351\ \ \ \ \ q31\_t\ \ \ \ \ \ \ \ \ \ *px2;\ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ output\ data\ matrix\ pointer\ */}}
+\DoxyCodeLine{00352\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ numRowsA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a1bcf80ccdc2acc29198f1592ae300390}{numRows}};\ \ \textcolor{comment}{/*\ number\ of\ rows\ of\ input\ matrix\ A\ \ \ \ */}}
+\DoxyCodeLine{00353\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ numColsB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}};\ \ \textcolor{comment}{/*\ number\ of\ columns\ of\ input\ matrix\ B\ */}}
+\DoxyCodeLine{00354\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ numColsA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}};\ \ \textcolor{comment}{/*\ number\ of\ columns\ of\ input\ matrix\ A\ */}}
+\DoxyCodeLine{00355\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ numRowsB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a1bcf80ccdc2acc29198f1592ae300390}{numRows}};\ \ \textcolor{comment}{/*\ number\ of\ rows\ of\ input\ matrix\ A\ \ \ \ */}}
+\DoxyCodeLine{00356\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ col,\ i\ =\ 0u,\ j,\ row\ =\ numRowsB;\ \ \ \ \ \textcolor{comment}{/*\ loop\ counters\ */}}
+\DoxyCodeLine{00357\ \ \ \ \ q31\_t\ \ \ \ \ \ \ \ \ \ *pSrcBT\ =\ pState;\ \ \ \ \ \textcolor{comment}{/*\ input\ data\ matrix\ pointer\ for\ transpose\ */}}
+\DoxyCodeLine{00358\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ blkCnt;\ \ \ \ \ \textcolor{comment}{/*\ loop\ counters\ */}}
+\DoxyCodeLine{00359\ \ \ \ \ arm\_status\ \ \ \ \ \ status;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Status\ of\ matrix\ multiplication\ */}}
+\DoxyCodeLine{00360\ \ \ \ \ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ BT;}
+\DoxyCodeLine{00361\ \textcolor{preprocessor}{\#ifdef\ ARM\_MATH\_MATRIX\_CHECK}}
+\DoxyCodeLine{00362\ }
+\DoxyCodeLine{00363\ \ \ \ \ \textcolor{comment}{/*\ Check\ for\ matrix\ mismatch\ condition\ */}}
+\DoxyCodeLine{00364\ \ \ \ \ \textcolor{keywordflow}{if}\ ((pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}}\ !=\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a1bcf80ccdc2acc29198f1592ae300390}{numRows}})\ ||}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ (pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a1bcf80ccdc2acc29198f1592ae300390}{numRows}}\ !=\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a1bcf80ccdc2acc29198f1592ae300390}{numRows}})\ ||\ (pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}}\ !=\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}}))\ \{}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Set\ status\ as\ ARM\_MATH\_SIZE\_MISMATCH\ */}}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ status\ =\ ARM\_MATH\_SIZE\_MISMATCH;}
+\DoxyCodeLine{00368\ \ \ \ \ \}\ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00369\ \textcolor{preprocessor}{\#endif\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{/*\ \#ifdef\ ARM\_MATH\_MATRIX\_CHECK\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00370\ \ \ \ \ \{}
+\DoxyCodeLine{00371\ }
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ small\ squared\ matrix\ specialized\ routines\ */}}
+\DoxyCodeLine{00373\ \ \ \ \ \textcolor{keywordflow}{if}(numRowsA\ ==\ numColsB\ \&\&\ numColsB\ ==\ numColsA)\ \{}
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (numRowsA\ ==\ 1)}
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ \ \ \ \ q63\_t\ sum\ =\ \ (q63\_t)\ *pInA\ *\ *pInB;}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \ \ \ \ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}}[0]\ =\ (q31\_t)(sum\ >>\ 31);}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (ARM\_MATH\_SUCCESS);}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(numRowsA\ ==\ 2)}
+\DoxyCodeLine{00381\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ arm\_mat\_mult\_opt\_q31\_2x2\_mve(pSrcA,\ pSrcB,\ pDst);}
+\DoxyCodeLine{00382\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(numRowsA\ ==\ 3)}
+\DoxyCodeLine{00383\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ arm\_mat\_mult\_opt\_q31\_3x3\_mve(pSrcA,\ pSrcB,\ pDst);}
+\DoxyCodeLine{00384\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (numRowsA\ ==\ 4)}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ arm\_mat\_mult\_opt\_q31\_4x4\_mve(pSrcA,\ pSrcB,\ pDst);}
+\DoxyCodeLine{00386\ \ \ \ \ \}}
+\DoxyCodeLine{00387\ }
+\DoxyCodeLine{00388\ }
+\DoxyCodeLine{00389\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00390\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Matrix\ transpose}}
+\DoxyCodeLine{00391\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ BT.\mbox{\hyperlink{structarm__matrix__instance__q31_a1bcf80ccdc2acc29198f1592ae300390}{numRows}}\ =\ numColsB;}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ BT.\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}}\ =\ numRowsB;}
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ BT.\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}}\ =\ pSrcBT;}
+\DoxyCodeLine{00395\ }
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{group___matrix_trans_ga30a4d49489ac67ff98a46b9f58f73bf1}{arm\_mat\_trans\_q31}}(pSrcB,\ \&BT);}
+\DoxyCodeLine{00397\ }
+\DoxyCodeLine{00398\ }
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00400\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Reset\ the\ variables\ for\ the\ usage\ in\ the\ following\ multiplication\ process}}
+\DoxyCodeLine{00401\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \ \ i\ =\ 0;}
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \ \ row\ =\ numRowsA\ >>\ 1;}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ px\ =\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};}
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \ \ px2\ =\ px\ +\ numColsB;}
+\DoxyCodeLine{00406\ }
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00408\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ main\ loop}}
+\DoxyCodeLine{00409\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ compute\ 2\ x\ 2\ output\ blocks}}
+\DoxyCodeLine{00410\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ with\ dot\ products\ (Matrix\ A\ rows\ *\ Transposed\ MAtrix\ B\ rows)}}
+\DoxyCodeLine{00411\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (row\ >\ 0u)\ \{}
+\DoxyCodeLine{00413\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00414\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ *\ For\ every\ row\ wise\ process,\ the\ column\ loop\ counter\ is\ to\ be\ initiated}}
+\DoxyCodeLine{00415\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ *\ Compute\ 2\ columns\ and\ 2\ rows\ in\ parrallel}}
+\DoxyCodeLine{00416\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00417\ \ \ \ \ \ \ \ \ \ \ \ \ col\ =\ numColsB\ >>\ 1;}
+\DoxyCodeLine{00418\ \ \ \ \ \ \ \ \ \ \ \ \ j\ =\ 0;}
+\DoxyCodeLine{00419\ }
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00421\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ *\ column\ pair\ loop}}
+\DoxyCodeLine{00422\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (col\ >\ 0u)\ \{}
+\DoxyCodeLine{00424\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ q31\_t\ \textcolor{keyword}{const}\ \ \ \ *pSrcAVec,\ *pSrcBVec,\ *pSrcA2Vec,\ *pSrcB2Vec;}
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ q31x4\_t\ \ \ \ \ \ \ \ \ vecA,\ vecA2,\ vecB,\ vecB2;}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ q63\_t\ \ \ \ \ \ \ \ \ \ \ acc0,\ acc1,\ acc2,\ acc3;}
+\DoxyCodeLine{00427\ }
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00429\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ Initiate\ the\ pointers}}
+\DoxyCodeLine{00430\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ -\/\ 2\ x\ consecutive\ Matrix\ A\ rows\ (i\ increment\ is\ 2\ x\ numColsA)}}
+\DoxyCodeLine{00431\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ -\/\ 2\ x\ consecutive\ Matrix\ B'\ rows\ (j\ increment\ is\ 2\ x\ numRowsB)}}
+\DoxyCodeLine{00432\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pInA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}}\ +\ i;}
+\DoxyCodeLine{00434\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pInA2\ =\ pInA\ +\ numColsA;}
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pInB\ =\ pSrcBT\ +\ j;}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pInB2\ =\ pInB\ +\ numRowsB;}
+\DoxyCodeLine{00437\ }
+\DoxyCodeLine{00438\ }
+\DoxyCodeLine{00439\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcAVec\ =\ (q31\_t\ \textcolor{keyword}{const}\ *)\ pInA;}
+\DoxyCodeLine{00440\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcA2Vec\ =\ (q31\_t\ \textcolor{keyword}{const}\ *)\ pInA2;}
+\DoxyCodeLine{00441\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcBVec\ =\ (q31\_t\ \textcolor{keyword}{const}\ *)\ pInB;}
+\DoxyCodeLine{00442\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcB2Vec\ =\ (q31\_t\ \textcolor{keyword}{const}\ *)\ pInB2;}
+\DoxyCodeLine{00443\ }
+\DoxyCodeLine{00444\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ 0LL;}
+\DoxyCodeLine{00445\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc1\ =\ 0LL;}
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc2\ =\ 0LL;}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc3\ =\ 0LL;}
+\DoxyCodeLine{00448\ }
+\DoxyCodeLine{00449\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ load\ scheduling\ */}}
+\DoxyCodeLine{00450\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcAVec);}
+\DoxyCodeLine{00451\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcAVec\ +=\ 4;}
+\DoxyCodeLine{00452\ }
+\DoxyCodeLine{00453\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt\ =\ (numColsA\ /\ 4);}
+\DoxyCodeLine{00454\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00455\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecB\ =\ vld1q(pSrcBVec);}
+\DoxyCodeLine{00456\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcBVec\ +=\ 4;}
+\DoxyCodeLine{00457\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ vrmlaldavhaq(acc0,\ vecA,\ vecB);}
+\DoxyCodeLine{00458\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecA2\ =\ vld1q(pSrcA2Vec);}
+\DoxyCodeLine{00459\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcA2Vec\ +=\ 4;}
+\DoxyCodeLine{00460\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc1\ =\ vrmlaldavhaq(acc1,\ vecA2,\ vecB);}
+\DoxyCodeLine{00461\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecB2\ =\ vld1q(pSrcB2Vec);}
+\DoxyCodeLine{00462\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcB2Vec\ +=\ 4;}
+\DoxyCodeLine{00463\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc2\ =\ vrmlaldavhaq(acc2,\ vecA,\ vecB2);}
+\DoxyCodeLine{00464\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcAVec);}
+\DoxyCodeLine{00465\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcAVec\ +=\ 4;}
+\DoxyCodeLine{00466\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc3\ =\ vrmlaldavhaq(acc3,\ vecA2,\ vecB2);}
+\DoxyCodeLine{00467\ }
+\DoxyCodeLine{00468\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00469\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00470\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00471\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ tail}}
+\DoxyCodeLine{00472\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ (will\ be\ merged\ thru\ tail\ predication)}}
+\DoxyCodeLine{00473\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00474\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt\ =\ (numColsA\ \&\ 3);}
+\DoxyCodeLine{00475\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00476\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p0\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00477\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecB\ =\ vld1q(pSrcBVec);}
+\DoxyCodeLine{00478\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ vrmlaldavhaq\_p(acc0,\ vecA,\ vecB,\ p0);}
+\DoxyCodeLine{00479\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecA2\ =\ vld1q(pSrcA2Vec);}
+\DoxyCodeLine{00480\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc1\ =\ vrmlaldavhaq\_p(acc1,\ vecA2,\ vecB,\ p0);}
+\DoxyCodeLine{00481\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecB2\ =\ vld1q(pSrcB2Vec);}
+\DoxyCodeLine{00482\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc2\ =\ vrmlaldavhaq\_p(acc2,\ vecA,\ vecB2,\ p0);}
+\DoxyCodeLine{00483\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcAVec);}
+\DoxyCodeLine{00484\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc3\ =\ vrmlaldavhaq\_p(acc3,\ vecA2,\ vecB2,\ p0);}
+\DoxyCodeLine{00485\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00486\ }
+\DoxyCodeLine{00487\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Convert\ to\ 1.31\ */}}
+\DoxyCodeLine{00488\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ asrl(acc0,\ 23);}
+\DoxyCodeLine{00489\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc1\ =\ asrl(acc1,\ 23);}
+\DoxyCodeLine{00490\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc2\ =\ asrl(acc2,\ 23);}
+\DoxyCodeLine{00491\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc3\ =\ asrl(acc3,\ 23);}
+\DoxyCodeLine{00492\ }
+\DoxyCodeLine{00493\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Store\ the\ results\ (2\ x\ 2\ block)\ in\ the\ destination\ buffer\ */}}
+\DoxyCodeLine{00494\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *px++\ =\ (q31\_t)\ acc0;}
+\DoxyCodeLine{00495\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *px++\ =\ (q31\_t)\ acc2;}
+\DoxyCodeLine{00496\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *px2++\ =\ (q31\_t)\ acc1;}
+\DoxyCodeLine{00497\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *px2++\ =\ (q31\_t)\ acc3;}
+\DoxyCodeLine{00498\ }
+\DoxyCodeLine{00499\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ j\ +=\ numRowsB\ *\ 2;}
+\DoxyCodeLine{00500\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00501\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ Decrement\ the\ column\ pair\ loop\ counter}}
+\DoxyCodeLine{00502\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00503\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ col-\/-\/;}
+\DoxyCodeLine{00504\ }
+\DoxyCodeLine{00505\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00506\ }
+\DoxyCodeLine{00507\ \ \ \ \ \ \ \ \ \ \ \ \ i\ =\ i\ +\ numColsA\ *\ 2;}
+\DoxyCodeLine{00508\ \ \ \ \ \ \ \ \ \ \ \ \ px\ =\ px2\ +\ (numColsB\ \&\ 1u);}
+\DoxyCodeLine{00509\ \ \ \ \ \ \ \ \ \ \ \ \ px2\ =\ px\ +\ numColsB;}
+\DoxyCodeLine{00510\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00511\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ *\ Decrement\ the\ row\ pair\ loop\ counter}}
+\DoxyCodeLine{00512\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00513\ \ \ \ \ \ \ \ \ \ \ \ \ row-\/-\/;}
+\DoxyCodeLine{00514\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00515\ }
+\DoxyCodeLine{00516\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00517\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Compute\ remaining\ row\ and/or\ column\ below}}
+\DoxyCodeLine{00518\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00519\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (numColsB\ \&\ 1u)\ \{}
+\DoxyCodeLine{00520\ \ \ \ \ \ \ \ \ \ \ \ \ row\ =\ numRowsA\ \&\ (\string~0x1);\ \ \ \ \textcolor{comment}{//avoid\ redundant\ computation}}
+\DoxyCodeLine{00521\ \ \ \ \ \ \ \ \ \ \ \ \ px\ =\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}}\ +\ numColsB\ -\/\ 1;}
+\DoxyCodeLine{00522\ \ \ \ \ \ \ \ \ \ \ \ \ i\ =\ 0;}
+\DoxyCodeLine{00523\ }
+\DoxyCodeLine{00524\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00525\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ *\ row\ loop}}
+\DoxyCodeLine{00526\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00527\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (row\ >\ 0)\ \{}
+\DoxyCodeLine{00528\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ q31\_t\ \textcolor{keyword}{const}\ \ \ \ *pSrcAVec,\ *pSrcBVec;}
+\DoxyCodeLine{00529\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ q31x4\_t\ \ \ \ \ \ \ \ \ vecA,\ vecB;}
+\DoxyCodeLine{00530\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ q63\_t\ \ \ \ \ \ \ \ \ \ \ acc0;}
+\DoxyCodeLine{00531\ }
+\DoxyCodeLine{00532\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00533\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ point\ to\ last\ column\ in\ matrix\ B}}
+\DoxyCodeLine{00534\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00535\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pInB\ =\ pSrcBT\ +\ numRowsB\ *\ (numColsB\ -\/\ 1);}
+\DoxyCodeLine{00536\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pInA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}}\ +\ i;}
+\DoxyCodeLine{00537\ }
+\DoxyCodeLine{00538\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcAVec\ =\ (q31\_t\ \textcolor{keyword}{const}\ *)\ pInA;}
+\DoxyCodeLine{00539\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcBVec\ =\ (q31\_t\ \textcolor{keyword}{const}\ *)\ pInB;}
+\DoxyCodeLine{00540\ }
+\DoxyCodeLine{00541\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ single\ dot-\/product\ */}}
+\DoxyCodeLine{00542\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ 0LL;}
+\DoxyCodeLine{00543\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt\ =\ (numColsA\ /\ 4);}
+\DoxyCodeLine{00544\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00545\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcAVec);}
+\DoxyCodeLine{00546\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcAVec\ +=\ 4;}
+\DoxyCodeLine{00547\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecB\ =\ vld1q(pSrcBVec);}
+\DoxyCodeLine{00548\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcBVec\ +=\ 4;}
+\DoxyCodeLine{00549\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ vrmlaldavhaq(acc0,\ vecA,\ vecB);}
+\DoxyCodeLine{00550\ }
+\DoxyCodeLine{00551\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00552\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00553\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00554\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ tail}}
+\DoxyCodeLine{00555\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ (will\ be\ merged\ thru\ tail\ predication)}}
+\DoxyCodeLine{00556\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00557\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt\ =\ (numColsA\ \&\ 3);}
+\DoxyCodeLine{00558\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00559\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p0\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00560\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcAVec);}
+\DoxyCodeLine{00561\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecB\ =\ vld1q(pSrcBVec);}
+\DoxyCodeLine{00562\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ vrmlaldavhaq\_p(acc0,\ vecA,\ vecB,\ p0);}
+\DoxyCodeLine{00563\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00564\ }
+\DoxyCodeLine{00565\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ asrl(acc0,\ 23);}
+\DoxyCodeLine{00566\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *px\ =\ (q31\_t)\ acc0;}
+\DoxyCodeLine{00567\ }
+\DoxyCodeLine{00568\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ px\ +=\ numColsB;}
+\DoxyCodeLine{00569\ }
+\DoxyCodeLine{00570\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i\ +=\ numColsA;}
+\DoxyCodeLine{00571\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00572\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ Decrement\ the\ row\ loop\ counter}}
+\DoxyCodeLine{00573\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00574\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ row-\/-\/;}
+\DoxyCodeLine{00575\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00576\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00577\ }
+\DoxyCodeLine{00578\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (numRowsA\ \&\ 1u)\ \{}
+\DoxyCodeLine{00579\ \ \ \ \ \ \ \ \ \ \ \ \ col\ =\ numColsB;}
+\DoxyCodeLine{00580\ \ \ \ \ \ \ \ \ \ \ \ \ i\ =\ 0u;}
+\DoxyCodeLine{00581\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00582\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ *\ point\ to\ last\ row\ in\ output\ matrix}}
+\DoxyCodeLine{00583\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00584\ \ \ \ \ \ \ \ \ \ \ \ \ px\ =\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}}\ +\ (numColsB)\ *\ (numRowsA\ -\/\ 1);}
+\DoxyCodeLine{00585\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00586\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ *\ col\ loop}}
+\DoxyCodeLine{00587\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00588\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (col\ >\ 0)\ \{}
+\DoxyCodeLine{00589\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ q31\_t\ \textcolor{keyword}{const}\ \ \ \ *pSrcAVec,\ *pSrcBVec;}
+\DoxyCodeLine{00590\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ q31x4\_t\ \ \ \ \ \ \ \ \ vecA,\ vecB;}
+\DoxyCodeLine{00591\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ q63\_t\ \ \ \ \ \ \ \ \ \ \ acc0;}
+\DoxyCodeLine{00592\ }
+\DoxyCodeLine{00593\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00594\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ point\ to\ last\ row\ in\ matrix\ A}}
+\DoxyCodeLine{00595\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00596\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pInA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}}\ +\ (numRowsA\ -\/\ 1)\ *\ numColsA;}
+\DoxyCodeLine{00597\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pInB\ =\ pSrcBT\ +\ i;}
+\DoxyCodeLine{00598\ }
+\DoxyCodeLine{00599\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00600\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ Set\ the\ variable\ sum,\ that\ acts\ as\ accumulator,\ to\ zero}}
+\DoxyCodeLine{00601\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00602\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcAVec\ =\ (q31\_t\ \textcolor{keyword}{const}\ *)\ pInA;}
+\DoxyCodeLine{00603\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcBVec\ =\ (q31\_t\ \textcolor{keyword}{const}\ *)\ pInB;}
+\DoxyCodeLine{00604\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ 0LL;}
+\DoxyCodeLine{00605\ }
+\DoxyCodeLine{00606\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt\ =\ (numColsA\ /\ 4);}
+\DoxyCodeLine{00607\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00608\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcAVec);}
+\DoxyCodeLine{00609\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcAVec\ +=\ 4;}
+\DoxyCodeLine{00610\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecB\ =\ vld1q(pSrcBVec);}
+\DoxyCodeLine{00611\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pSrcBVec\ +=\ 4;}
+\DoxyCodeLine{00612\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ vrmlaldavhaq(acc0,\ vecA,\ vecB);}
+\DoxyCodeLine{00613\ }
+\DoxyCodeLine{00614\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00615\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00616\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00617\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ tail}}
+\DoxyCodeLine{00618\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ (will\ be\ merged\ thru\ tail\ predication)}}
+\DoxyCodeLine{00619\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00620\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt\ =\ (numColsA\ \&\ 3);}
+\DoxyCodeLine{00621\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00622\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p0\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00623\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcAVec);}
+\DoxyCodeLine{00624\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vecB\ =\ vld1q(pSrcBVec);}
+\DoxyCodeLine{00625\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ vrmlaldavhaq\_p(acc0,\ vecA,\ vecB,\ p0);}
+\DoxyCodeLine{00626\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00627\ }
+\DoxyCodeLine{00628\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ asrl(acc0,\ 23);}
+\DoxyCodeLine{00629\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *px++\ =\ (q31\_t)\ acc0;}
+\DoxyCodeLine{00630\ }
+\DoxyCodeLine{00631\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i\ +=\ numColsA;}
+\DoxyCodeLine{00632\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00633\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ Decrement\ the\ col\ loop\ counter}}
+\DoxyCodeLine{00634\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00635\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ col-\/-\/;}
+\DoxyCodeLine{00636\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00637\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00638\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Set\ status\ as\ ARM\_MATH\_SUCCESS\ */}}
+\DoxyCodeLine{00639\ \ \ \ \ \ \ \ \ status\ =\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00640\ \ \ \ \ \}}
+\DoxyCodeLine{00641\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00642\ \textcolor{comment}{\ \ \ \ \ *\ Return\ to\ application}}
+\DoxyCodeLine{00643\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00644\ \ \ \ \ \textcolor{keywordflow}{return}\ (status);}
+\DoxyCodeLine{00645\ \}}
+\DoxyCodeLine{00646\ }
+\DoxyCodeLine{00647\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00648\ arm\_status\ \mbox{\hyperlink{group___matrix_mult_gae9ef4cf0a04c7c0c6814f5235ecdc14f}{arm\_mat\_mult\_opt\_q31}}(}
+\DoxyCodeLine{00649\ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pSrcA,}
+\DoxyCodeLine{00650\ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pSrcB,}
+\DoxyCodeLine{00651\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pDst,}
+\DoxyCodeLine{00652\ \ \ \ \ \ \ \ \ q31\_t\ *pState)}
+\DoxyCodeLine{00653\ \{}
+\DoxyCodeLine{00654\ \ \ q31\_t\ *pIn1\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Input\ data\ matrix\ pointer\ A\ */}}
+\DoxyCodeLine{00655\ \ \ q31\_t\ *pIn2\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Input\ data\ matrix\ pointer\ B\ */}}
+\DoxyCodeLine{00656\ \ \ q31\_t\ *pInA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Input\ data\ matrix\ pointer\ A\ */}}
+\DoxyCodeLine{00657\ \ \ q31\_t\ *pInB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Input\ data\ matrix\ pointer\ B\ */}}
+\DoxyCodeLine{00658\ \ \ q31\_t\ *pOut\ =\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Output\ data\ matrix\ pointer\ */}}
+\DoxyCodeLine{00659\ \ \ q31\_t\ *px;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ output\ data\ matrix\ pointer\ */}}
+\DoxyCodeLine{00660\ \ \ q63\_t\ sum;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Accumulator\ */}}
+\DoxyCodeLine{00661\ \ \ uint16\_t\ numRowsA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a1bcf80ccdc2acc29198f1592ae300390}{numRows}};\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Number\ of\ rows\ of\ input\ matrix\ A\ */}}
+\DoxyCodeLine{00662\ \ \ uint16\_t\ numColsB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}};\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Number\ of\ columns\ of\ input\ matrix\ B\ */}}
+\DoxyCodeLine{00663\ \ \ uint16\_t\ numColsA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}};\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Number\ of\ columns\ of\ input\ matrix\ A\ */}}
+\DoxyCodeLine{00664\ \ \ uint32\_t\ col,\ i\ =\ 0U,\ row\ =\ numRowsA,\ colCnt;\ \ \textcolor{comment}{/*\ Loop\ counters\ */}}
+\DoxyCodeLine{00665\ \ \ arm\_status\ status;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Status\ of\ matrix\ multiplication\ */}}
+\DoxyCodeLine{00666\ \ \ (void)pState;}
+\DoxyCodeLine{00667\ \textcolor{preprocessor}{\#ifdef\ ARM\_MATH\_MATRIX\_CHECK}}
+\DoxyCodeLine{00668\ }
+\DoxyCodeLine{00669\ \ \ \textcolor{comment}{/*\ Check\ for\ matrix\ mismatch\ condition\ */}}
+\DoxyCodeLine{00670\ \ \ \textcolor{keywordflow}{if}\ ((pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}}\ !=\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a1bcf80ccdc2acc29198f1592ae300390}{numRows}})\ ||}
+\DoxyCodeLine{00671\ \ \ \ \ \ \ (pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a1bcf80ccdc2acc29198f1592ae300390}{numRows}}\ !=\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a1bcf80ccdc2acc29198f1592ae300390}{numRows}})\ \ ||}
+\DoxyCodeLine{00672\ \ \ \ \ \ \ (pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}}\ !=\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}})\ \ \ \ )}
+\DoxyCodeLine{00673\ \ \ \{}
+\DoxyCodeLine{00674\ \ \ \ \ \textcolor{comment}{/*\ Set\ status\ as\ ARM\_MATH\_SIZE\_MISMATCH\ */}}
+\DoxyCodeLine{00675\ \ \ \ \ status\ =\ ARM\_MATH\_SIZE\_MISMATCH;}
+\DoxyCodeLine{00676\ \ \ \}}
+\DoxyCodeLine{00677\ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00678\ }
+\DoxyCodeLine{00679\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifdef\ ARM\_MATH\_MATRIX\_CHECK\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00680\ }
+\DoxyCodeLine{00681\ \ \ \{}
+\DoxyCodeLine{00682\ \ \ \ \ \textcolor{comment}{/*\ The\ following\ loop\ performs\ the\ dot-\/product\ of\ each\ row\ in\ pSrcA\ with\ each\ column\ in\ pSrcB\ */}}
+\DoxyCodeLine{00683\ \ \ \ \ \textcolor{comment}{/*\ row\ loop\ */}}
+\DoxyCodeLine{00684\ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00685\ \ \ \ \ \{}
+\DoxyCodeLine{00686\ \ \ \ \ \ \ \textcolor{comment}{/*\ Output\ pointer\ is\ set\ to\ starting\ address\ of\ row\ being\ processed\ */}}
+\DoxyCodeLine{00687\ \ \ \ \ \ \ px\ =\ pOut\ +\ i;}
+\DoxyCodeLine{00688\ }
+\DoxyCodeLine{00689\ \ \ \ \ \ \ \textcolor{comment}{/*\ For\ every\ row\ wise\ process,\ column\ loop\ counter\ is\ to\ be\ initiated\ */}}
+\DoxyCodeLine{00690\ \ \ \ \ \ \ col\ =\ numColsB;}
+\DoxyCodeLine{00691\ }
+\DoxyCodeLine{00692\ \ \ \ \ \ \ \textcolor{comment}{/*\ For\ every\ row\ wise\ process,\ pIn2\ pointer\ is\ set\ to\ starting\ address\ of\ pSrcB\ data\ */}}
+\DoxyCodeLine{00693\ \ \ \ \ \ \ pIn2\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};}
+\DoxyCodeLine{00694\ }
+\DoxyCodeLine{00695\ \ \ \ \ \ \ \textcolor{comment}{/*\ column\ loop\ */}}
+\DoxyCodeLine{00696\ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00697\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00698\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Set\ the\ variable\ sum,\ that\ acts\ as\ accumulator,\ to\ zero\ */}}
+\DoxyCodeLine{00699\ \ \ \ \ \ \ \ \ sum\ =\ 0;}
+\DoxyCodeLine{00700\ }
+\DoxyCodeLine{00701\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialize\ pointer\ pIn1\ to\ point\ to\ starting\ address\ of\ column\ being\ processed\ */}}
+\DoxyCodeLine{00702\ \ \ \ \ \ \ \ \ pIn1\ =\ pInA;}
+\DoxyCodeLine{00703\ }
+\DoxyCodeLine{00704\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)}}
+\DoxyCodeLine{00705\ }
+\DoxyCodeLine{00706\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ 4\ MACs\ at\ a\ time.\ */}}
+\DoxyCodeLine{00707\ \ \ \ \ \ \ \ \ colCnt\ =\ numColsA\ >>\ 2U;}
+\DoxyCodeLine{00708\ }
+\DoxyCodeLine{00709\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ matrix\ multiplication\ */}}
+\DoxyCodeLine{00710\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (colCnt\ >\ 0U)}
+\DoxyCodeLine{00711\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00712\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ c(m,n)\ =\ a(1,1)\ *\ b(1,1)\ +\ a(1,2)\ *\ b(2,1)\ +\ ....\ +\ a(m,p)\ *\ b(p,n)\ */}}
+\DoxyCodeLine{00713\ }
+\DoxyCodeLine{00714\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Perform\ the\ multiply-\/accumulates\ */}}
+\DoxyCodeLine{00715\ \ \ \ \ \ \ \ \ \ \ sum\ +=\ (q63\_t)\ *pIn1++\ *\ *pIn2;}
+\DoxyCodeLine{00716\ \ \ \ \ \ \ \ \ \ \ pIn2\ +=\ numColsB;}
+\DoxyCodeLine{00717\ }
+\DoxyCodeLine{00718\ \ \ \ \ \ \ \ \ \ \ sum\ +=\ (q63\_t)\ *pIn1++\ *\ *pIn2;}
+\DoxyCodeLine{00719\ \ \ \ \ \ \ \ \ \ \ pIn2\ +=\ numColsB;}
+\DoxyCodeLine{00720\ }
+\DoxyCodeLine{00721\ \ \ \ \ \ \ \ \ \ \ sum\ +=\ (q63\_t)\ *pIn1++\ *\ *pIn2;}
+\DoxyCodeLine{00722\ \ \ \ \ \ \ \ \ \ \ pIn2\ +=\ numColsB;}
+\DoxyCodeLine{00723\ }
+\DoxyCodeLine{00724\ \ \ \ \ \ \ \ \ \ \ sum\ +=\ (q63\_t)\ *pIn1++\ *\ *pIn2;}
+\DoxyCodeLine{00725\ \ \ \ \ \ \ \ \ \ \ pIn2\ +=\ numColsB;}
+\DoxyCodeLine{00726\ }
+\DoxyCodeLine{00727\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00728\ \ \ \ \ \ \ \ \ \ \ colCnt-\/-\/;}
+\DoxyCodeLine{00729\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00730\ }
+\DoxyCodeLine{00731\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ remaining\ MACs\ */}}
+\DoxyCodeLine{00732\ \ \ \ \ \ \ \ \ colCnt\ =\ numColsA\ \%\ 0x4U;}
+\DoxyCodeLine{00733\ }
+\DoxyCodeLine{00734\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00735\ }
+\DoxyCodeLine{00736\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialize\ cntCnt\ with\ number\ of\ columns\ */}}
+\DoxyCodeLine{00737\ \ \ \ \ \ \ \ \ colCnt\ =\ numColsA;}
+\DoxyCodeLine{00738\ }
+\DoxyCodeLine{00739\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_LOOPUNROLL)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00740\ }
+\DoxyCodeLine{00741\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (colCnt\ >\ 0U)}
+\DoxyCodeLine{00742\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00743\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ c(m,n)\ =\ a(1,1)\ *\ b(1,1)\ +\ a(1,2)\ *\ b(2,1)\ +\ ....\ +\ a(m,p)\ *\ b(p,n)\ */}}
+\DoxyCodeLine{00744\ }
+\DoxyCodeLine{00745\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Perform\ the\ multiply-\/accumulates\ */}}
+\DoxyCodeLine{00746\ \ \ \ \ \ \ \ \ \ \ sum\ +=\ (q63\_t)\ *pIn1++\ *\ *pIn2;}
+\DoxyCodeLine{00747\ \ \ \ \ \ \ \ \ \ \ pIn2\ +=\ numColsB;}
+\DoxyCodeLine{00748\ }
+\DoxyCodeLine{00749\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00750\ \ \ \ \ \ \ \ \ \ \ colCnt-\/-\/;}
+\DoxyCodeLine{00751\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00752\ }
+\DoxyCodeLine{00753\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Convert\ result\ from\ 2.62\ to\ 1.31\ format\ and\ store\ in\ destination\ buffer\ */}}
+\DoxyCodeLine{00754\ \ \ \ \ \ \ \ \ *px++\ =\ (q31\_t)\ (sum\ >>\ 31);}
+\DoxyCodeLine{00755\ }
+\DoxyCodeLine{00756\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ column\ loop\ counter\ */}}
+\DoxyCodeLine{00757\ \ \ \ \ \ \ \ \ col-\/-\/;}
+\DoxyCodeLine{00758\ }
+\DoxyCodeLine{00759\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Update\ pointer\ pIn2\ to\ point\ to\ starting\ address\ of\ next\ column\ */}}
+\DoxyCodeLine{00760\ \ \ \ \ \ \ \ \ pIn2\ =\ pInB\ +\ (numColsB\ -\/\ col);}
+\DoxyCodeLine{00761\ }
+\DoxyCodeLine{00762\ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (col\ >\ 0U);}
+\DoxyCodeLine{00763\ }
+\DoxyCodeLine{00764\ \ \ \ \ \ \ \textcolor{comment}{/*\ Update\ pointer\ pInA\ to\ point\ to\ starting\ address\ of\ next\ row\ */}}
+\DoxyCodeLine{00765\ \ \ \ \ \ \ i\ =\ i\ +\ numColsB;}
+\DoxyCodeLine{00766\ \ \ \ \ \ \ pInA\ =\ pInA\ +\ numColsA;}
+\DoxyCodeLine{00767\ }
+\DoxyCodeLine{00768\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ row\ loop\ counter\ */}}
+\DoxyCodeLine{00769\ \ \ \ \ \ \ row-\/-\/;}
+\DoxyCodeLine{00770\ }
+\DoxyCodeLine{00771\ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (row\ >\ 0U);}
+\DoxyCodeLine{00772\ }
+\DoxyCodeLine{00773\ \ \ \ \ \textcolor{comment}{/*\ Set\ status\ as\ ARM\_MATH\_SUCCESS\ */}}
+\DoxyCodeLine{00774\ \ \ \ \ status\ =\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00775\ \ \ \}}
+\DoxyCodeLine{00776\ }
+\DoxyCodeLine{00777\ \ \ \textcolor{comment}{/*\ Return\ to\ application\ */}}
+\DoxyCodeLine{00778\ \ \ \textcolor{keywordflow}{return}\ (status);}
+\DoxyCodeLine{00779\ \}}
+\DoxyCodeLine{00780\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEI)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00781\ }
+
+\end{DoxyCode}

@@ -1,0 +1,205 @@
+\doxysection{arm\+\_\+canberra\+\_\+distance\+\_\+f32.\+c}
+\hypertarget{arm__canberra__distance__f32_8c_source}{}\label{arm__canberra__distance__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/DistanceFunctions/arm\_canberra\_distance\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/DistanceFunctions/arm\_canberra\_distance\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_canberra\_distance\_f32.c}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ Description:\ \ Canberra\ distance\ between\ two\ vectors}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00012\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}dsp/distance\_functions.h"{}}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <limits.h>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <math.h>}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00055\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\#include\ "{}arm\_vec\_math.h"{}}}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ float32\_t\ \mbox{\hyperlink{group___canberra_ga4cb969f4c0c64a9afda98b2ed13e95fa}{arm\_canberra\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00061\ \{}
+\DoxyCodeLine{00062\ \ \ \ \ float32\_t\ \ \ \ \ \ \ accum\ =\ 0.0f;}
+\DoxyCodeLine{00063\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ \ blkCnt;}
+\DoxyCodeLine{00064\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ a,\ b,\ c,\ accumV;}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \ accumV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0)\ \{}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ a\ =\ vld1q(pA);}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ b\ =\ vld1q(pB);}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ c\ =\ vabdq(a,\ b);}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ a\ =\ vabsq(a);}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ b\ =\ vabsq(b);}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ a\ =\ vaddq(a,\ b);}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{00080\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ May\ divide\ by\ zero\ when\ a\ and\ b\ have\ both\ the\ same\ lane\ at\ zero.}}
+\DoxyCodeLine{00081\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ a\ =\ vrecip\_medprec\_f32(a);}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00085\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Force\ result\ of\ a\ division\ by\ 0\ to\ 0.\ It\ the\ behavior\ of\ the}}
+\DoxyCodeLine{00086\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ sklearn\ canberra\ function.}}
+\DoxyCodeLine{00087\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ a\ =\ vdupq\_m\_n\_f32(a,\ 0.0f,\ vcmpeqq(a,\ 0.0f));}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ c\ =\ vmulq(c,\ a);}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ accumV\ =\ vaddq(accumV,\ c);}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ pA\ +=\ 4;}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ pB\ +=\ 4;}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00095\ \ \ \ \ \}}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p0\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ a\ =\ vldrwq\_z\_f32(pA,\ p0);}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ b\ =\ vldrwq\_z\_f32(pB,\ p0);}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ c\ =\ vabdq(a,\ b);}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ a\ =\ vabsq(a);}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ b\ =\ vabsq(b);}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ a\ =\ vaddq(a,\ b);}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{00111\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ May\ divide\ by\ zero\ when\ a\ and\ b\ have\ both\ the\ same\ lane\ at\ zero.}}
+\DoxyCodeLine{00112\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ a\ =\ vrecip\_medprec\_f32(a);}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00116\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Force\ result\ of\ a\ division\ by\ 0\ to\ 0.\ It\ the\ behavior\ of\ the}}
+\DoxyCodeLine{00117\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ sklearn\ canberra\ function.}}
+\DoxyCodeLine{00118\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ a\ =\ vdupq\_m\_n\_f32(a,\ 0.0f,\ vcmpeqq(a,\ 0.0f));}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ c\ =\ vmulq(c,\ a);}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ accumV\ =\ vaddq\_m(accumV,\ accumV,\ c,\ p0);}
+\DoxyCodeLine{00122\ \ \ \ \ \}}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ accum\ =\ vecAddAcrossF32Mve(accumV);}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \ \ \ \ \textcolor{keywordflow}{return}\ (accum);}
+\DoxyCodeLine{00127\ \}}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00130\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_NEON)}}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \textcolor{preprocessor}{\#include\ "{}NEMath.h"{}}}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ float32\_t\ \mbox{\hyperlink{group___canberra_ga4cb969f4c0c64a9afda98b2ed13e95fa}{arm\_canberra\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00135\ \{}
+\DoxyCodeLine{00136\ \ \ \ float32\_t\ accum=0.0f,\ tmpA,\ tmpB,diff,sum;}
+\DoxyCodeLine{00137\ \ \ \ uint32\_t\ blkCnt;}
+\DoxyCodeLine{00138\ \ \ \ float32x4\_t\ a,b,c,accumV;}
+\DoxyCodeLine{00139\ \ \ \ float32x2\_t\ accumV2;}
+\DoxyCodeLine{00140\ \ \ \ uint32x4\_t\ \ \ isZeroV;}
+\DoxyCodeLine{00141\ \ \ \ float32x4\_t\ zeroV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \ accumV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00145\ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00146\ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00147\ \ \ \ \{}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ a\ =\ vld1q\_f32(pA);}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ b\ =\ vld1q\_f32(pB);}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ c\ =\ vabdq\_f32(a,b);}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ a\ =\ vabsq\_f32(a);}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ b\ =\ vabsq\_f32(b);}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ a\ =\ vaddq\_f32(a,b);}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ isZeroV\ =\ vceqq\_f32(a,zeroV);}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{00159\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ May\ divide\ by\ zero\ when\ a\ and\ b\ have\ both\ the\ same\ lane\ at\ zero.}}
+\DoxyCodeLine{00160\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ a\ =\ vinvq\_f32(a);}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00164\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Force\ result\ of\ a\ division\ by\ 0\ to\ 0.\ It\ the\ behavior\ of\ the}}
+\DoxyCodeLine{00165\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ sklearn\ canberra\ function.}}
+\DoxyCodeLine{00166\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ a\ =\ vreinterpretq\_f32\_s32(vbicq\_s32(vreinterpretq\_s32\_f32(a),vreinterpretq\_s32\_u32(isZeroV)));}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ c\ =\ vmulq\_f32(c,a);}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ accumV\ =\ vaddq\_f32(accumV,c);}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ pA\ +=\ 4;}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ pB\ +=\ 4;}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ blkCnt\ -\/-\/;}
+\DoxyCodeLine{00174\ \ \ \ \}}
+\DoxyCodeLine{00175\ \ \ \ accumV2\ =\ vpadd\_f32(vget\_low\_f32(accumV),vget\_high\_f32(accumV));}
+\DoxyCodeLine{00176\ \ \ \ accum\ =\ vget\_lane\_f32(accumV2,\ 0)\ +\ vget\_lane\_f32(accumV2,\ 1);}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00179\ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00180\ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00181\ \ \ \ \{}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ tmpA\ =\ *pA++;}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ tmpB\ =\ *pB++;}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00185\ \ \ \ \ \ \ diff\ =\ fabsf(tmpA\ -\/\ tmpB);}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ sum\ =\ fabsf(tmpA)\ +\ fabsf(tmpB);}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((tmpA\ !=\ 0.0f)\ ||\ (tmpB\ !=\ 0.0f))}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \ accum\ +=\ (diff\ /\ sum);}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ blkCnt\ -\/-\/;}
+\DoxyCodeLine{00192\ \ \ \ \}}
+\DoxyCodeLine{00193\ \ \ \ \textcolor{keywordflow}{return}(accum);}
+\DoxyCodeLine{00194\ \}}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00197\ float32\_t\ \mbox{\hyperlink{group___canberra_ga4cb969f4c0c64a9afda98b2ed13e95fa}{arm\_canberra\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00198\ \{}
+\DoxyCodeLine{00199\ \ \ \ float32\_t\ accum=0.0f,\ tmpA,\ tmpB,diff,sum;}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00201\ \ \ \ \textcolor{keywordflow}{while}(blockSize\ >\ 0)}
+\DoxyCodeLine{00202\ \ \ \ \{}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ tmpA\ =\ *pA++;}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ tmpB\ =\ *pB++;}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00206\ \ \ \ \ \ \ diff\ =\ fabsf(tmpA\ -\/\ tmpB);}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ sum\ =\ fabsf(tmpA)\ +\ fabsf(tmpB);}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((tmpA\ !=\ 0.0f)\ ||\ (tmpB\ !=\ 0.0f))}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ accum\ +=\ (diff\ /\ sum);}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ blockSize\ -\/-\/;}
+\DoxyCodeLine{00213\ \ \ \ \}}
+\DoxyCodeLine{00214\ \ \ \ \textcolor{keywordflow}{return}(accum);}
+\DoxyCodeLine{00215\ \}}
+\DoxyCodeLine{00216\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00217\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00218\ }
+\DoxyCodeLine{00219\ }
+
+\end{DoxyCode}

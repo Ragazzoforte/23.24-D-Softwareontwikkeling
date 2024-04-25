@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['nack_20state_0',['NACK State',['../group___s_m_a_r_t_c_a_r_d___n_a_c_k___state.html',1,'SMARTCARD NACK State'],['../group___u_s_a_r_t___n_a_c_k___state.html',1,'USART NACK State']]],
+  ['nand_20aliased_20defines_20maintained_20for_20legacy_20purpose_1',['HAL NAND Aliased Defines maintained for legacy purpose',['../group___h_a_l___n_a_n_d___aliased___defines.html',1,'']]],
+  ['negate_2',['Vector Negate',['../group___basic_negate.html',1,'']]],
+  ['nested_20vectored_20interrupt_20controller_20nvic_3',['Nested Vectored Interrupt Controller (NVIC)',['../group___c_m_s_i_s___n_v_i_c.html',1,'']]],
+  ['network_20computation_4',['Basic Math Functions for Neural Network Computation',['../group___n_n_basic_math.html',1,'']]],
+  ['network_20data_20conversion_20functions_5',['Neural Network Data Conversion Functions',['../group__nndata__convert.html',1,'']]],
+  ['network_20functions_6',['Neural Network Functions',['../group__group_n_n.html',1,'']]],
+  ['neural_20network_20computation_7',['Basic Math Functions for Neural Network Computation',['../group___n_n_basic_math.html',1,'']]],
+  ['neural_20network_20data_20conversion_20functions_8',['Neural Network Data Conversion Functions',['../group__nndata__convert.html',1,'']]],
+  ['neural_20network_20functions_9',['Neural Network Functions',['../group__group_n_n.html',1,'']]],
+  ['non_20blocking_20mode_20interrupt_10',['Non-Blocking mode Interrupt',['../group___non-_blocking__mode___interrupt.html',1,'']]],
+  ['nor_20aliased_20defines_20maintained_20for_20legacy_20purpose_11',['HAL NOR Aliased Defines maintained for legacy purpose',['../group___h_a_l___n_o_r___aliased___defines.html',1,'']]],
+  ['norm_12',['Quaternion Norm',['../group___quat_norm.html',1,'']]],
+  ['normalization_13',['Quaternion normalization',['../group___quat_normalized.html',1,'']]],
+  ['normalized_20lms_20filters_14',['Normalized LMS Filters',['../group___l_m_s___n_o_r_m.html',1,'']]],
+  ['nostretch_20mode_15',['nostretch mode',['../group___i2_c__nostretch__mode.html',1,'I2C nostretch mode'],['../group___s_m_b_u_s__nostretch__mode.html',1,'SMBUS nostretch mode']]],
+  ['not_16',['Vector bitwise NOT',['../group___not.html',1,'']]],
+  ['not_20in_20scb_20scnscb_17',['System Controls not in SCB (SCnSCB)',['../group___c_m_s_i_s___s_cn_s_c_b.html',1,'']]],
+  ['nrst_5fstdby_18',['FLASH Option Bytes nRST_STDBY',['../group___f_l_a_s_h_ex___option___bytes__n_r_s_t___s_t_d_b_y.html',1,'']]],
+  ['nrst_5fstop_19',['FLASH Option Bytes nRST_STOP',['../group___f_l_a_s_h_ex___option___bytes__n_r_s_t___s_t_o_p.html',1,'']]],
+  ['number_20of_20stop_20bits_20',['Number of Stop Bits',['../group___s_m_a_r_t_c_a_r_d___stop___bits.html',1,'SMARTCARD Number of Stop Bits'],['../group___u_a_r_t___stop___bits.html',1,'UART Number of Stop Bits'],['../group___u_s_a_r_t___stop___bits.html',1,'USART Number of Stop Bits']]],
+  ['nvic_21',['Nested Vectored Interrupt Controller (NVIC)',['../group___c_m_s_i_s___n_v_i_c.html',1,'']]],
+  ['nvic_20functions_22',['NVIC Functions',['../group___c_m_s_i_s___core___n_v_i_c_functions.html',1,'']]]
+];

@@ -1,0 +1,300 @@
+\doxysection{arm\+\_\+vec\+\_\+fft.\+h}
+\hypertarget{arm__vec__fft_8h_source}{}\label{arm__vec__fft_8h_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/PrivateInclude/arm\_vec\_fft.h@{VGA\_Driver/Drivers/CMSIS/DSP/PrivateInclude/arm\_vec\_fft.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/******************************************************************************}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ @file\ \ \ \ \ arm\_vec\_fft.h}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ @brief\ \ \ \ Private\ header\ file\ for\ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ @version\ \ V1.7.0}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ @date\ \ \ \ \ 07.\ January\ 2020}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ ******************************************************************************/}}
+\DoxyCodeLine{00007\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ Copyright\ (c)\ 2010-\/2020\ Arm\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#ifndef\ \_ARM\_VEC\_FFT\_H\_}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#define\ \_ARM\_VEC\_FFT\_H\_}}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#include\ "{}arm\_math.h"{}}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#ifdef\ \ \ \_\_cplusplus}}
+\DoxyCodeLine{00032\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}}
+\DoxyCodeLine{00033\ \{}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#if\ (defined(ARM\_MATH\_MVEF)\ ||\ defined(ARM\_MATH\_MVEI)\ ||\ defined(ARM\_MATH\_HELIUM))\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#define\ MVE\_CMPLX\_ADD\_A\_ixB(A,\ B)\ \ \ \ \ \ \ \ \ \ \ vcaddq\_rot90(A,B)}}
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#define\ MVE\_CMPLX\_SUB\_A\_ixB(A,B)\ \ \ \ \ \ \ \ \ \ \ \ vcaddq\_rot270(A,B)}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#define\ MVE\_CMPLX\_MULT\_FLT\_AxB(A,B)\ \ \ \ \ \ \ \ \ vcmlaq\_rot90(vcmulq(A,\ B),\ A,\ B)}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#define\ MVE\_CMPLX\_MULT\_FLT\_Conj\_AxB(A,B)\ \ \ \ vcmlaq\_rot270(vcmulq(A,\ B),\ A,\ B)}}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#define\ MVE\_CMPLX\_MULT\_FX\_AxB(A,B,TyA)\ \ \ \ \ \ vqdmladhxq(vqdmlsdhq((TyA)vuninitializedq\_s32(),\ A,\ B),\ A,\ B)}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#define\ MVE\_CMPLX\_MULT\_FX\_AxConjB(A,B,TyA)\ \ vqdmladhq(vqdmlsdhxq((TyA)vuninitializedq\_s32(),\ A,\ B),\ A,\ B)}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#define\ MVE\_CMPLX\_ADD\_FX\_A\_ixB(A,\ B)\ \ \ \ \ \ \ \ vhcaddq\_rot90(A,B)}}
+\DoxyCodeLine{00047\ \textcolor{preprocessor}{\#define\ MVE\_CMPLX\_SUB\_FX\_A\_ixB(A,B)\ \ \ \ \ \ \ \ \ vhcaddq\_rot270(A,B)}}
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00058\ \_\_STATIC\_INLINE\ \textcolor{keywordtype}{void}\ arm\_bitreversal\_32\_inpl\_mve(}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ uint32\_t\ *pSrc,}
+\DoxyCodeLine{00060\ \ \ \textcolor{keyword}{const}\ uint16\_t\ \ bitRevLen,}
+\DoxyCodeLine{00061\ \ \ \textcolor{keyword}{const}\ uint16\_t\ *pBitRevTab)}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \{}
+\DoxyCodeLine{00064\ \ \ \ \ uint64\_t\ \ \ \ \ \ \ *src\ =\ (uint64\_t\ *)\ pSrc;}
+\DoxyCodeLine{00065\ \ \ \ \ int32\_t\ \ \ \ \ \ \ \ \ blkCnt;\ \ \ \ \ \textcolor{comment}{/*\ loop\ counters\ */}}
+\DoxyCodeLine{00066\ \ \ \ \ uint32x4\_t\ \ \ \ \ \ bitRevTabOff;}
+\DoxyCodeLine{00067\ \ \ \ \ uint32x4\_t\ \ \ \ \ \ one\ =\ vdupq\_n\_u32(1);}
+\DoxyCodeLine{00068\ \ \ \ \ uint64x2\_t\ \ \ \ \ \ inLow,\ inHigh;}
+\DoxyCodeLine{00069\ \ \ \ \ uint64x2\_t\ \ \ \ \ \ bitRevOff1Low,\ bitRevOff0Low;}
+\DoxyCodeLine{00070\ \ \ \ \ uint64x2\_t\ \ \ \ \ \ bitRevOff1High,\ bitRevOff0High;}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{comment}{/*\ load\ scheduling\ to\ increase\ gather\ load\ idx\ update\ /\ gather\ load\ distance\ */}}
+\DoxyCodeLine{00073\ \ \ \ \ bitRevTabOff\ =\ vldrhq\_u32(pBitRevTab);}
+\DoxyCodeLine{00074\ \ \ \ \ pBitRevTab\ +=\ 4;}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \ \ \ \ bitRevOff0Low\ =\ vmullbq\_int\_u32(bitRevTabOff,\ one);}
+\DoxyCodeLine{00077\ \ \ \ \ bitRevOff0High\ =\ vmulltq\_int\_u32(bitRevTabOff,\ one);}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \ \ blkCnt\ =\ bitRevLen\ /\ 8;}
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0)\ \{}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ bitRevTabOff\ =\ vldrhq\_u32(pBitRevTab);}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ pBitRevTab\ +=\ 4;}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ 64-\/bit\ index\ expansion\ */}}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ bitRevOff1Low\ =\ vmullbq\_int\_u32(bitRevTabOff,\ one);}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ bitRevOff1High\ =\ vmulltq\_int\_u32(bitRevTabOff,\ one);}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ inLow\ =\ vldrdq\_gather\_offset\_u64(src,\ bitRevOff0Low);}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ inHigh\ =\ vldrdq\_gather\_offset\_u64(src,\ bitRevOff0High);}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ vstrdq\_scatter\_offset\_u64(src,\ bitRevOff0Low,\ inHigh);}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ vstrdq\_scatter\_offset\_u64(src,\ bitRevOff0High,\ inLow);}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ unrolled\ */}}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ bitRevTabOff\ =\ vldrhq\_u32(pBitRevTab);}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ pBitRevTab\ +=\ 4;}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ bitRevOff0Low\ =\ vmullbq\_int\_u32(bitRevTabOff,\ one);}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ bitRevOff0High\ =\ vmulltq\_int\_u32(bitRevTabOff,\ one);}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ inLow\ =\ vldrdq\_gather\_offset\_u64(src,\ bitRevOff1Low);}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ inHigh\ =\ vldrdq\_gather\_offset\_u64(src,\ bitRevOff1High);}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ vstrdq\_scatter\_offset\_u64(src,\ bitRevOff1Low,\ inHigh);}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ vstrdq\_scatter\_offset\_u64(src,\ bitRevOff1High,\ inLow);}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00110\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Decrement\ the\ blockSize\ loop\ counter}}
+\DoxyCodeLine{00111\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00113\ \ \ \ \ \}}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \ \ \textcolor{keywordflow}{if}\ (bitRevLen\ \&\ 7)\ \{}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ FFT\ size\ =\ 16\ */}}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ inLow\ =\ vldrdq\_gather\_offset\_u64(src,\ bitRevOff0Low);}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ inHigh\ =\ vldrdq\_gather\_offset\_u64(src,\ bitRevOff0High);}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ vstrdq\_scatter\_offset\_u64(src,\ bitRevOff0Low,\ inHigh);}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ vstrdq\_scatter\_offset\_u64(src,\ bitRevOff0High,\ inLow);}
+\DoxyCodeLine{00122\ \ \ \ \ \}}
+\DoxyCodeLine{00123\ \}}
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00135\ \_\_STATIC\_INLINE\ \textcolor{keywordtype}{void}\ arm\_bitreversal\_16\_inpl\_mve(}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ uint16\_t\ *pSrc,}
+\DoxyCodeLine{00137\ \ \ \textcolor{keyword}{const}\ uint16\_t\ bitRevLen,}
+\DoxyCodeLine{00138\ \ \ \textcolor{keyword}{const}\ uint16\_t\ *pBitRevTab)}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \{}
+\DoxyCodeLine{00141\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ *src\ =\ (uint32\_t\ *)\ pSrc;}
+\DoxyCodeLine{00142\ \ \ \ \ int32\_t\ \ \ \ \ \ \ \ \ blkCnt;\ \ \ \ \ \textcolor{comment}{/*\ loop\ counters\ */}}
+\DoxyCodeLine{00143\ \ \ \ \ uint32x4\_t\ \ \ \ \ \ bitRevTabOff;}
+\DoxyCodeLine{00144\ \ \ \ \ uint16x8\_t\ \ \ \ \ \ one\ =\ vdupq\_n\_u16(1);}
+\DoxyCodeLine{00145\ \ \ \ \ uint32x4\_t\ \ \ \ \ \ bitRevOff1Low,\ bitRevOff0Low;}
+\DoxyCodeLine{00146\ \ \ \ \ uint32x4\_t\ \ \ \ \ \ bitRevOff1High,\ bitRevOff0High;}
+\DoxyCodeLine{00147\ \ \ \ \ uint32x4\_t\ \ \ \ \ \ inLow,\ inHigh;}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ \ \ \textcolor{comment}{/*\ load\ scheduling\ to\ increase\ gather\ load\ idx\ update\ /\ gather\ load\ distance\ */}}
+\DoxyCodeLine{00150\ \ \ \ \ bitRevTabOff\ =\ vldrhq\_u16(pBitRevTab);}
+\DoxyCodeLine{00151\ \ \ \ \ pBitRevTab\ +=\ 8;}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \ \ \ \ bitRevOff0Low\ =\ vmullbq\_int\_u16((uint16x8\_t)bitRevTabOff,\ one);}
+\DoxyCodeLine{00154\ \ \ \ \ bitRevOff0High\ =\ vmulltq\_int\_u16((uint16x8\_t)bitRevTabOff,\ one);}
+\DoxyCodeLine{00155\ \ \ \ \ bitRevOff0Low\ =\ vshrq\_n\_u16((uint16x8\_t)bitRevOff0Low,\ 3);}
+\DoxyCodeLine{00156\ \ \ \ \ bitRevOff0High\ =\ vshrq\_n\_u16((uint16x8\_t)bitRevOff0High,\ 3);}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \ \ \ \ blkCnt\ =\ (bitRevLen\ /\ 16);}
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0)\ \{}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ bitRevTabOff\ =\ vldrhq\_u16(pBitRevTab);}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ pBitRevTab\ +=\ 8;}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ bitRevOff1Low\ =\ vmullbq\_int\_u16((uint16x8\_t)bitRevTabOff,\ one);}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ bitRevOff1High\ =\ vmulltq\_int\_u16((uint16x8\_t)bitRevTabOff,\ one);}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ bitRevOff1Low\ =\ vshrq\_n\_u16((uint16x8\_t)bitRevOff1Low,\ 3);}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ bitRevOff1High\ =\ vshrq\_n\_u16((uint16x8\_t)bitRevOff1High,\ 3);}
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ inLow\ =\ vldrwq\_gather\_shifted\_offset\_u32(src,\ bitRevOff0Low);}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ inHigh\ =\ vldrwq\_gather\_shifted\_offset\_u32(src,\ bitRevOff0High);}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ vstrwq\_scatter\_shifted\_offset\_u32(src,\ bitRevOff0Low,\ inHigh);}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ vstrwq\_scatter\_shifted\_offset\_u32(src,\ bitRevOff0High,\ inLow);}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ loop\ unrolling\ */}}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ bitRevTabOff\ =\ vldrhq\_u16(pBitRevTab);}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ pBitRevTab\ +=\ 8;}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ bitRevOff0Low\ =\ vmullbq\_int\_u16((uint16x8\_t)bitRevTabOff,\ one);}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ bitRevOff0High\ =\ vmulltq\_int\_u16((uint16x8\_t)bitRevTabOff,\ one);}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ bitRevOff0Low\ =\ vshrq\_n\_u16((uint16x8\_t)bitRevOff0Low,\ 3);}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ bitRevOff0High\ =\ vshrq\_n\_u16((uint16x8\_t)bitRevOff0High,\ 3);}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ inLow\ =\ vldrwq\_gather\_shifted\_offset\_u32(src,\ bitRevOff1Low);}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ inHigh\ =\ vldrwq\_gather\_shifted\_offset\_u32(src,\ bitRevOff1High);}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ vstrwq\_scatter\_shifted\_offset\_u32(src,\ bitRevOff1Low,\ inHigh);}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ vstrwq\_scatter\_shifted\_offset\_u32(src,\ bitRevOff1High,\ inLow);}
+\DoxyCodeLine{00188\ }
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00190\ \ \ \ \ \}}
+\DoxyCodeLine{00191\ }
+\DoxyCodeLine{00192\ \ \ \ \ \textcolor{comment}{/*\ tail\ handling\ */}}
+\DoxyCodeLine{00193\ \ \ \ \ blkCnt\ =\ bitRevLen\ \&\ 0xf;}
+\DoxyCodeLine{00194\ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ ==\ 8)\ \{}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ inLow\ =\ vldrwq\_gather\_shifted\_offset\_u32(src,\ bitRevOff0Low);}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ inHigh\ =\ vldrwq\_gather\_shifted\_offset\_u32(src,\ bitRevOff0High);}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ vstrwq\_scatter\_shifted\_offset\_u32(src,\ bitRevOff0Low,\ inHigh);}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ vstrwq\_scatter\_shifted\_offset\_u32(src,\ bitRevOff0High,\ inLow);}
+\DoxyCodeLine{00200\ \ \ \ \ \}\ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (blkCnt\ ==\ 12)\ \{}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ FFT\ 16\ special\ case\ */}}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p\ =\ vctp16q(4);}
+\DoxyCodeLine{00203\ }
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ bitRevTabOff\ =\ vldrhq\_z\_u16(pBitRevTab,\ p);}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ inLow\ =\ vldrwq\_gather\_shifted\_offset\_u32(src,\ bitRevOff0Low);}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ inHigh\ =\ vldrwq\_gather\_shifted\_offset\_u32(src,\ bitRevOff0High);}
+\DoxyCodeLine{00208\ }
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ vstrwq\_scatter\_shifted\_offset\_u32(src,\ bitRevOff0Low,\ inHigh);}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ vstrwq\_scatter\_shifted\_offset\_u32(src,\ bitRevOff0High,\ inLow);}
+\DoxyCodeLine{00211\ }
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ bitRevOff0Low\ =\ vmullbq\_int\_u16((uint16x8\_t)bitRevTabOff,\ one);}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ bitRevOff0High\ =\ vmulltq\_int\_u16((uint16x8\_t)bitRevTabOff,\ one);}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ bitRevOff0Low\ =\ vshrq\_n\_u16((uint16x8\_t)bitRevOff0Low,\ 3);}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ bitRevOff0High\ =\ vshrq\_n\_u16((uint16x8\_t)bitRevOff0High,\ 3);}
+\DoxyCodeLine{00216\ }
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ inLow\ =\ vldrwq\_gather\_shifted\_offset\_z\_u32(src,\ bitRevOff0Low,\ p);}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ inHigh\ =\ vldrwq\_gather\_shifted\_offset\_z\_u32(src,\ bitRevOff0High,\ p);}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ vstrwq\_scatter\_shifted\_offset\_p\_u32(src,\ bitRevOff0Low,\ inHigh,\ p);}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ vstrwq\_scatter\_shifted\_offset\_p\_u32(src,\ bitRevOff0High,\ inLow,\ p);}
+\DoxyCodeLine{00222\ \ \ \ \ \}}
+\DoxyCodeLine{00223\ \}}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00232\ \_\_STATIC\_INLINE\ \textcolor{keywordtype}{void}\ arm\_bitreversal\_32\_outpl\_mve(\textcolor{keywordtype}{void}\ *pDst,\ \textcolor{keywordtype}{void}\ *pSrc,\ uint32\_t\ fftLen)}
+\DoxyCodeLine{00233\ \{}
+\DoxyCodeLine{00234\ \ \ \ \ uint32x4\_t\ \ \ \ \ \ idxOffs0,\ idxOffs1,\ bitRevOffs0,\ bitRevOffs1;}
+\DoxyCodeLine{00235\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ bitRevPos,\ blkCnt;}
+\DoxyCodeLine{00236\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ *pDst32\ =\ (uint32\_t\ *)\ pDst;}
+\DoxyCodeLine{00237\ }
+\DoxyCodeLine{00238\ \ \ \ \ \textcolor{comment}{/*\ fwd\ indexes\ */}}
+\DoxyCodeLine{00239\ \ \ \ \ idxOffs0\ =\ vdupq\_n\_u32(0);}
+\DoxyCodeLine{00240\ \ \ \ \ idxOffs1\ =\ vdupq\_n\_u32(0);}
+\DoxyCodeLine{00241\ \ \ \ \ idxOffs0[0]\ =\ 0;\ \ \ \ idxOffs0[2]\ =\ 4;}
+\DoxyCodeLine{00242\ \ \ \ \ idxOffs1[0]\ =\ 8;\ \ \ \ idxOffs1[2]\ =\ 12;}
+\DoxyCodeLine{00243\ }
+\DoxyCodeLine{00244\ \ \ \ \ bitRevPos\ =\ (31\ -\/\ \mbox{\hyperlink{group___c_m_s_i_s___core___instruction_interface_ga5d5bb1527e042be4a9fa5a33f65cc248}{\_\_CLZ}}(fftLen))\ +\ 5;}
+\DoxyCodeLine{00245\ \ \ \ \ blkCnt\ =\ fftLen\ >>\ 2;}
+\DoxyCodeLine{00246\ }
+\DoxyCodeLine{00247\ \ \ \ \ \textcolor{comment}{/*\ issued\ earlier\ to\ increase\ gather\ load\ idx\ update\ /\ gather\ load\ distance\ */}}
+\DoxyCodeLine{00248\ \ \ \ \ \textcolor{comment}{/*\ bit-\/reverse\ fwd\ indexes\ */}}
+\DoxyCodeLine{00249\ \ \ \ \ bitRevOffs0\ =\ vbrsrq(idxOffs0,\ bitRevPos);}
+\DoxyCodeLine{00250\ \ \ \ \ bitRevOffs1\ =\ vbrsrq(idxOffs1,\ bitRevPos);}
+\DoxyCodeLine{00251\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0)\ \{}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ uint64x2\_t\ \ \ \ \ \ vecIn;}
+\DoxyCodeLine{00253\ }
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ vecIn\ =\ vldrdq\_gather\_offset\_u64(pSrc,\ (uint64x2\_t)\ bitRevOffs0);}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ idxOffs0\ =\ idxOffs0\ +\ 16;}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ vst1q(pDst32,\ (uint32x4\_t)\ vecIn);}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ pDst32\ +=\ 4;}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ bitRevOffs0\ =\ vbrsrq(idxOffs0,\ bitRevPos);}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ vecIn\ =\ vldrdq\_gather\_offset\_u64(pSrc,\ (uint64x2\_t)\ bitRevOffs1);}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ idxOffs1\ =\ idxOffs1\ +\ 16;}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ vst1q(pDst32,\ (uint32x4\_t)\ vecIn);}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ pDst32\ +=\ 4;}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ bitRevOffs1\ =\ vbrsrq(idxOffs1,\ bitRevPos);}
+\DoxyCodeLine{00265\ }
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00267\ \ \ \ \ \}}
+\DoxyCodeLine{00268\ \}}
+\DoxyCodeLine{00269\ }
+\DoxyCodeLine{00270\ }
+\DoxyCodeLine{00279\ \_\_STATIC\_INLINE\ \textcolor{keywordtype}{void}\ arm\_bitreversal\_16\_outpl\_mve(\textcolor{keywordtype}{void}\ *pDst,\ \textcolor{keywordtype}{void}\ *pSrc,\ uint32\_t\ fftLen)}
+\DoxyCodeLine{00280\ \{}
+\DoxyCodeLine{00281\ \ \ \ \ uint32x4\_t\ \ \ \ \ \ idxOffs0,\ idxOffs1,\ bitRevOffs0,\ bitRevOffs1;}
+\DoxyCodeLine{00282\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ bitRevPos,\ blkCnt;}
+\DoxyCodeLine{00283\ \ \ \ \ uint16\_t\ \ \ \ \ \ \ *pDst16\ =\ (uint16\_t\ *)\ pDst;}
+\DoxyCodeLine{00284\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ incrIdx\ =\ 0;}
+\DoxyCodeLine{00285\ }
+\DoxyCodeLine{00286\ \ \ \ \ \textcolor{comment}{/*\ fwd\ indexes\ */}}
+\DoxyCodeLine{00287\ \ \ \ \ idxOffs0\ =\ vidupq\_wb\_u32(\&incrIdx,\ 4);\ \ \ \ \textcolor{comment}{//\ \{0,\ 4,\ 8,\ 12\}}}
+\DoxyCodeLine{00288\ \ \ \ \ idxOffs1\ =\ vidupq\_wb\_u32(\&incrIdx,\ 4);\ \ \ \ \textcolor{comment}{//\ \{16,\ 20,\ 24,\ 28\}}}
+\DoxyCodeLine{00289\ }
+\DoxyCodeLine{00290\ \ \ \ \ bitRevPos\ =\ (31\ -\/\ \mbox{\hyperlink{group___c_m_s_i_s___core___instruction_interface_ga5d5bb1527e042be4a9fa5a33f65cc248}{\_\_CLZ}}(fftLen))\ +\ 4;}
+\DoxyCodeLine{00291\ \ \ \ \ blkCnt\ =\ fftLen\ >>\ 3;}
+\DoxyCodeLine{00292\ }
+\DoxyCodeLine{00293\ \ \ \ \ \textcolor{comment}{/*\ issued\ earlier\ to\ increase\ gather\ load\ idx\ update\ /\ gather\ load\ distance\ */}}
+\DoxyCodeLine{00294\ \ \ \ \ \textcolor{comment}{/*\ bit-\/reverse\ fwd\ indexes\ */}}
+\DoxyCodeLine{00295\ \ \ \ \ bitRevOffs0\ =\ vbrsrq(idxOffs0,\ bitRevPos);}
+\DoxyCodeLine{00296\ \ \ \ \ bitRevOffs1\ =\ vbrsrq(idxOffs1,\ bitRevPos);}
+\DoxyCodeLine{00297\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0)\ \{}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ uint32x4\_t\ \ \ \ \ \ vecIn;}
+\DoxyCodeLine{00299\ }
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ vecIn\ =\ vldrwq\_gather\_offset\_s32(pSrc,\ bitRevOffs0);}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ idxOffs0\ =\ idxOffs0\ +\ 32;}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ vst1q(pDst16,\ (uint16x8\_t)\ vecIn);}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ pDst16\ +=\ 8;}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ bitRevOffs0\ =\ vbrsrq(idxOffs0,\ bitRevPos);}
+\DoxyCodeLine{00305\ }
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ vecIn\ =\ vldrwq\_gather\_offset\_s32(pSrc,\ bitRevOffs1);}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ idxOffs1\ =\ idxOffs1\ +\ 32;}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ vst1q(pDst16,\ (uint16x8\_t)\ vecIn);}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ pDst16\ +=\ 8;}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ bitRevOffs1\ =\ vbrsrq(idxOffs1,\ bitRevPos);}
+\DoxyCodeLine{00311\ }
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00313\ \ \ \ \ \}}
+\DoxyCodeLine{00314\ \}}
+\DoxyCodeLine{00315\ }
+\DoxyCodeLine{00316\ }
+\DoxyCodeLine{00317\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ (defined(ARM\_MATH\_MVEF)\ ||\ defined(ARM\_MATH\_HELIUM))\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)*/}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00318\ }
+\DoxyCodeLine{00319\ }
+\DoxyCodeLine{00320\ \textcolor{preprocessor}{\#ifdef\ \ \ \_\_cplusplus}}
+\DoxyCodeLine{00321\ \}}
+\DoxyCodeLine{00322\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00323\ }
+\DoxyCodeLine{00324\ }
+\DoxyCodeLine{00325\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \_ARM\_VEC\_FFT\_H\_\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

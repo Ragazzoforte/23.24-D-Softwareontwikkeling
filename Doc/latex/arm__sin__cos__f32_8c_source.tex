@@ -1,0 +1,107 @@
+\doxysection{arm\+\_\+sin\+\_\+cos\+\_\+f32.\+c}
+\hypertarget{arm__sin__cos__f32_8c_source}{}\label{arm__sin__cos__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/ControllerFunctions/arm\_sin\_cos\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/ControllerFunctions/arm\_sin\_cos\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_sin\_cos\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Sine\ and\ Cosine\ calculation\ for\ floating-\/point\ values}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/controller\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}arm\_common\_tables.h"{}}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00074\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___sin_cos_ga4420d45c37d58c310ef9ae1b5fe58020}{arm\_sin\_cos\_f32}}(}
+\DoxyCodeLine{00075\ \ \ float32\_t\ theta,}
+\DoxyCodeLine{00076\ \ \ float32\_t\ *\ pSinVal,}
+\DoxyCodeLine{00077\ \ \ float32\_t\ *\ pCosVal)}
+\DoxyCodeLine{00078\ \{}
+\DoxyCodeLine{00079\ \ \ float32\_t\ fract,\ in;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ input,\ output\ variables\ */}}
+\DoxyCodeLine{00080\ \ \ uint16\_t\ indexS,\ indexC;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Index\ variable\ */}}
+\DoxyCodeLine{00081\ \ \ float32\_t\ f1,\ f2,\ d1,\ d2;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Two\ nearest\ output\ values\ */}}
+\DoxyCodeLine{00082\ \ \ float32\_t\ Dn,\ Df;}
+\DoxyCodeLine{00083\ \ \ float32\_t\ temp,\ findex;}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \textcolor{comment}{/*\ input\ x\ is\ in\ degrees\ */}}
+\DoxyCodeLine{00086\ \ \ \textcolor{comment}{/*\ Scale\ input,\ divide\ input\ by\ 360,\ for\ cosine\ add\ 0.25\ (pi/2)\ to\ read\ sine\ table\ */}}
+\DoxyCodeLine{00087\ \ \ in\ =\ theta\ *\ 0.00277777777778f;}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \textcolor{keywordflow}{if}\ (in\ <\ 0.0f)}
+\DoxyCodeLine{00090\ \ \ \{}
+\DoxyCodeLine{00091\ \ \ \ \ in\ =\ -\/in;}
+\DoxyCodeLine{00092\ \ \ \}}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \ \ in\ =\ in\ -\/\ (int32\_t)in;}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \textcolor{comment}{/*\ Calculate\ the\ nearest\ index\ */}}
+\DoxyCodeLine{00097\ \ \ findex\ =\ (float32\_t)FAST\_MATH\_TABLE\_SIZE\ *\ in;}
+\DoxyCodeLine{00098\ \ \ indexS\ =\ ((uint16\_t)findex)\ \&\ 0x1ff;}
+\DoxyCodeLine{00099\ \ \ indexC\ =\ (indexS\ +\ (FAST\_MATH\_TABLE\_SIZE\ /\ 4))\ \&\ 0x1ff;}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \ \ \textcolor{comment}{/*\ Calculation\ of\ fractional\ value\ */}}
+\DoxyCodeLine{00102\ \ \ fract\ =\ findex\ -\/\ (float32\_t)\ indexS;}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \textcolor{comment}{/*\ Read\ two\ nearest\ values\ of\ input\ value\ from\ the\ cos\ \&\ sin\ tables\ */}}
+\DoxyCodeLine{00105\ \ \ f1\ =\ \ sinTable\_f32[indexC\ \ ];}
+\DoxyCodeLine{00106\ \ \ f2\ =\ \ sinTable\_f32[indexC+1];}
+\DoxyCodeLine{00107\ \ \ d1\ =\ -\/sinTable\_f32[indexS\ \ ];}
+\DoxyCodeLine{00108\ \ \ d2\ =\ -\/sinTable\_f32[indexS+1];}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ temp\ =\ (1.0f\ -\/\ fract)\ *\ f1\ +\ fract\ *\ f2;}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ Dn\ =\ 0.0122718463030f;\ \textcolor{comment}{/*\ delta\ between\ the\ two\ points\ (fixed),\ in\ this\ case\ 2*pi/FAST\_MATH\_TABLE\_SIZE\ */}}
+\DoxyCodeLine{00113\ \ \ Df\ =\ f2\ -\/\ f1;\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ delta\ between\ the\ values\ of\ the\ functions\ */}}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ temp\ =\ Dn\ *\ (d1\ +\ d2)\ -\/\ 2\ *\ Df;}
+\DoxyCodeLine{00116\ \ \ temp\ =\ fract\ *\ temp\ +\ (3\ *\ Df\ -\/\ (d2\ +\ 2\ *\ d1)\ *\ Dn);}
+\DoxyCodeLine{00117\ \ \ temp\ =\ fract\ *\ temp\ +\ d1\ *\ Dn;}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ \textcolor{comment}{/*\ Calculation\ of\ cosine\ value\ */}}
+\DoxyCodeLine{00120\ \ \ *pCosVal\ =\ fract\ *\ temp\ +\ f1;}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \textcolor{comment}{/*\ Read\ two\ nearest\ values\ of\ input\ value\ from\ the\ cos\ \&\ sin\ tables\ */}}
+\DoxyCodeLine{00123\ \ \ f1\ =\ sinTable\_f32[indexS\ \ ];}
+\DoxyCodeLine{00124\ \ \ f2\ =\ sinTable\_f32[indexS+1];}
+\DoxyCodeLine{00125\ \ \ d1\ =\ sinTable\_f32[indexC\ \ ];}
+\DoxyCodeLine{00126\ \ \ d2\ =\ sinTable\_f32[indexC+1];}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \ \ temp\ =\ (1.0f\ -\/\ fract)\ *\ f1\ +\ fract\ *\ f2;}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ Df\ =\ f2\ -\/\ f1;\ \textcolor{comment}{//\ delta\ between\ the\ values\ of\ the\ functions}}
+\DoxyCodeLine{00131\ \ \ temp\ =\ Dn\ *\ (d1\ +\ d2)\ -\/\ 2\ *\ Df;}
+\DoxyCodeLine{00132\ \ \ temp\ =\ fract\ *\ temp\ +\ (3\ *\ Df\ -\/\ (d2\ +\ 2\ *\ d1)\ *\ Dn);}
+\DoxyCodeLine{00133\ \ \ temp\ =\ fract\ *\ temp\ +\ d1\ *\ Dn;}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \textcolor{comment}{/*\ Calculation\ of\ sine\ value\ */}}
+\DoxyCodeLine{00136\ \ \ *pSinVal\ =\ fract\ *\ temp\ +\ f1;}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \ \ \textcolor{keywordflow}{if}\ (theta\ <\ 0.0f)}
+\DoxyCodeLine{00139\ \ \ \{}
+\DoxyCodeLine{00140\ \ \ \ \ *pSinVal\ =\ -\/*pSinVal;}
+\DoxyCodeLine{00141\ \ \ \}}
+\DoxyCodeLine{00142\ \}}
+\DoxyCodeLine{00143\ }
+
+\end{DoxyCode}

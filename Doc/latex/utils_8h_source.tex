@@ -1,0 +1,230 @@
+\doxysection{utils.\+h}
+\hypertarget{utils_8h_source}{}\label{utils_8h_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Include/dsp/utils.h@{VGA\_Driver/Drivers/CMSIS/DSP/Include/dsp/utils.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/******************************************************************************}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ @file\ \ \ \ \ arm\_math\_utils.h}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ @brief\ \ \ \ Public\ header\ file\ for\ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ @version\ \ V1.9.0}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ @date\ \ \ \ \ 20.\ July\ 2020}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ ******************************************************************************/}}
+\DoxyCodeLine{00007\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ Copyright\ (c)\ 2010-\/2020\ Arm\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#ifndef\ \_ARM\_MATH\_UTILS\_H\_}}
+\DoxyCodeLine{00026\ }
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ \_ARM\_MATH\_UTILS\_H\_}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}arm\_math\_types.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#ifdef\ \ \ \_\_cplusplus}}
+\DoxyCodeLine{00032\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}}
+\DoxyCodeLine{00033\ \{}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#define\ INDEX\_MASK\ \ \ \ \ \ \ \ \ 0x0000003F}}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#define\ SQ(x)\ ((x)\ *\ (x))}}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#define\ ROUND\_UP(N,\ S)\ ((((N)\ +\ (S)\ -\/\ 1)\ /\ (S))\ *\ (S))}}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00051\ \ \ \_\_STATIC\_FORCEINLINE\ uint32\_t\ arm\_recip\_q31(}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ q31\_t\ in,}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ q31\_t\ *\ dst,}
+\DoxyCodeLine{00054\ \ \ \textcolor{keyword}{const}\ q31\_t\ *\ pRecipTable)}
+\DoxyCodeLine{00055\ \ \ \{}
+\DoxyCodeLine{00056\ \ \ \ \ q31\_t\ out;}
+\DoxyCodeLine{00057\ \ \ \ \ uint32\_t\ tempVal;}
+\DoxyCodeLine{00058\ \ \ \ \ uint32\_t\ index,\ i;}
+\DoxyCodeLine{00059\ \ \ \ \ uint32\_t\ signBits;}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \ \ \ \ \textcolor{keywordflow}{if}\ (in\ >\ 0)}
+\DoxyCodeLine{00062\ \ \ \ \ \{}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ signBits\ =\ ((uint32\_t)\ (\mbox{\hyperlink{group___c_m_s_i_s___core___instruction_interface_ga5d5bb1527e042be4a9fa5a33f65cc248}{\_\_CLZ}}(\ in)\ -\/\ 1));}
+\DoxyCodeLine{00064\ \ \ \ \ \}}
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00066\ \ \ \ \ \{}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ signBits\ =\ ((uint32\_t)\ (\mbox{\hyperlink{group___c_m_s_i_s___core___instruction_interface_ga5d5bb1527e042be4a9fa5a33f65cc248}{\_\_CLZ}}(-\/in)\ -\/\ 1));}
+\DoxyCodeLine{00068\ \ \ \ \ \}}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{comment}{/*\ Convert\ input\ sample\ to\ 1.31\ format\ */}}
+\DoxyCodeLine{00071\ \ \ \ \ in\ =\ (in\ <<\ signBits);}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \ \ \ \ \textcolor{comment}{/*\ calculation\ of\ index\ for\ initial\ approximated\ Val\ */}}
+\DoxyCodeLine{00074\ \ \ \ \ index\ =\ (uint32\_t)(in\ >>\ 24);}
+\DoxyCodeLine{00075\ \ \ \ \ index\ =\ (index\ \&\ INDEX\_MASK);}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{comment}{/*\ 1.31\ with\ exp\ 1\ */}}
+\DoxyCodeLine{00078\ \ \ \ \ out\ =\ pRecipTable[index];}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \ \ \textcolor{comment}{/*\ calculation\ of\ reciprocal\ value\ */}}
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{comment}{/*\ running\ approximation\ for\ two\ iterations\ */}}
+\DoxyCodeLine{00082\ \ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ 0U;\ i\ <\ 2U;\ i++)}
+\DoxyCodeLine{00083\ \ \ \ \ \{}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ tempVal\ =\ (uint32\_t)\ (((q63\_t)\ in\ *\ out)\ >>\ 31);}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ tempVal\ =\ 0x7FFFFFFFu\ -\/\ tempVal;}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ \ \ \ \ 1.31\ with\ exp\ 1\ */}}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \textcolor{comment}{/*\ out\ =\ (q31\_t)\ (((q63\_t)\ out\ *\ tempVal)\ >>\ 30);\ */}}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ out\ =\ clip\_q63\_to\_q31(((q63\_t)\ out\ *\ tempVal)\ >>\ 30);}
+\DoxyCodeLine{00089\ \ \ \ \ \}}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \ \ \ \ \textcolor{comment}{/*\ write\ output\ */}}
+\DoxyCodeLine{00092\ \ \ \ \ *dst\ =\ out;}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{comment}{/*\ return\ num\ of\ signbits\ of\ out\ =\ 1/in\ value\ */}}
+\DoxyCodeLine{00095\ \ \ \ \ \textcolor{keywordflow}{return}\ (signBits\ +\ 1U);}
+\DoxyCodeLine{00096\ \ \ \}}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00102\ \ \ \_\_STATIC\_FORCEINLINE\ uint32\_t\ arm\_recip\_q15(}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ q15\_t\ in,}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ q15\_t\ *\ dst,}
+\DoxyCodeLine{00105\ \ \ \textcolor{keyword}{const}\ q15\_t\ *\ pRecipTable)}
+\DoxyCodeLine{00106\ \ \ \{}
+\DoxyCodeLine{00107\ \ \ \ \ q15\_t\ out\ =\ 0;}
+\DoxyCodeLine{00108\ \ \ \ \ uint32\_t\ tempVal\ =\ 0;}
+\DoxyCodeLine{00109\ \ \ \ \ uint32\_t\ index\ =\ 0,\ i\ =\ 0;}
+\DoxyCodeLine{00110\ \ \ \ \ uint32\_t\ signBits\ =\ 0;}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{keywordflow}{if}\ (in\ >\ 0)}
+\DoxyCodeLine{00113\ \ \ \ \ \{}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ signBits\ =\ ((uint32\_t)(\mbox{\hyperlink{group___c_m_s_i_s___core___instruction_interface_ga5d5bb1527e042be4a9fa5a33f65cc248}{\_\_CLZ}}(\ in)\ -\/\ 17));}
+\DoxyCodeLine{00115\ \ \ \ \ \}}
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00117\ \ \ \ \ \{}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ signBits\ =\ ((uint32\_t)(\mbox{\hyperlink{group___c_m_s_i_s___core___instruction_interface_ga5d5bb1527e042be4a9fa5a33f65cc248}{\_\_CLZ}}(-\/in)\ -\/\ 17));}
+\DoxyCodeLine{00119\ \ \ \ \ \}}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \ \ \ \ \textcolor{comment}{/*\ Convert\ input\ sample\ to\ 1.15\ format\ */}}
+\DoxyCodeLine{00122\ \ \ \ \ in\ =\ (in\ <<\ signBits);}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ \textcolor{comment}{/*\ calculation\ of\ index\ for\ initial\ approximated\ Val\ */}}
+\DoxyCodeLine{00125\ \ \ \ \ index\ =\ (uint32\_t)(in\ >>\ \ 8);}
+\DoxyCodeLine{00126\ \ \ \ \ index\ =\ (index\ \&\ INDEX\_MASK);}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \ \ \ \ \textcolor{comment}{/*\ \ \ \ \ \ 1.15\ with\ exp\ 1\ \ */}}
+\DoxyCodeLine{00129\ \ \ \ \ out\ =\ pRecipTable[index];}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{comment}{/*\ calculation\ of\ reciprocal\ value\ */}}
+\DoxyCodeLine{00132\ \ \ \ \ \textcolor{comment}{/*\ running\ approximation\ for\ two\ iterations\ */}}
+\DoxyCodeLine{00133\ \ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ 0U;\ i\ <\ 2U;\ i++)}
+\DoxyCodeLine{00134\ \ \ \ \ \{}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ tempVal\ =\ (uint32\_t)\ (((q31\_t)\ in\ *\ out)\ >>\ 15);}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ tempVal\ =\ 0x7FFFu\ -\/\ tempVal;}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ \ \ \ \ 1.15\ with\ exp\ 1\ */}}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ out\ =\ (q15\_t)\ (((q31\_t)\ out\ *\ tempVal)\ >>\ 14);}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \textcolor{comment}{/*\ out\ =\ clip\_q31\_to\_q15(((q31\_t)\ out\ *\ tempVal)\ >>\ 14);\ */}}
+\DoxyCodeLine{00140\ \ \ \ \ \}}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ \ \ \ \ \textcolor{comment}{/*\ write\ output\ */}}
+\DoxyCodeLine{00143\ \ \ \ \ *dst\ =\ out;}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00145\ \ \ \ \ \textcolor{comment}{/*\ return\ num\ of\ signbits\ of\ out\ =\ 1/in\ value\ */}}
+\DoxyCodeLine{00146\ \ \ \ \ \textcolor{keywordflow}{return}\ (signBits\ +\ 1);}
+\DoxyCodeLine{00147\ \ \ \}}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00156\ \_\_STATIC\_INLINE\ \ \textcolor{keywordtype}{void}\ arm\_norm\_64\_to\_32u(uint64\_t\ in,\ int32\_t\ *\ normalized,\ int32\_t\ *norm)}
+\DoxyCodeLine{00157\ \{}
+\DoxyCodeLine{00158\ \ \ \ \ int32\_t\ \ \ \ \ n1;}
+\DoxyCodeLine{00159\ \ \ \ \ int32\_t\ \ \ \ \ hi\ =\ (int32\_t)\ (in\ >>\ 32);}
+\DoxyCodeLine{00160\ \ \ \ \ int32\_t\ \ \ \ \ lo\ =\ (int32\_t)\ ((in\ <<\ 32)\ >>\ 32);}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00162\ \ \ \ \ n1\ =\ \mbox{\hyperlink{group___c_m_s_i_s___core___instruction_interface_ga5d5bb1527e042be4a9fa5a33f65cc248}{\_\_CLZ}}(hi)\ -\/\ 32;}
+\DoxyCodeLine{00163\ \ \ \ \ \textcolor{keywordflow}{if}\ (!n1)}
+\DoxyCodeLine{00164\ \ \ \ \ \{}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00166\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ input\ fits\ in\ 32-\/bit}}
+\DoxyCodeLine{00167\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ n1\ =\ \mbox{\hyperlink{group___c_m_s_i_s___core___instruction_interface_ga5d5bb1527e042be4a9fa5a33f65cc248}{\_\_CLZ}}(lo);}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (!n1)}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00172\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ *\ MSB\ set,\ need\ to\ scale\ down\ by\ 1}}
+\DoxyCodeLine{00173\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ *norm\ =\ -\/1;}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ *normalized\ =\ (((uint32\_t)\ lo)\ >>\ 1);}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (n1\ ==\ 32)}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00181\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ input\ is\ zero}}
+\DoxyCodeLine{00182\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *norm\ =\ 0;}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *normalized\ =\ 0;}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00188\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\ 32-\/bit\ normalization}}
+\DoxyCodeLine{00189\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *norm\ =\ n1\ -\/\ 1;}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *normalized\ =\ lo\ <<\ *norm;}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00194\ \ \ \ \ \}\ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00195\ \ \ \ \ \{}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00197\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ input\ fits\ in\ 64-\/bit}}
+\DoxyCodeLine{00198\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ n1\ =\ 1\ -\/\ n1;}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ *norm\ =\ -\/n1;}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00202\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ 64\ bit\ normalization}}
+\DoxyCodeLine{00203\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ *normalized\ =\ (((uint32\_t)\ lo)\ >>\ n1)\ |\ (hi\ <<\ (32\ -\/\ n1));}
+\DoxyCodeLine{00205\ \ \ \ \ \}}
+\DoxyCodeLine{00206\ \}}
+\DoxyCodeLine{00207\ }
+\DoxyCodeLine{00208\ \_\_STATIC\_INLINE\ q31\_t\ arm\_div\_q63\_to\_q31(q63\_t\ num,\ q31\_t\ den)}
+\DoxyCodeLine{00209\ \{}
+\DoxyCodeLine{00210\ \ \ \ \ q31\_t\ \ \ result;}
+\DoxyCodeLine{00211\ \ \ \ \ uint64\_t\ \ \ absNum;}
+\DoxyCodeLine{00212\ \ \ \ \ int32\_t\ \ \ normalized;}
+\DoxyCodeLine{00213\ \ \ \ \ int32\_t\ \ \ norm;}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00216\ \textcolor{comment}{\ \ \ \ \ *\ if\ sum\ fits\ in\ 32bits}}
+\DoxyCodeLine{00217\ \textcolor{comment}{\ \ \ \ \ *\ avoid\ costly\ 64-\/bit\ division}}
+\DoxyCodeLine{00218\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00219\ \ \ \ \ absNum\ =\ num\ >\ 0\ ?\ num\ :\ -\/num;}
+\DoxyCodeLine{00220\ \ \ \ \ arm\_norm\_64\_to\_32u(absNum,\ \&normalized,\ \&norm);}
+\DoxyCodeLine{00221\ \ \ \ \ \textcolor{keywordflow}{if}\ (norm\ >\ 0)}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00223\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ 32-\/bit\ division}}
+\DoxyCodeLine{00224\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ result\ =\ (q31\_t)\ num\ /\ den;}
+\DoxyCodeLine{00226\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00228\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ 64-\/bit\ division}}
+\DoxyCodeLine{00229\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ result\ =\ (q31\_t)\ (num\ /\ den);}
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00232\ \ \ \ \ \textcolor{keywordflow}{return}\ result;}
+\DoxyCodeLine{00233\ \}}
+\DoxyCodeLine{00234\ }
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ \textcolor{preprocessor}{\#ifdef\ \ \ \_\_cplusplus}}
+\DoxyCodeLine{00237\ \}}
+\DoxyCodeLine{00238\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00239\ }
+\DoxyCodeLine{00240\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*ifndef\ \_ARM\_MATH\_UTILS\_H\_\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

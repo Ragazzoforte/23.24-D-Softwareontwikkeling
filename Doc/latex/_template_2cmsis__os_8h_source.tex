@@ -1,0 +1,411 @@
+\doxysection{cmsis\+\_\+os.\+h}
+\hypertarget{_template_2cmsis__os_8h_source}{}\label{_template_2cmsis__os_8h_source}\index{VGA\_Driver/Drivers/CMSIS/RTOS/Template/cmsis\_os.h@{VGA\_Driver/Drivers/CMSIS/RTOS/Template/cmsis\_os.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 5.\ February\ 2013}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.02}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS-\/RTOS\ API}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ cmsis\_os.h\ template\ header\ file}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ Version\ 0.02}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ \ \ \ Initial\ Proposal\ Phase}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ Version\ 0.03}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ \ \ \ osKernelStart\ added,\ optional\ feature:\ main\ started\ as\ thread}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ \ \ \ osSemaphores\ have\ standard\ behavior}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ \ \ \ osTimerCreate\ does\ not\ start\ the\ timer,\ added\ osTimerStart}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ \ \ \ osThreadPass\ is\ renamed\ to\ osThreadYield}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ Version\ 1.01}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ \ \ \ Support\ for\ C++\ interface}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ \ \ \ \ -\/\ const\ attribute\ removed\ from\ the\ osXxxxDef\_t\ typedef's}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ \ \ \ \ -\/\ const\ attribute\ added\ to\ the\ osXxxxDef\ macros}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ \ \ \ Added:\ osTimerDelete,\ osMutexDelete,\ osSemaphoreDelete}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ \ \ \ Added:\ osKernelInitialize}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ Version\ 1.02}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ \ \ \ Control\ functions\ for\ short\ timeouts\ in\ microsecond\ resolution:}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ \ \ \ Added:\ osKernelSysTick,\ osKernelSysTickFrequency,\ osKernelSysTickMicroSec}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ \ \ \ Removed:\ osSignalGet\ }}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ Copyright\ (c)\ 2013-\/2017\ ARM\ LIMITED}}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00029\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00030\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00031\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00032\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00037\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00039\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00040\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00041\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00042\ \textcolor{comment}{\ *-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00043\ \ }
+\DoxyCodeLine{00044\ \ }
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#ifndef\ \_CMSIS\_OS\_H}}
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#define\ \_CMSIS\_OS\_H}}
+\DoxyCodeLine{00047\ \ }
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#define\ osCMSIS\ \ \ \ \ \ \ \ \ \ \ 0x10002\ \ \ \ \ \ }}
+\DoxyCodeLine{00050\ \ }
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#define\ osCMSIS\_KERNEL\ \ \ \ 0x10000\ \ \ \ \ \ }}
+\DoxyCodeLine{00053\ \ }
+\DoxyCodeLine{00055\ \textcolor{preprocessor}{\#define\ osKernelSystemId\ "{}KERNEL\ V1.00"{}\ \ \ }}
+\DoxyCodeLine{00056\ \ }
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\#define\ osFeature\_MainThread\ \ \ 1\ \ \ \ \ \ \ }}
+\DoxyCodeLine{00059\ \textcolor{preprocessor}{\#define\ osFeature\_Pool\ \ \ \ \ \ \ \ \ 1\ \ \ \ \ \ \ }}
+\DoxyCodeLine{00060\ \textcolor{preprocessor}{\#define\ osFeature\_MailQ\ \ \ \ \ \ \ \ 1\ \ \ \ \ \ \ }}
+\DoxyCodeLine{00061\ \textcolor{preprocessor}{\#define\ osFeature\_MessageQ\ \ \ \ \ 1\ \ \ \ \ \ \ }}
+\DoxyCodeLine{00062\ \textcolor{preprocessor}{\#define\ osFeature\_Signals\ \ \ \ \ \ 8\ \ \ \ \ \ \ }}
+\DoxyCodeLine{00063\ \textcolor{preprocessor}{\#define\ osFeature\_Semaphore\ \ \ \ 30\ \ \ \ \ \ }}
+\DoxyCodeLine{00064\ \textcolor{preprocessor}{\#define\ osFeature\_Wait\ \ \ \ \ \ \ \ \ 1\ \ \ \ \ \ \ }}
+\DoxyCodeLine{00065\ \textcolor{preprocessor}{\#define\ osFeature\_SysTick\ \ \ \ \ \ 1\ \ \ \ \ \ \ }}
+\DoxyCodeLine{00066\ \ }
+\DoxyCodeLine{00067\ \textcolor{preprocessor}{\#include\ <stdint.h>}}
+\DoxyCodeLine{00068\ \textcolor{preprocessor}{\#include\ <stddef.h>}}
+\DoxyCodeLine{00069\ \ }
+\DoxyCodeLine{00070\ \textcolor{preprocessor}{\#ifdef\ \ \_\_cplusplus}}
+\DoxyCodeLine{00071\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}}
+\DoxyCodeLine{00072\ \{}
+\DoxyCodeLine{00073\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00074\ \ }
+\DoxyCodeLine{00075\ \ }
+\DoxyCodeLine{00076\ \textcolor{comment}{//\ ====\ Enumeration,\ structures,\ defines\ ====}}
+\DoxyCodeLine{00077\ \ }
+\DoxyCodeLine{00080\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \ \{}
+\DoxyCodeLine{00081\ \ \ osPriorityIdle\ \ \ \ \ \ \ \ \ \ =\ -\/3,\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00082\ \ \ osPriorityLow\ \ \ \ \ \ \ \ \ \ \ =\ -\/2,\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00083\ \ \ osPriorityBelowNormal\ \ \ =\ -\/1,\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00084\ \ \ osPriorityNormal\ \ \ \ \ \ \ \ =\ \ 0,\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00085\ \ \ osPriorityAboveNormal\ \ \ =\ +1,\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00086\ \ \ osPriorityHigh\ \ \ \ \ \ \ \ \ \ =\ +2,\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00087\ \ \ osPriorityRealtime\ \ \ \ \ \ =\ +3,\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00088\ \ \ osPriorityError\ \ \ \ \ \ \ \ \ =\ \ 0x84\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00089\ \}\ osPriority;}
+\DoxyCodeLine{00090\ \ }
+\DoxyCodeLine{00093\ \textcolor{preprocessor}{\#define\ osWaitForever\ \ \ \ \ 0xFFFFFFFF\ \ \ \ \ }}
+\DoxyCodeLine{00094\ \ }
+\DoxyCodeLine{00097\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \ \{}
+\DoxyCodeLine{00098\ \ \ osOK\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ \ \ \ 0,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00099\ \ \ osEventSignal\ \ \ \ \ \ \ \ \ \ \ =\ \ 0x08,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00100\ \ \ osEventMessage\ \ \ \ \ \ \ \ \ \ =\ \ 0x10,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00101\ \ \ osEventMail\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ 0x20,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00102\ \ \ osEventTimeout\ \ \ \ \ \ \ \ \ \ =\ \ 0x40,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00103\ \ \ osErrorParameter\ \ \ \ \ \ \ \ =\ \ 0x80,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00104\ \ \ osErrorResource\ \ \ \ \ \ \ \ \ =\ \ 0x81,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00105\ \ \ osErrorTimeoutResource\ \ =\ \ 0xC1,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00106\ \ \ osErrorISR\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ 0x82,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00107\ \ \ osErrorISRRecursive\ \ \ \ \ =\ \ 0x83,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00108\ \ \ osErrorPriority\ \ \ \ \ \ \ \ \ =\ \ 0x84,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00109\ \ \ osErrorNoMemory\ \ \ \ \ \ \ \ \ =\ \ 0x85,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00110\ \ \ osErrorValue\ \ \ \ \ \ \ \ \ \ \ \ =\ \ 0x86,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00111\ \ \ osErrorOS\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ 0xFF,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00112\ \ \ os\_status\_reserved\ \ \ \ \ \ =\ \ 0x7FFFFFFF\ \ }
+\DoxyCodeLine{00113\ \}\ osStatus;}
+\DoxyCodeLine{00114\ \ }
+\DoxyCodeLine{00115\ \ }
+\DoxyCodeLine{00118\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \ \{}
+\DoxyCodeLine{00119\ \ \ osTimerOnce\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ \ \ \ 0,\ \ \ \ \ \ \ }
+\DoxyCodeLine{00120\ \ \ osTimerPeriodic\ \ \ \ \ \ \ \ \ =\ \ \ \ \ 1\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00121\ \}\ os\_timer\_type;}
+\DoxyCodeLine{00122\ \ }
+\DoxyCodeLine{00125\ \textcolor{keyword}{typedef}\ void\ (*os\_pthread)\ (\textcolor{keywordtype}{void}\ \textcolor{keyword}{const}\ *argument);}
+\DoxyCodeLine{00126\ \ }
+\DoxyCodeLine{00129\ \textcolor{keyword}{typedef}\ void\ (*os\_ptimer)\ (\textcolor{keywordtype}{void}\ \textcolor{keyword}{const}\ *argument);}
+\DoxyCodeLine{00130\ \ }
+\DoxyCodeLine{00131\ \textcolor{comment}{//\ >>>\ the\ following\ data\ type\ definitions\ may\ shall\ adapted\ towards\ a\ specific\ RTOS}}
+\DoxyCodeLine{00132\ \ }
+\DoxyCodeLine{00135\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }os\_thread\_cb\ *osThreadId;}
+\DoxyCodeLine{00136\ \ }
+\DoxyCodeLine{00139\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }os\_timer\_cb\ *osTimerId;}
+\DoxyCodeLine{00140\ \ }
+\DoxyCodeLine{00143\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }os\_mutex\_cb\ *osMutexId;}
+\DoxyCodeLine{00144\ \ }
+\DoxyCodeLine{00147\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }os\_semaphore\_cb\ *osSemaphoreId;}
+\DoxyCodeLine{00148\ \ }
+\DoxyCodeLine{00151\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }os\_pool\_cb\ *osPoolId;}
+\DoxyCodeLine{00152\ \ }
+\DoxyCodeLine{00155\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }os\_messageQ\_cb\ *osMessageQId;}
+\DoxyCodeLine{00156\ \ }
+\DoxyCodeLine{00159\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }os\_mailQ\_cb\ *osMailQId;}
+\DoxyCodeLine{00160\ \ }
+\DoxyCodeLine{00161\ \ }
+\DoxyCodeLine{00164\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structos__thread__def}{os\_thread\_def}}\ \ \{}
+\DoxyCodeLine{00165\ \ \ os\_pthread\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos__thread__def_ad3c9624ee214329fb34e71f544a6933e}{pthread}};\ \ \ \ }
+\DoxyCodeLine{00166\ \ \ osPriority\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos__thread__def_a15da8f23c6fe684b70a73646ada685e7}{tpriority}};\ \ \ \ }
+\DoxyCodeLine{00167\ \ \ uint32\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos__thread__def_aa4c4115851a098c0b87358ab6c025603}{instances}};\ \ \ \ }
+\DoxyCodeLine{00168\ \ \ uint32\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos__thread__def_a950b7f81ad4711959517296e63bc79d1}{stacksize}};\ \ \ \ }
+\DoxyCodeLine{00169\ \}\ \mbox{\hyperlink{structos__thread__def}{osThreadDef\_t}};}
+\DoxyCodeLine{00170\ \ }
+\DoxyCodeLine{00173\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structos__timer__def}{os\_timer\_def}}\ \ \{}
+\DoxyCodeLine{00174\ \ \ os\_ptimer\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos__timer__def_a15773df83aba93f8e61f3737af5fae47}{ptimer}};\ \ \ \ }
+\DoxyCodeLine{00175\ \}\ \mbox{\hyperlink{structos__timer__def}{osTimerDef\_t}};}
+\DoxyCodeLine{00176\ \ }
+\DoxyCodeLine{00179\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structos__mutex__def}{os\_mutex\_def}}\ \ \{}
+\DoxyCodeLine{00180\ \ \ uint32\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos__mutex__def_a44b7a3baf02bac7ad707e8f2f5eca1ca}{dummy}};\ \ \ \ }
+\DoxyCodeLine{00181\ \}\ \mbox{\hyperlink{structos__mutex__def}{osMutexDef\_t}};}
+\DoxyCodeLine{00182\ \ }
+\DoxyCodeLine{00185\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structos__semaphore__def}{os\_semaphore\_def}}\ \ \{}
+\DoxyCodeLine{00186\ \ \ uint32\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos__semaphore__def_a44b7a3baf02bac7ad707e8f2f5eca1ca}{dummy}};\ \ \ \ }
+\DoxyCodeLine{00187\ \}\ \mbox{\hyperlink{structos__semaphore__def}{osSemaphoreDef\_t}};}
+\DoxyCodeLine{00188\ \ }
+\DoxyCodeLine{00191\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structos__pool__def}{os\_pool\_def}}\ \ \{}
+\DoxyCodeLine{00192\ \ \ uint32\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos__pool__def_ac112e786b2a234e0e45cb5bdbee53763}{pool\_sz}};\ \ \ \ }
+\DoxyCodeLine{00193\ \ \ uint32\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos__pool__def_a4c2a0c691de3365c00ecd22d8102811f}{item\_sz}};\ \ \ \ }
+\DoxyCodeLine{00194\ \ \ \textcolor{keywordtype}{void}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\mbox{\hyperlink{structos__pool__def_a269c3935f8bc66db70bccdd02cb05e3c}{pool}};\ \ \ \ }
+\DoxyCodeLine{00195\ \}\ \mbox{\hyperlink{structos__pool__def}{osPoolDef\_t}};}
+\DoxyCodeLine{00196\ \ }
+\DoxyCodeLine{00199\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structos__message_q__def}{os\_messageQ\_def}}\ \ \{}
+\DoxyCodeLine{00200\ \ \ uint32\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos__message_q__def_a8a83a3a8c0aa8057b13807d2a54077e0}{queue\_sz}};\ \ \ \ }
+\DoxyCodeLine{00201\ \ \ uint32\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos__message_q__def_a4c2a0c691de3365c00ecd22d8102811f}{item\_sz}};\ \ \ \ }
+\DoxyCodeLine{00202\ \ \ \textcolor{keywordtype}{void}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\mbox{\hyperlink{structos__message_q__def_a269c3935f8bc66db70bccdd02cb05e3c}{pool}};\ \ \ \ }
+\DoxyCodeLine{00203\ \}\ \mbox{\hyperlink{structos__message_q__def}{osMessageQDef\_t}};}
+\DoxyCodeLine{00204\ \ }
+\DoxyCodeLine{00207\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structos__mail_q__def}{os\_mailQ\_def}}\ \ \{}
+\DoxyCodeLine{00208\ \ \ uint32\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos__mail_q__def_a8a83a3a8c0aa8057b13807d2a54077e0}{queue\_sz}};\ \ \ \ }
+\DoxyCodeLine{00209\ \ \ uint32\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos__mail_q__def_a4c2a0c691de3365c00ecd22d8102811f}{item\_sz}};\ \ \ \ }
+\DoxyCodeLine{00210\ \ \ \textcolor{keywordtype}{void}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\mbox{\hyperlink{structos__mail_q__def_a269c3935f8bc66db70bccdd02cb05e3c}{pool}};\ \ \ \ }
+\DoxyCodeLine{00211\ \}\ \mbox{\hyperlink{structos__mail_q__def}{osMailQDef\_t}};}
+\DoxyCodeLine{00212\ \ }
+\DoxyCodeLine{00216\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ \ }\{}
+\DoxyCodeLine{00217\ \ \ osStatus\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos_event_ad477a289f1f03ac45407b64268d707d3}{status}};\ \ \ \ \ }
+\DoxyCodeLine{00218\ \ \ \textcolor{keyword}{union\ \ }\{}
+\DoxyCodeLine{00219\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos_event_a9e0a00edabf3b8a5dafff624fff7bbfc}{v}};\ \ \ \ \ }
+\DoxyCodeLine{00220\ \ \ \ \ \textcolor{keywordtype}{void}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *\mbox{\hyperlink{structos_event_a117104b82864d3b23ec174af6d392709}{p}};\ \ \ \ \ }
+\DoxyCodeLine{00221\ \ \ \ \ int32\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos_event_ad0dda1bf7e74f1576261d493fba232b6}{signals}};\ \ \ \ \ }
+\DoxyCodeLine{00222\ \ \ \}\ value;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00223\ \ \ \textcolor{keyword}{union\ \ }\{}
+\DoxyCodeLine{00224\ \ \ \ \ osMailQId\ \ \ \ \ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structos_event_ac86175a4b1706bee596f3018322df26e}{mail\_id}};\ \ \ \ \ }
+\DoxyCodeLine{00225\ \ \ \ \ osMessageQId\ \ \ \ \ \ \ \mbox{\hyperlink{structos_event_af394cbe21dde7377974e63af38cd87b0}{message\_id}};\ \ \ \ \ }
+\DoxyCodeLine{00226\ \ \ \}\ def;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00227\ \}\ \mbox{\hyperlink{structos_event}{osEvent}};}
+\DoxyCodeLine{00228\ \ }
+\DoxyCodeLine{00229\ \ }
+\DoxyCodeLine{00230\ \textcolor{comment}{//\ \ ====\ Kernel\ Control\ Functions\ ====}}
+\DoxyCodeLine{00231\ \ }
+\DoxyCodeLine{00235\ osStatus\ osKernelInitialize\ (\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00236\ \ }
+\DoxyCodeLine{00240\ osStatus\ osKernelStart\ (\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00241\ \ }
+\DoxyCodeLine{00245\ int32\_t\ osKernelRunning(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00246\ \ }
+\DoxyCodeLine{00247\ \textcolor{preprocessor}{\#if\ (defined\ (osFeature\_SysTick)\ \ \&\&\ \ (osFeature\_SysTick\ !=\ 0))\ \ \ \ \ }\textcolor{comment}{//\ System\ Timer\ available}}
+\DoxyCodeLine{00248\ \ }
+\DoxyCodeLine{00252\ uint32\_t\ osKernelSysTick\ (\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00253\ \ }
+\DoxyCodeLine{00256\ \textcolor{preprocessor}{\#define\ osKernelSysTickFrequency\ 100000000}}
+\DoxyCodeLine{00257\ \ }
+\DoxyCodeLine{00261\ \textcolor{preprocessor}{\#define\ osKernelSysTickMicroSec(microsec)\ (((uint64\_t)microsec\ *\ (osKernelSysTickFrequency))\ /\ 1000000)}}
+\DoxyCodeLine{00262\ \ }
+\DoxyCodeLine{00263\ \textcolor{preprocessor}{\#endif\ \ \ \ }\textcolor{comment}{//\ System\ Timer\ available}}
+\DoxyCodeLine{00264\ \ }
+\DoxyCodeLine{00265\ \textcolor{comment}{//\ \ ====\ Thread\ Management\ ====}}
+\DoxyCodeLine{00266\ \ }
+\DoxyCodeLine{00274\ \textcolor{preprocessor}{\#if\ defined\ (osObjectsExternal)\ \ }\textcolor{comment}{//\ object\ is\ external}}
+\DoxyCodeLine{00275\ \textcolor{preprocessor}{\#define\ osThreadDef(name,\ priority,\ instances,\ stacksz)\ \ \(\backslash\)}}
+\DoxyCodeLine{00276\ \textcolor{preprocessor}{extern\ const\ osThreadDef\_t\ os\_thread\_def\_\#\#name}}
+\DoxyCodeLine{00277\ \textcolor{preprocessor}{\#else\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ define\ the\ object}}
+\DoxyCodeLine{00278\ \textcolor{preprocessor}{\#define\ osThreadDef(name,\ priority,\ instances,\ stacksz)\ \ \(\backslash\)}}
+\DoxyCodeLine{00279\ \textcolor{preprocessor}{const\ osThreadDef\_t\ os\_thread\_def\_\#\#name\ =\ \(\backslash\)}}
+\DoxyCodeLine{00280\ \textcolor{preprocessor}{\{\ (name),\ (priority),\ (instances),\ (stacksz)\ \ \}}}
+\DoxyCodeLine{00281\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00282\ \ }
+\DoxyCodeLine{00287\ \textcolor{preprocessor}{\#define\ osThread(name)\ \ \(\backslash\)}}
+\DoxyCodeLine{00288\ \textcolor{preprocessor}{\&os\_thread\_def\_\#\#name}}
+\DoxyCodeLine{00289\ \ }
+\DoxyCodeLine{00295\ osThreadId\ osThreadCreate\ (\textcolor{keyword}{const}\ \mbox{\hyperlink{structos__thread__def}{osThreadDef\_t}}\ *thread\_def,\ \textcolor{keywordtype}{void}\ *argument);}
+\DoxyCodeLine{00296\ \ }
+\DoxyCodeLine{00300\ osThreadId\ osThreadGetId\ (\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00301\ \ }
+\DoxyCodeLine{00306\ osStatus\ osThreadTerminate\ (osThreadId\ thread\_id);}
+\DoxyCodeLine{00307\ \ }
+\DoxyCodeLine{00311\ osStatus\ osThreadYield\ (\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00312\ \ }
+\DoxyCodeLine{00318\ osStatus\ osThreadSetPriority\ (osThreadId\ thread\_id,\ osPriority\ priority);}
+\DoxyCodeLine{00319\ \ }
+\DoxyCodeLine{00324\ osPriority\ osThreadGetPriority\ (osThreadId\ thread\_id);}
+\DoxyCodeLine{00325\ \ }
+\DoxyCodeLine{00326\ \ }
+\DoxyCodeLine{00327\ \textcolor{comment}{//\ \ ====\ Generic\ Wait\ Functions\ ====}}
+\DoxyCodeLine{00328\ \ }
+\DoxyCodeLine{00332\ osStatus\ osDelay\ (uint32\_t\ millisec);}
+\DoxyCodeLine{00333\ \ }
+\DoxyCodeLine{00334\ \textcolor{preprocessor}{\#if\ (defined\ (osFeature\_Wait)\ \ \&\&\ \ (osFeature\_Wait\ !=\ 0))\ \ \ \ \ }\textcolor{comment}{//\ Generic\ Wait\ available}}
+\DoxyCodeLine{00335\ \ }
+\DoxyCodeLine{00340\ \mbox{\hyperlink{structos_event}{osEvent}}\ osWait\ (uint32\_t\ millisec);}
+\DoxyCodeLine{00341\ \ }
+\DoxyCodeLine{00342\ \textcolor{preprocessor}{\#endif\ \ }\textcolor{comment}{//\ Generic\ Wait\ available}}
+\DoxyCodeLine{00343\ \ }
+\DoxyCodeLine{00344\ \ }
+\DoxyCodeLine{00345\ \textcolor{comment}{//\ \ ====\ Timer\ Management\ Functions\ ====}}
+\DoxyCodeLine{00351\ \textcolor{preprocessor}{\#if\ defined\ (osObjectsExternal)\ \ }\textcolor{comment}{//\ object\ is\ external}}
+\DoxyCodeLine{00352\ \textcolor{preprocessor}{\#define\ osTimerDef(name,\ function)\ \ \(\backslash\)}}
+\DoxyCodeLine{00353\ \textcolor{preprocessor}{extern\ const\ osTimerDef\_t\ os\_timer\_def\_\#\#name}}
+\DoxyCodeLine{00354\ \textcolor{preprocessor}{\#else\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ define\ the\ object}}
+\DoxyCodeLine{00355\ \textcolor{preprocessor}{\#define\ osTimerDef(name,\ function)\ \ \(\backslash\)}}
+\DoxyCodeLine{00356\ \textcolor{preprocessor}{const\ osTimerDef\_t\ os\_timer\_def\_\#\#name\ =\ \(\backslash\)}}
+\DoxyCodeLine{00357\ \textcolor{preprocessor}{\{\ (function)\ \}}}
+\DoxyCodeLine{00358\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00359\ \ }
+\DoxyCodeLine{00364\ \textcolor{preprocessor}{\#define\ osTimer(name)\ \(\backslash\)}}
+\DoxyCodeLine{00365\ \textcolor{preprocessor}{\&os\_timer\_def\_\#\#name}}
+\DoxyCodeLine{00366\ \ }
+\DoxyCodeLine{00373\ osTimerId\ osTimerCreate\ (\textcolor{keyword}{const}\ \mbox{\hyperlink{structos__timer__def}{osTimerDef\_t}}\ *timer\_def,\ os\_timer\_type\ type,\ \textcolor{keywordtype}{void}\ *argument);}
+\DoxyCodeLine{00374\ \ }
+\DoxyCodeLine{00380\ osStatus\ osTimerStart\ (osTimerId\ timer\_id,\ uint32\_t\ millisec);}
+\DoxyCodeLine{00381\ \ }
+\DoxyCodeLine{00386\ osStatus\ osTimerStop\ (osTimerId\ timer\_id);}
+\DoxyCodeLine{00387\ \ }
+\DoxyCodeLine{00392\ osStatus\ osTimerDelete\ (osTimerId\ timer\_id);}
+\DoxyCodeLine{00393\ \ }
+\DoxyCodeLine{00394\ \ }
+\DoxyCodeLine{00395\ \textcolor{comment}{//\ \ ====\ Signal\ Management\ ====}}
+\DoxyCodeLine{00396\ \ }
+\DoxyCodeLine{00402\ int32\_t\ osSignalSet\ (osThreadId\ thread\_id,\ int32\_t\ signals);}
+\DoxyCodeLine{00403\ \ }
+\DoxyCodeLine{00409\ int32\_t\ osSignalClear\ (osThreadId\ thread\_id,\ int32\_t\ signals);}
+\DoxyCodeLine{00410\ \ }
+\DoxyCodeLine{00416\ \mbox{\hyperlink{structos_event}{osEvent}}\ osSignalWait\ (int32\_t\ signals,\ uint32\_t\ millisec);}
+\DoxyCodeLine{00417\ \ }
+\DoxyCodeLine{00418\ \ }
+\DoxyCodeLine{00419\ \textcolor{comment}{//\ \ ====\ Mutex\ Management\ ====}}
+\DoxyCodeLine{00420\ \ }
+\DoxyCodeLine{00425\ \textcolor{preprocessor}{\#if\ defined\ (osObjectsExternal)\ \ }\textcolor{comment}{//\ object\ is\ external}}
+\DoxyCodeLine{00426\ \textcolor{preprocessor}{\#define\ osMutexDef(name)\ \ \(\backslash\)}}
+\DoxyCodeLine{00427\ \textcolor{preprocessor}{extern\ const\ osMutexDef\_t\ os\_mutex\_def\_\#\#name}}
+\DoxyCodeLine{00428\ \textcolor{preprocessor}{\#else\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ define\ the\ object}}
+\DoxyCodeLine{00429\ \textcolor{preprocessor}{\#define\ osMutexDef(name)\ \ \(\backslash\)}}
+\DoxyCodeLine{00430\ \textcolor{preprocessor}{const\ osMutexDef\_t\ os\_mutex\_def\_\#\#name\ =\ \{\ 0\ \}}}
+\DoxyCodeLine{00431\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00432\ \ }
+\DoxyCodeLine{00437\ \textcolor{preprocessor}{\#define\ osMutex(name)\ \ \(\backslash\)}}
+\DoxyCodeLine{00438\ \textcolor{preprocessor}{\&os\_mutex\_def\_\#\#name}}
+\DoxyCodeLine{00439\ \ }
+\DoxyCodeLine{00444\ osMutexId\ osMutexCreate\ (\textcolor{keyword}{const}\ \mbox{\hyperlink{structos__mutex__def}{osMutexDef\_t}}\ *mutex\_def);}
+\DoxyCodeLine{00445\ \ }
+\DoxyCodeLine{00451\ osStatus\ osMutexWait\ (osMutexId\ mutex\_id,\ uint32\_t\ millisec);}
+\DoxyCodeLine{00452\ \ }
+\DoxyCodeLine{00457\ osStatus\ osMutexRelease\ (osMutexId\ mutex\_id);}
+\DoxyCodeLine{00458\ \ }
+\DoxyCodeLine{00463\ osStatus\ osMutexDelete\ (osMutexId\ mutex\_id);}
+\DoxyCodeLine{00464\ \ }
+\DoxyCodeLine{00465\ \ }
+\DoxyCodeLine{00466\ \textcolor{comment}{//\ \ ====\ Semaphore\ Management\ Functions\ ====}}
+\DoxyCodeLine{00467\ \ }
+\DoxyCodeLine{00468\ \textcolor{preprocessor}{\#if\ (defined\ (osFeature\_Semaphore)\ \ \&\&\ \ (osFeature\_Semaphore\ !=\ 0))\ \ \ \ \ }\textcolor{comment}{//\ Semaphore\ available}}
+\DoxyCodeLine{00469\ \ }
+\DoxyCodeLine{00474\ \textcolor{preprocessor}{\#if\ defined\ (osObjectsExternal)\ \ }\textcolor{comment}{//\ object\ is\ external}}
+\DoxyCodeLine{00475\ \textcolor{preprocessor}{\#define\ osSemaphoreDef(name)\ \ \(\backslash\)}}
+\DoxyCodeLine{00476\ \textcolor{preprocessor}{extern\ const\ osSemaphoreDef\_t\ os\_semaphore\_def\_\#\#name}}
+\DoxyCodeLine{00477\ \textcolor{preprocessor}{\#else\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ define\ the\ object}}
+\DoxyCodeLine{00478\ \textcolor{preprocessor}{\#define\ osSemaphoreDef(name)\ \ \(\backslash\)}}
+\DoxyCodeLine{00479\ \textcolor{preprocessor}{const\ osSemaphoreDef\_t\ os\_semaphore\_def\_\#\#name\ =\ \{\ 0\ \}}}
+\DoxyCodeLine{00480\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00481\ \ }
+\DoxyCodeLine{00486\ \textcolor{preprocessor}{\#define\ osSemaphore(name)\ \ \(\backslash\)}}
+\DoxyCodeLine{00487\ \textcolor{preprocessor}{\&os\_semaphore\_def\_\#\#name}}
+\DoxyCodeLine{00488\ \ }
+\DoxyCodeLine{00494\ osSemaphoreId\ osSemaphoreCreate\ (\textcolor{keyword}{const}\ \mbox{\hyperlink{structos__semaphore__def}{osSemaphoreDef\_t}}\ *semaphore\_def,\ int32\_t\ count);}
+\DoxyCodeLine{00495\ \ }
+\DoxyCodeLine{00501\ int32\_t\ osSemaphoreWait\ (osSemaphoreId\ semaphore\_id,\ uint32\_t\ millisec);}
+\DoxyCodeLine{00502\ \ }
+\DoxyCodeLine{00507\ osStatus\ osSemaphoreRelease\ (osSemaphoreId\ semaphore\_id);}
+\DoxyCodeLine{00508\ \ }
+\DoxyCodeLine{00513\ osStatus\ osSemaphoreDelete\ (osSemaphoreId\ semaphore\_id);}
+\DoxyCodeLine{00514\ \ }
+\DoxyCodeLine{00515\ \textcolor{preprocessor}{\#endif\ \ \ \ \ }\textcolor{comment}{//\ Semaphore\ available}}
+\DoxyCodeLine{00516\ \ }
+\DoxyCodeLine{00517\ \ }
+\DoxyCodeLine{00518\ \textcolor{comment}{//\ \ ====\ Memory\ Pool\ Management\ Functions\ ====}}
+\DoxyCodeLine{00519\ \ }
+\DoxyCodeLine{00520\ \textcolor{preprocessor}{\#if\ (defined\ (osFeature\_Pool)\ \ \&\&\ \ (osFeature\_Pool\ !=\ 0))\ \ }\textcolor{comment}{//\ Memory\ Pool\ Management\ available}}
+\DoxyCodeLine{00521\ \ }
+\DoxyCodeLine{00528\ \textcolor{preprocessor}{\#if\ defined\ (osObjectsExternal)\ \ }\textcolor{comment}{//\ object\ is\ external}}
+\DoxyCodeLine{00529\ \textcolor{preprocessor}{\#define\ osPoolDef(name,\ no,\ type)\ \ \ \(\backslash\)}}
+\DoxyCodeLine{00530\ \textcolor{preprocessor}{extern\ const\ osPoolDef\_t\ os\_pool\_def\_\#\#name}}
+\DoxyCodeLine{00531\ \textcolor{preprocessor}{\#else\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ define\ the\ object}}
+\DoxyCodeLine{00532\ \textcolor{preprocessor}{\#define\ osPoolDef(name,\ no,\ type)\ \ \ \(\backslash\)}}
+\DoxyCodeLine{00533\ \textcolor{preprocessor}{const\ osPoolDef\_t\ os\_pool\_def\_\#\#name\ =\ \(\backslash\)}}
+\DoxyCodeLine{00534\ \textcolor{preprocessor}{\{\ (no),\ sizeof(type),\ NULL\ \}}}
+\DoxyCodeLine{00535\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00536\ \ }
+\DoxyCodeLine{00541\ \textcolor{preprocessor}{\#define\ osPool(name)\ \(\backslash\)}}
+\DoxyCodeLine{00542\ \textcolor{preprocessor}{\&os\_pool\_def\_\#\#name}}
+\DoxyCodeLine{00543\ \ }
+\DoxyCodeLine{00548\ osPoolId\ osPoolCreate\ (\textcolor{keyword}{const}\ \mbox{\hyperlink{structos__pool__def}{osPoolDef\_t}}\ *pool\_def);}
+\DoxyCodeLine{00549\ \ }
+\DoxyCodeLine{00554\ \textcolor{keywordtype}{void}\ *osPoolAlloc\ (osPoolId\ pool\_id);}
+\DoxyCodeLine{00555\ \ }
+\DoxyCodeLine{00560\ \textcolor{keywordtype}{void}\ *osPoolCAlloc\ (osPoolId\ pool\_id);}
+\DoxyCodeLine{00561\ \ }
+\DoxyCodeLine{00567\ osStatus\ osPoolFree\ (osPoolId\ pool\_id,\ \textcolor{keywordtype}{void}\ *block);}
+\DoxyCodeLine{00568\ \ }
+\DoxyCodeLine{00569\ \textcolor{preprocessor}{\#endif\ \ \ }\textcolor{comment}{//\ Memory\ Pool\ Management\ available}}
+\DoxyCodeLine{00570\ \ }
+\DoxyCodeLine{00571\ \ }
+\DoxyCodeLine{00572\ \textcolor{comment}{//\ \ ====\ Message\ Queue\ Management\ Functions\ ====}}
+\DoxyCodeLine{00573\ \ }
+\DoxyCodeLine{00574\ \textcolor{preprocessor}{\#if\ (defined\ (osFeature\_MessageQ)\ \ \&\&\ \ (osFeature\_MessageQ\ !=\ 0))\ \ \ \ \ }\textcolor{comment}{//\ Message\ Queues\ available}}
+\DoxyCodeLine{00575\ \ }
+\DoxyCodeLine{00582\ \textcolor{preprocessor}{\#if\ defined\ (osObjectsExternal)\ \ }\textcolor{comment}{//\ object\ is\ external}}
+\DoxyCodeLine{00583\ \textcolor{preprocessor}{\#define\ osMessageQDef(name,\ queue\_sz,\ type)\ \ \ \(\backslash\)}}
+\DoxyCodeLine{00584\ \textcolor{preprocessor}{extern\ const\ osMessageQDef\_t\ os\_messageQ\_def\_\#\#name}}
+\DoxyCodeLine{00585\ \textcolor{preprocessor}{\#else\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ define\ the\ object}}
+\DoxyCodeLine{00586\ \textcolor{preprocessor}{\#define\ osMessageQDef(name,\ queue\_sz,\ type)\ \ \ \(\backslash\)}}
+\DoxyCodeLine{00587\ \textcolor{preprocessor}{const\ osMessageQDef\_t\ os\_messageQ\_def\_\#\#name\ =\ \(\backslash\)}}
+\DoxyCodeLine{00588\ \textcolor{preprocessor}{\{\ (queue\_sz),\ sizeof\ (type)\ \ \}}}
+\DoxyCodeLine{00589\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00590\ \ }
+\DoxyCodeLine{00595\ \textcolor{preprocessor}{\#define\ osMessageQ(name)\ \(\backslash\)}}
+\DoxyCodeLine{00596\ \textcolor{preprocessor}{\&os\_messageQ\_def\_\#\#name}}
+\DoxyCodeLine{00597\ \ }
+\DoxyCodeLine{00603\ osMessageQId\ osMessageCreate\ (\textcolor{keyword}{const}\ \mbox{\hyperlink{structos__message_q__def}{osMessageQDef\_t}}\ *queue\_def,\ osThreadId\ thread\_id);}
+\DoxyCodeLine{00604\ \ }
+\DoxyCodeLine{00611\ osStatus\ osMessagePut\ (osMessageQId\ queue\_id,\ uint32\_t\ info,\ uint32\_t\ millisec);}
+\DoxyCodeLine{00612\ \ }
+\DoxyCodeLine{00618\ \mbox{\hyperlink{structos_event}{osEvent}}\ osMessageGet\ (osMessageQId\ queue\_id,\ uint32\_t\ millisec);}
+\DoxyCodeLine{00619\ \ }
+\DoxyCodeLine{00620\ \textcolor{preprocessor}{\#endif\ \ \ \ \ }\textcolor{comment}{//\ Message\ Queues\ available}}
+\DoxyCodeLine{00621\ \ }
+\DoxyCodeLine{00622\ \ }
+\DoxyCodeLine{00623\ \textcolor{comment}{//\ \ ====\ Mail\ Queue\ Management\ Functions\ ====}}
+\DoxyCodeLine{00624\ \ }
+\DoxyCodeLine{00625\ \textcolor{preprocessor}{\#if\ (defined\ (osFeature\_MailQ)\ \ \&\&\ \ (osFeature\_MailQ\ !=\ 0))\ \ \ \ \ }\textcolor{comment}{//\ Mail\ Queues\ available}}
+\DoxyCodeLine{00626\ \ }
+\DoxyCodeLine{00633\ \textcolor{preprocessor}{\#if\ defined\ (osObjectsExternal)\ \ }\textcolor{comment}{//\ object\ is\ external}}
+\DoxyCodeLine{00634\ \textcolor{preprocessor}{\#define\ osMailQDef(name,\ queue\_sz,\ type)\ \(\backslash\)}}
+\DoxyCodeLine{00635\ \textcolor{preprocessor}{extern\ const\ osMailQDef\_t\ os\_mailQ\_def\_\#\#name}}
+\DoxyCodeLine{00636\ \textcolor{preprocessor}{\#else\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ define\ the\ object}}
+\DoxyCodeLine{00637\ \textcolor{preprocessor}{\#define\ osMailQDef(name,\ queue\_sz,\ type)\ \(\backslash\)}}
+\DoxyCodeLine{00638\ \textcolor{preprocessor}{const\ osMailQDef\_t\ os\_mailQ\_def\_\#\#name\ =\ \ \(\backslash\)}}
+\DoxyCodeLine{00639\ \textcolor{preprocessor}{\{\ (queue\_sz),\ sizeof\ (type)\ \}}}
+\DoxyCodeLine{00640\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00641\ \ }
+\DoxyCodeLine{00646\ \textcolor{preprocessor}{\#define\ osMailQ(name)\ \ \(\backslash\)}}
+\DoxyCodeLine{00647\ \textcolor{preprocessor}{\&os\_mailQ\_def\_\#\#name}}
+\DoxyCodeLine{00648\ \ }
+\DoxyCodeLine{00654\ osMailQId\ osMailCreate\ (\textcolor{keyword}{const}\ \mbox{\hyperlink{structos__mail_q__def}{osMailQDef\_t}}\ *queue\_def,\ osThreadId\ thread\_id);}
+\DoxyCodeLine{00655\ \ }
+\DoxyCodeLine{00661\ \textcolor{keywordtype}{void}\ *osMailAlloc\ (osMailQId\ queue\_id,\ uint32\_t\ millisec);}
+\DoxyCodeLine{00662\ \ }
+\DoxyCodeLine{00668\ \textcolor{keywordtype}{void}\ *osMailCAlloc\ (osMailQId\ queue\_id,\ uint32\_t\ millisec);}
+\DoxyCodeLine{00669\ \ }
+\DoxyCodeLine{00675\ osStatus\ osMailPut\ (osMailQId\ queue\_id,\ \textcolor{keywordtype}{void}\ *mail);}
+\DoxyCodeLine{00676\ \ }
+\DoxyCodeLine{00682\ \mbox{\hyperlink{structos_event}{osEvent}}\ osMailGet\ (osMailQId\ queue\_id,\ uint32\_t\ millisec);}
+\DoxyCodeLine{00683\ \ }
+\DoxyCodeLine{00689\ osStatus\ osMailFree\ (osMailQId\ queue\_id,\ \textcolor{keywordtype}{void}\ *mail);}
+\DoxyCodeLine{00690\ \ }
+\DoxyCodeLine{00691\ \textcolor{preprocessor}{\#endif\ \ }\textcolor{comment}{//\ Mail\ Queues\ available}}
+\DoxyCodeLine{00692\ \ }
+\DoxyCodeLine{00693\ \ }
+\DoxyCodeLine{00694\ \textcolor{preprocessor}{\#ifdef\ \ \_\_cplusplus}}
+\DoxyCodeLine{00695\ \}}
+\DoxyCodeLine{00696\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00697\ \ }
+\DoxyCodeLine{00698\ \textcolor{preprocessor}{\#endif\ \ }\textcolor{comment}{//\ \_CMSIS\_OS\_H}}
+
+\end{DoxyCode}

@@ -1,0 +1,229 @@
+\doxysection{arm\+\_\+mat\+\_\+scale\+\_\+q15.\+c}
+\hypertarget{arm__mat__scale__q15_8c_source}{}\label{arm__mat__scale__q15_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/MatrixFunctions/arm\_mat\_scale\_q15.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/MatrixFunctions/arm\_mat\_scale\_q15.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_mat\_scale\_q15.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Multiplies\ a\ Q15\ matrix\ by\ a\ scalar}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/matrix\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00054\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00055\ arm\_status\ \mbox{\hyperlink{group___matrix_scale_ga7521769e2cf1c3d9c4656138cd2ae2ca}{arm\_mat\_scale\_q15}}(}
+\DoxyCodeLine{00056\ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__matrix__instance__q15}{arm\_matrix\_instance\_q15}}\ *\ pSrc,}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ q15\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ scaleFract,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ int32\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shift,}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structarm__matrix__instance__q15}{arm\_matrix\_instance\_q15}}\ *\ pDst)}
+\DoxyCodeLine{00060\ \{}
+\DoxyCodeLine{00061\ \ \ arm\_status\ status;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Status\ of\ matrix\ scaling\ */}}
+\DoxyCodeLine{00062\ \ \ q15\_t\ *pIn\ =\ pSrc-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a817ede38365e63e561a12069c6c5c087}{pData}};\ \ \ \ \ \ \ \textcolor{comment}{/*\ input\ data\ matrix\ pointer\ */}}
+\DoxyCodeLine{00063\ \ \ q15\_t\ *pOut\ =\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a817ede38365e63e561a12069c6c5c087}{pData}};\ \ \ \ \ \ \textcolor{comment}{/*\ output\ data\ matrix\ pointer\ */}}
+\DoxyCodeLine{00064\ \ \ uint32\_t\ \ numSamples;\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ total\ number\ of\ elements\ in\ the\ matrix\ */}}
+\DoxyCodeLine{00065\ \ \ uint32\_t\ \ blkCnt;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ loop\ counters\ */}}
+\DoxyCodeLine{00066\ \ \ q15x8\_t\ vecIn,\ vecOut;}
+\DoxyCodeLine{00067\ \ \ q15\_t\ \textcolor{keyword}{const}\ *pInVec;}
+\DoxyCodeLine{00068\ \ \ int32\_t\ totShift\ =\ shift\ +\ 1;\ \ \ \textcolor{comment}{/*\ shift\ to\ apply\ after\ scaling\ */}}
+\DoxyCodeLine{00069\ \ \ }
+\DoxyCodeLine{00070\ \ \ pInVec\ =\ (q15\_t\ \textcolor{keyword}{const}\ *)\ pIn;}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \textcolor{preprocessor}{\ \ \#ifdef\ ARM\_MATH\_MATRIX\_CHECK}}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \ \ \textcolor{comment}{/*\ Check\ for\ matrix\ mismatch\ condition\ */}}
+\DoxyCodeLine{00075\ \ \ \textcolor{keywordflow}{if}\ ((pSrc-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a1bcf80ccdc2acc29198f1592ae300390}{numRows}}\ !=\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a1bcf80ccdc2acc29198f1592ae300390}{numRows}})\ ||}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ (pSrc-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}}\ !=\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}})\ \ \ )}
+\DoxyCodeLine{00077\ \ \ \{}
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{comment}{/*\ Set\ status\ as\ ARM\_MATH\_SIZE\_MISMATCH\ */}}
+\DoxyCodeLine{00079\ \ \ \ \ status\ =\ ARM\_MATH\_SIZE\_MISMATCH;}
+\DoxyCodeLine{00080\ \ \ \}}
+\DoxyCodeLine{00081\ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifdef\ ARM\_MATH\_MATRIX\_CHECK\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \{}
+\DoxyCodeLine{00086\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00087\ \textcolor{comment}{\ \ \ \ \ *\ Total\ number\ of\ samples\ in\ the\ input\ matrix}}
+\DoxyCodeLine{00088\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00089\ \ \ \ \ numSamples\ =\ (uint32\_t)\ pSrc-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a1bcf80ccdc2acc29198f1592ae300390}{numRows}}\ *\ pSrc-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}};}
+\DoxyCodeLine{00090\ \ \ \ \ blkCnt\ =\ numSamples\ >>\ 3;}
+\DoxyCodeLine{00091\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00092\ \ \ \ \ \{}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00094\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ C(m,n)\ =\ A(m,n)\ *\ scale}}
+\DoxyCodeLine{00095\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Scaling\ and\ results\ are\ stored\ in\ the\ destination\ buffer.}}
+\DoxyCodeLine{00096\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ vecIn\ =\ vld1q(pInVec);\ pInVec\ +=\ 8;}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ multiply\ input\ with\ scaler\ value\ */}}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ vecOut\ =\ vmulhq(vecIn,\ vdupq\_n\_s16(scaleFract));}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ apply\ shifting\ */}}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ vecOut\ =\ vqshlq\_r(vecOut,\ totShift);}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ vst1q(pOut,\ vecOut);\ pOut\ +=\ 8;}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00107\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Decrement\ the\ blockSize\ loop\ counter}}
+\DoxyCodeLine{00108\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00110\ \ \ \ \ \}}
+\DoxyCodeLine{00111\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00112\ \textcolor{comment}{\ \ \ \ \ *\ tail}}
+\DoxyCodeLine{00113\ \textcolor{comment}{\ \ \ \ \ *\ (will\ be\ merged\ thru\ tail\ predication)}}
+\DoxyCodeLine{00114\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00115\ \ \ \ \ blkCnt\ =\ numSamples\ \&\ 7;}
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00117\ \ \ \ \ \{}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ mve\_pred16\_t\ p0\ =\ vctp16q(blkCnt);}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ vecIn\ =\ vld1q(pInVec);\ pInVec\ +=\ 8;}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ vecOut\ =\ vmulhq(vecIn,\ vdupq\_n\_s16(scaleFract));}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ vecOut\ =\ vqshlq\_r(vecOut,\ totShift);}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ vstrhq\_p(pOut,\ vecOut,\ p0);}
+\DoxyCodeLine{00123\ \ \ \ \ \}}
+\DoxyCodeLine{00124\ \ \ \ \ \ \textcolor{comment}{/*\ Set\ status\ as\ ARM\_MATH\_SUCCESS\ */}}
+\DoxyCodeLine{00125\ \ \ \ \ status\ =\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00126\ \ \ \}}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \ \ \textcolor{comment}{/*\ Return\ to\ application\ */}}
+\DoxyCodeLine{00129\ \ \ \textcolor{keywordflow}{return}\ (status);}
+\DoxyCodeLine{00130\ \}}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00133\ arm\_status\ \mbox{\hyperlink{group___matrix_scale_ga7521769e2cf1c3d9c4656138cd2ae2ca}{arm\_mat\_scale\_q15}}(}
+\DoxyCodeLine{00134\ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__matrix__instance__q15}{arm\_matrix\_instance\_q15}}\ *\ pSrc,}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ q15\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ scaleFract,}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ int32\_t\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shift,}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structarm__matrix__instance__q15}{arm\_matrix\_instance\_q15}}\ *\ pDst)}
+\DoxyCodeLine{00138\ \{}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ q15\_t\ *pIn\ =\ pSrc-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a817ede38365e63e561a12069c6c5c087}{pData}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Input\ data\ matrix\ pointer\ */}}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ q15\_t\ *pOut\ =\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a817ede38365e63e561a12069c6c5c087}{pData}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Output\ data\ matrix\ pointer\ */}}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ uint32\_t\ numSamples;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Total\ number\ of\ elements\ in\ the\ matrix\ */}}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ uint32\_t\ blkCnt;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ counter\ */}}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ arm\_status\ status;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Status\ of\ matrix\ scaling\ */}}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ int32\_t\ kShift\ =\ 15\ -\/\ shift;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Total\ shift\ to\ apply\ after\ scaling\ */}}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)\ \&\&\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ q31\_t\ inA1,\ inA2;}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ q31\_t\ out1,\ out2,\ out3,\ out4;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ output\ variables\ */}}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ q15\_t\ in1,\ in2,\ in3,\ in4;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ input\ variables\ */}}
+\DoxyCodeLine{00150\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00152\ \textcolor{preprocessor}{\#ifdef\ ARM\_MATH\_MATRIX\_CHECK}}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ \ \ \textcolor{comment}{/*\ Check\ for\ matrix\ mismatch\ condition\ */}}
+\DoxyCodeLine{00155\ \ \ \textcolor{keywordflow}{if}\ ((pSrc-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a1bcf80ccdc2acc29198f1592ae300390}{numRows}}\ !=\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a1bcf80ccdc2acc29198f1592ae300390}{numRows}})\ ||}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ (pSrc-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}}\ !=\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}})\ \ \ )}
+\DoxyCodeLine{00157\ \ \ \{}
+\DoxyCodeLine{00158\ \ \ \ \ \textcolor{comment}{/*\ Set\ status\ as\ ARM\_MATH\_SIZE\_MISMATCH\ */}}
+\DoxyCodeLine{00159\ \ \ \ \ status\ =\ ARM\_MATH\_SIZE\_MISMATCH;}
+\DoxyCodeLine{00160\ \ \ \}}
+\DoxyCodeLine{00161\ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifdef\ ARM\_MATH\_MATRIX\_CHECK\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ \ \ \{}
+\DoxyCodeLine{00166\ \ \ \ \ \textcolor{comment}{/*\ Total\ number\ of\ samples\ in\ input\ matrix\ */}}
+\DoxyCodeLine{00167\ \ \ \ \ numSamples\ =\ (uint32\_t)\ pSrc-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a1bcf80ccdc2acc29198f1592ae300390}{numRows}}\ *\ pSrc-\/>\mbox{\hyperlink{structarm__matrix__instance__q15_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}};}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)}}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \ \ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ 4\ outputs\ at\ a\ time\ */}}
+\DoxyCodeLine{00172\ \ \ \ \ blkCnt\ =\ numSamples\ >>\ 2U;}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00175\ \ \ \ \ \{}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \textcolor{comment}{/*\ C(m,n)\ =\ A(m,n)\ *\ k\ */}}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \textcolor{comment}{/*\ read\ 2\ times\ 2\ samples\ at\ a\ time\ from\ source\ */}}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ inA1\ =\ read\_q15x2\_ia\ (\&pIn);}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ inA2\ =\ read\_q15x2\_ia\ (\&pIn);}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \textcolor{comment}{/*\ Scale\ inputs\ and\ store\ result\ in\ temporary\ variables}}
+\DoxyCodeLine{00184\ \textcolor{comment}{\ \ \ \ \ \ \ *\ in\ single\ cycle\ by\ packing\ the\ outputs\ */}}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ out1\ =\ (q31\_t)\ ((q15\_t)\ (inA1\ >>\ 16)\ *\ scaleFract);}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ out2\ =\ (q31\_t)\ ((q15\_t)\ (inA1\ \ \ \ \ \ )\ *\ scaleFract);}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ out3\ =\ (q31\_t)\ ((q15\_t)\ (inA2\ >>\ 16)\ *\ scaleFract);}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ out4\ =\ (q31\_t)\ ((q15\_t)\ (inA2\ \ \ \ \ \ )\ *\ scaleFract);}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \textcolor{comment}{/*\ apply\ shifting\ */}}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ out1\ =\ out1\ >>\ kShift;}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ out2\ =\ out2\ >>\ kShift;}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ out3\ =\ out3\ >>\ kShift;}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ out4\ =\ out4\ >>\ kShift;}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \textcolor{comment}{/*\ saturate\ the\ output\ */}}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ in1\ =\ (q15\_t)\ (\mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(out1,\ 16));}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ in2\ =\ (q15\_t)\ (\mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(out2,\ 16));}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ in3\ =\ (q15\_t)\ (\mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(out3,\ 16));}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ in4\ =\ (q15\_t)\ (\mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(out4,\ 16));}
+\DoxyCodeLine{00201\ }
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \textcolor{comment}{/*\ store\ result\ to\ destination\ */}}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ write\_q15x2\_ia\ (\&pOut,\ \_\_PKHBT(in2,\ in1,\ 16));}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ write\_q15x2\_ia\ (\&pOut,\ \_\_PKHBT(in4,\ in3,\ 16));}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00206\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ *pOut++\ =\ (q15\_t)\ (\mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(((q31\_t)\ (*pIn++)\ *\ scaleFract)\ >>\ kShift,\ 16));}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ *pOut++\ =\ (q15\_t)\ (\mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(((q31\_t)\ (*pIn++)\ *\ scaleFract)\ >>\ kShift,\ 16));}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ *pOut++\ =\ (q15\_t)\ (\mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(((q31\_t)\ (*pIn++)\ *\ scaleFract)\ >>\ kShift,\ 16));}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ *pOut++\ =\ (q15\_t)\ (\mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(((q31\_t)\ (*pIn++)\ *\ scaleFract)\ >>\ kShift,\ 16));}
+\DoxyCodeLine{00211\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00212\ }
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00215\ \ \ \ \ \}}
+\DoxyCodeLine{00216\ }
+\DoxyCodeLine{00217\ \ \ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ remaining\ outputs\ */}}
+\DoxyCodeLine{00218\ \ \ \ \ blkCnt\ =\ numSamples\ \%\ 0x4U;}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00220\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00221\ }
+\DoxyCodeLine{00222\ \ \ \ \ \textcolor{comment}{/*\ Initialize\ blkCnt\ with\ number\ of\ samples\ */}}
+\DoxyCodeLine{00223\ \ \ \ \ blkCnt\ =\ numSamples;}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00225\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_LOOPUNROLL)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00227\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00228\ \ \ \ \ \{}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \textcolor{comment}{/*\ C(m,n)\ =\ A(m,n)\ *\ k\ */}}
+\DoxyCodeLine{00230\ }
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \textcolor{comment}{/*\ Scale,\ saturate\ and\ store\ result\ in\ destination\ buffer.\ */}}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ *pOut++\ =\ (q15\_t)\ (\mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(((q31\_t)\ (*pIn++)\ *\ scaleFract)\ >>\ kShift,\ 16));}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00236\ \ \ \ \ \}}
+\DoxyCodeLine{00237\ }
+\DoxyCodeLine{00238\ \ \ \ \ \textcolor{comment}{/*\ Set\ status\ as\ ARM\_MATH\_SUCCESS\ */}}
+\DoxyCodeLine{00239\ \ \ \ \ status\ =\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00240\ \ \ \}}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \ \ \textcolor{comment}{/*\ Return\ to\ application\ */}}
+\DoxyCodeLine{00243\ \ \ \textcolor{keywordflow}{return}\ (status);}
+\DoxyCodeLine{00244\ \}}
+\DoxyCodeLine{00245\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEI)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00246\ }
+
+\end{DoxyCode}

@@ -1,0 +1,368 @@
+\doxysection{arm\+\_\+conv\+\_\+partial\+\_\+opt\+\_\+q7.\+c}
+\hypertarget{arm__conv__partial__opt__q7_8c_source}{}\label{arm__conv__partial__opt__q7_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/FilteringFunctions/arm\_conv\_partial\_opt\_q7.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/FilteringFunctions/arm\_conv\_partial\_opt\_q7.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_conv\_partial\_opt\_q7.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Partial\ convolution\ of\ Q7\ sequences}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/filtering\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00056\ arm\_status\ \mbox{\hyperlink{group___partial_conv_gadfc0cd0290793c790ccaa1c73eda0694}{arm\_conv\_partial\_opt\_q7}}(}
+\DoxyCodeLine{00057\ \ \ \textcolor{keyword}{const}\ q7\_t\ *\ pSrcA,}
+\DoxyCodeLine{00058\ \ \ \ \ \ \ \ \ uint32\_t\ srcALen,}
+\DoxyCodeLine{00059\ \ \ \textcolor{keyword}{const}\ q7\_t\ *\ pSrcB,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ uint32\_t\ srcBLen,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ q7\_t\ *\ pDst,}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ uint32\_t\ firstIndex,}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ uint32\_t\ numPoints,}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ q15\_t\ *\ pScratch1,}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ q15\_t\ *\ pScratch2)}
+\DoxyCodeLine{00066\ \{}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ q15\_t\ *pScr2,\ *pScr1;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Intermediate\ pointers\ for\ scratch\ pointers\ */}}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ q15\_t\ x4;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ input\ variable\ */}}
+\DoxyCodeLine{00069\ \ \ \textcolor{keyword}{const}\ q7\_t\ *pIn1,\ *pIn2;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ InputA\ and\ inputB\ pointer\ */}}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ uint32\_t\ j,\ k,\ blkCnt,\ tapCnt;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ counter\ */}}
+\DoxyCodeLine{00071\ \ \ \textcolor{keyword}{const}\ q7\_t\ *px;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ input1\ pointer\ */}}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ q15\_t\ *py;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ input2\ pointer\ */}}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ q31\_t\ acc0,\ acc1,\ acc2,\ acc3;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Accumulator\ */}}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ q31\_t\ x1,\ x2,\ x3,\ y1;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ input\ variables\ */}}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ arm\_status\ status;}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ q7\_t\ *pOut\ =\ pDst;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Output\ pointer\ */}}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ q7\_t\ out0,\ out1,\ out2,\ out3;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ variables\ */}}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \ \ \textcolor{comment}{/*\ Check\ for\ range\ of\ output\ samples\ to\ be\ calculated\ */}}
+\DoxyCodeLine{00080\ \ \ \textcolor{keywordflow}{if}\ ((firstIndex\ +\ numPoints)\ >\ ((srcALen\ +\ (srcBLen\ -\/\ 1U))))}
+\DoxyCodeLine{00081\ \ \ \{}
+\DoxyCodeLine{00082\ \ \ \ \ \textcolor{comment}{/*\ Set\ status\ as\ ARM\_MATH\_ARGUMENT\_ERROR\ */}}
+\DoxyCodeLine{00083\ \ \ \ \ status\ =\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00084\ \ \ \}}
+\DoxyCodeLine{00085\ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00086\ \ \ \{}
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{comment}{/*\ The\ algorithm\ implementation\ is\ based\ on\ the\ lengths\ of\ the\ inputs.\ */}}
+\DoxyCodeLine{00088\ \ \ \ \ \textcolor{comment}{/*\ srcB\ is\ always\ made\ to\ slide\ across\ srcA.\ */}}
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{comment}{/*\ So\ srcBLen\ is\ always\ considered\ as\ shorter\ or\ equal\ to\ srcALen\ */}}
+\DoxyCodeLine{00090\ \ \ \ \ \textcolor{keywordflow}{if}\ (srcALen\ >=\ srcBLen)}
+\DoxyCodeLine{00091\ \ \ \ \ \{}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialization\ of\ inputA\ pointer\ */}}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ pIn1\ =\ pSrcA;}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialization\ of\ inputB\ pointer\ */}}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ pIn2\ =\ pSrcB;}
+\DoxyCodeLine{00097\ \ \ \ \ \}}
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00099\ \ \ \ \ \{}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialization\ of\ inputA\ pointer\ */}}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ pIn1\ =\ pSrcB;}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialization\ of\ inputB\ pointer\ */}}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ pIn2\ =\ pSrcA;}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \textcolor{comment}{/*\ srcBLen\ is\ always\ considered\ as\ shorter\ or\ equal\ to\ srcALen\ */}}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ j\ =\ srcBLen;}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ srcBLen\ =\ srcALen;}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ srcALen\ =\ j;}
+\DoxyCodeLine{00110\ \ \ \ \ \}}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{comment}{/*\ pointer\ to\ take\ end\ of\ scratch2\ buffer\ */}}
+\DoxyCodeLine{00113\ \ \ \ \ pScr2\ =\ pScratch2;}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \ \ \textcolor{comment}{/*\ points\ to\ smaller\ length\ sequence\ */}}
+\DoxyCodeLine{00116\ \ \ \ \ px\ =\ pIn2\ +\ srcBLen\ -\/\ 1;}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00118\ \ \ \ \ \textcolor{comment}{/*\ Apply\ loop\ unrolling\ and\ do\ 4\ Copies\ simultaneously.\ */}}
+\DoxyCodeLine{00119\ \ \ \ \ k\ =\ srcBLen\ >>\ 2U;}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \ \ \ \ \textcolor{comment}{/*\ First\ part\ of\ the\ processing\ with\ loop\ unrolling\ copies\ 4\ data\ points\ at\ a\ time.}}
+\DoxyCodeLine{00122\ \textcolor{comment}{\ \ \ \ \ **\ a\ second\ loop\ below\ copies\ for\ the\ remaining\ 1\ to\ 3\ samples.\ */}}
+\DoxyCodeLine{00123\ \ \ \ \ \textcolor{keywordflow}{while}\ (k\ >\ 0U)}
+\DoxyCodeLine{00124\ \ \ \ \ \{}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \textcolor{comment}{/*\ copy\ second\ buffer\ in\ reversal\ manner\ */}}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ x4\ =\ (q15\_t)\ *px-\/-\/;}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ *pScr2++\ =\ x4;}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ x4\ =\ (q15\_t)\ *px-\/-\/;}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ *pScr2++\ =\ x4;}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ x4\ =\ (q15\_t)\ *px-\/-\/;}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ *pScr2++\ =\ x4;}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ x4\ =\ (q15\_t)\ *px-\/-\/;}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ *pScr2++\ =\ x4;}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ k-\/-\/;}
+\DoxyCodeLine{00137\ \ \ \ \ \}}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00139\ \ \ \ \ \textcolor{comment}{/*\ If\ the\ count\ is\ not\ a\ multiple\ of\ 4,\ copy\ remaining\ samples\ here.}}
+\DoxyCodeLine{00140\ \textcolor{comment}{\ \ \ \ \ **\ No\ loop\ unrolling\ is\ used.\ */}}
+\DoxyCodeLine{00141\ \ \ \ \ k\ =\ srcBLen\ \%\ 0x4U;}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \ \ \textcolor{keywordflow}{while}\ (k\ >\ 0U)}
+\DoxyCodeLine{00144\ \ \ \ \ \{}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \textcolor{comment}{/*\ copy\ second\ buffer\ in\ reversal\ manner\ for\ remaining\ samples\ */}}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ x4\ =\ (q15\_t)\ *px-\/-\/;}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ *pScr2++\ =\ x4;}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ k-\/-\/;}
+\DoxyCodeLine{00151\ \ \ \ \ \}}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \ \ \ \ \textcolor{comment}{/*\ Initialze\ temporary\ scratch\ pointer\ */}}
+\DoxyCodeLine{00154\ \ \ \ \ pScr1\ =\ pScratch1;}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00156\ \ \ \ \ \textcolor{comment}{/*\ Fill\ (srcBLen\ -\/\ 1U)\ zeros\ in\ scratch\ buffer\ */}}
+\DoxyCodeLine{00157\ \ \ \ \ \mbox{\hyperlink{group___fill_ga76b21c32a3783a2b3334d930a646e5d8}{arm\_fill\_q15}}(0,\ pScr1,\ (srcBLen\ -\/\ 1U));}
+\DoxyCodeLine{00158\ }
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{comment}{/*\ Update\ temporary\ scratch\ pointer\ */}}
+\DoxyCodeLine{00160\ \ \ \ \ pScr1\ +=\ (srcBLen\ -\/\ 1U);}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00162\ \ \ \ \ \textcolor{comment}{/*\ Copy\ (srcALen)\ samples\ in\ scratch\ buffer\ */}}
+\DoxyCodeLine{00163\ \ \ \ \ \textcolor{comment}{/*\ Apply\ loop\ unrolling\ and\ do\ 4\ Copies\ simultaneously.\ */}}
+\DoxyCodeLine{00164\ \ \ \ \ k\ =\ srcALen\ >>\ 2U;}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ \textcolor{comment}{/*\ First\ part\ of\ the\ processing\ with\ loop\ unrolling\ copies\ 4\ data\ points\ at\ a\ time.}}
+\DoxyCodeLine{00167\ \textcolor{comment}{\ \ \ \ \ **\ a\ second\ loop\ below\ copies\ for\ the\ remaining\ 1\ to\ 3\ samples.\ */}}
+\DoxyCodeLine{00168\ \ \ \ \ \textcolor{keywordflow}{while}\ (k\ >\ 0U)}
+\DoxyCodeLine{00169\ \ \ \ \ \{}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \textcolor{comment}{/*\ copy\ second\ buffer\ in\ reversal\ manner\ */}}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ x4\ =\ (q15\_t)\ *pIn1++;}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ *pScr1++\ =\ x4;}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ x4\ =\ (q15\_t)\ *pIn1++;}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ *pScr1++\ =\ x4;}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ x4\ =\ (q15\_t)\ *pIn1++;}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ *pScr1++\ =\ x4;}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ x4\ =\ (q15\_t)\ *pIn1++;}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ *pScr1++\ =\ x4;}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ k-\/-\/;}
+\DoxyCodeLine{00182\ \ \ \ \ \}}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{comment}{/*\ If\ the\ count\ is\ not\ a\ multiple\ of\ 4,\ copy\ remaining\ samples\ here.}}
+\DoxyCodeLine{00185\ \textcolor{comment}{\ \ \ \ \ **\ No\ loop\ unrolling\ is\ used.\ */}}
+\DoxyCodeLine{00186\ \ \ \ \ k\ =\ srcALen\ \%\ 0x4U;}
+\DoxyCodeLine{00187\ }
+\DoxyCodeLine{00188\ \ \ \ \ \textcolor{keywordflow}{while}\ (k\ >\ 0U)}
+\DoxyCodeLine{00189\ \ \ \ \ \{}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \textcolor{comment}{/*\ copy\ second\ buffer\ in\ reversal\ manner\ for\ remaining\ samples\ */}}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ x4\ =\ (q15\_t)\ *pIn1++;}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ *pScr1++\ =\ x4;}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ the\ loop\ counter\ */}}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ k-\/-\/;}
+\DoxyCodeLine{00196\ \ \ \ \ \}}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00198\ \ \ \ \ \textcolor{comment}{/*\ Fill\ (srcBLen\ -\/\ 1U)\ zeros\ at\ end\ of\ scratch\ buffer\ */}}
+\DoxyCodeLine{00199\ \ \ \ \ \mbox{\hyperlink{group___fill_ga76b21c32a3783a2b3334d930a646e5d8}{arm\_fill\_q15}}(0,\ pScr1,\ (srcBLen\ -\/\ 1U));}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00201\ \ \ \ \ \textcolor{comment}{/*\ Update\ pointer\ */}}
+\DoxyCodeLine{00202\ \ \ \ \ pScr1\ +=\ (srcBLen\ -\/\ 1U);}
+\DoxyCodeLine{00203\ }
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00205\ \ \ \ \ \textcolor{comment}{/*\ Temporary\ pointer\ for\ scratch2\ */}}
+\DoxyCodeLine{00206\ \ \ \ \ py\ =\ pScratch2;}
+\DoxyCodeLine{00207\ }
+\DoxyCodeLine{00208\ \ \ \ \ \textcolor{comment}{/*\ Initialization\ of\ pIn2\ pointer\ */}}
+\DoxyCodeLine{00209\ \ \ \ \ pIn2\ =\ (q7\_t\ *)\ py;}
+\DoxyCodeLine{00210\ }
+\DoxyCodeLine{00211\ \ \ \ \ pScr2\ =\ py;}
+\DoxyCodeLine{00212\ }
+\DoxyCodeLine{00213\ \ \ \ \ pOut\ =\ pDst\ +\ firstIndex;}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \ \ \ \ pScratch1\ +=\ firstIndex;}
+\DoxyCodeLine{00216\ }
+\DoxyCodeLine{00217\ \ \ \ \ \textcolor{comment}{/*\ Actual\ convolution\ process\ starts\ here\ */}}
+\DoxyCodeLine{00218\ \ \ \ \ blkCnt\ =\ (numPoints)\ >>\ 2;}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00220\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0)}
+\DoxyCodeLine{00221\ \ \ \ \ \{}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialize\ temporary\ scratch\ pointer\ as\ scratch1\ */}}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ pScr1\ =\ pScratch1;}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \textcolor{comment}{/*\ Clear\ Accumulators\ */}}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ acc0\ =\ 0;}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ acc1\ =\ 0;}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ acc2\ =\ 0;}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ acc3\ =\ 0;}
+\DoxyCodeLine{00230\ }
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ two\ samples\ from\ scratch1\ buffer\ */}}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ x1\ =\ read\_q15x2\_ia\ (\&pScr1);}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ next\ two\ samples\ from\ scratch1\ buffer\ */}}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ x2\ =\ read\_q15x2\_ia\ (\&pScr1);}
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00237\ \ \ \ \ \ \ tapCnt\ =\ (srcBLen)\ >>\ 2U;}
+\DoxyCodeLine{00238\ }
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (tapCnt\ >\ 0U)}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ four\ samples\ from\ smaller\ buffer\ */}}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ y1\ =\ read\_q15x2\_ia\ (\&pScr2);}
+\DoxyCodeLine{00243\ }
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ multiply\ and\ accumulate\ */}}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ acc0\ =\ \_\_SMLAD(x1,\ y1,\ acc0);}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ acc2\ =\ \_\_SMLAD(x2,\ y1,\ acc2);}
+\DoxyCodeLine{00247\ }
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ pack\ input\ data\ */}}
+\DoxyCodeLine{00249\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ x3\ =\ \_\_PKHBT(x2,\ x1,\ 0);}
+\DoxyCodeLine{00251\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ x3\ =\ \_\_PKHBT(x1,\ x2,\ 0);}
+\DoxyCodeLine{00253\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ multiply\ and\ accumulate\ */}}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ acc1\ =\ \_\_SMLADX(x3,\ y1,\ acc1);}
+\DoxyCodeLine{00257\ }
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ next\ two\ samples\ from\ scratch1\ buffer\ */}}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ x1\ =\ read\_q15x2\_ia\ (\&pScr1);}
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ pack\ input\ data\ */}}
+\DoxyCodeLine{00262\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ x3\ =\ \_\_PKHBT(x1,\ x2,\ 0);}
+\DoxyCodeLine{00264\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ x3\ =\ \_\_PKHBT(x2,\ x1,\ 0);}
+\DoxyCodeLine{00266\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00267\ }
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ acc3\ =\ \_\_SMLADX(x3,\ y1,\ acc3);}
+\DoxyCodeLine{00269\ }
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ four\ samples\ from\ smaller\ buffer\ */}}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ y1\ =\ read\_q15x2\_ia\ (\&pScr2);}
+\DoxyCodeLine{00272\ }
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ acc0\ =\ \_\_SMLAD(x2,\ y1,\ acc0);}
+\DoxyCodeLine{00274\ }
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ acc2\ =\ \_\_SMLAD(x1,\ y1,\ acc2);}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ acc1\ =\ \_\_SMLADX(x3,\ y1,\ acc1);}
+\DoxyCodeLine{00278\ }
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \ \ x2\ =\ read\_q15x2\_ia\ (\&pScr1);}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00281\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ x3\ =\ \_\_PKHBT(x2,\ x1,\ 0);}
+\DoxyCodeLine{00283\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ x3\ =\ \_\_PKHBT(x1,\ x2,\ 0);}
+\DoxyCodeLine{00285\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ acc3\ =\ \_\_SMLADX(x3,\ y1,\ acc3);}
+\DoxyCodeLine{00288\ }
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ tapCnt-\/-\/;}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00292\ }
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \textcolor{comment}{/*\ Update\ scratch\ pointer\ for\ remaining\ samples\ of\ smaller\ length\ sequence\ */}}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ pScr1\ -\/=\ 4U;}
+\DoxyCodeLine{00295\ }
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \textcolor{comment}{/*\ apply\ same\ above\ for\ remaining\ samples\ of\ smaller\ length\ sequence\ */}}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ tapCnt\ =\ (srcBLen)\ \&\ 3U;}
+\DoxyCodeLine{00298\ }
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (tapCnt\ >\ 0U)}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ accumulate\ the\ results\ */}}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ acc0\ +=\ (*pScr1++\ *\ *pScr2);}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ acc1\ +=\ (*pScr1++\ *\ *pScr2);}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ acc2\ +=\ (*pScr1++\ *\ *pScr2);}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ acc3\ +=\ (*pScr1++\ *\ *pScr2++);}
+\DoxyCodeLine{00306\ }
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ pScr1\ -\/=\ 3U;}
+\DoxyCodeLine{00308\ }
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ tapCnt-\/-\/;}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00312\ }
+\DoxyCodeLine{00313\ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00314\ }
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \textcolor{comment}{/*\ Store\ the\ result\ in\ the\ accumulator\ in\ the\ destination\ buffer.\ */}}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ out0\ =\ (q7\_t)\ (\mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(acc0\ >>\ 7U,\ 8));}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ out1\ =\ (q7\_t)\ (\mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(acc1\ >>\ 7U,\ 8));}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ out2\ =\ (q7\_t)\ (\mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(acc2\ >>\ 7U,\ 8));}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ out3\ =\ (q7\_t)\ (\mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(acc3\ >>\ 7U,\ 8));}
+\DoxyCodeLine{00320\ }
+\DoxyCodeLine{00321\ \ \ \ \ \ \ write\_q7x4\_ia\ (\&pOut,\ \_\_PACKq7(out0,\ out1,\ out2,\ out3));}
+\DoxyCodeLine{00322\ }
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialization\ of\ inputB\ pointer\ */}}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ pScr2\ =\ py;}
+\DoxyCodeLine{00325\ }
+\DoxyCodeLine{00326\ \ \ \ \ \ \ pScratch1\ +=\ 4U;}
+\DoxyCodeLine{00327\ \ \ \ \ \}}
+\DoxyCodeLine{00328\ }
+\DoxyCodeLine{00329\ \ \ \ \ blkCnt\ =\ (numPoints)\ \&\ 0x3;}
+\DoxyCodeLine{00330\ }
+\DoxyCodeLine{00331\ \ \ \ \ \textcolor{comment}{/*\ Calculate\ convolution\ for\ remaining\ samples\ of\ Bigger\ length\ sequence\ */}}
+\DoxyCodeLine{00332\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0)}
+\DoxyCodeLine{00333\ \ \ \ \ \{}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialze\ temporary\ scratch\ pointer\ as\ scratch1\ */}}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ pScr1\ =\ pScratch1;}
+\DoxyCodeLine{00336\ }
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \textcolor{comment}{/*\ Clear\ Accumlators\ */}}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ acc0\ =\ 0;}
+\DoxyCodeLine{00339\ }
+\DoxyCodeLine{00340\ \ \ \ \ \ \ tapCnt\ =\ (srcBLen)\ >>\ 1U;}
+\DoxyCodeLine{00341\ }
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (tapCnt\ >\ 0U)}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00344\ }
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ next\ two\ samples\ from\ scratch1\ buffer\ */}}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ x1\ =\ read\_q15x2\_ia\ (\&pScr1);}
+\DoxyCodeLine{00347\ }
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ two\ samples\ from\ smaller\ buffer\ */}}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ y1\ =\ read\_q15x2\_ia\ (\&pScr2);}
+\DoxyCodeLine{00350\ }
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \ \ acc0\ =\ \_\_SMLAD(x1,\ y1,\ acc0);}
+\DoxyCodeLine{00352\ }
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ the\ loop\ counter\ */}}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ tapCnt-\/-\/;}
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00356\ }
+\DoxyCodeLine{00357\ \ \ \ \ \ \ tapCnt\ =\ (srcBLen)\ \&\ 1U;}
+\DoxyCodeLine{00358\ }
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \textcolor{comment}{/*\ apply\ same\ above\ for\ remaining\ samples\ of\ smaller\ length\ sequence\ */}}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (tapCnt\ >\ 0U)}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00362\ }
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ accumulate\ the\ results\ */}}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ acc0\ +=\ (*pScr1++\ *\ *pScr2++);}
+\DoxyCodeLine{00365\ }
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ tapCnt-\/-\/;}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00369\ }
+\DoxyCodeLine{00370\ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00371\ }
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \textcolor{comment}{/*\ Store\ the\ result\ in\ the\ accumulator\ in\ the\ destination\ buffer.\ */}}
+\DoxyCodeLine{00373\ \ \ \ \ \ \ *pOut++\ =\ (q7\_t)\ (\mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(acc0\ >>\ 7U,\ 8));}
+\DoxyCodeLine{00374\ }
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialization\ of\ inputB\ pointer\ */}}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ pScr2\ =\ py;}
+\DoxyCodeLine{00377\ }
+\DoxyCodeLine{00378\ \ \ \ \ \ \ pScratch1\ +=\ 1U;}
+\DoxyCodeLine{00379\ \ \ \ \ \}}
+\DoxyCodeLine{00380\ }
+\DoxyCodeLine{00381\ \ \ \ \ \textcolor{comment}{/*\ Set\ status\ as\ ARM\_MATH\_SUCCESS\ */}}
+\DoxyCodeLine{00382\ \ \ \ \ status\ =\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00383\ \ \ \}}
+\DoxyCodeLine{00384\ }
+\DoxyCodeLine{00385\ \ \ \textcolor{keywordflow}{return}\ (status);}
+\DoxyCodeLine{00386\ \}}
+\DoxyCodeLine{00387\ }
+
+\end{DoxyCode}

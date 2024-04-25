@@ -1,0 +1,175 @@
+\doxysection{arm\+\_\+kullback\+\_\+leibler\+\_\+f32.\+c}
+\hypertarget{arm__kullback__leibler__f32_8c_source}{}\label{arm__kullback__leibler__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/StatisticsFunctions/arm\_kullback\_leibler\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/StatisticsFunctions/arm\_kullback\_leibler\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_logsumexp\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ LogSumExp}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/statistics\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <limits.h>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <math.h>}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00055\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\#include\ "{}arm\_vec\_math.h"{}}}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ float32\_t\ \mbox{\hyperlink{group___kullback-_leibler_gac079b8525d5b6d3e80ca43517be2b5b4}{arm\_kullback\_leibler\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *\ pSrcA,\textcolor{keyword}{const}\ float32\_t\ *\ pSrcB,uint32\_t\ blockSize)}
+\DoxyCodeLine{00061\ \{}
+\DoxyCodeLine{00062\ \ \ \ \ uint32\_t\ blkCnt;}
+\DoxyCodeLine{00063\ \ \ \ \ float32\_t\ accum,\ pA,pB;}
+\DoxyCodeLine{00064\ \ }
+\DoxyCodeLine{00065\ \ \ \ \ }
+\DoxyCodeLine{00066\ \ \ \ \ blkCnt\ =\ blockSize;}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ \ \ accum\ =\ 0.0f;}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vSum\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00071\ \ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00073\ \ \ \ \ \{}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcA);}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecB\ =\ vld1q(pSrcB);}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vRatio;}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ vRatio\ =\ vdiv\_f32(vecB,\ vecA);}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ vSum\ =\ vaddq\_f32(vSum,\ vmulq(vecA,\ vlogq\_f32(vRatio)));}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00082\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Decrement\ the\ blockSize\ loop\ counter}}
+\DoxyCodeLine{00083\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Advance\ vector\ source\ and\ destination\ pointers}}
+\DoxyCodeLine{00084\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ pSrcA\ +=\ 4;}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ pSrcB\ +=\ 4;}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ blkCnt\ -\/-\/;}
+\DoxyCodeLine{00088\ \ \ \ \ \}}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ accum\ =\ vecAddAcrossF32Mve(vSum);}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00094\ \ \ \ \ \{}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ pA\ =\ *pSrcA++;}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ pB\ =\ *pSrcB++;}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ accum\ +=\ pA\ *\ logf(pB\ /\ pA);}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00100\ \ \ \ \ }
+\DoxyCodeLine{00101\ \ \ \ \ \}}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \textcolor{keywordflow}{return}(-\/accum);}
+\DoxyCodeLine{00104\ \}}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00107\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_NEON)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \textcolor{preprocessor}{\#include\ "{}NEMath.h"{}}}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ float32\_t\ \mbox{\hyperlink{group___kullback-_leibler_gac079b8525d5b6d3e80ca43517be2b5b4}{arm\_kullback\_leibler\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *\ pSrcA,\textcolor{keyword}{const}\ float32\_t\ *\ pSrcB,uint32\_t\ blockSize)}
+\DoxyCodeLine{00112\ \{}
+\DoxyCodeLine{00113\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pInA,\ *pInB;}
+\DoxyCodeLine{00114\ \ \ \ \ uint32\_t\ blkCnt;}
+\DoxyCodeLine{00115\ \ \ \ \ float32\_t\ accum,\ pA,pB;}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ \ float32x4\_t\ accumV;}
+\DoxyCodeLine{00118\ \ \ \ \ float32x2\_t\ accumV2;}
+\DoxyCodeLine{00119\ \ \ \ \ float32x4\_t\ tmpVA,\ tmpVB,tmpV;}
+\DoxyCodeLine{00120\ \ }
+\DoxyCodeLine{00121\ \ \ \ \ pInA\ =\ pSrcA;}
+\DoxyCodeLine{00122\ \ \ \ \ pInB\ =\ pSrcB;}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ accum\ =\ 0.0f;}
+\DoxyCodeLine{00125\ \ \ \ \ accumV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00128\ \ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00129\ \ \ \ \ \{}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ tmpVA\ =\ vld1q\_f32(pInA);}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ pInA\ +=\ 4;}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \ \ \ \ \ \ tmpVB\ =\ vld1q\_f32(pInB);}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ pInB\ +=\ 4;}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00136\ \ \ \ \ \ \ tmpV\ =\ vinvq\_f32(tmpVA);}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ tmpVB\ =\ vmulq\_f32(tmpVB,\ tmpV);}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ tmpVB\ =\ vlogq\_f32(tmpVB);}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \ \ \ \ accumV\ =\ vmlaq\_f32(accumV,\ tmpVA,\ tmpVB);}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00142\ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00143\ \ \ \ \ }
+\DoxyCodeLine{00144\ \ \ \ \ \}}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \ \ \ \ accumV2\ =\ vpadd\_f32(vget\_low\_f32(accumV),vget\_high\_f32(accumV));}
+\DoxyCodeLine{00147\ \ \ \ \ accum\ =\ vget\_lane\_f32(accumV2,\ 0)\ +\ vget\_lane\_f32(accumV2,\ 1);}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00150\ \ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00151\ \ \ \ \ \{}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ pA\ =\ *pInA++;}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ pB\ =\ *pInB++;}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ accum\ +=\ pA\ *\ logf(pB/pA);}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00157\ \ \ \ \ }
+\DoxyCodeLine{00158\ \ \ \ \ \}}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ \ \ \ \ \textcolor{keywordflow}{return}(-\/accum);}
+\DoxyCodeLine{00161\ \}}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00164\ float32\_t\ \mbox{\hyperlink{group___kullback-_leibler_gac079b8525d5b6d3e80ca43517be2b5b4}{arm\_kullback\_leibler\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *\ pSrcA,\textcolor{keyword}{const}\ float32\_t\ *\ pSrcB,uint32\_t\ blockSize)}
+\DoxyCodeLine{00165\ \{}
+\DoxyCodeLine{00166\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pInA,\ *pInB;}
+\DoxyCodeLine{00167\ \ \ \ \ uint32\_t\ blkCnt;}
+\DoxyCodeLine{00168\ \ \ \ \ float32\_t\ accum,\ pA,pB;}
+\DoxyCodeLine{00169\ \ }
+\DoxyCodeLine{00170\ \ \ \ \ pInA\ =\ pSrcA;}
+\DoxyCodeLine{00171\ \ \ \ \ pInB\ =\ pSrcB;}
+\DoxyCodeLine{00172\ \ \ \ \ blkCnt\ =\ blockSize;}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \ \ \ \ accum\ =\ 0.0f;}
+\DoxyCodeLine{00175\ }
+\DoxyCodeLine{00176\ \ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00177\ \ \ \ \ \{}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ pA\ =\ *pInA++;}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ pB\ =\ *pInB++;}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ accum\ +=\ pA\ *\ logf(pB\ /\ pA);}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00183\ \ \ \ \ }
+\DoxyCodeLine{00184\ \ \ \ \ \}}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \ \ \ \ \textcolor{keywordflow}{return}(-\/accum);}
+\DoxyCodeLine{00187\ \}}
+\DoxyCodeLine{00188\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00189\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00190\ }
+
+\end{DoxyCode}

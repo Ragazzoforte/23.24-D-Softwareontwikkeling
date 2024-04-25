@@ -1,0 +1,458 @@
+\doxysection{arm\+\_\+cfft\+\_\+radix2\+\_\+f16.\+c}
+\hypertarget{arm__cfft__radix2__f16_8c_source}{}\label{arm__cfft__radix2__f16_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_cfft\_radix2\_f16.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_cfft\_radix2\_f16.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_cfft\_radix2\_f16.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Radix-\/2\ Decimation\ in\ Frequency\ CFFT\ \&\ CIFFT\ Floating\ point\ processing\ function}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/transform\_functions\_f16.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#if\ defined(ARM\_FLOAT16\_SUPPORTED)}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{keywordtype}{void}\ arm\_radix2\_butterfly\_f16(}
+\DoxyCodeLine{00034\ \ \ \ \ \ \ \ \ float16\_t\ *\ pSrc,}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ uint32\_t\ fftLen,}
+\DoxyCodeLine{00036\ \ \ \textcolor{keyword}{const}\ float16\_t\ *\ pCoef,}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ uint16\_t\ twidCoefModifier);}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{keywordtype}{void}\ arm\_radix2\_butterfly\_inverse\_f16(}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ float16\_t\ *\ pSrc,}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ uint32\_t\ fftLen,}
+\DoxyCodeLine{00042\ \ \ \textcolor{keyword}{const}\ float16\_t\ *\ pCoef,}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ uint16\_t\ twidCoefModifier,}
+\DoxyCodeLine{00044\ \ \ \ \ \ \ \ \ float16\_t\ onebyfftLen);}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{keyword}{extern}\ \textcolor{keywordtype}{void}\ arm\_bitreversal\_f16(}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ float16\_t\ *\ pSrc,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ uint16\_t\ fftSize,}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ uint16\_t\ bitRevFactor,}
+\DoxyCodeLine{00050\ \ \ \textcolor{keyword}{const}\ uint16\_t\ *\ pBitRevTab);}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00069\ \textcolor{keywordtype}{void}\ arm\_cfft\_radix2\_f16(}
+\DoxyCodeLine{00070\ \textcolor{keyword}{const}\ arm\_cfft\_radix2\_instance\_f16\ *\ S,}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ float16\_t\ *\ pSrc)}
+\DoxyCodeLine{00072\ \{}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \ \ \ \textcolor{keywordflow}{if}\ (S-\/>ifftFlag\ ==\ 1U)}
+\DoxyCodeLine{00075\ \ \ \ \{}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \textcolor{comment}{/*\ Complex\ IFFT\ radix-\/2\ */}}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ arm\_radix2\_butterfly\_inverse\_f16(pSrc,\ S-\/>fftLen,\ S-\/>pTwiddle,}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ S-\/>twidCoefModifier,\ S-\/>onebyfftLen);}
+\DoxyCodeLine{00079\ \ \ \ \}}
+\DoxyCodeLine{00080\ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00081\ \ \ \ \{}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \textcolor{comment}{/*\ Complex\ FFT\ radix-\/2\ */}}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ arm\_radix2\_butterfly\_f16(pSrc,\ S-\/>fftLen,\ S-\/>pTwiddle,}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ S-\/>twidCoefModifier);}
+\DoxyCodeLine{00085\ \ \ \ \}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \textcolor{keywordflow}{if}\ (S-\/>bitReverseFlag\ ==\ 1U)}
+\DoxyCodeLine{00088\ \ \ \ \{}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \textcolor{comment}{/*\ Bit\ Reversal\ */}}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ arm\_bitreversal\_f16(pSrc,\ S-\/>fftLen,\ S-\/>bitRevFactor,\ S-\/>pBitRevTable);}
+\DoxyCodeLine{00091\ \ \ \ \}}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \}}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00102\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00103\ \textcolor{comment}{**\ Internal\ helper\ function\ used\ by\ the\ FFTs}}
+\DoxyCodeLine{00104\ \textcolor{comment}{**\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00107\ \textcolor{comment}{*\ @brief\ \ Core\ function\ for\ the\ floating-\/point\ CFFT\ butterfly\ process.}}
+\DoxyCodeLine{00108\ \textcolor{comment}{*\ @param[in,\ out]\ *pSrc\ \ \ \ \ \ \ \ \ \ \ \ points\ to\ the\ in-\/place\ buffer\ of\ floating-\/point\ data\ type.}}
+\DoxyCodeLine{00109\ \textcolor{comment}{*\ @param[in]\ \ \ \ \ \ fftLen\ \ \ \ \ \ \ \ \ \ \ length\ of\ the\ FFT.}}
+\DoxyCodeLine{00110\ \textcolor{comment}{*\ @param[in]\ \ \ \ \ \ *pCoef\ \ \ \ \ \ \ \ \ \ \ points\ to\ the\ twiddle\ coefficient\ buffer.}}
+\DoxyCodeLine{00111\ \textcolor{comment}{*\ @param[in]\ \ \ \ \ \ twidCoefModifier\ twiddle\ coefficient\ modifier\ that\ supports\ different\ size\ FFTs\ with\ the\ same\ twiddle\ factor\ table.}}
+\DoxyCodeLine{00112\ \textcolor{comment}{*\ @return\ none.}}
+\DoxyCodeLine{00113\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \textcolor{keywordtype}{void}\ arm\_radix2\_butterfly\_f16(}
+\DoxyCodeLine{00116\ float16\_t\ *\ pSrc,}
+\DoxyCodeLine{00117\ uint32\_t\ fftLen,}
+\DoxyCodeLine{00118\ \textcolor{keyword}{const}\ float16\_t\ *\ pCoef,}
+\DoxyCodeLine{00119\ uint16\_t\ twidCoefModifier)}
+\DoxyCodeLine{00120\ \{}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \ uint32\_t\ i,\ j,\ k,\ l;}
+\DoxyCodeLine{00123\ \ \ \ uint32\_t\ n1,\ n2,\ ia;}
+\DoxyCodeLine{00124\ \ \ \ float16\_t\ xt,\ yt,\ cosVal,\ sinVal;}
+\DoxyCodeLine{00125\ \ \ \ float16\_t\ p0,\ p1,\ p2,\ p3;}
+\DoxyCodeLine{00126\ \ \ \ float16\_t\ a0,\ a1;}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ \ \textcolor{comment}{/*\ \ Initializations\ for\ the\ first\ stage\ */}}
+\DoxyCodeLine{00131\ \ \ \ n2\ =\ fftLen\ >>\ 1;}
+\DoxyCodeLine{00132\ \ \ \ ia\ =\ 0;}
+\DoxyCodeLine{00133\ \ \ \ i\ =\ 0;}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \ \textcolor{comment}{//\ loop\ for\ groups}}
+\DoxyCodeLine{00136\ \ \ \ \textcolor{keywordflow}{for}\ (k\ =\ n2;\ k\ >\ 0;\ k-\/-\/)}
+\DoxyCodeLine{00137\ \ \ \ \{}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ cosVal\ =\ pCoef[ia\ *\ 2];}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ sinVal\ =\ pCoef[(ia\ *\ 2)\ +\ 1];}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ ia\ +=\ twidCoefModifier;}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ index\ calculation\ for\ the\ input\ as,\ */}}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ pSrc[i\ +\ 0],\ pSrc[i\ +\ fftLen/1]\ */}}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ l\ =\ i\ +\ n2;}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ implementation\ */}}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ a0\ =\ (\_Float16)pSrc[2\ *\ i]\ +\ (\_Float16)pSrc[2\ *\ l];}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ xt\ =\ (\_Float16)pSrc[2\ *\ i]\ -\/\ (\_Float16)pSrc[2\ *\ l];}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00152\ \ \ \ \ \ \ yt\ =\ (\_Float16)pSrc[2\ *\ i\ +\ 1]\ -\/\ (\_Float16)pSrc[2\ *\ l\ +\ 1];}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ a1\ =\ (\_Float16)pSrc[2\ *\ l\ +\ 1]\ +\ (\_Float16)pSrc[2\ *\ i\ +\ 1];}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \ \ \ \ \ \ p0\ =\ (\_Float16)xt\ *\ (\_Float16)cosVal;}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ p1\ =\ (\_Float16)yt\ *\ (\_Float16)sinVal;}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ p2\ =\ (\_Float16)yt\ *\ (\_Float16)cosVal;}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ p3\ =\ (\_Float16)xt\ *\ (\_Float16)sinVal;}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ \ \ \ \ \ \ pSrc[2\ *\ i]\ \ \ \ \ =\ a0;}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ pSrc[2\ *\ i\ +\ 1]\ =\ a1;}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \ \ \ \ \ \ pSrc[2\ *\ l]\ \ \ \ \ =\ (\_Float16)p0\ +\ (\_Float16)p1;}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ pSrc[2\ *\ l\ +\ 1]\ =\ (\_Float16)p2\ -\/\ (\_Float16)p3;}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ \ \ i++;}
+\DoxyCodeLine{00167\ \ \ \ \}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ groups\ loop\ end}}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \ \ \ twidCoefModifier\ <<=\ 1U;}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \ \ \ \textcolor{comment}{//\ loop\ for\ stage}}
+\DoxyCodeLine{00172\ \ \ \ \textcolor{keywordflow}{for}\ (k\ =\ n2;\ k\ >\ 2;\ k\ =\ k\ >>\ 1)}
+\DoxyCodeLine{00173\ \ \ \ \{}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ n1\ =\ n2;}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ n2\ =\ n2\ >>\ 1;}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ ia\ =\ 0;}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \textcolor{comment}{//\ loop\ for\ groups}}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ j\ =\ 0;}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ cosVal\ =\ pCoef[ia\ *\ 2];}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ sinVal\ =\ pCoef[(ia\ *\ 2)\ +\ 1];}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ ia\ +=\ twidCoefModifier;}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ loop\ for\ butterfly}}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ i\ =\ j;}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ l\ =\ i\ +\ n2;}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ a0\ =\ (\_Float16)pSrc[2\ *\ i]\ +\ (\_Float16)pSrc[2\ *\ l];}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ xt\ =\ (\_Float16)pSrc[2\ *\ i]\ -\/\ (\_Float16)pSrc[2\ *\ l];}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ \ yt\ =\ (\_Float16)pSrc[2\ *\ i\ +\ 1]\ -\/\ (\_Float16)pSrc[2\ *\ l\ +\ 1];}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \ a1\ =\ (\_Float16)pSrc[2\ *\ l\ +\ 1]\ +\ (\_Float16)pSrc[2\ *\ i\ +\ 1];}
+\DoxyCodeLine{00196\ }
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ p0\ =\ (\_Float16)xt\ *\ (\_Float16)cosVal;}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ p1\ =\ (\_Float16)yt\ *\ (\_Float16)sinVal;}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ p2\ =\ (\_Float16)yt\ *\ (\_Float16)cosVal;}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ \ p3\ =\ (\_Float16)xt\ *\ (\_Float16)sinVal;}
+\DoxyCodeLine{00201\ }
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i]\ =\ a0;}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i\ +\ 1]\ =\ a1;}
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ l]\ \ \ \ \ =\ (\_Float16)p0\ +\ (\_Float16)p1;}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ l\ +\ 1]\ =\ (\_Float16)p2\ -\/\ (\_Float16)p3;}
+\DoxyCodeLine{00207\ }
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ i\ +=\ n1;}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (\ i\ <\ fftLen\ );\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ butterfly\ loop\ end}}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ j++;}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (\ j\ <\ n2);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ groups\ loop\ end}}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ twidCoefModifier\ <<=\ 1U;}
+\DoxyCodeLine{00213\ \ \ \ \}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ stages\ loop\ end}}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \ \ \ \textcolor{comment}{//\ loop\ for\ butterfly}}
+\DoxyCodeLine{00216\ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ 0;\ i\ <\ fftLen;\ i\ +=\ 2)}
+\DoxyCodeLine{00217\ \ \ \ \{}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ a0\ =\ (\_Float16)pSrc[2\ *\ i]\ +\ (\_Float16)pSrc[2\ *\ i\ +\ 2];}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ xt\ =\ (\_Float16)pSrc[2\ *\ i]\ -\/\ (\_Float16)pSrc[2\ *\ i\ +\ 2];}
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00221\ \ \ \ \ \ \ yt\ =\ (\_Float16)pSrc[2\ *\ i\ +\ 1]\ -\/\ (\_Float16)pSrc[2\ *\ i\ +\ 3];}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ a1\ =\ (\_Float16)pSrc[2\ *\ i\ +\ 3]\ +\ (\_Float16)pSrc[2\ *\ i\ +\ 1];}
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00224\ \ \ \ \ \ \ pSrc[2\ *\ i]\ =\ a0;}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ pSrc[2\ *\ i\ +\ 1]\ =\ a1;}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ pSrc[2\ *\ i\ +\ 2]\ =\ xt;}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ pSrc[2\ *\ i\ +\ 3]\ =\ yt;}
+\DoxyCodeLine{00228\ \ \ \ \}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ groups\ loop\ end}}
+\DoxyCodeLine{00229\ }
+\DoxyCodeLine{00230\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00232\ \ \ \ n2\ =\ fftLen;}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ \ \ \ \textcolor{comment}{//\ loop\ for\ stage}}
+\DoxyCodeLine{00235\ \ \ \ \textcolor{keywordflow}{for}\ (k\ =\ fftLen;\ k\ >\ 1;\ k\ =\ k\ >>\ 1)}
+\DoxyCodeLine{00236\ \ \ \ \{}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ n1\ =\ n2;}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ n2\ =\ n2\ >>\ 1;}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ ia\ =\ 0;}
+\DoxyCodeLine{00240\ }
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \textcolor{comment}{//\ loop\ for\ groups}}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ j\ =\ 0;}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ cosVal\ =\ pCoef[ia\ *\ 2];}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ sinVal\ =\ pCoef[(ia\ *\ 2)\ +\ 1];}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ ia\ +=\ twidCoefModifier;}
+\DoxyCodeLine{00248\ }
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ loop\ for\ butterfly}}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \ i\ =\ j;}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ \ \ \ \ l\ =\ i\ +\ n2;}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ \ \ \ \ a0\ =\ (\_Float16)pSrc[2\ *\ i]\ +\ (\_Float16)pSrc[2\ *\ l];}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \ \ \ \ xt\ =\ (\_Float16)pSrc[2\ *\ i]\ -\/\ (\_Float16)pSrc[2\ *\ l];}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \ \ \ \ yt\ =\ (\_Float16)pSrc[2\ *\ i\ +\ 1]\ -\/\ (\_Float16)pSrc[2\ *\ l\ +\ 1];}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \ \ \ \ a1\ =\ (\_Float16)pSrc[2\ *\ l\ +\ 1]\ +\ (\_Float16)pSrc[2\ *\ i\ +\ 1];}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \ \ \ \ p0\ =\ (\_Float16)xt\ *\ (\_Float16)cosVal;}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \ \ \ \ p1\ =\ (\_Float16)yt\ *\ (\_Float16)sinVal;}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \ \ \ \ p2\ =\ (\_Float16)yt\ *\ (\_Float16)cosVal;}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \ \ \ \ p3\ =\ (\_Float16)xt\ *\ (\_Float16)sinVal;}
+\DoxyCodeLine{00264\ }
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i]\ =\ a0;}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i\ +\ 1]\ =\ a1;}
+\DoxyCodeLine{00267\ }
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ l]\ \ \ \ \ =\ (\_Float16)p0\ +\ (\_Float16)p1;}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ l\ +\ 1]\ =\ (\_Float16)p2\ -\/\ (\_Float16)p3;}
+\DoxyCodeLine{00270\ }
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \ \ i\ +=\ n1;}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (i\ <\ fftLen);}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \ j++;}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (j\ <\ n2);}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ twidCoefModifier\ <<=\ 1U;}
+\DoxyCodeLine{00276\ \ \ \ \}}
+\DoxyCodeLine{00277\ }
+\DoxyCodeLine{00278\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \ \ \ \#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00279\ }
+\DoxyCodeLine{00280\ \}}
+\DoxyCodeLine{00281\ }
+\DoxyCodeLine{00282\ }
+\DoxyCodeLine{00283\ \textcolor{keywordtype}{void}\ arm\_radix2\_butterfly\_inverse\_f16(}
+\DoxyCodeLine{00284\ float16\_t\ *\ pSrc,}
+\DoxyCodeLine{00285\ uint32\_t\ fftLen,}
+\DoxyCodeLine{00286\ \textcolor{keyword}{const}\ float16\_t\ *\ pCoef,}
+\DoxyCodeLine{00287\ uint16\_t\ twidCoefModifier,}
+\DoxyCodeLine{00288\ float16\_t\ onebyfftLen)}
+\DoxyCodeLine{00289\ \{}
+\DoxyCodeLine{00290\ }
+\DoxyCodeLine{00291\ \ \ \ uint32\_t\ i,\ j,\ k,\ l;}
+\DoxyCodeLine{00292\ \ \ \ uint32\_t\ n1,\ n2,\ ia;}
+\DoxyCodeLine{00293\ \ \ \ float16\_t\ xt,\ yt,\ cosVal,\ sinVal;}
+\DoxyCodeLine{00294\ \ \ \ float16\_t\ p0,\ p1,\ p2,\ p3;}
+\DoxyCodeLine{00295\ \ \ \ float16\_t\ a0,\ a1;}
+\DoxyCodeLine{00296\ }
+\DoxyCodeLine{00297\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00298\ }
+\DoxyCodeLine{00299\ \ \ \ n2\ =\ fftLen\ >>\ 1;}
+\DoxyCodeLine{00300\ \ \ \ ia\ =\ 0;}
+\DoxyCodeLine{00301\ }
+\DoxyCodeLine{00302\ \ \ \ \textcolor{comment}{//\ loop\ for\ groups}}
+\DoxyCodeLine{00303\ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ 0;\ i\ <\ n2;\ i++)}
+\DoxyCodeLine{00304\ \ \ \ \{}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ cosVal\ =\ pCoef[ia\ *\ 2];}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ sinVal\ =\ pCoef[(ia\ *\ 2)\ +\ 1];}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ ia\ +=\ twidCoefModifier;}
+\DoxyCodeLine{00308\ }
+\DoxyCodeLine{00309\ \ \ \ \ \ \ l\ =\ i\ +\ n2;}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ a0\ =\ (\_Float16)pSrc[2\ *\ i]\ +\ (\_Float16)pSrc[2\ *\ l];}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ xt\ =\ (\_Float16)pSrc[2\ *\ i]\ -\/\ (\_Float16)pSrc[2\ *\ l];}
+\DoxyCodeLine{00312\ }
+\DoxyCodeLine{00313\ \ \ \ \ \ \ yt\ =\ (\_Float16)pSrc[2\ *\ i\ +\ 1]\ -\/\ (\_Float16)pSrc[2\ *\ l\ +\ 1];}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ a1\ =\ (\_Float16)pSrc[2\ *\ l\ +\ 1]\ +\ (\_Float16)pSrc[2\ *\ i\ +\ 1];}
+\DoxyCodeLine{00315\ }
+\DoxyCodeLine{00316\ \ \ \ \ \ \ p0\ =\ (\_Float16)xt\ *\ (\_Float16)cosVal;}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ p1\ =\ (\_Float16)yt\ *\ (\_Float16)sinVal;}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ p2\ =\ (\_Float16)yt\ *\ (\_Float16)cosVal;}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ p3\ =\ (\_Float16)xt\ *\ (\_Float16)sinVal;}
+\DoxyCodeLine{00320\ }
+\DoxyCodeLine{00321\ \ \ \ \ \ \ pSrc[2\ *\ i]\ =\ a0;}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ pSrc[2\ *\ i\ +\ 1]\ =\ a1;}
+\DoxyCodeLine{00323\ }
+\DoxyCodeLine{00324\ \ \ \ \ \ \ pSrc[2\ *\ l]\ \ \ \ \ =\ (\_Float16)p0\ -\/\ (\_Float16)p1;}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ pSrc[2\ *\ l\ +\ 1]\ =\ (\_Float16)p2\ +\ (\_Float16)p3;}
+\DoxyCodeLine{00326\ \ \ \ \}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ groups\ loop\ end}}
+\DoxyCodeLine{00327\ }
+\DoxyCodeLine{00328\ \ \ \ twidCoefModifier\ <<=\ 1U;}
+\DoxyCodeLine{00329\ }
+\DoxyCodeLine{00330\ \ \ \ \textcolor{comment}{//\ loop\ for\ stage}}
+\DoxyCodeLine{00331\ \ \ \ \textcolor{keywordflow}{for}\ (k\ =\ fftLen\ /\ 2;\ k\ >\ 2;\ k\ =\ k\ >>\ 1)}
+\DoxyCodeLine{00332\ \ \ \ \{}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ n1\ =\ n2;}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ n2\ =\ n2\ >>\ 1;}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ ia\ =\ 0;}
+\DoxyCodeLine{00336\ }
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \textcolor{comment}{//\ loop\ for\ groups}}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ j\ =\ 0;}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \ cosVal\ =\ pCoef[ia\ *\ 2];}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ \ sinVal\ =\ pCoef[(ia\ *\ 2)\ +\ 1];}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \ \ \ ia\ +=\ twidCoefModifier;}
+\DoxyCodeLine{00344\ }
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ loop\ for\ butterfly}}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \ i\ =\ j;}
+\DoxyCodeLine{00347\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ \ \ \ \ l\ =\ i\ +\ n2;}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \ \ \ \ a0\ =\ (\_Float16)pSrc[2\ *\ i]\ +\ (\_Float16)pSrc[2\ *\ l];}
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \ \ \ \ \ \ xt\ =\ (\_Float16)pSrc[2\ *\ i]\ -\/\ (\_Float16)pSrc[2\ *\ l];}
+\DoxyCodeLine{00352\ }
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \ \ \ \ yt\ =\ (\_Float16)pSrc[2\ *\ i\ +\ 1]\ -\/\ (\_Float16)pSrc[2\ *\ l\ +\ 1];}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ \ \ \ \ a1\ =\ (\_Float16)pSrc[2\ *\ l\ +\ 1]\ +\ (\_Float16)pSrc[2\ *\ i\ +\ 1];}
+\DoxyCodeLine{00355\ }
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \ \ \ \ \ \ p0\ =\ (\_Float16)xt\ *\ (\_Float16)cosVal;}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ \ \ \ \ p1\ =\ (\_Float16)yt\ *\ (\_Float16)sinVal;}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ \ \ \ \ p2\ =\ (\_Float16)yt\ *\ (\_Float16)cosVal;}
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \ \ \ \ \ \ p3\ =\ (\_Float16)xt\ *\ (\_Float16)sinVal;}
+\DoxyCodeLine{00360\ }
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i]\ =\ a0;}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i\ +\ 1]\ =\ a1;}
+\DoxyCodeLine{00363\ }
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ l]\ \ \ \ \ =\ (\_Float16)p0\ -\/\ (\_Float16)p1;}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ l\ +\ 1]\ =\ (\_Float16)p2\ +\ (\_Float16)p3;}
+\DoxyCodeLine{00366\ }
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ \ \ \ \ i\ +=\ n1;}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (\ i\ <\ fftLen\ );\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ butterfly\ loop\ end}}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \ j++;}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (j\ <\ n2);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ groups\ loop\ end}}
+\DoxyCodeLine{00371\ }
+\DoxyCodeLine{00372\ \ \ \ \ \ \ twidCoefModifier\ <<=\ 1U;}
+\DoxyCodeLine{00373\ \ \ \ \}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ stages\ loop\ end}}
+\DoxyCodeLine{00374\ }
+\DoxyCodeLine{00375\ \ \ \ \textcolor{comment}{//\ loop\ for\ butterfly}}
+\DoxyCodeLine{00376\ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ 0;\ i\ <\ fftLen;\ i\ +=\ 2)}
+\DoxyCodeLine{00377\ \ \ \ \{}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ a0\ =\ (\_Float16)pSrc[2\ *\ i]\ +\ (\_Float16)pSrc[2\ *\ i\ +\ 2];}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ xt\ =\ (\_Float16)pSrc[2\ *\ i]\ -\/\ (\_Float16)pSrc[2\ *\ i\ +\ 2];}
+\DoxyCodeLine{00380\ }
+\DoxyCodeLine{00381\ \ \ \ \ \ \ a1\ =\ (\_Float16)pSrc[2\ *\ i\ +\ 3]\ +\ (\_Float16)pSrc[2\ *\ i\ +\ 1];}
+\DoxyCodeLine{00382\ \ \ \ \ \ \ yt\ =\ (\_Float16)pSrc[2\ *\ i\ +\ 1]\ -\/\ (\_Float16)pSrc[2\ *\ i\ +\ 3];}
+\DoxyCodeLine{00383\ }
+\DoxyCodeLine{00384\ \ \ \ \ \ \ p0\ =\ (\_Float16)a0\ *\ (\_Float16)onebyfftLen;}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ p2\ =\ (\_Float16)xt\ *\ (\_Float16)onebyfftLen;}
+\DoxyCodeLine{00386\ \ \ \ \ \ \ p1\ =\ (\_Float16)a1\ *\ (\_Float16)onebyfftLen;}
+\DoxyCodeLine{00387\ \ \ \ \ \ \ p3\ =\ (\_Float16)yt\ *\ (\_Float16)onebyfftLen;}
+\DoxyCodeLine{00388\ }
+\DoxyCodeLine{00389\ \ \ \ \ \ \ pSrc[2\ *\ i]\ =\ p0;}
+\DoxyCodeLine{00390\ \ \ \ \ \ \ pSrc[2\ *\ i\ +\ 1]\ =\ p1;}
+\DoxyCodeLine{00391\ \ \ \ \ \ \ pSrc[2\ *\ i\ +\ 2]\ =\ p2;}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ pSrc[2\ *\ i\ +\ 3]\ =\ p3;}
+\DoxyCodeLine{00393\ \ \ \ \}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ butterfly\ loop\ end}}
+\DoxyCodeLine{00394\ }
+\DoxyCodeLine{00395\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00396\ }
+\DoxyCodeLine{00397\ \ \ \ n2\ =\ fftLen;}
+\DoxyCodeLine{00398\ }
+\DoxyCodeLine{00399\ \ \ \ \textcolor{comment}{//\ loop\ for\ stage}}
+\DoxyCodeLine{00400\ \ \ \ \textcolor{keywordflow}{for}\ (k\ =\ fftLen;\ k\ >\ 2;\ k\ =\ k\ >>\ 1)}
+\DoxyCodeLine{00401\ \ \ \ \{}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ n1\ =\ n2;}
+\DoxyCodeLine{00403\ \ \ \ \ \ \ n2\ =\ n2\ >>\ 1;}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ ia\ =\ 0;}
+\DoxyCodeLine{00405\ }
+\DoxyCodeLine{00406\ \ \ \ \ \ \ \textcolor{comment}{//\ loop\ for\ groups}}
+\DoxyCodeLine{00407\ \ \ \ \ \ \ j\ =\ 0;}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ \ cosVal\ =\ pCoef[ia\ *\ 2];}
+\DoxyCodeLine{00411\ \ \ \ \ \ \ \ \ \ sinVal\ =\ pCoef[(ia\ *\ 2)\ +\ 1];}
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \ \ ia\ =\ ia\ +\ twidCoefModifier;}
+\DoxyCodeLine{00413\ }
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ loop\ for\ butterfly}}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \ \ \ i\ =\ j;}
+\DoxyCodeLine{00416\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00417\ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00418\ \ \ \ \ \ \ \ \ \ \ \ \ l\ =\ i\ +\ n2;}
+\DoxyCodeLine{00419\ \ \ \ \ \ \ \ \ \ \ \ \ a0\ =\ (\_Float16)pSrc[2\ *\ i]\ +\ (\_Float16)pSrc[2\ *\ l];}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \ \ \ \ \ \ xt\ =\ (\_Float16)pSrc[2\ *\ i]\ -\/\ (\_Float16)pSrc[2\ *\ l];}
+\DoxyCodeLine{00421\ }
+\DoxyCodeLine{00422\ \ \ \ \ \ \ \ \ \ \ \ \ yt\ =\ (\_Float16)pSrc[2\ *\ i\ +\ 1]\ -\/\ (\_Float16)pSrc[2\ *\ l\ +\ 1];}
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ \ \ \ \ a1\ =\ (\_Float16)pSrc[2\ *\ l\ +\ 1]\ +\ (\_Float16)pSrc[2\ *\ i\ +\ 1];}
+\DoxyCodeLine{00424\ }
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ \ \ \ \ p0\ =\ (\_Float16)xt\ *\ (\_Float16)cosVal;}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ \ \ \ \ p1\ =\ (\_Float16)yt\ *\ (\_Float16)sinVal;}
+\DoxyCodeLine{00427\ \ \ \ \ \ \ \ \ \ \ \ \ p2\ =\ (\_Float16)yt\ *\ (\_Float16)cosVal;}
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \ \ \ \ \ \ p3\ =\ (\_Float16)xt\ *\ (\_Float16)sinVal;}
+\DoxyCodeLine{00429\ }
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i]\ =\ a0;}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i\ +\ 1]\ =\ a1;}
+\DoxyCodeLine{00432\ }
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ l]\ \ \ \ \ =\ (\_Float16)p0\ -\/\ (\_Float16)p1;}
+\DoxyCodeLine{00434\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ l\ +\ 1]\ =\ (\_Float16)p2\ +\ (\_Float16)p3;}
+\DoxyCodeLine{00435\ }
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \ \ \ \ \ \ i\ +=\ n1;}
+\DoxyCodeLine{00437\ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (\ i\ <\ fftLen\ );\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ butterfly\ loop\ end}}
+\DoxyCodeLine{00438\ \ \ \ \ \ \ \ \ \ j++;}
+\DoxyCodeLine{00439\ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (\ j\ <\ n2\ );\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ groups\ loop\ end}}
+\DoxyCodeLine{00440\ }
+\DoxyCodeLine{00441\ \ \ \ \ \ \ twidCoefModifier\ =\ twidCoefModifier\ <<\ 1U;}
+\DoxyCodeLine{00442\ \ \ \ \}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ stages\ loop\ end}}
+\DoxyCodeLine{00443\ }
+\DoxyCodeLine{00444\ \ \ \ n1\ =\ n2;}
+\DoxyCodeLine{00445\ \ \ \ n2\ =\ n2\ >>\ 1;}
+\DoxyCodeLine{00446\ }
+\DoxyCodeLine{00447\ \ \ \ \textcolor{comment}{//\ loop\ for\ butterfly}}
+\DoxyCodeLine{00448\ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ 0;\ i\ <\ fftLen;\ i\ +=\ n1)}
+\DoxyCodeLine{00449\ \ \ \ \{}
+\DoxyCodeLine{00450\ \ \ \ \ \ \ l\ =\ i\ +\ n2;}
+\DoxyCodeLine{00451\ }
+\DoxyCodeLine{00452\ \ \ \ \ \ \ a0\ =\ (\_Float16)pSrc[2\ *\ i]\ +\ (\_Float16)pSrc[2\ *\ l];}
+\DoxyCodeLine{00453\ \ \ \ \ \ \ xt\ =\ (\_Float16)pSrc[2\ *\ i]\ -\/\ (\_Float16)pSrc[2\ *\ l];}
+\DoxyCodeLine{00454\ }
+\DoxyCodeLine{00455\ \ \ \ \ \ \ a1\ =\ (\_Float16)pSrc[2\ *\ l\ +\ 1]\ +\ (\_Float16)pSrc[2\ *\ i\ +\ 1];}
+\DoxyCodeLine{00456\ \ \ \ \ \ \ yt\ =\ (\_Float16)pSrc[2\ *\ i\ +\ 1]\ -\/\ (\_Float16)pSrc[2\ *\ l\ +\ 1];}
+\DoxyCodeLine{00457\ }
+\DoxyCodeLine{00458\ \ \ \ \ \ \ p0\ =\ (\_Float16)a0\ *\ (\_Float16)onebyfftLen;}
+\DoxyCodeLine{00459\ \ \ \ \ \ \ p2\ =\ (\_Float16)xt\ *\ (\_Float16)onebyfftLen;}
+\DoxyCodeLine{00460\ \ \ \ \ \ \ p1\ =\ (\_Float16)a1\ *\ (\_Float16)onebyfftLen;}
+\DoxyCodeLine{00461\ \ \ \ \ \ \ p3\ =\ (\_Float16)yt\ *\ (\_Float16)onebyfftLen;}
+\DoxyCodeLine{00462\ }
+\DoxyCodeLine{00463\ \ \ \ \ \ \ pSrc[2\ *\ i]\ =\ p0;}
+\DoxyCodeLine{00464\ \ \ \ \ \ \ pSrc[2U\ *\ l]\ =\ p2;}
+\DoxyCodeLine{00465\ }
+\DoxyCodeLine{00466\ \ \ \ \ \ \ pSrc[2\ *\ i\ +\ 1]\ =\ p1;}
+\DoxyCodeLine{00467\ \ \ \ \ \ \ pSrc[2U\ *\ l\ +\ 1U]\ =\ p3;}
+\DoxyCodeLine{00468\ \ \ \ \}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ butterfly\ loop\ end}}
+\DoxyCodeLine{00469\ }
+\DoxyCodeLine{00470\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ \ \ \ \ \ \#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00471\ }
+\DoxyCodeLine{00472\ \}}
+\DoxyCodeLine{00473\ }
+\DoxyCodeLine{00474\ }
+\DoxyCodeLine{00475\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined(ARM\_FLOAT16\_SUPPORTED)\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

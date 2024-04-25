@@ -1,0 +1,491 @@
+\doxysection{arm\+\_\+fir\+\_\+lattice\+\_\+q15.\+c}
+\hypertarget{arm__fir__lattice__q15_8c_source}{}\label{arm__fir__lattice__q15_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/FilteringFunctions/arm\_fir\_lattice\_q15.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/FilteringFunctions/arm\_fir\_lattice\_q15.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_fir\_lattice\_q15.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Q15\ FIR\ lattice\ filter\ processing\ function}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/filtering\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00049\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___f_i_r___lattice_gafddb7fd49cb0e8a4b6d9546b58bf60fb}{arm\_fir\_lattice\_q15}}(}
+\DoxyCodeLine{00050\ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__fir__lattice__instance__q15}{arm\_fir\_lattice\_instance\_q15}}\ *\ S,}
+\DoxyCodeLine{00051\ \ \ \textcolor{keyword}{const}\ q15\_t\ *\ pSrc,}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ q15\_t\ *\ pDst,}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ uint32\_t\ blockSize)}
+\DoxyCodeLine{00054\ \{}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ q15\_t\ *pState\ =\ S-\/>pState;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ State\ pointer\ */}}
+\DoxyCodeLine{00056\ \ \ \textcolor{keyword}{const}\ q15\_t\ *pCoeffs\ =\ S-\/>pCoeffs;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ q15\_t\ *px;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ state\ pointer\ */}}
+\DoxyCodeLine{00058\ \ \ \textcolor{keyword}{const}\ q15\_t\ *pk;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ coefficient\ pointer\ */}}
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ uint32\_t\ numStages\ =\ S-\/>numStages;\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Number\ of\ stages\ in\ the\ filter\ */}}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ uint32\_t\ blkCnt,\ stageCnt;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ counters\ */}}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ q31\_t\ fcurr0,\ fnext0,\ gnext0,\ gcurr0;\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ variables\ */}}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \textcolor{preprocessor}{\#if\ (1)}}
+\DoxyCodeLine{00064\ \textcolor{comment}{//\#if\ !defined(ARM\_MATH\_CM0\_FAMILY)}}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)}}
+\DoxyCodeLine{00067\ \ \ q31\_t\ fcurr1,\ fnext1,\ gnext1;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ variables\ for\ second\ sample\ in\ loop\ unrolling\ */}}
+\DoxyCodeLine{00068\ \ \ q31\_t\ fcurr2,\ fnext2,\ gnext2;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ variables\ for\ third\ sample\ in\ loop\ unrolling\ */}}
+\DoxyCodeLine{00069\ \ \ q31\_t\ fcurr3,\ fnext3,\ gnext3;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ variables\ for\ fourth\ sample\ in\ loop\ unrolling\ */}}
+\DoxyCodeLine{00070\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ gcurr0\ =\ 0;}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)}}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ 4\ outputs\ at\ a\ time\ */}}
+\DoxyCodeLine{00077\ \ \ blkCnt\ =\ blockSize\ >>\ 2U;}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00080\ \ \ \{}
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{comment}{/*\ Read\ two\ samples\ from\ input\ buffer\ */}}
+\DoxyCodeLine{00082\ \ \ \ \ \textcolor{comment}{/*\ f0(n)\ =\ x(n)\ */}}
+\DoxyCodeLine{00083\ \ \ \ \ fcurr0\ =\ *pSrc++;}
+\DoxyCodeLine{00084\ \ \ \ \ fcurr1\ =\ *pSrc++;}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \ \ \ \ \textcolor{comment}{/*\ Initialize\ state\ pointer\ */}}
+\DoxyCodeLine{00087\ \ \ \ \ px\ =\ pState;}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{comment}{/*\ Initialize\ coeff\ pointer\ */}}
+\DoxyCodeLine{00090\ \ \ \ \ pk\ =\ pCoeffs;}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{comment}{/*\ Read\ g0(n-\/1)\ from\ state\ buffer\ */}}
+\DoxyCodeLine{00093\ \ \ \ \ gcurr0\ =\ *px;}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \ \ \textcolor{comment}{/*\ Process\ first\ sample\ for\ first\ tap\ */}}
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{comment}{/*\ f1(n)\ =\ f0(n)\ +\ \ K1\ *\ g0(n-\/1)\ */}}
+\DoxyCodeLine{00097\ \ \ \ \ fnext0\ =\ (q31\_t)\ ((gcurr0\ *\ (*pk))\ >>\ 15U)\ +\ fcurr0;}
+\DoxyCodeLine{00098\ \ \ \ \ fnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext0,\ 16);}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ \textcolor{comment}{/*\ g1(n)\ =\ f0(n)\ *\ K1\ \ +\ \ g0(n-\/1)\ */}}
+\DoxyCodeLine{00101\ \ \ \ \ gnext0\ =\ (q31\_t)\ ((fcurr0\ *\ (*pk))\ >>\ 15U)\ +\ gcurr0;}
+\DoxyCodeLine{00102\ \ \ \ \ gnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext0,\ 16);}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{comment}{/*\ Process\ second\ sample\ for\ first\ tap\ */}}
+\DoxyCodeLine{00105\ \ \ \ \ fnext1\ =\ (q31\_t)\ ((fcurr0\ *\ (*pk))\ >>\ 15U)\ +\ fcurr1;}
+\DoxyCodeLine{00106\ \ \ \ \ fnext1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext1,\ 16);}
+\DoxyCodeLine{00107\ \ \ \ \ gnext1\ =\ (q31\_t)\ ((fcurr1\ *\ (*pk))\ >>\ 15U)\ +\ fcurr0;}
+\DoxyCodeLine{00108\ \ \ \ \ gnext1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext1,\ 16);}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \ \textcolor{comment}{/*\ Read\ next\ two\ samples\ from\ input\ buffer\ */}}
+\DoxyCodeLine{00111\ \ \ \ \ \textcolor{comment}{/*\ f0(n+2)\ =\ x(n+2)\ */}}
+\DoxyCodeLine{00112\ \ \ \ \ fcurr2\ =\ *pSrc++;}
+\DoxyCodeLine{00113\ \ \ \ \ fcurr3\ =\ *pSrc++;}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \ \ \textcolor{comment}{/*\ Process\ third\ sample\ for\ first\ tap\ */}}
+\DoxyCodeLine{00116\ \ \ \ \ fnext2\ =\ (q31\_t)\ ((fcurr1\ *\ (*pk))\ >>\ 15U)\ +\ fcurr2;}
+\DoxyCodeLine{00117\ \ \ \ \ fnext2\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext2,\ 16);}
+\DoxyCodeLine{00118\ \ \ \ \ gnext2\ =\ (q31\_t)\ ((fcurr2\ *\ (*pk))\ >>\ 15U)\ +\ fcurr1;}
+\DoxyCodeLine{00119\ \ \ \ \ gnext2\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext2,\ 16);}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \ \ \ \ \textcolor{comment}{/*\ Process\ fourth\ sample\ for\ first\ tap\ */}}
+\DoxyCodeLine{00122\ \ \ \ \ fnext3\ =\ (q31\_t)\ ((fcurr2\ *\ (*pk\ \ ))\ >>\ 15U)\ +\ fcurr3;}
+\DoxyCodeLine{00123\ \ \ \ \ fnext3\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext3,\ 16);}
+\DoxyCodeLine{00124\ \ \ \ \ gnext3\ =\ (q31\_t)\ ((fcurr3\ *\ (*pk++))\ >>\ 15U)\ +\ fcurr2;}
+\DoxyCodeLine{00125\ \ \ \ \ gnext3\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext3,\ 16);}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{comment}{/*\ Copy\ only\ last\ input\ sample\ into\ the\ state\ buffer}}
+\DoxyCodeLine{00128\ \textcolor{comment}{\ \ \ \ \ \ \ which\ will\ be\ used\ for\ next\ samples\ processing\ */}}
+\DoxyCodeLine{00129\ \ \ \ \ *px++\ =\ (q15\_t)\ fcurr3;}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{comment}{/*\ Update\ of\ f\ values\ for\ next\ coefficient\ set\ processing\ */}}
+\DoxyCodeLine{00132\ \ \ \ \ fcurr0\ =\ fnext0;}
+\DoxyCodeLine{00133\ \ \ \ \ fcurr1\ =\ fnext1;}
+\DoxyCodeLine{00134\ \ \ \ \ fcurr2\ =\ fnext2;}
+\DoxyCodeLine{00135\ \ \ \ \ fcurr3\ =\ fnext3;}
+\DoxyCodeLine{00136\ }
+\DoxyCodeLine{00137\ \ \ \ \ \textcolor{comment}{/*\ Loop\ unrolling.\ \ Process\ 4\ taps\ at\ a\ time\ .\ */}}
+\DoxyCodeLine{00138\ \ \ \ \ stageCnt\ =\ (numStages\ -\/\ 1U)\ >>\ 2U;}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \ \ \textcolor{comment}{/*\ Loop\ over\ the\ number\ of\ taps.\ \ Unroll\ by\ a\ factor\ of\ 4.}}
+\DoxyCodeLine{00141\ \textcolor{comment}{\ \ \ \ \ \ \ Repeat\ until\ we've\ computed\ numStages-\/3\ coefficients.\ */}}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \ \ \textcolor{comment}{/*\ Process\ 2nd,\ 3rd,\ 4th\ and\ 5th\ taps\ ...\ here\ */}}
+\DoxyCodeLine{00144\ \ \ \ \ \textcolor{keywordflow}{while}\ (stageCnt\ >\ 0U)}
+\DoxyCodeLine{00145\ \ \ \ \ \{}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ g1(n-\/1),\ g3(n-\/1)\ ....\ from\ state\ */}}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ gcurr0\ =\ *px;}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \textcolor{comment}{/*\ save\ g1(n)\ in\ state\ buffer\ */}}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ *px++\ =\ (q15\_t)\ gnext3;}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ first\ sample\ for\ 2nd,\ 6th\ ..\ tap\ */}}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \textcolor{comment}{/*\ Sample\ processing\ for\ K2,\ K6....\ */}}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \textcolor{comment}{/*\ f1(n)\ =\ f0(n)\ +\ \ K1\ *\ g0(n-\/1)\ */}}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ fnext0\ =\ (q31\_t)\ ((gcurr0\ *\ (*pk))\ >>\ 15U)\ +\ fcurr0;}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ fnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext0,\ 16);}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ second\ sample\ for\ 2nd,\ 6th\ ..\ tap\ */}}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \textcolor{comment}{/*\ for\ sample\ 2\ processing\ */}}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ fnext1\ =\ (q31\_t)\ ((gnext0\ *\ (*pk))\ >>\ 15U)\ +\ fcurr1;}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ fnext1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext1,\ 16);}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ third\ sample\ for\ 2nd,\ 6th\ ..\ tap\ */}}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ fnext2\ =\ (q31\_t)\ ((gnext1\ *\ (*pk))\ >>\ 15U)\ +\ fcurr2;}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ fnext2\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext2,\ 16);}
+\DoxyCodeLine{00166\ }
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ fourth\ sample\ for\ 2nd,\ 6th\ ..\ tap\ */}}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ fnext3\ =\ (q31\_t)\ ((gnext2\ *\ (*pk))\ >>\ 15U)\ +\ fcurr3;}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ fnext3\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext3,\ 16);}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \textcolor{comment}{/*\ g1(n)\ =\ f0(n)\ *\ K1\ \ +\ \ g0(n-\/1)\ */}}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ state\ values\ for\ next\ stage\ */}}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ gnext3\ =\ (q31\_t)\ ((fcurr3\ *\ (*pk))\ >>\ 15U)\ +\ gnext2;}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ gnext3\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext3,\ 16);}
+\DoxyCodeLine{00175\ }
+\DoxyCodeLine{00176\ \ \ \ \ \ \ gnext2\ =\ (q31\_t)\ ((fcurr2\ *\ (*pk))\ >>\ 15U)\ +\ gnext1;}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ gnext2\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext2,\ 16);}
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00179\ \ \ \ \ \ \ gnext1\ =\ (q31\_t)\ ((fcurr1\ *\ (*pk))\ >>\ 15U)\ +\ gnext0;}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ gnext1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext1,\ 16);}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00182\ \ \ \ \ \ \ gnext0\ =\ (q31\_t)\ ((fcurr0\ *\ (*pk++))\ >>\ 15U)\ +\ gcurr0;}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ gnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext0,\ 16);}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ g2(n-\/1),\ g4(n-\/1)\ ....\ from\ state\ */}}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ gcurr0\ =\ *px;}
+\DoxyCodeLine{00188\ }
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \textcolor{comment}{/*\ save\ g1(n)\ in\ state\ buffer\ */}}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ *px++\ =\ (q15\_t)\ gnext3;}
+\DoxyCodeLine{00191\ }
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \textcolor{comment}{/*\ Sample\ processing\ for\ K3,\ K7....\ */}}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ first\ sample\ for\ 3rd,\ 7th\ ..\ tap\ */}}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \textcolor{comment}{/*\ f3(n)\ =\ f2(n)\ +\ \ K3\ *\ g2(n-\/1)\ */}}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ fcurr0\ =\ (q31\_t)\ ((gcurr0\ *\ (*pk))\ >>\ 15U)\ +\ fnext0;}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ fcurr0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fcurr0,\ 16);}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ second\ sample\ for\ 3rd,\ 7th\ ..\ tap\ */}}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ fcurr1\ =\ (q31\_t)\ ((gnext0\ *\ (*pk))\ >>\ 15U)\ +\ fnext1;}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ fcurr1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fcurr1,\ 16);}
+\DoxyCodeLine{00201\ }
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ third\ sample\ for\ 3rd,\ 7th\ ..\ tap\ */}}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ fcurr2\ =\ (q31\_t)\ ((gnext1\ *\ (*pk))\ >>\ 15U)\ +\ fnext2;}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ fcurr2\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fcurr2,\ 16);}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ fourth\ sample\ for\ 3rd,\ 7th\ ..\ tap\ */}}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ fcurr3\ =\ (q31\_t)\ ((gnext2\ *\ (*pk))\ >>\ 15U)\ +\ fnext3;}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ fcurr3\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fcurr3,\ 16);}
+\DoxyCodeLine{00209\ }
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ state\ values\ for\ next\ stage\ */}}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \textcolor{comment}{/*\ g3(n)\ =\ f2(n)\ *\ K3\ \ +\ \ g2(n-\/1)\ */}}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ gnext3\ =\ (q31\_t)\ ((fnext3\ *\ (*pk))\ >>\ 15U)\ +\ gnext2;}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ gnext3\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext3,\ 16);}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \ \ \ \ \ \ gnext2\ =\ (q31\_t)\ ((fnext2\ *\ (*pk))\ >>\ 15U)\ +\ gnext1;}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ gnext2\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext2,\ 16);}
+\DoxyCodeLine{00217\ }
+\DoxyCodeLine{00218\ \ \ \ \ \ \ gnext1\ =\ (q31\_t)\ ((fnext1\ *\ (*pk))\ >>\ 15U)\ +\ gnext0;}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ gnext1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext1,\ 16);}
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00221\ \ \ \ \ \ \ gnext0\ =\ (q31\_t)\ ((fnext0\ *\ (*pk++))\ >>\ 15U)\ +\ gcurr0;}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ gnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext0,\ 16);}
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ g1(n-\/1),\ g3(n-\/1)\ ....\ from\ state\ */}}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ gcurr0\ =\ *px;}
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \textcolor{comment}{/*\ save\ g1(n)\ in\ state\ buffer\ */}}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ *px++\ =\ (q15\_t)\ gnext3;}
+\DoxyCodeLine{00229\ }
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \textcolor{comment}{/*\ Sample\ processing\ for\ K4,\ K8....\ */}}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ first\ sample\ for\ 4th,\ 8th\ ..\ tap\ */}}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \textcolor{comment}{/*\ f4(n)\ =\ f3(n)\ +\ \ K4\ *\ g3(n-\/1)\ */}}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ fnext0\ =\ (q31\_t)\ ((gcurr0\ *\ (*pk))\ >>\ 15U)\ +\ fcurr0;}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ fnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext0,\ 16);}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ second\ sample\ for\ 4th,\ 8th\ ..\ tap\ */}}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \textcolor{comment}{/*\ for\ sample\ 2\ processing\ */}}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ fnext1\ =\ (q31\_t)\ ((gnext0\ *\ (*pk))\ >>\ 15U)\ +\ fcurr1;}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ fnext1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext1,\ 16);}
+\DoxyCodeLine{00240\ }
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ third\ sample\ for\ 4th,\ 8th\ ..\ tap\ */}}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ fnext2\ =\ (q31\_t)\ ((gnext1\ *\ (*pk))\ >>\ 15U)\ +\ fcurr2;}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ fnext2\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext2,\ 16);}
+\DoxyCodeLine{00244\ }
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ fourth\ sample\ for\ 4th,\ 8th\ ..\ tap\ */}}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ fnext3\ =\ (q31\_t)\ ((gnext2\ *\ (*pk))\ >>\ 15U)\ +\ fcurr3;}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ fnext3\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext3,\ 16);}
+\DoxyCodeLine{00248\ }
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \textcolor{comment}{/*\ g4(n)\ =\ f3(n)\ *\ K4\ \ +\ \ g3(n-\/1)\ */}}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ state\ values\ for\ next\ stage\ */}}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ gnext3\ =\ (q31\_t)\ ((fcurr3\ *\ (*pk))\ >>\ 15U)\ +\ gnext2;}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ gnext3\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext3,\ 16);}
+\DoxyCodeLine{00253\ }
+\DoxyCodeLine{00254\ \ \ \ \ \ \ gnext2\ =\ (q31\_t)\ ((fcurr2\ *\ (*pk))\ >>\ 15U)\ +\ gnext1;}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ gnext2\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext2,\ 16);}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ \ \ \ \ \ \ gnext1\ =\ (q31\_t)\ ((fcurr1\ *\ (*pk))\ >>\ 15U)\ +\ gnext0;}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ gnext1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext1,\ 16);}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \ \ \ \ \ \ gnext0\ =\ (q31\_t)\ ((fcurr0\ *\ (*pk++))\ >>\ 15U)\ +\ gcurr0;}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ gnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext0,\ 16);}
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ g2(n-\/1),\ g4(n-\/1)\ ....\ from\ state\ */}}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ gcurr0\ =\ *px;}
+\DoxyCodeLine{00265\ }
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \textcolor{comment}{/*\ save\ g4(n)\ in\ state\ buffer\ */}}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ *px++\ =\ (q15\_t)\ gnext3;}
+\DoxyCodeLine{00268\ }
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \textcolor{comment}{/*\ Sample\ processing\ for\ K5,\ K9....\ */}}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ first\ sample\ for\ 5th,\ 9th\ ..\ tap\ */}}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \textcolor{comment}{/*\ f5(n)\ =\ f4(n)\ +\ \ K5\ *\ g4(n-\/1)\ */}}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ fcurr0\ =\ (q31\_t)\ ((gcurr0\ *\ (*pk))\ >>\ 15U)\ +\ fnext0;}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ fcurr0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fcurr0,\ 16);}
+\DoxyCodeLine{00274\ }
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ second\ sample\ for\ 5th,\ 9th\ ..\ tap\ */}}
+\DoxyCodeLine{00276\ \ \ \ \ \ \ fcurr1\ =\ (q31\_t)\ ((gnext0\ *\ (*pk))\ >>\ 15U)\ +\ fnext1;}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ fcurr1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fcurr1,\ 16);}
+\DoxyCodeLine{00278\ }
+\DoxyCodeLine{00279\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ third\ sample\ for\ 5th,\ 9th\ ..\ tap\ */}}
+\DoxyCodeLine{00280\ \ \ \ \ \ \ fcurr2\ =\ (q31\_t)\ ((gnext1\ *\ (*pk))\ >>\ 15U)\ +\ fnext2;}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ fcurr2\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fcurr2,\ 16);}
+\DoxyCodeLine{00282\ }
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ fourth\ sample\ for\ 5th,\ 9th\ ..\ tap\ */}}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ fcurr3\ =\ (q31\_t)\ ((gnext2\ *\ (*pk))\ >>\ 15U)\ +\ fnext3;}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ fcurr3\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fcurr3,\ 16);}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ state\ values\ for\ next\ stage\ */}}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \textcolor{comment}{/*\ g5(n)\ =\ f4(n)\ *\ K5\ \ +\ \ g4(n-\/1)\ */}}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ gnext3\ =\ (q31\_t)\ ((fnext3\ *\ (*pk))\ >>\ 15U)\ +\ gnext2;}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ gnext3\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext3,\ 16);}
+\DoxyCodeLine{00291\ }
+\DoxyCodeLine{00292\ \ \ \ \ \ \ gnext2\ =\ (q31\_t)\ ((fnext2\ *\ (*pk))\ >>\ 15U)\ +\ gnext1;}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ gnext2\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext2,\ 16);}
+\DoxyCodeLine{00294\ }
+\DoxyCodeLine{00295\ \ \ \ \ \ \ gnext1\ =\ (q31\_t)\ ((fnext1\ *\ (*pk))\ >>\ 15U)\ +\ gnext0;}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ gnext1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext1,\ 16);}
+\DoxyCodeLine{00297\ }
+\DoxyCodeLine{00298\ \ \ \ \ \ \ gnext0\ =\ (q31\_t)\ ((fnext0\ *\ (*pk++))\ >>\ 15U)\ +\ gcurr0;}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ gnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext0,\ 16);}
+\DoxyCodeLine{00300\ }
+\DoxyCodeLine{00301\ \ \ \ \ \ \ stageCnt-\/-\/;}
+\DoxyCodeLine{00302\ \ \ \ \ \}}
+\DoxyCodeLine{00303\ }
+\DoxyCodeLine{00304\ \ \ \ \ \textcolor{comment}{/*\ If\ the\ (filter\ length\ -\/1)\ is\ not\ a\ multiple\ of\ 4,\ compute\ the\ remaining\ filter\ taps\ */}}
+\DoxyCodeLine{00305\ \ \ \ \ stageCnt\ =\ (numStages\ -\/\ 1U)\ \%\ 0x4U;}
+\DoxyCodeLine{00306\ }
+\DoxyCodeLine{00307\ \ \ \ \ \textcolor{keywordflow}{while}\ (stageCnt\ >\ 0U)}
+\DoxyCodeLine{00308\ \ \ \ \ \{}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ gcurr0\ =\ *px;}
+\DoxyCodeLine{00310\ }
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \textcolor{comment}{/*\ save\ g\ value\ in\ state\ buffer\ */}}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ *px++\ =\ (q15\_t)\ gnext3;}
+\DoxyCodeLine{00313\ }
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \textcolor{comment}{/*\ Process\ four\ samples\ for\ last\ three\ taps\ here\ */}}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ fnext0\ =\ (q31\_t)\ ((gcurr0\ *\ (*pk))\ >>\ 15U)\ +\ fcurr0;}
+\DoxyCodeLine{00316\ \ \ \ \ \ \ fnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext0,\ 16);}
+\DoxyCodeLine{00317\ }
+\DoxyCodeLine{00318\ \ \ \ \ \ \ fnext1\ =\ (q31\_t)\ ((gnext0\ *\ (*pk))\ >>\ 15U)\ +\ fcurr1;}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ fnext1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext1,\ 16);}
+\DoxyCodeLine{00320\ }
+\DoxyCodeLine{00321\ \ \ \ \ \ \ fnext2\ =\ (q31\_t)\ ((gnext1\ *\ (*pk))\ >>\ 15U)\ +\ fcurr2;}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ fnext2\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext2,\ 16);}
+\DoxyCodeLine{00323\ }
+\DoxyCodeLine{00324\ \ \ \ \ \ \ fnext3\ =\ (q31\_t)\ ((gnext2\ *\ (*pk))\ >>\ 15U)\ +\ fcurr3;}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ fnext3\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext3,\ 16);}
+\DoxyCodeLine{00326\ }
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \textcolor{comment}{/*\ g1(n)\ =\ f0(n)\ *\ K1\ \ +\ \ g0(n-\/1)\ */}}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ gnext3\ =\ (q31\_t)\ ((fcurr3\ *\ (*pk))\ >>\ 15U)\ +\ gnext2;}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ gnext3\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext3,\ 16);}
+\DoxyCodeLine{00330\ }
+\DoxyCodeLine{00331\ \ \ \ \ \ \ gnext2\ =\ (q31\_t)\ ((fcurr2\ *\ (*pk))\ >>\ 15U)\ +\ gnext1;}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ gnext2\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext2,\ 16);}
+\DoxyCodeLine{00333\ }
+\DoxyCodeLine{00334\ \ \ \ \ \ \ gnext1\ =\ (q31\_t)\ ((fcurr1\ *\ (*pk))\ >>\ 15U)\ +\ gnext0;}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ gnext1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext1,\ 16);}
+\DoxyCodeLine{00336\ }
+\DoxyCodeLine{00337\ \ \ \ \ \ \ gnext0\ =\ (q31\_t)\ ((fcurr0\ *\ (*pk++))\ >>\ 15U)\ +\ gcurr0;}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ gnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext0,\ 16);}
+\DoxyCodeLine{00339\ }
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \textcolor{comment}{/*\ Update\ of\ f\ values\ for\ next\ coefficient\ set\ processing\ */}}
+\DoxyCodeLine{00341\ \ \ \ \ \ \ fcurr0\ =\ fnext0;}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ fcurr1\ =\ fnext1;}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ fcurr2\ =\ fnext2;}
+\DoxyCodeLine{00344\ \ \ \ \ \ \ fcurr3\ =\ fnext3;}
+\DoxyCodeLine{00345\ }
+\DoxyCodeLine{00346\ \ \ \ \ \ \ stageCnt-\/-\/;}
+\DoxyCodeLine{00347\ \ \ \ \ \}}
+\DoxyCodeLine{00348\ }
+\DoxyCodeLine{00349\ \ \ \ \ \textcolor{comment}{/*\ The\ results\ in\ the\ 4\ accumulators,\ store\ in\ the\ destination\ buffer.\ */}}
+\DoxyCodeLine{00350\ \ \ \ \ \textcolor{comment}{/*\ y(n)\ =\ fN(n)\ */}}
+\DoxyCodeLine{00351\ }
+\DoxyCodeLine{00352\ \textcolor{preprocessor}{\#ifndef\ \ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00353\ \ \ \ \ write\_q15x2\_ia\ (\&pDst,\ \_\_PKHBT(fcurr0,\ fcurr1,\ 16));}
+\DoxyCodeLine{00354\ \ \ \ \ write\_q15x2\_ia\ (\&pDst,\ \_\_PKHBT(fcurr2,\ fcurr3,\ 16));}
+\DoxyCodeLine{00355\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00356\ \ \ \ \ write\_q15x2\_ia\ (\&pDst,\ \_\_PKHBT(fcurr1,\ fcurr0,\ 16));}
+\DoxyCodeLine{00357\ \ \ \ \ write\_q15x2\_ia\ (\&pDst,\ \_\_PKHBT(fcurr3,\ fcurr2,\ 16));}
+\DoxyCodeLine{00358\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ \ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00359\ }
+\DoxyCodeLine{00360\ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00361\ \ \ \}}
+\DoxyCodeLine{00362\ }
+\DoxyCodeLine{00363\ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ remaining\ outputs\ */}}
+\DoxyCodeLine{00364\ \ \ blkCnt\ =\ blockSize\ \%\ 0x4U;}
+\DoxyCodeLine{00365\ }
+\DoxyCodeLine{00366\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00367\ }
+\DoxyCodeLine{00368\ \ \ \textcolor{comment}{/*\ Initialize\ blkCnt\ with\ number\ of\ samples\ */}}
+\DoxyCodeLine{00369\ \ \ blkCnt\ =\ blockSize;}
+\DoxyCodeLine{00370\ }
+\DoxyCodeLine{00371\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_LOOPUNROLL)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00372\ }
+\DoxyCodeLine{00373\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00374\ \ \ \{}
+\DoxyCodeLine{00375\ \ \ \ \ \textcolor{comment}{/*\ f0(n)\ =\ x(n)\ */}}
+\DoxyCodeLine{00376\ \ \ \ \ fcurr0\ =\ *pSrc++;}
+\DoxyCodeLine{00377\ }
+\DoxyCodeLine{00378\ \ \ \ \ \textcolor{comment}{/*\ Initialize\ state\ pointer\ */}}
+\DoxyCodeLine{00379\ \ \ \ \ px\ =\ pState;}
+\DoxyCodeLine{00380\ }
+\DoxyCodeLine{00381\ \ \ \ \ \textcolor{comment}{/*\ Initialize\ coeff\ pointer\ */}}
+\DoxyCodeLine{00382\ \ \ \ \ pk\ =\ pCoeffs;}
+\DoxyCodeLine{00383\ }
+\DoxyCodeLine{00384\ \ \ \ \ \textcolor{comment}{/*\ read\ g2(n)\ from\ state\ buffer\ */}}
+\DoxyCodeLine{00385\ \ \ \ \ gcurr0\ =\ *px;}
+\DoxyCodeLine{00386\ }
+\DoxyCodeLine{00387\ \ \ \ \ \textcolor{comment}{/*\ for\ sample\ 1\ processing\ */}}
+\DoxyCodeLine{00388\ \ \ \ \ \textcolor{comment}{/*\ f1(n)\ =\ f0(n)\ +\ \ K1\ *\ g0(n-\/1)\ */}}
+\DoxyCodeLine{00389\ \ \ \ \ fnext0\ =\ (((q31\_t)\ gcurr0\ *\ (*pk))\ >>\ 15U)\ +\ fcurr0;}
+\DoxyCodeLine{00390\ \ \ \ \ fnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext0,\ 16);}
+\DoxyCodeLine{00391\ }
+\DoxyCodeLine{00392\ \ \ \ \ \textcolor{comment}{/*\ g1(n)\ =\ f0(n)\ *\ K1\ \ +\ \ g0(n-\/1)\ */}}
+\DoxyCodeLine{00393\ \ \ \ \ gnext0\ =\ (((q31\_t)\ fcurr0\ *\ (*pk++))\ >>\ 15U)\ +\ gcurr0;}
+\DoxyCodeLine{00394\ \ \ \ \ gnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext0,\ 16);}
+\DoxyCodeLine{00395\ }
+\DoxyCodeLine{00396\ \ \ \ \ \textcolor{comment}{/*\ save\ g1(n)\ in\ state\ buffer\ */}}
+\DoxyCodeLine{00397\ \ \ \ \ *px++\ =\ (q15\_t)\ fcurr0;}
+\DoxyCodeLine{00398\ }
+\DoxyCodeLine{00399\ \ \ \ \ \textcolor{comment}{/*\ f1(n)\ is\ saved\ in\ fcurr0\ for\ next\ stage\ processing\ */}}
+\DoxyCodeLine{00400\ \ \ \ \ fcurr0\ =\ fnext0;}
+\DoxyCodeLine{00401\ }
+\DoxyCodeLine{00402\ \ \ \ \ stageCnt\ =\ (numStages\ -\/\ 1U);}
+\DoxyCodeLine{00403\ }
+\DoxyCodeLine{00404\ \ \ \ \ \textcolor{comment}{/*\ stage\ loop\ */}}
+\DoxyCodeLine{00405\ \ \ \ \ \textcolor{keywordflow}{while}\ (stageCnt\ >\ 0U)}
+\DoxyCodeLine{00406\ \ \ \ \ \{}
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \textcolor{comment}{/*\ read\ g2(n)\ from\ state\ buffer\ */}}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ gcurr0\ =\ *px;}
+\DoxyCodeLine{00409\ }
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \textcolor{comment}{/*\ save\ g1(n)\ in\ state\ buffer\ */}}
+\DoxyCodeLine{00411\ \ \ \ \ \ \ *px++\ =\ (q15\_t)\ gnext0;}
+\DoxyCodeLine{00412\ }
+\DoxyCodeLine{00413\ \ \ \ \ \ \ \textcolor{comment}{/*\ Sample\ processing\ for\ K2,\ K3....\ */}}
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \textcolor{comment}{/*\ f2(n)\ =\ f1(n)\ +\ \ K2\ *\ g1(n-\/1)\ */}}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ fnext0\ =\ (((q31\_t)\ gcurr0\ *\ (*pk))\ >>\ 15U)\ +\ fcurr0;}
+\DoxyCodeLine{00416\ \ \ \ \ \ \ fnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext0,\ 16);}
+\DoxyCodeLine{00417\ }
+\DoxyCodeLine{00418\ \ \ \ \ \ \ \textcolor{comment}{/*\ g2(n)\ =\ f1(n)\ *\ K2\ \ +\ \ g1(n-\/1)\ */}}
+\DoxyCodeLine{00419\ \ \ \ \ \ \ gnext0\ =\ (((q31\_t)\ fcurr0\ *\ (*pk++))\ >>\ 15U)\ +\ gcurr0;}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ gnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext0,\ 16);}
+\DoxyCodeLine{00421\ }
+\DoxyCodeLine{00422\ \ \ \ \ \ \ \textcolor{comment}{/*\ f1(n)\ is\ saved\ in\ fcurr0\ for\ next\ stage\ processing\ */}}
+\DoxyCodeLine{00423\ \ \ \ \ \ \ fcurr0\ =\ fnext0;}
+\DoxyCodeLine{00424\ }
+\DoxyCodeLine{00425\ \ \ \ \ \ \ stageCnt-\/-\/;}
+\DoxyCodeLine{00426\ \ \ \ \ \}}
+\DoxyCodeLine{00427\ }
+\DoxyCodeLine{00428\ \ \ \ \ \textcolor{comment}{/*\ y(n)\ =\ fN(n)\ */}}
+\DoxyCodeLine{00429\ \ \ \ \ *pDst++\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fcurr0,\ 16);}
+\DoxyCodeLine{00430\ }
+\DoxyCodeLine{00431\ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00432\ \ \ \}}
+\DoxyCodeLine{00433\ }
+\DoxyCodeLine{00434\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00435\ \textcolor{comment}{/*\ alternate\ version\ for\ CM0\_FAMILY\ */}}
+\DoxyCodeLine{00436\ }
+\DoxyCodeLine{00437\ \ \ blkCnt\ =\ blockSize;}
+\DoxyCodeLine{00438\ }
+\DoxyCodeLine{00439\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00440\ \ \ \{}
+\DoxyCodeLine{00441\ \ \ \ \ \textcolor{comment}{/*\ f0(n)\ =\ x(n)\ */}}
+\DoxyCodeLine{00442\ \ \ \ \ fcurr0\ =\ *pSrc++;}
+\DoxyCodeLine{00443\ }
+\DoxyCodeLine{00444\ \ \ \ \ \textcolor{comment}{/*\ Initialize\ state\ pointer\ */}}
+\DoxyCodeLine{00445\ \ \ \ \ px\ =\ pState;}
+\DoxyCodeLine{00446\ }
+\DoxyCodeLine{00447\ \ \ \ \ \textcolor{comment}{/*\ Initialize\ coeff\ pointer\ */}}
+\DoxyCodeLine{00448\ \ \ \ \ pk\ =\ pCoeffs;}
+\DoxyCodeLine{00449\ }
+\DoxyCodeLine{00450\ \ \ \ \ \textcolor{comment}{/*\ read\ g0(n-\/1)\ from\ state\ buffer\ */}}
+\DoxyCodeLine{00451\ \ \ \ \ gcurr0\ =\ *px;}
+\DoxyCodeLine{00452\ }
+\DoxyCodeLine{00453\ \ \ \ \ \textcolor{comment}{/*\ for\ sample\ 1\ processing\ */}}
+\DoxyCodeLine{00454\ \ \ \ \ \textcolor{comment}{/*\ f1(n)\ =\ f0(n)\ +\ \ K1\ *\ g0(n-\/1)\ */}}
+\DoxyCodeLine{00455\ \ \ \ \ fnext0\ =\ ((gcurr0\ *\ (*pk))\ >>\ 15U)\ +\ fcurr0;}
+\DoxyCodeLine{00456\ \ \ \ \ fnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext,\ 16);}
+\DoxyCodeLine{00457\ }
+\DoxyCodeLine{00458\ \ \ \ \ \textcolor{comment}{/*\ g1(n)\ =\ f0(n)\ *\ K1\ \ +\ \ g0(n-\/1)\ */}}
+\DoxyCodeLine{00459\ \ \ \ \ gnext0\ =\ ((fcurr0\ *\ (*pk++))\ >>\ 15U)\ +\ gcurr0;}
+\DoxyCodeLine{00460\ \ \ \ \ gnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext0,\ 16);}
+\DoxyCodeLine{00461\ }
+\DoxyCodeLine{00462\ \ \ \ \ \textcolor{comment}{/*\ save\ f0(n)\ in\ state\ buffer\ */}}
+\DoxyCodeLine{00463\ \ \ \ \ *px++\ =\ (q15\_t)\ fcurr0;}
+\DoxyCodeLine{00464\ }
+\DoxyCodeLine{00465\ \ \ \ \ \textcolor{comment}{/*\ f1(n)\ is\ saved\ in\ fcurr\ for\ next\ stage\ processing\ */}}
+\DoxyCodeLine{00466\ \ \ \ \ fcurr0\ =\ fnext0;}
+\DoxyCodeLine{00467\ }
+\DoxyCodeLine{00468\ \ \ \ \ stageCnt\ =\ (numStages\ -\/\ 1U);}
+\DoxyCodeLine{00469\ }
+\DoxyCodeLine{00470\ \ \ \ \ \textcolor{comment}{/*\ stage\ loop\ */}}
+\DoxyCodeLine{00471\ \ \ \ \ \textcolor{keywordflow}{while}\ (stageCnt\ >\ 0U)}
+\DoxyCodeLine{00472\ \ \ \ \ \{}
+\DoxyCodeLine{00473\ \ \ \ \ \ \ \textcolor{comment}{/*\ read\ g1(n-\/1)\ from\ state\ buffer\ */}}
+\DoxyCodeLine{00474\ \ \ \ \ \ \ gcurr0\ =\ *px;}
+\DoxyCodeLine{00475\ }
+\DoxyCodeLine{00476\ \ \ \ \ \ \ \textcolor{comment}{/*\ save\ g0(n-\/1)\ in\ state\ buffer\ */}}
+\DoxyCodeLine{00477\ \ \ \ \ \ \ *px++\ =\ (q15\_t)\ gnext0;}
+\DoxyCodeLine{00478\ }
+\DoxyCodeLine{00479\ \ \ \ \ \ \ \textcolor{comment}{/*\ Sample\ processing\ for\ K2,\ K3....\ */}}
+\DoxyCodeLine{00480\ \ \ \ \ \ \ \textcolor{comment}{/*\ f2(n)\ =\ f1(n)\ +\ \ K2\ *\ g1(n-\/1)\ */}}
+\DoxyCodeLine{00481\ \ \ \ \ \ \ fnext0\ =\ ((gcurr0\ *\ (*pk))\ >>\ 15U)\ +\ fcurr0;}
+\DoxyCodeLine{00482\ \ \ \ \ \ \ fnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fnext0,\ 16);}
+\DoxyCodeLine{00483\ }
+\DoxyCodeLine{00484\ \ \ \ \ \ \ \textcolor{comment}{/*\ g2(n)\ =\ f1(n)\ *\ K2\ \ +\ \ g1(n-\/1)\ */}}
+\DoxyCodeLine{00485\ \ \ \ \ \ \ gnext0\ =\ ((fcurr0\ *\ (*pk++))\ >>\ 15U)\ +\ gcurr0;}
+\DoxyCodeLine{00486\ \ \ \ \ \ \ gnext0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(gnext0,\ 16);}
+\DoxyCodeLine{00487\ }
+\DoxyCodeLine{00488\ \ \ \ \ \ \ \textcolor{comment}{/*\ f1(n)\ is\ saved\ in\ fcurr0\ for\ next\ stage\ processing\ */}}
+\DoxyCodeLine{00489\ \ \ \ \ \ \ fcurr0\ =\ fnext0;}
+\DoxyCodeLine{00490\ }
+\DoxyCodeLine{00491\ \ \ \ \ \ \ stageCnt-\/-\/;}
+\DoxyCodeLine{00492\ \ \ \ \ \}}
+\DoxyCodeLine{00493\ }
+\DoxyCodeLine{00494\ \ \ \ \ \textcolor{comment}{/*\ y(n)\ =\ fN(n)\ */}}
+\DoxyCodeLine{00495\ \ \ \ \ *pDst++\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(fcurr0,\ 16);}
+\DoxyCodeLine{00496\ }
+\DoxyCodeLine{00497\ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00498\ \ \ \}}
+\DoxyCodeLine{00499\ }
+\DoxyCodeLine{00500\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ !defined(ARM\_MATH\_CM0\_FAMILY)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00501\ }
+\DoxyCodeLine{00502\ \}}
+\DoxyCodeLine{00503\ }
+
+\end{DoxyCode}

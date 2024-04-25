@@ -1,0 +1,108 @@
+\doxysection{arm\+\_\+bitreversal\+\_\+f16.\+c}
+\hypertarget{arm__bitreversal__f16_8c_source}{}\label{arm__bitreversal__f16_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_bitreversal\_f16.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_bitreversal\_f16.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_bitreversal\_f16.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Bitreversal\ functions}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/transform\_functions\_f16.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00032\ \textcolor{comment}{*\ @brief\ \ In-\/place\ bit\ reversal\ function.}}
+\DoxyCodeLine{00033\ \textcolor{comment}{*\ @param[in,\ out]\ *pSrc\ \ \ \ \ \ \ \ points\ to\ the\ in-\/place\ buffer\ of\ floating-\/point\ data\ type.}}
+\DoxyCodeLine{00034\ \textcolor{comment}{*\ @param[in]\ \ \ \ \ \ fftSize\ \ \ \ \ \ length\ of\ the\ FFT.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{*\ @param[in]\ \ \ \ \ \ bitRevFactor\ bit\ reversal\ modifier\ that\ supports\ different\ size\ FFTs\ with\ the\ same\ bit\ reversal\ table.}}
+\DoxyCodeLine{00036\ \textcolor{comment}{*\ @param[in]\ \ \ \ \ \ *pBitRevTab\ \ points\ to\ the\ bit\ reversal\ table.}}
+\DoxyCodeLine{00037\ \textcolor{comment}{*\ @return\ none.}}
+\DoxyCodeLine{00038\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#if\ defined(ARM\_FLOAT16\_SUPPORTED)}}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \textcolor{keywordtype}{void}\ arm\_bitreversal\_f16(}
+\DoxyCodeLine{00043\ float16\_t\ *\ pSrc,}
+\DoxyCodeLine{00044\ uint16\_t\ fftSize,}
+\DoxyCodeLine{00045\ uint16\_t\ bitRevFactor,}
+\DoxyCodeLine{00046\ \textcolor{keyword}{const}\ uint16\_t\ *\ pBitRevTab)}
+\DoxyCodeLine{00047\ \{}
+\DoxyCodeLine{00048\ \ \ \ uint16\_t\ fftLenBy2,\ fftLenBy2p1;}
+\DoxyCodeLine{00049\ \ \ \ uint16\_t\ i,\ j;}
+\DoxyCodeLine{00050\ \ \ \ float16\_t\ in;}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \ \ \ \textcolor{comment}{/*\ \ Initializations\ */}}
+\DoxyCodeLine{00053\ \ \ \ j\ =\ 0U;}
+\DoxyCodeLine{00054\ \ \ \ fftLenBy2\ =\ fftSize\ >>\ 1U;}
+\DoxyCodeLine{00055\ \ \ \ fftLenBy2p1\ =\ (fftSize\ >>\ 1U)\ +\ 1U;}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \ \ \ \textcolor{comment}{/*\ Bit\ Reversal\ Implementation\ */}}
+\DoxyCodeLine{00058\ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ 0U;\ i\ <=\ (fftLenBy2\ -\/\ 2U);\ i\ +=\ 2U)}
+\DoxyCodeLine{00059\ \ \ \ \{}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (i\ <\ j)}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ pSrc[i]\ <-\/>\ pSrc[j];\ */}}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ \ in\ =\ pSrc[2U\ *\ i];}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ \ pSrc[2U\ *\ i]\ =\ pSrc[2U\ *\ j];}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ \ pSrc[2U\ *\ j]\ =\ in;}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ pSrc[i+1U]\ <-\/>\ pSrc[j+1U]\ */}}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ \ in\ =\ pSrc[(2U\ *\ i)\ +\ 1U];}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \ pSrc[(2U\ *\ i)\ +\ 1U]\ =\ pSrc[(2U\ *\ j)\ +\ 1U];}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ \ pSrc[(2U\ *\ j)\ +\ 1U]\ =\ in;}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ pSrc[i+fftLenBy2p1]\ <-\/>\ pSrc[j+fftLenBy2p1]\ */}}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ \ in\ =\ pSrc[2U\ *\ (i\ +\ fftLenBy2p1)];}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ pSrc[2U\ *\ (i\ +\ fftLenBy2p1)]\ =\ pSrc[2U\ *\ (j\ +\ fftLenBy2p1)];}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ pSrc[2U\ *\ (j\ +\ fftLenBy2p1)]\ =\ in;}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ pSrc[i+fftLenBy2p1+1U]\ <-\/>\ pSrc[j+fftLenBy2p1+1U]\ */}}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ in\ =\ pSrc[(2U\ *\ (i\ +\ fftLenBy2p1))\ +\ 1U];}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \ pSrc[(2U\ *\ (i\ +\ fftLenBy2p1))\ +\ 1U]\ =}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ pSrc[(2U\ *\ (j\ +\ fftLenBy2p1))\ +\ 1U];}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ pSrc[(2U\ *\ (j\ +\ fftLenBy2p1))\ +\ 1U]\ =\ in;}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ pSrc[i+1U]\ <-\/>\ pSrc[j+1U]\ */}}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ in\ =\ pSrc[2U\ *\ (i\ +\ 1U)];}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ pSrc[2U\ *\ (i\ +\ 1U)]\ =\ pSrc[2U\ *\ (j\ +\ fftLenBy2)];}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ pSrc[2U\ *\ (j\ +\ fftLenBy2)]\ =\ in;}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ pSrc[i+2U]\ <-\/>\ pSrc[j+2U]\ */}}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ in\ =\ pSrc[(2U\ *\ (i\ +\ 1U))\ +\ 1U];}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ pSrc[(2U\ *\ (i\ +\ 1U))\ +\ 1U]\ =\ pSrc[(2U\ *\ (j\ +\ fftLenBy2))\ +\ 1U];}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ pSrc[(2U\ *\ (j\ +\ fftLenBy2))\ +\ 1U]\ =\ in;}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ the\ index\ for\ the\ bit\ reversal\ */}}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ j\ =\ *pBitRevTab;}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Updating\ the\ bit\ reversal\ index\ depending\ on\ the\ fft\ length\ \ */}}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ pBitRevTab\ +=\ bitRevFactor;}
+\DoxyCodeLine{00100\ \ \ \ \}}
+\DoxyCodeLine{00101\ \}}
+\DoxyCodeLine{00102\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined(ARM\_FLOAT16\_SUPPORTED)\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

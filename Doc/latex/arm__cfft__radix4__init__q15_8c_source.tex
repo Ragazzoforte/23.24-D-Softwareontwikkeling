@@ -1,0 +1,122 @@
+\doxysection{arm\+\_\+cfft\+\_\+radix4\+\_\+init\+\_\+q15.\+c}
+\hypertarget{arm__cfft__radix4__init__q15_8c_source}{}\label{arm__cfft__radix4__init__q15_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_cfft\_radix4\_init\_q15.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_cfft\_radix4\_init\_q15.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_cfft\_radix4\_init\_q15.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Radix-\/4\ Decimation\ in\ Frequency\ Q15\ FFT\ \&\ IFFT\ initialization\ function}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/transform\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}arm\_common\_tables.h"{}}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00070\ arm\_status\ \mbox{\hyperlink{group___complex_f_f_t_ga0c2acfda3126c452e75b81669e8ad9ef}{arm\_cfft\_radix4\_init\_q15}}(}
+\DoxyCodeLine{00071\ \ \ \mbox{\hyperlink{structarm__cfft__radix4__instance__q15}{arm\_cfft\_radix4\_instance\_q15}}\ *\ S,}
+\DoxyCodeLine{00072\ \ \ uint16\_t\ fftLen,}
+\DoxyCodeLine{00073\ \ \ uint8\_t\ ifftFlag,}
+\DoxyCodeLine{00074\ \ \ uint8\_t\ bitReverseFlag)}
+\DoxyCodeLine{00075\ \{}
+\DoxyCodeLine{00076\ \ \ \textcolor{comment}{/*\ \ Initialise\ the\ default\ arm\ status\ */}}
+\DoxyCodeLine{00077\ \ \ arm\_status\ status\ =\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_FFT\_ALLOW\_TABLES)}}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ defined(ARM\_TABLE\_TWIDDLECOEF\_Q15\_4096)}}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \textcolor{comment}{/*\ \ Initialise\ the\ default\ arm\ status\ */}}
+\DoxyCodeLine{00084\ \ \ status\ =\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00085\ \ \ \textcolor{comment}{/*\ \ Initialise\ the\ FFT\ length\ */}}
+\DoxyCodeLine{00086\ \ \ S-\/>fftLen\ =\ fftLen;}
+\DoxyCodeLine{00087\ \ \ \textcolor{comment}{/*\ \ Initialise\ the\ Twiddle\ coefficient\ pointer\ */}}
+\DoxyCodeLine{00088\ \ \ S-\/>pTwiddle\ =\ (q15\_t\ *)\ \mbox{\hyperlink{group___c_f_f_t___c_i_f_f_t_ga9b409d6995eab17805b1d1881d4bc652}{twiddleCoef\_4096\_q15}};}
+\DoxyCodeLine{00089\ \ \ \textcolor{comment}{/*\ \ Initialise\ the\ Flag\ for\ selection\ of\ CFFT\ or\ CIFFT\ */}}
+\DoxyCodeLine{00090\ \ \ S-\/>ifftFlag\ =\ ifftFlag;}
+\DoxyCodeLine{00091\ \ \ \textcolor{comment}{/*\ \ Initialise\ the\ Flag\ for\ calculation\ Bit\ reversal\ or\ not\ */}}
+\DoxyCodeLine{00092\ \ \ S-\/>bitReverseFlag\ =\ bitReverseFlag;}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ defined(ARM\_TABLE\_BITREV\_1024)}}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \textcolor{comment}{/*\ \ Initializations\ of\ structure\ parameters\ depending\ on\ the\ FFT\ length\ */}}
+\DoxyCodeLine{00097\ \ \ \textcolor{keywordflow}{switch}\ (S-\/>fftLen)}
+\DoxyCodeLine{00098\ \ \ \{}
+\DoxyCodeLine{00099\ \ \ \textcolor{keywordflow}{case}\ 4096U:}
+\DoxyCodeLine{00100\ \ \ \ \ \textcolor{comment}{/*\ \ Initializations\ of\ structure\ parameters\ for\ 4096\ point\ FFT\ */}}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{comment}{/*\ \ Initialise\ the\ twiddle\ coef\ modifier\ value\ */}}
+\DoxyCodeLine{00103\ \ \ \ \ S-\/>twidCoefModifier\ =\ 1U;}
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{comment}{/*\ \ Initialise\ the\ bit\ reversal\ table\ modifier\ */}}
+\DoxyCodeLine{00105\ \ \ \ \ S-\/>bitRevFactor\ =\ 1U;}
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{comment}{/*\ \ Initialise\ the\ bit\ reversal\ table\ pointer\ */}}
+\DoxyCodeLine{00107\ \ \ \ \ S-\/>pBitRevTable\ =\ (uint16\_t\ *)\ \mbox{\hyperlink{group___c_f_f_t___c_i_f_f_t_gae247e83ad50d474107254e25b36ad42b}{armBitRevTable}};}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \ \ \textcolor{keywordflow}{case}\ 1024U:}
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{comment}{/*\ \ Initializations\ of\ structure\ parameters\ for\ 1024\ point\ FFT\ */}}
+\DoxyCodeLine{00113\ \ \ \ \ S-\/>twidCoefModifier\ =\ 4U;}
+\DoxyCodeLine{00114\ \ \ \ \ S-\/>bitRevFactor\ =\ 4U;}
+\DoxyCodeLine{00115\ \ \ \ \ S-\/>pBitRevTable\ =\ (uint16\_t\ *)\ \&\ \mbox{\hyperlink{group___c_f_f_t___c_i_f_f_t_gae247e83ad50d474107254e25b36ad42b}{armBitRevTable}}[3];}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ \textcolor{keywordflow}{case}\ 256U:}
+\DoxyCodeLine{00120\ \ \ \ \ \textcolor{comment}{/*\ \ Initializations\ of\ structure\ parameters\ for\ 256\ point\ FFT\ */}}
+\DoxyCodeLine{00121\ \ \ \ \ S-\/>twidCoefModifier\ =\ 16U;}
+\DoxyCodeLine{00122\ \ \ \ \ S-\/>bitRevFactor\ =\ 16U;}
+\DoxyCodeLine{00123\ \ \ \ \ S-\/>pBitRevTable\ =\ (uint16\_t\ *)\ \&\ \mbox{\hyperlink{group___c_f_f_t___c_i_f_f_t_gae247e83ad50d474107254e25b36ad42b}{armBitRevTable}}[15];}
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00125\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \textcolor{keywordflow}{case}\ 64U:}
+\DoxyCodeLine{00128\ \ \ \ \ \textcolor{comment}{/*\ \ Initializations\ of\ structure\ parameters\ for\ 64\ point\ FFT\ */}}
+\DoxyCodeLine{00129\ \ \ \ \ S-\/>twidCoefModifier\ =\ 64U;}
+\DoxyCodeLine{00130\ \ \ \ \ S-\/>bitRevFactor\ =\ 64U;}
+\DoxyCodeLine{00131\ \ \ \ \ S-\/>pBitRevTable\ =\ (uint16\_t\ *)\ \&\ \mbox{\hyperlink{group___c_f_f_t___c_i_f_f_t_gae247e83ad50d474107254e25b36ad42b}{armBitRevTable}}[63];}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \textcolor{keywordflow}{case}\ 16U:}
+\DoxyCodeLine{00136\ \ \ \ \ \textcolor{comment}{/*\ \ Initializations\ of\ structure\ parameters\ for\ 16\ point\ FFT\ */}}
+\DoxyCodeLine{00137\ \ \ \ \ S-\/>twidCoefModifier\ =\ 256U;}
+\DoxyCodeLine{00138\ \ \ \ \ S-\/>bitRevFactor\ =\ 256U;}
+\DoxyCodeLine{00139\ \ \ \ \ S-\/>pBitRevTable\ =\ (uint16\_t\ *)\ \&\ \mbox{\hyperlink{group___c_f_f_t___c_i_f_f_t_gae247e83ad50d474107254e25b36ad42b}{armBitRevTable}}[255];}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00144\ \ \ \ \ \textcolor{comment}{/*\ \ Reporting\ argument\ error\ if\ fftSize\ is\ not\ valid\ value\ */}}
+\DoxyCodeLine{00145\ \ \ \ \ status\ =\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00146\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00147\ \ \ \}}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00150\ \textcolor{preprocessor}{\#endif\ }}
+\DoxyCodeLine{00151\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00152\ \ \ \textcolor{keywordflow}{return}\ (status);}
+\DoxyCodeLine{00153\ \}}
+\DoxyCodeLine{00154\ }
+
+\end{DoxyCode}

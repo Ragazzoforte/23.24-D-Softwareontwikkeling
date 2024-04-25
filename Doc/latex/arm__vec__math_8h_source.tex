@@ -1,0 +1,361 @@
+\doxysection{arm\+\_\+vec\+\_\+math.\+h}
+\hypertarget{arm__vec__math_8h_source}{}\label{arm__vec__math_8h_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Include/arm\_vec\_math.h@{VGA\_Driver/Drivers/CMSIS/DSP/Include/arm\_vec\_math.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/******************************************************************************}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ @file\ \ \ \ \ arm\_vec\_math.h}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ @brief\ \ \ \ Public\ header\ file\ for\ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ @version\ \ V1.10.0}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ @date\ \ \ \ \ 08\ July\ 2021}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ ******************************************************************************/}}
+\DoxyCodeLine{00008\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Copyright\ (c)\ 2010-\/2021\ Arm\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#ifndef\ \_ARM\_VEC\_MATH\_H}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ \_ARM\_VEC\_MATH\_H}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}arm\_math\_types.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}arm\_common\_tables.h"{}}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#ifdef\ \ \ \_\_cplusplus}}
+\DoxyCodeLine{00034\ \textcolor{keyword}{extern}\ \textcolor{stringliteral}{"{}C"{}}}
+\DoxyCodeLine{00035\ \{}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#if\ (defined(ARM\_MATH\_MVEF)\ ||\ defined(ARM\_MATH\_HELIUM))\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#define\ INV\_NEWTON\_INIT\_F32\ \ \ \ \ \ \ \ \ 0x7EF127EA}}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ float32\_t\ \_\_logf\_rng\_f32=0.693147180f;}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \textcolor{comment}{/*\ fast\ inverse\ approximation\ (3x\ newton)\ */}}
+\DoxyCodeLine{00046\ \_\_STATIC\_INLINE\ f32x4\_t\ vrecip\_medprec\_f32(}
+\DoxyCodeLine{00047\ \ \ \ \ f32x4\_t\ x)}
+\DoxyCodeLine{00048\ \{}
+\DoxyCodeLine{00049\ \ \ \ \ q31x4\_t\ \ \ \ \ \ \ \ \ m;}
+\DoxyCodeLine{00050\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ b;}
+\DoxyCodeLine{00051\ \ \ \ \ any32x4\_t\ \ \ \ \ \ \ xinv;}
+\DoxyCodeLine{00052\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ ax\ =\ vabsq(x);}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \ \ \ \ xinv.f\ =\ ax;}
+\DoxyCodeLine{00055\ \ \ \ \ m\ =\ 0x3F800000\ -\/\ (xinv.i\ \&\ 0x7F800000);}
+\DoxyCodeLine{00056\ \ \ \ \ xinv.i\ =\ xinv.i\ +\ m;}
+\DoxyCodeLine{00057\ \ \ \ \ xinv.f\ =\ 1.41176471f\ -\/\ 0.47058824f\ *\ xinv.f;}
+\DoxyCodeLine{00058\ \ \ \ \ xinv.i\ =\ xinv.i\ +\ m;}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \ \ \ \ b\ =\ 2.0f\ -\/\ xinv.f\ *\ ax;}
+\DoxyCodeLine{00061\ \ \ \ \ xinv.f\ =\ xinv.f\ *\ b;}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \ \ \ \ b\ =\ 2.0f\ -\/\ xinv.f\ *\ ax;}
+\DoxyCodeLine{00064\ \ \ \ \ xinv.f\ =\ xinv.f\ *\ b;}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \ b\ =\ 2.0f\ -\/\ xinv.f\ *\ ax;}
+\DoxyCodeLine{00067\ \ \ \ \ xinv.f\ =\ xinv.f\ *\ b;}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \ \ xinv.f\ =\ vdupq\_m(xinv.f,\ INFINITY,\ vcmpeqq(x,\ 0.0f));}
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00071\ \textcolor{comment}{\ \ \ \ \ *\ restore\ sign}}
+\DoxyCodeLine{00072\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00073\ \ \ \ \ xinv.f\ =\ vnegq\_m(xinv.f,\ xinv.f,\ vcmpltq(x,\ 0.0f));}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{keywordflow}{return}\ xinv.f;}
+\DoxyCodeLine{00076\ \}}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \textcolor{comment}{/*\ fast\ inverse\ approximation\ (4x\ newton)\ */}}
+\DoxyCodeLine{00079\ \_\_STATIC\_INLINE\ f32x4\_t\ vrecip\_hiprec\_f32(}
+\DoxyCodeLine{00080\ \ \ \ \ f32x4\_t\ x)}
+\DoxyCodeLine{00081\ \{}
+\DoxyCodeLine{00082\ \ \ \ \ q31x4\_t\ \ \ \ \ \ \ \ \ m;}
+\DoxyCodeLine{00083\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ b;}
+\DoxyCodeLine{00084\ \ \ \ \ any32x4\_t\ \ \ \ \ \ \ xinv;}
+\DoxyCodeLine{00085\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ ax\ =\ vabsq(x);}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ xinv.f\ =\ ax;}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ m\ =\ 0x3F800000\ -\/\ (xinv.i\ \&\ 0x7F800000);}
+\DoxyCodeLine{00090\ \ \ \ \ xinv.i\ =\ xinv.i\ +\ m;}
+\DoxyCodeLine{00091\ \ \ \ \ xinv.f\ =\ 1.41176471f\ -\/\ 0.47058824f\ *\ xinv.f;}
+\DoxyCodeLine{00092\ \ \ \ \ xinv.i\ =\ xinv.i\ +\ m;}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \ \ \ \ b\ =\ 2.0f\ -\/\ xinv.f\ *\ ax;}
+\DoxyCodeLine{00095\ \ \ \ \ xinv.f\ =\ xinv.f\ *\ b;}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ b\ =\ 2.0f\ -\/\ xinv.f\ *\ ax;}
+\DoxyCodeLine{00098\ \ \ \ \ xinv.f\ =\ xinv.f\ *\ b;}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ b\ =\ 2.0f\ -\/\ xinv.f\ *\ ax;}
+\DoxyCodeLine{00101\ \ \ \ \ xinv.f\ =\ xinv.f\ *\ b;}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ b\ =\ 2.0f\ -\/\ xinv.f\ *\ ax;}
+\DoxyCodeLine{00104\ \ \ \ \ xinv.f\ =\ xinv.f\ *\ b;}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \ \ \ \ xinv.f\ =\ vdupq\_m(xinv.f,\ INFINITY,\ vcmpeqq(x,\ 0.0f));}
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00108\ \textcolor{comment}{\ \ \ \ \ *\ restore\ sign}}
+\DoxyCodeLine{00109\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00110\ \ \ \ \ xinv.f\ =\ vnegq\_m(xinv.f,\ xinv.f,\ vcmpltq(x,\ 0.0f));}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{keywordflow}{return}\ xinv.f;}
+\DoxyCodeLine{00113\ \}}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \_\_STATIC\_INLINE\ f32x4\_t\ vdiv\_f32(}
+\DoxyCodeLine{00116\ \ \ \ \ f32x4\_t\ num,\ f32x4\_t\ den)}
+\DoxyCodeLine{00117\ \{}
+\DoxyCodeLine{00118\ \ \ \ \ \textcolor{keywordflow}{return}\ vmulq(num,\ vrecip\_hiprec\_f32(den));}
+\DoxyCodeLine{00119\ \}}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00128\ \_\_STATIC\_INLINE\ f32x4\_t\ vtaylor\_polyq\_f32(}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ \ \ x,}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ coeffs)}
+\DoxyCodeLine{00131\ \{}
+\DoxyCodeLine{00132\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ A\ =\ vfmasq(vdupq\_n\_f32(coeffs[4]),\ x,\ coeffs[0]);}
+\DoxyCodeLine{00133\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ B\ =\ vfmasq(vdupq\_n\_f32(coeffs[6]),\ x,\ coeffs[2]);}
+\DoxyCodeLine{00134\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ C\ =\ vfmasq(vdupq\_n\_f32(coeffs[5]),\ x,\ coeffs[1]);}
+\DoxyCodeLine{00135\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ D\ =\ vfmasq(vdupq\_n\_f32(coeffs[7]),\ x,\ coeffs[3]);}
+\DoxyCodeLine{00136\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ x2\ =\ vmulq(x,\ x);}
+\DoxyCodeLine{00137\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ x4\ =\ vmulq(x2,\ x2);}
+\DoxyCodeLine{00138\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ res\ =\ vfmaq(vfmaq\_f32(A,\ B,\ x2),\ vfmaq\_f32(C,\ D,\ x2),\ x4);}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \ \ \textcolor{keywordflow}{return}\ res;}
+\DoxyCodeLine{00141\ \}}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \_\_STATIC\_INLINE\ f32x4\_t\ vmant\_exp\_f32(}
+\DoxyCodeLine{00144\ \ \ \ \ f32x4\_t\ \ \ \ \ x,}
+\DoxyCodeLine{00145\ \ \ \ \ int32x4\_t\ *\ e)}
+\DoxyCodeLine{00146\ \{}
+\DoxyCodeLine{00147\ \ \ \ \ any32x4\_t\ \ \ \ \ \ \ r;}
+\DoxyCodeLine{00148\ \ \ \ \ int32x4\_t\ \ \ \ \ \ \ n;}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \ \ \ \ r.f\ =\ x;}
+\DoxyCodeLine{00151\ \ \ \ \ n\ =\ r.i\ >>\ 23;}
+\DoxyCodeLine{00152\ \ \ \ \ n\ =\ n\ -\/\ 127;}
+\DoxyCodeLine{00153\ \ \ \ \ r.i\ =\ r.i\ -\/\ (n\ <<\ 23);}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \ \ \ \ *e\ =\ n;}
+\DoxyCodeLine{00156\ \ \ \ \ \textcolor{keywordflow}{return}\ r.f;}
+\DoxyCodeLine{00157\ \}}
+\DoxyCodeLine{00158\ }
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ \_\_STATIC\_INLINE\ f32x4\_t\ vlogq\_f32(f32x4\_t\ vecIn)}
+\DoxyCodeLine{00161\ \{}
+\DoxyCodeLine{00162\ \ \ \ \ q31x4\_t\ \ \ \ \ \ \ \ \ vecExpUnBiased;}
+\DoxyCodeLine{00163\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecTmpFlt0,\ vecTmpFlt1;}
+\DoxyCodeLine{00164\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecAcc0,\ vecAcc1,\ vecAcc2,\ vecAcc3;}
+\DoxyCodeLine{00165\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecExpUnBiasedFlt;}
+\DoxyCodeLine{00166\ }
+\DoxyCodeLine{00167\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00168\ \textcolor{comment}{\ \ \ \ \ *\ extract\ exponent}}
+\DoxyCodeLine{00169\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00170\ \ \ \ \ vecTmpFlt1\ =\ vmant\_exp\_f32(vecIn,\ \&vecExpUnBiased);}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \ \ \ \ vecTmpFlt0\ =\ vecTmpFlt1\ *\ vecTmpFlt1;}
+\DoxyCodeLine{00173\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00174\ \textcolor{comment}{\ \ \ \ \ *\ a\ =\ (\_\_logf\_lut\_f32[4]\ *\ r.f)\ +\ (\_\_logf\_lut\_f32[0]);}}
+\DoxyCodeLine{00175\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00176\ \ \ \ \ vecAcc0\ =\ vdupq\_n\_f32(\_\_logf\_lut\_f32[0]);}
+\DoxyCodeLine{00177\ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecTmpFlt1,\ \_\_logf\_lut\_f32[4]);}
+\DoxyCodeLine{00178\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00179\ \textcolor{comment}{\ \ \ \ \ *\ b\ =\ (\_\_logf\_lut\_f32[6]\ *\ r.f)\ +\ (\_\_logf\_lut\_f32[2]);}}
+\DoxyCodeLine{00180\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00181\ \ \ \ \ vecAcc1\ =\ vdupq\_n\_f32(\_\_logf\_lut\_f32[2]);}
+\DoxyCodeLine{00182\ \ \ \ \ vecAcc1\ =\ vfmaq(vecAcc1,\ vecTmpFlt1,\ \_\_logf\_lut\_f32[6]);}
+\DoxyCodeLine{00183\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00184\ \textcolor{comment}{\ \ \ \ \ *\ c\ =\ (\_\_logf\_lut\_f32[5]\ *\ r.f)\ +\ (\_\_logf\_lut\_f32[1]);}}
+\DoxyCodeLine{00185\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00186\ \ \ \ \ vecAcc2\ =\ vdupq\_n\_f32(\_\_logf\_lut\_f32[1]);}
+\DoxyCodeLine{00187\ \ \ \ \ vecAcc2\ =\ vfmaq(vecAcc2,\ vecTmpFlt1,\ \_\_logf\_lut\_f32[5]);}
+\DoxyCodeLine{00188\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00189\ \textcolor{comment}{\ \ \ \ \ *\ d\ =\ (\_\_logf\_lut\_f32[7]\ *\ r.f)\ +\ (\_\_logf\_lut\_f32[3]);}}
+\DoxyCodeLine{00190\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00191\ \ \ \ \ vecAcc3\ =\ vdupq\_n\_f32(\_\_logf\_lut\_f32[3]);}
+\DoxyCodeLine{00192\ \ \ \ \ vecAcc3\ =\ vfmaq(vecAcc3,\ vecTmpFlt1,\ \_\_logf\_lut\_f32[7]);}
+\DoxyCodeLine{00193\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00194\ \textcolor{comment}{\ \ \ \ \ *\ a\ =\ a\ +\ b\ *\ xx;}}
+\DoxyCodeLine{00195\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00196\ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecAcc1,\ vecTmpFlt0);}
+\DoxyCodeLine{00197\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00198\ \textcolor{comment}{\ \ \ \ \ *\ c\ =\ c\ +\ d\ *\ xx;}}
+\DoxyCodeLine{00199\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00200\ \ \ \ \ vecAcc2\ =\ vfmaq(vecAcc2,\ vecAcc3,\ vecTmpFlt0);}
+\DoxyCodeLine{00201\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00202\ \textcolor{comment}{\ \ \ \ \ *\ xx\ =\ xx\ *\ xx;}}
+\DoxyCodeLine{00203\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00204\ \ \ \ \ vecTmpFlt0\ =\ vecTmpFlt0\ *\ vecTmpFlt0;}
+\DoxyCodeLine{00205\ \ \ \ \ vecExpUnBiasedFlt\ =\ vcvtq\_f32\_s32(vecExpUnBiased);}
+\DoxyCodeLine{00206\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00207\ \textcolor{comment}{\ \ \ \ \ *\ r.f\ =\ a\ +\ c\ *\ xx;}}
+\DoxyCodeLine{00208\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00209\ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecAcc2,\ vecTmpFlt0);}
+\DoxyCodeLine{00210\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00211\ \textcolor{comment}{\ \ \ \ \ *\ add\ exponent}}
+\DoxyCodeLine{00212\ \textcolor{comment}{\ \ \ \ \ *\ r.f\ =\ r.f\ +\ ((float32\_t)\ m)\ *\ \_\_logf\_rng\_f32;}}
+\DoxyCodeLine{00213\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00214\ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecExpUnBiasedFlt,\ \_\_logf\_rng\_f32);}
+\DoxyCodeLine{00215\ \ \ \ \ \textcolor{comment}{//\ set\ log0\ down\ to\ -\/inf}}
+\DoxyCodeLine{00216\ \ \ \ \ vecAcc0\ =\ vdupq\_m(vecAcc0,\ -\/INFINITY,\ vcmpeqq(vecIn,\ 0.0f));}
+\DoxyCodeLine{00217\ \ \ \ \ \textcolor{keywordflow}{return}\ vecAcc0;}
+\DoxyCodeLine{00218\ \}}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00220\ \_\_STATIC\_INLINE\ f32x4\_t\ vexpq\_f32(}
+\DoxyCodeLine{00221\ \ \ \ \ f32x4\_t\ x)}
+\DoxyCodeLine{00222\ \{}
+\DoxyCodeLine{00223\ \ \ \ \ \textcolor{comment}{//\ Perform\ range\ reduction\ [-\/log(2),log(2)]}}
+\DoxyCodeLine{00224\ \ \ \ \ int32x4\_t\ \ \ \ \ \ \ m\ =\ vcvtq\_s32\_f32(vmulq\_n\_f32(x,\ 1.4426950408f));}
+\DoxyCodeLine{00225\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ val\ =\ vfmsq\_f32(x,\ vcvtq\_f32\_s32(m),\ vdupq\_n\_f32(0.6931471805f));}
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00227\ \ \ \ \ \textcolor{comment}{//\ Polynomial\ Approximation}}
+\DoxyCodeLine{00228\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ poly\ =\ vtaylor\_polyq\_f32(val,\ exp\_tab);}
+\DoxyCodeLine{00229\ }
+\DoxyCodeLine{00230\ \ \ \ \ \textcolor{comment}{//\ Reconstruct}}
+\DoxyCodeLine{00231\ \ \ \ \ poly\ =\ (f32x4\_t)\ (vqaddq\_s32((q31x4\_t)\ (poly),\ vqshlq\_n\_s32(m,\ 23)));}
+\DoxyCodeLine{00232\ }
+\DoxyCodeLine{00233\ \ \ \ \ poly\ =\ vdupq\_m(poly,\ 0.0f,\ vcmpltq\_n\_s32(m,\ -\/126));}
+\DoxyCodeLine{00234\ \ \ \ \ \textcolor{keywordflow}{return}\ poly;}
+\DoxyCodeLine{00235\ \}}
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00237\ \_\_STATIC\_INLINE\ f32x4\_t\ arm\_vec\_exponent\_f32(f32x4\_t\ x,\ int32\_t\ nb)}
+\DoxyCodeLine{00238\ \{}
+\DoxyCodeLine{00239\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ r\ =\ x;}
+\DoxyCodeLine{00240\ \ \ \ \ nb-\/-\/;}
+\DoxyCodeLine{00241\ \ \ \ \ \textcolor{keywordflow}{while}\ (nb\ >\ 0)\ \{}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ r\ =\ vmulq(r,\ x);}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ nb-\/-\/;}
+\DoxyCodeLine{00244\ \ \ \ \ \}}
+\DoxyCodeLine{00245\ \ \ \ \ \textcolor{keywordflow}{return}\ (r);}
+\DoxyCodeLine{00246\ \}}
+\DoxyCodeLine{00247\ }
+\DoxyCodeLine{00248\ \_\_STATIC\_INLINE\ f32x4\_t\ vrecip\_f32(f32x4\_t\ vecIn)}
+\DoxyCodeLine{00249\ \{}
+\DoxyCodeLine{00250\ \ \ \ \ f32x4\_t\ \ \ \ \ vecSx,\ vecW,\ vecTmp;}
+\DoxyCodeLine{00251\ \ \ \ \ any32x4\_t\ \ \ v;}
+\DoxyCodeLine{00252\ }
+\DoxyCodeLine{00253\ \ \ \ \ vecSx\ =\ vabsq(vecIn);}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00255\ \ \ \ \ v.f\ =\ vecIn;}
+\DoxyCodeLine{00256\ \ \ \ \ v.i\ =\ vsubq(vdupq\_n\_s32(INV\_NEWTON\_INIT\_F32),\ v.i);}
+\DoxyCodeLine{00257\ }
+\DoxyCodeLine{00258\ \ \ \ \ vecW\ =\ vmulq(vecSx,\ v.f);}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \ \ \ \ \textcolor{comment}{//\ v.f\ =\ v.f\ *\ (8\ +\ w\ *\ (-\/28\ +\ w\ *\ (56\ +\ w\ *\ (-\/70\ +\ w\ *(56\ +\ w\ *\ (-\/28\ +\ w\ *\ (8\ -\/\ w)))))));}}
+\DoxyCodeLine{00261\ \ \ \ \ vecTmp\ =\ vsubq(vdupq\_n\_f32(8.0f),\ vecW);}
+\DoxyCodeLine{00262\ \ \ \ \ vecTmp\ =\ vfmasq(vecW,\ vecTmp,\ -\/28.0f);}
+\DoxyCodeLine{00263\ \ \ \ \ vecTmp\ =\ vfmasq(vecW,\ vecTmp,\ 56.0f);}
+\DoxyCodeLine{00264\ \ \ \ \ vecTmp\ =\ vfmasq(vecW,\ vecTmp,\ -\/70.0f);}
+\DoxyCodeLine{00265\ \ \ \ \ vecTmp\ =\ vfmasq(vecW,\ vecTmp,\ 56.0f);}
+\DoxyCodeLine{00266\ \ \ \ \ vecTmp\ =\ vfmasq(vecW,\ vecTmp,\ -\/28.0f);}
+\DoxyCodeLine{00267\ \ \ \ \ vecTmp\ =\ vfmasq(vecW,\ vecTmp,\ 8.0f);}
+\DoxyCodeLine{00268\ \ \ \ \ v.f\ =\ vmulq(v.f,\ \ vecTmp);}
+\DoxyCodeLine{00269\ }
+\DoxyCodeLine{00270\ \ \ \ \ v.f\ =\ vdupq\_m(v.f,\ INFINITY,\ vcmpeqq(vecIn,\ 0.0f));}
+\DoxyCodeLine{00271\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00272\ \textcolor{comment}{\ \ \ \ \ *\ restore\ sign}}
+\DoxyCodeLine{00273\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00274\ \ \ \ \ v.f\ =\ vnegq\_m(v.f,\ v.f,\ vcmpltq(vecIn,\ 0.0f));}
+\DoxyCodeLine{00275\ \ \ \ \ \textcolor{keywordflow}{return}\ v.f;}
+\DoxyCodeLine{00276\ \}}
+\DoxyCodeLine{00277\ }
+\DoxyCodeLine{00278\ \_\_STATIC\_INLINE\ f32x4\_t\ vtanhq\_f32(}
+\DoxyCodeLine{00279\ \ \ \ \ f32x4\_t\ val)}
+\DoxyCodeLine{00280\ \{}
+\DoxyCodeLine{00281\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ x\ =}
+\DoxyCodeLine{00282\ \ \ \ \ \ \ \ \ vminnmq\_f32(vmaxnmq\_f32(val,\ vdupq\_n\_f32(-\/10.f)),\ vdupq\_n\_f32(10.0f));}
+\DoxyCodeLine{00283\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ exp2x\ =\ vexpq\_f32(vmulq\_n\_f32(x,\ 2.f));}
+\DoxyCodeLine{00284\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ num\ =\ vsubq\_n\_f32(exp2x,\ 1.f);}
+\DoxyCodeLine{00285\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ den\ =\ vaddq\_n\_f32(exp2x,\ 1.f);}
+\DoxyCodeLine{00286\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ tanh\ =\ vmulq\_f32(num,\ vrecip\_f32(den));}
+\DoxyCodeLine{00287\ \ \ \ \ \textcolor{keywordflow}{return}\ tanh;}
+\DoxyCodeLine{00288\ \}}
+\DoxyCodeLine{00289\ }
+\DoxyCodeLine{00290\ \_\_STATIC\_INLINE\ f32x4\_t\ vpowq\_f32(}
+\DoxyCodeLine{00291\ \ \ \ \ f32x4\_t\ val,}
+\DoxyCodeLine{00292\ \ \ \ \ f32x4\_t\ n)}
+\DoxyCodeLine{00293\ \{}
+\DoxyCodeLine{00294\ \ \ \ \ \textcolor{keywordflow}{return}\ vexpq\_f32(vmulq\_f32(n,\ vlogq\_f32(val)));}
+\DoxyCodeLine{00295\ \}}
+\DoxyCodeLine{00296\ }
+\DoxyCodeLine{00297\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ (defined(ARM\_MATH\_MVEF)\ ||\ defined(ARM\_MATH\_HELIUM))\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)*/}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00298\ }
+\DoxyCodeLine{00299\ \textcolor{preprocessor}{\#if\ (defined(ARM\_MATH\_MVEI)\ ||\ defined(ARM\_MATH\_HELIUM))\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00300\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ (defined(ARM\_MATH\_MVEI)\ ||\ defined(ARM\_MATH\_HELIUM))\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00301\ }
+\DoxyCodeLine{00302\ \textcolor{preprocessor}{\#if\ (defined(ARM\_MATH\_NEON)\ ||\ defined(ARM\_MATH\_NEON\_EXPERIMENTAL))\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00303\ }
+\DoxyCodeLine{00304\ \textcolor{preprocessor}{\#include\ "{}NEMath.h"{}}}
+\DoxyCodeLine{00312\ \_\_STATIC\_INLINE\ \ float32x4\_t\ arm\_vec\_exponent\_f32(float32x4\_t\ x,\ int32\_t\ nb)}
+\DoxyCodeLine{00313\ \{}
+\DoxyCodeLine{00314\ \ \ \ \ float32x4\_t\ r\ =\ x;}
+\DoxyCodeLine{00315\ \ \ \ \ nb\ -\/-\/;}
+\DoxyCodeLine{00316\ \ \ \ \ \textcolor{keywordflow}{while}(nb\ >\ 0)}
+\DoxyCodeLine{00317\ \ \ \ \ \{}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ r\ =\ vmulq\_f32(r\ ,\ x);}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ nb-\/-\/;}
+\DoxyCodeLine{00320\ \ \ \ \ \}}
+\DoxyCodeLine{00321\ \ \ \ \ \textcolor{keywordflow}{return}(r);}
+\DoxyCodeLine{00322\ \}}
+\DoxyCodeLine{00323\ }
+\DoxyCodeLine{00324\ }
+\DoxyCodeLine{00325\ \_\_STATIC\_INLINE\ float32x4\_t\ \_\_arm\_vec\_sqrt\_f32\_neon(float32x4\_t\ \ x)}
+\DoxyCodeLine{00326\ \{}
+\DoxyCodeLine{00327\ \ \ \ \ float32x4\_t\ x1\ =\ vmaxq\_f32(x,\ vdupq\_n\_f32(FLT\_MIN));}
+\DoxyCodeLine{00328\ \ \ \ \ float32x4\_t\ e\ =\ vrsqrteq\_f32(x1);}
+\DoxyCodeLine{00329\ \ \ \ \ e\ =\ vmulq\_f32(vrsqrtsq\_f32(vmulq\_f32(x1,\ e),\ e),\ e);}
+\DoxyCodeLine{00330\ \ \ \ \ e\ =\ vmulq\_f32(vrsqrtsq\_f32(vmulq\_f32(x1,\ e),\ e),\ e);}
+\DoxyCodeLine{00331\ \ \ \ \ \textcolor{keywordflow}{return}\ vmulq\_f32(x,\ e);}
+\DoxyCodeLine{00332\ \}}
+\DoxyCodeLine{00333\ }
+\DoxyCodeLine{00334\ \_\_STATIC\_INLINE\ int16x8\_t\ \_\_arm\_vec\_sqrt\_q15\_neon(int16x8\_t\ vec)}
+\DoxyCodeLine{00335\ \{}
+\DoxyCodeLine{00336\ \ \ \ \ float32x4\_t\ tempF;}
+\DoxyCodeLine{00337\ \ \ \ \ int32x4\_t\ tempHI,tempLO;}
+\DoxyCodeLine{00338\ }
+\DoxyCodeLine{00339\ \ \ \ \ tempLO\ =\ vmovl\_s16(vget\_low\_s16(vec));}
+\DoxyCodeLine{00340\ \ \ \ \ tempF\ =\ vcvtq\_n\_f32\_s32(tempLO,15);}
+\DoxyCodeLine{00341\ \ \ \ \ tempF\ =\ \_\_arm\_vec\_sqrt\_f32\_neon(tempF);}
+\DoxyCodeLine{00342\ \ \ \ \ tempLO\ =\ vcvtq\_n\_s32\_f32(tempF,15);}
+\DoxyCodeLine{00343\ }
+\DoxyCodeLine{00344\ \ \ \ \ tempHI\ =\ vmovl\_s16(vget\_high\_s16(vec));}
+\DoxyCodeLine{00345\ \ \ \ \ tempF\ =\ vcvtq\_n\_f32\_s32(tempHI,15);}
+\DoxyCodeLine{00346\ \ \ \ \ tempF\ =\ \_\_arm\_vec\_sqrt\_f32\_neon(tempF);}
+\DoxyCodeLine{00347\ \ \ \ \ tempHI\ =\ vcvtq\_n\_s32\_f32(tempF,15);}
+\DoxyCodeLine{00348\ }
+\DoxyCodeLine{00349\ \ \ \ \ \textcolor{keywordflow}{return}(vcombine\_s16(vqmovn\_s32(tempLO),vqmovn\_s32(tempHI)));}
+\DoxyCodeLine{00350\ \}}
+\DoxyCodeLine{00351\ }
+\DoxyCodeLine{00352\ \_\_STATIC\_INLINE\ int32x4\_t\ \_\_arm\_vec\_sqrt\_q31\_neon(int32x4\_t\ vec)}
+\DoxyCodeLine{00353\ \{}
+\DoxyCodeLine{00354\ \ \ float32x4\_t\ temp;}
+\DoxyCodeLine{00355\ }
+\DoxyCodeLine{00356\ \ \ temp\ =\ vcvtq\_n\_f32\_s32(vec,31);}
+\DoxyCodeLine{00357\ \ \ temp\ =\ \_\_arm\_vec\_sqrt\_f32\_neon(temp);}
+\DoxyCodeLine{00358\ \ \ \textcolor{keywordflow}{return}(vcvtq\_n\_s32\_f32(temp,31));}
+\DoxyCodeLine{00359\ \}}
+\DoxyCodeLine{00360\ }
+\DoxyCodeLine{00361\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \ (defined(ARM\_MATH\_NEON)\ ||\ defined(ARM\_MATH\_NEON\_EXPERIMENTAL))\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00362\ }
+\DoxyCodeLine{00363\ \textcolor{preprocessor}{\#ifdef\ \ \ \_\_cplusplus}}
+\DoxyCodeLine{00364\ \}}
+\DoxyCodeLine{00365\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00366\ }
+\DoxyCodeLine{00367\ }
+\DoxyCodeLine{00368\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \_ARM\_VEC\_MATH\_H\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00369\ }
+
+\end{DoxyCode}

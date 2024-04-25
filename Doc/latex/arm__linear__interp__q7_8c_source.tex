@@ -1,0 +1,79 @@
+\doxysection{arm\+\_\+linear\+\_\+interp\+\_\+q7.\+c}
+\hypertarget{arm__linear__interp__q7_8c_source}{}\label{arm__linear__interp__q7_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/InterpolationFunctions/arm\_linear\_interp\_q7.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/InterpolationFunctions/arm\_linear\_interp\_q7.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_linear\_interp\_q7.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Q7\ linear\ interpolation}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/interpolation\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00053\ \ \ q7\_t\ \mbox{\hyperlink{group___linear_interpolate_ga490ac8c4b82d1ea761e9756e6546de69}{arm\_linear\_interp\_q7}}(}
+\DoxyCodeLine{00054\ \ \ \textcolor{keyword}{const}\ q7\_t\ *\ pYData,}
+\DoxyCodeLine{00055\ \ \ q31\_t\ x,}
+\DoxyCodeLine{00056\ \ \ uint32\_t\ nValues)}
+\DoxyCodeLine{00057\ \ \ \{}
+\DoxyCodeLine{00058\ \ \ \ \ q31\_t\ y;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ output\ */}}
+\DoxyCodeLine{00059\ \ \ \ \ q7\_t\ y0,\ y1;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Nearest\ output\ values\ */}}
+\DoxyCodeLine{00060\ \ \ \ \ q31\_t\ fract;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ fractional\ part\ */}}
+\DoxyCodeLine{00061\ \ \ \ \ uint32\_t\ index;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Index\ to\ read\ nearest\ output\ values\ */}}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{comment}{/*\ Input\ is\ in\ 12.20\ format\ */}}
+\DoxyCodeLine{00064\ \ \ \ \ \textcolor{comment}{/*\ 12\ bits\ for\ the\ table\ index\ */}}
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{comment}{/*\ Index\ value\ calculation\ */}}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keywordflow}{if}\ (x\ <\ 0)}
+\DoxyCodeLine{00067\ \ \ \ \ \{}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (pYData[0]);}
+\DoxyCodeLine{00069\ \ \ \ \ \}}
+\DoxyCodeLine{00070\ \ \ \ \ index\ =\ (x\ >>\ 20)\ \&\ 0xfff;}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keywordflow}{if}\ (index\ >=\ (nValues\ -\/\ 1))}
+\DoxyCodeLine{00073\ \ \ \ \ \{}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (pYData[nValues\ -\/\ 1]);}
+\DoxyCodeLine{00075\ \ \ \ \ \}}
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00077\ \ \ \ \ \{}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \textcolor{comment}{/*\ 20\ bits\ for\ the\ fractional\ part\ */}}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \textcolor{comment}{/*\ fract\ is\ in\ 12.20\ format\ */}}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ fract\ =\ (x\ \&\ 0x000FFFFF);}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ two\ nearest\ output\ values\ from\ the\ index\ and\ are\ in\ 1.7(q7)\ format\ */}}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ y0\ =\ pYData[index];}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ y1\ =\ pYData[index\ +\ 1];}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ y0\ *\ (1-\/fract\ )\ and\ y\ is\ in\ 13.27(q27)\ format\ */}}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ y\ =\ ((y0\ *\ (0xFFFFF\ -\/\ fract)));}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ y1\ *\ fract\ +\ y0\ *\ (1-\/fract)\ and\ y\ is\ in\ 13.27(q27)\ format\ */}}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ y\ +=\ (y1\ *\ fract);}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \textcolor{comment}{/*\ convert\ y\ to\ 1.7(q7)\ format\ */}}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (q7\_t)\ (y\ >>\ 20);}
+\DoxyCodeLine{00094\ \ \ \ \ \ \}}
+\DoxyCodeLine{00095\ \ \ \}}
+
+\end{DoxyCode}

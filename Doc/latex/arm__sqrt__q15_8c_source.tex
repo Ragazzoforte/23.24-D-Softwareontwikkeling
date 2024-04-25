@@ -1,0 +1,108 @@
+\doxysection{arm\+\_\+sqrt\+\_\+q15.\+c}
+\hypertarget{arm__sqrt__q15_8c_source}{}\label{arm__sqrt__q15_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/FastMathFunctions/arm\_sqrt\_q15.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/FastMathFunctions/arm\_sqrt\_q15.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_sqrt\_q15.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Q15\ square\ root\ function}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/fast\_math\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}arm\_common\_tables.h"{}}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#define\ Q12QUARTER\ 0x2000}}
+\DoxyCodeLine{00051\ arm\_status\ \mbox{\hyperlink{group___s_q_r_t_ga5abe5ca724f3e15849662b03752c1238}{arm\_sqrt\_q15}}(}
+\DoxyCodeLine{00052\ \ \ q15\_t\ in,}
+\DoxyCodeLine{00053\ \ \ q15\_t\ *\ pOut)}
+\DoxyCodeLine{00054\ \{}
+\DoxyCodeLine{00055\ \ \ q15\_t\ number,\ var1,\ signBits1,temp;}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \ \ number\ =\ in;}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \textcolor{comment}{/*\ If\ the\ input\ is\ a\ positive\ number\ then\ compute\ the\ signBits.\ */}}
+\DoxyCodeLine{00060\ \ \ \textcolor{keywordflow}{if}\ (number\ >\ 0)}
+\DoxyCodeLine{00061\ \ \ \{}
+\DoxyCodeLine{00062\ \ \ \ \ signBits1\ =\ \mbox{\hyperlink{group___c_m_s_i_s___core___instruction_interface_ga5d5bb1527e042be4a9fa5a33f65cc248}{\_\_CLZ}}(number)\ -\/\ 17;}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \ \ \ \ \textcolor{comment}{/*\ Shift\ by\ the\ number\ of\ signBits1\ */}}
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keywordflow}{if}\ ((signBits1\ \%\ 2)\ ==\ 0)}
+\DoxyCodeLine{00066\ \ \ \ \ \{}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ number\ =\ number\ <<\ signBits1;}
+\DoxyCodeLine{00068\ \ \ \ \ \}}
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00070\ \ \ \ \ \{}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ number\ =\ number\ <<\ (signBits1\ -\/\ 1);}
+\DoxyCodeLine{00072\ \ \ \ \ \}}
+\DoxyCodeLine{00073\ \ \ \ \ \textcolor{comment}{/*\ Start\ value\ for\ 1/sqrt(x)\ for\ the\ Newton\ iteration\ */}}
+\DoxyCodeLine{00074\ \ \ \ \ var1\ =\ sqrt\_initial\_lut\_q15[(number>>\ 11)\ -\/\ (\mbox{\hyperlink{group___s_q_r_t_gaf6719bb18280f9c76077432e7445f2f5}{Q12QUARTER}}\ >>\ 11)];}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{comment}{/*\ 0.5\ var1\ *\ (3\ -\/\ number\ *\ var1\ *\ var1)\ */}}
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{comment}{/*\ 1st\ iteration\ */}}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \ \ \ temp\ =\ ((q31\_t)\ var1\ *\ var1)\ >>\ 12;}
+\DoxyCodeLine{00080\ \ \ \ temp\ =\ ((q31\_t)\ number\ *\ temp)\ >>\ 15;}
+\DoxyCodeLine{00081\ \ \ \ temp\ =\ 0x3000\ -\/\ temp;\ }
+\DoxyCodeLine{00082\ \ \ \ var1\ =\ ((q31\_t)\ var1\ *\ temp)\ >>\ 13;}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \ \ \ temp\ =\ ((q31\_t)\ var1\ *\ var1)\ >>\ 12;}
+\DoxyCodeLine{00085\ \ \ \ temp\ =\ ((q31\_t)\ number\ *\ temp)\ >>\ 15;}
+\DoxyCodeLine{00086\ \ \ \ temp\ =\ 0x3000\ -\/\ temp;\ }
+\DoxyCodeLine{00087\ \ \ \ var1\ =\ ((q31\_t)\ var1\ *\ temp)\ >>\ 13;}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ temp\ =\ ((q31\_t)\ var1\ *\ var1)\ >>\ 12;}
+\DoxyCodeLine{00090\ \ \ \ temp\ =\ ((q31\_t)\ number\ *\ temp)\ >>\ 15;}
+\DoxyCodeLine{00091\ \ \ \ temp\ =\ 0x3000\ -\/\ temp;\ }
+\DoxyCodeLine{00092\ \ \ \ var1\ =\ ((q31\_t)\ var1\ *\ temp)\ >>\ 13;}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{comment}{/*\ Multiply\ the\ inverse\ square\ root\ with\ the\ original\ value\ */}}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ var1\ =\ ((q15\_t)\ (((q31\_t)\ number\ *\ var1)\ >>\ 12));}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{comment}{/*\ Shift\ the\ output\ down\ accordingly\ */}}
+\DoxyCodeLine{00099\ \ \ \ \ \textcolor{keywordflow}{if}\ ((signBits1\ \%\ 2)\ ==\ 0)}
+\DoxyCodeLine{00100\ \ \ \ \ \{}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ var1\ =\ var1\ >>\ (signBits1\ /\ 2);}
+\DoxyCodeLine{00102\ \ \ \ \ \}}
+\DoxyCodeLine{00103\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00104\ \ \ \ \ \{}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ var1\ =\ var1\ >>\ ((signBits1\ -\/\ 1)\ /\ 2);}
+\DoxyCodeLine{00106\ \ \ \ \ \}}
+\DoxyCodeLine{00107\ \ \ \ \ *pOut\ =\ var1;}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \ \textcolor{keywordflow}{return}\ (ARM\_MATH\_SUCCESS);}
+\DoxyCodeLine{00111\ \ \ \}}
+\DoxyCodeLine{00112\ \ \ \textcolor{comment}{/*\ If\ the\ number\ is\ a\ negative\ number\ then\ store\ zero\ as\ its\ square\ root\ value\ */}}
+\DoxyCodeLine{00113\ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00114\ \ \ \{}
+\DoxyCodeLine{00115\ \ \ \ \ *pOut\ =\ 0;}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ \ \textcolor{keywordflow}{return}\ (ARM\_MATH\_ARGUMENT\_ERROR);}
+\DoxyCodeLine{00118\ \ \ \}}
+\DoxyCodeLine{00119\ \}}
+\DoxyCodeLine{00120\ }
+
+\end{DoxyCode}

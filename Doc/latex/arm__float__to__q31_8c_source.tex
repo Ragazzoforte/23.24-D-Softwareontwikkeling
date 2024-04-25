@@ -1,0 +1,282 @@
+\doxysection{arm\+\_\+float\+\_\+to\+\_\+q31.\+c}
+\hypertarget{arm__float__to__q31_8c_source}{}\label{arm__float__to__q31_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/SupportFunctions/arm\_float\_to\_q31.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/SupportFunctions/arm\_float\_to\_q31.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_float\_to\_q31.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Converts\ the\ elements\ of\ the\ floating-\/point\ vector\ to\ Q31\ vector}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/support\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00066\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00067\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group__float__to__x_gaae21be47db707e79552f3e8221a48fb0}{arm\_float\_to\_q31}}(}
+\DoxyCodeLine{00068\ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ pSrc,}
+\DoxyCodeLine{00069\ \ \ q31\_t\ *\ pDst,}
+\DoxyCodeLine{00070\ \ \ uint32\_t\ blockSize)}
+\DoxyCodeLine{00071\ \{}
+\DoxyCodeLine{00072\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ \ blkCnt;}
+\DoxyCodeLine{00073\ \ \ \ \ float32\_t\ \ \ \ \ \ \ maxQ\ =\ (float32\_t)\ Q31\_MAX;}
+\DoxyCodeLine{00074\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecDst;}
+\DoxyCodeLine{00075\ \textcolor{preprocessor}{\#ifdef\ ARM\_MATH\_ROUNDING}}
+\DoxyCodeLine{00076\ \ \ \ \ float32\_t\ in;}
+\DoxyCodeLine{00077\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \ \ blkCnt\ =\ blockSize\ >>\ 2U;}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \ \ \ \ \textcolor{comment}{/*\ Compute\ 4\ outputs\ at\ a\ time.\ */}}
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00084\ \ \ \ \ \{}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ vecDst\ =\ vldrwq\_f32(pSrc);}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A\ *\ 2147483648\ */}}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ convert\ from\ float\ to\ Q31\ and\ then\ store\ the\ results\ in\ the\ destination\ buffer\ */}}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ vecDst\ =\ vmulq(vecDst,\ maxQ);}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ vstrwq\_s32(pDst,\ vcvtaq\_s32\_f32(vecDst));}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00093\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Decrement\ the\ blockSize\ loop\ counter}}
+\DoxyCodeLine{00094\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Advance\ vector\ source\ and\ destination\ pointers}}
+\DoxyCodeLine{00095\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ pSrc\ +=\ 4;}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ pDst\ +=\ 4;}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ blkCnt\ -\/-\/;}
+\DoxyCodeLine{00099\ \ \ \ \ \}}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00104\ \ \ \ \ \{}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A\ *\ 2147483648\ */}}
+\DoxyCodeLine{00106\ \ \ \ }
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \textcolor{comment}{/*\ convert\ from\ float\ to\ Q31\ and\ store\ result\ in\ destination\ buffer\ */}}
+\DoxyCodeLine{00108\ \textcolor{preprocessor}{\#ifdef\ ARM\_MATH\_ROUNDING}}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ in\ =\ (*pSrc++\ *\ 2147483648.0f);}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ in\ +=\ in\ >\ 0.0f\ ?\ 0.5f\ :\ -\/0.5f;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ *pDst++\ =\ clip\_q63\_to\_q31((q63\_t)\ (in));}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A\ *\ 2147483648\ */}}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Convert\ from\ float\ to\ Q31\ and\ then\ store\ the\ results\ in\ the\ destination\ buffer\ */}}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ *pDst++\ =\ clip\_q63\_to\_q31((q63\_t)\ (*pSrc++\ *\ 2147483648.0f));}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifdef\ ARM\_MATH\_ROUNDING\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00124\ \ \ \}}
+\DoxyCodeLine{00125\ \}}
+\DoxyCodeLine{00126\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00127\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_NEON)}}
+\DoxyCodeLine{00128\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group__float__to__x_gaae21be47db707e79552f3e8221a48fb0}{arm\_float\_to\_q31}}(}
+\DoxyCodeLine{00129\ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ pSrc,}
+\DoxyCodeLine{00130\ \ \ q31\_t\ *\ pDst,}
+\DoxyCodeLine{00131\ \ \ uint32\_t\ blockSize)}
+\DoxyCodeLine{00132\ \{}
+\DoxyCodeLine{00133\ \ \ \textcolor{keyword}{const}\ float32\_t\ *pIn\ =\ pSrc;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Src\ pointer\ */}}
+\DoxyCodeLine{00134\ \ \ uint32\_t\ blkCnt;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ loop\ counter\ */}}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00136\ \ \ float32x4\_t\ inV;}
+\DoxyCodeLine{00137\ \textcolor{preprocessor}{\ \ \#ifdef\ ARM\_MATH\_ROUNDING}}
+\DoxyCodeLine{00138\ \ \ float32\_t\ in;}
+\DoxyCodeLine{00139\ \ \ float32x4\_t\ zeroV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00140\ \ \ float32x4\_t\ pHalf\ =\ vdupq\_n\_f32(0.5f\ /\ 2147483648.0f);}
+\DoxyCodeLine{00141\ \ \ float32x4\_t\ mHalf\ =\ vdupq\_n\_f32(-\/0.5f\ /\ 2147483648.0f);}
+\DoxyCodeLine{00142\ \ \ float32x4\_t\ r;}
+\DoxyCodeLine{00143\ \ \ uint32x4\_t\ cmp;}
+\DoxyCodeLine{00144\ \textcolor{preprocessor}{\ \ \#endif}}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \ \ int32x4\_t\ outV;}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ \ \ blkCnt\ =\ blockSize\ >>\ 2U;}
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \ \ \textcolor{comment}{/*\ Compute\ 4\ outputs\ at\ a\ time.}}
+\DoxyCodeLine{00151\ \textcolor{comment}{\ \ \ **\ a\ second\ loop\ below\ computes\ the\ remaining\ 1\ to\ 3\ samples.\ */}}
+\DoxyCodeLine{00152\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00153\ \ \ \{}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \textcolor{preprocessor}{\#ifdef\ ARM\_MATH\_ROUNDING}}
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00157\ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A\ *\ 32768\ */}}
+\DoxyCodeLine{00158\ \ \ \ \ \textcolor{comment}{/*\ Convert\ from\ float\ to\ Q31\ and\ then\ store\ the\ results\ in\ the\ destination\ buffer\ */}}
+\DoxyCodeLine{00159\ \ \ \ \ inV\ =\ vld1q\_f32(pIn);}
+\DoxyCodeLine{00160\ \ \ \ \ cmp\ =\ vcgtq\_f32(inV,zeroV);}
+\DoxyCodeLine{00161\ \ \ \ \ r\ =\ vbslq\_f32(cmp,pHalf,mHalf);}
+\DoxyCodeLine{00162\ \ \ \ \ inV\ =\ vaddq\_f32(inV,\ r);}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \ \ \ \ pIn\ +=\ 4;}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ outV\ =\ vcvtq\_n\_s32\_f32(inV,31);}
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00168\ \ \ \ \ vst1q\_s32(pDst,\ outV);}
+\DoxyCodeLine{00169\ \ \ \ \ pDst\ +=\ 4;}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00172\ }
+\DoxyCodeLine{00173\ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A\ *\ 2147483648\ */}}
+\DoxyCodeLine{00174\ \ \ \ \ \textcolor{comment}{/*\ Convert\ from\ float\ to\ Q31\ and\ then\ store\ the\ results\ in\ the\ destination\ buffer\ */}}
+\DoxyCodeLine{00175\ \ \ \ \ inV\ =\ vld1q\_f32(pIn);}
+\DoxyCodeLine{00176\ }
+\DoxyCodeLine{00177\ \ \ \ \ outV\ =\ vcvtq\_n\_s32\_f32(inV,31);}
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00179\ \ \ \ \ vst1q\_s32(pDst,\ outV);}
+\DoxyCodeLine{00180\ \ \ \ \ pDst\ +=\ 4;}
+\DoxyCodeLine{00181\ \ \ \ \ pIn\ +=\ 4;}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \ \ \ \ \ \#ifdef\ ARM\_MATH\_ROUNDING\ \ \ \ \ \ \ \ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00185\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ the\ loop\ counter\ */}}
+\DoxyCodeLine{00186\ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00187\ \ \ \}}
+\DoxyCodeLine{00188\ }
+\DoxyCodeLine{00189\ \ \ \textcolor{comment}{/*\ If\ the\ blockSize\ is\ not\ a\ multiple\ of\ 4,\ compute\ any\ remaining\ output\ samples\ here.}}
+\DoxyCodeLine{00190\ \textcolor{comment}{\ \ \ **\ No\ loop\ unrolling\ is\ used.\ */}}
+\DoxyCodeLine{00191\ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00192\ }
+\DoxyCodeLine{00193\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00194\ \ \ \{}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \textcolor{preprocessor}{\#ifdef\ ARM\_MATH\_ROUNDING}}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00198\ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A\ *\ 2147483648\ */}}
+\DoxyCodeLine{00199\ \ \ \ \ \textcolor{comment}{/*\ Convert\ from\ float\ to\ Q31\ and\ then\ store\ the\ results\ in\ the\ destination\ buffer\ */}}
+\DoxyCodeLine{00200\ \ \ \ \ in\ =\ *pIn++;}
+\DoxyCodeLine{00201\ \ \ \ \ in\ =\ (in\ *\ 2147483648.0f);}
+\DoxyCodeLine{00202\ \ \ \ \ in\ +=\ in\ >\ 0.0f\ ?\ 0.5f\ :\ -\/0.5f;}
+\DoxyCodeLine{00203\ \ \ \ \ *pDst++\ =\ clip\_q63\_to\_q31((q63\_t)\ (in));}
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00205\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00207\ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A\ *\ 2147483648\ */}}
+\DoxyCodeLine{00208\ \ \ \ \ \textcolor{comment}{/*\ Convert\ from\ float\ to\ Q31\ and\ then\ store\ the\ results\ in\ the\ destination\ buffer\ */}}
+\DoxyCodeLine{00209\ \ \ \ \ *pDst++\ =\ clip\_q63\_to\_q31((q63\_t)\ (*pIn++\ *\ 2147483648.0f));}
+\DoxyCodeLine{00210\ }
+\DoxyCodeLine{00211\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \ \ \ \ \ \#ifdef\ ARM\_MATH\_ROUNDING\ \ \ \ \ \ \ \ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00212\ }
+\DoxyCodeLine{00213\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ the\ loop\ counter\ */}}
+\DoxyCodeLine{00214\ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00215\ \ \ \}}
+\DoxyCodeLine{00216\ }
+\DoxyCodeLine{00217\ }
+\DoxyCodeLine{00218\ \}}
+\DoxyCodeLine{00219\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00220\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group__float__to__x_gaae21be47db707e79552f3e8221a48fb0}{arm\_float\_to\_q31}}(}
+\DoxyCodeLine{00221\ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ pSrc,}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ q31\_t\ *\ pDst,}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ uint32\_t\ blockSize)}
+\DoxyCodeLine{00224\ \{}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ uint32\_t\ blkCnt;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ counter\ */}}
+\DoxyCodeLine{00226\ \ \ \textcolor{keyword}{const}\ float32\_t\ *pIn\ =\ pSrc;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Source\ pointer\ */}}
+\DoxyCodeLine{00227\ }
+\DoxyCodeLine{00228\ \textcolor{preprocessor}{\#ifdef\ ARM\_MATH\_ROUNDING}}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ float32\_t\ in;}
+\DoxyCodeLine{00230\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifdef\ ARM\_MATH\_ROUNDING\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00232\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)}}
+\DoxyCodeLine{00233\ }
+\DoxyCodeLine{00234\ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ 4\ outputs\ at\ a\ time\ */}}
+\DoxyCodeLine{00235\ \ \ blkCnt\ =\ blockSize\ >>\ 2U;}
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00237\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00238\ \ \ \{}
+\DoxyCodeLine{00239\ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A\ *\ 2147483648\ */}}
+\DoxyCodeLine{00240\ }
+\DoxyCodeLine{00241\ \ \ \ \ \textcolor{comment}{/*\ convert\ from\ float\ to\ Q31\ and\ store\ result\ in\ destination\ buffer\ */}}
+\DoxyCodeLine{00242\ \textcolor{preprocessor}{\#ifdef\ ARM\_MATH\_ROUNDING}}
+\DoxyCodeLine{00243\ }
+\DoxyCodeLine{00244\ \ \ \ \ in\ =\ (*pIn++\ *\ 2147483648.0f);}
+\DoxyCodeLine{00245\ \ \ \ \ in\ +=\ in\ >\ 0.0f\ ?\ 0.5f\ :\ -\/0.5f;}
+\DoxyCodeLine{00246\ \ \ \ \ *pDst++\ =\ clip\_q63\_to\_q31((q63\_t)\ (in));}
+\DoxyCodeLine{00247\ }
+\DoxyCodeLine{00248\ \ \ \ \ in\ =\ (*pIn++\ *\ 2147483648.0f);}
+\DoxyCodeLine{00249\ \ \ \ \ in\ +=\ in\ >\ 0.0f\ ?\ 0.5f\ :\ -\/0.5f;}
+\DoxyCodeLine{00250\ \ \ \ \ *pDst++\ =\ clip\_q63\_to\_q31((q63\_t)\ (in));}
+\DoxyCodeLine{00251\ }
+\DoxyCodeLine{00252\ \ \ \ \ in\ =\ (*pIn++\ *\ 2147483648.0f);}
+\DoxyCodeLine{00253\ \ \ \ \ in\ +=\ in\ >\ 0.0f\ ?\ 0.5f\ :\ -\/0.5f;}
+\DoxyCodeLine{00254\ \ \ \ \ *pDst++\ =\ clip\_q63\_to\_q31((q63\_t)\ (in));}
+\DoxyCodeLine{00255\ }
+\DoxyCodeLine{00256\ \ \ \ \ in\ =\ (*pIn++\ *\ 2147483648.0f);}
+\DoxyCodeLine{00257\ \ \ \ \ in\ +=\ in\ >\ 0.0f\ ?\ 0.5f\ :\ -\/0.5f;}
+\DoxyCodeLine{00258\ \ \ \ \ *pDst++\ =\ clip\_q63\_to\_q31((q63\_t)\ (in));}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00261\ }
+\DoxyCodeLine{00262\ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A\ *\ 2147483648\ */}}
+\DoxyCodeLine{00263\ \ \ \ \ \textcolor{comment}{/*\ Convert\ from\ float\ to\ Q31\ and\ then\ store\ the\ results\ in\ the\ destination\ buffer\ */}}
+\DoxyCodeLine{00264\ \ \ \ \ *pDst++\ =\ clip\_q63\_to\_q31((q63\_t)\ (*pIn++\ *\ 2147483648.0f));}
+\DoxyCodeLine{00265\ \ \ \ \ *pDst++\ =\ clip\_q63\_to\_q31((q63\_t)\ (*pIn++\ *\ 2147483648.0f));}
+\DoxyCodeLine{00266\ \ \ \ \ *pDst++\ =\ clip\_q63\_to\_q31((q63\_t)\ (*pIn++\ *\ 2147483648.0f));}
+\DoxyCodeLine{00267\ \ \ \ \ *pDst++\ =\ clip\_q63\_to\_q31((q63\_t)\ (*pIn++\ *\ 2147483648.0f));}
+\DoxyCodeLine{00268\ }
+\DoxyCodeLine{00269\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifdef\ ARM\_MATH\_ROUNDING\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00270\ }
+\DoxyCodeLine{00271\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00272\ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00273\ \ \ \}}
+\DoxyCodeLine{00274\ }
+\DoxyCodeLine{00275\ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ remaining\ outputs\ */}}
+\DoxyCodeLine{00276\ \ \ blkCnt\ =\ blockSize\ \%\ 0x4U;}
+\DoxyCodeLine{00277\ }
+\DoxyCodeLine{00278\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00279\ }
+\DoxyCodeLine{00280\ \ \ \textcolor{comment}{/*\ Initialize\ blkCnt\ with\ number\ of\ samples\ */}}
+\DoxyCodeLine{00281\ \ \ blkCnt\ =\ blockSize;}
+\DoxyCodeLine{00282\ }
+\DoxyCodeLine{00283\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_LOOPUNROLL)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00284\ }
+\DoxyCodeLine{00285\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00286\ \ \ \{}
+\DoxyCodeLine{00287\ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A\ *\ 2147483648\ */}}
+\DoxyCodeLine{00288\ }
+\DoxyCodeLine{00289\ \ \ \ \ \textcolor{comment}{/*\ convert\ from\ float\ to\ Q31\ and\ store\ result\ in\ destination\ buffer\ */}}
+\DoxyCodeLine{00290\ \textcolor{preprocessor}{\#ifdef\ ARM\_MATH\_ROUNDING}}
+\DoxyCodeLine{00291\ }
+\DoxyCodeLine{00292\ \ \ \ \ in\ =\ (*pIn++\ *\ 2147483648.0f);}
+\DoxyCodeLine{00293\ \ \ \ \ in\ +=\ in\ >\ 0.0f\ ?\ 0.5f\ :\ -\/0.5f;}
+\DoxyCodeLine{00294\ \ \ \ \ *pDst++\ =\ clip\_q63\_to\_q31((q63\_t)\ (in));}
+\DoxyCodeLine{00295\ }
+\DoxyCodeLine{00296\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00297\ }
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A\ *\ 2147483648\ */}}
+\DoxyCodeLine{00299\ \ \ \ \ \textcolor{comment}{/*\ Convert\ from\ float\ to\ Q31\ and\ then\ store\ the\ results\ in\ the\ destination\ buffer\ */}}
+\DoxyCodeLine{00300\ \ \ \ \ *pDst++\ =\ clip\_q63\_to\_q31((q63\_t)\ (*pIn++\ *\ 2147483648.0f));}
+\DoxyCodeLine{00301\ }
+\DoxyCodeLine{00302\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifdef\ ARM\_MATH\_ROUNDING\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00303\ }
+\DoxyCodeLine{00304\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00305\ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00306\ \ \ \}}
+\DoxyCodeLine{00307\ }
+\DoxyCodeLine{00308\ \}}
+\DoxyCodeLine{00309\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined(ARM\_MATH\_NEON)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00310\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00311\ }
+
+\end{DoxyCode}

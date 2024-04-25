@@ -1,0 +1,201 @@
+\doxysection{arm\+\_\+rotation2quaternion\+\_\+f32.\+c}
+\hypertarget{arm__rotation2quaternion__f32_8c_source}{}\label{arm__rotation2quaternion__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/QuaternionMathFunctions/arm\_rotation2quaternion\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/QuaternionMathFunctions/arm\_rotation2quaternion\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_rotation2quaternion\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Floating-\/point\ rotation\ to\ quaternion\ conversion}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/quaternion\_math\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <math.h>}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#define\ RI(x,y)\ r[(3*(x)\ +\ (y))]}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00062\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \textcolor{preprocessor}{\#define\ R00\ \ vgetq\_lane(q1,0)}}
+\DoxyCodeLine{00067\ \textcolor{preprocessor}{\#define\ R01\ \ vgetq\_lane(q1,1)}}
+\DoxyCodeLine{00068\ \textcolor{preprocessor}{\#define\ R02\ \ vgetq\_lane(q1,2)}}
+\DoxyCodeLine{00069\ \textcolor{preprocessor}{\#define\ R10\ \ vgetq\_lane(q1,3)}}
+\DoxyCodeLine{00070\ \textcolor{preprocessor}{\#define\ R11\ \ vgetq\_lane(q2,0)}}
+\DoxyCodeLine{00071\ \textcolor{preprocessor}{\#define\ R12\ \ vgetq\_lane(q2,1)}}
+\DoxyCodeLine{00072\ \textcolor{preprocessor}{\#define\ R20\ \ vgetq\_lane(q2,2)}}
+\DoxyCodeLine{00073\ \textcolor{preprocessor}{\#define\ R21\ \ vgetq\_lane(q2,3)}}
+\DoxyCodeLine{00074\ \textcolor{preprocessor}{\#define\ R22\ \ ro22}}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___rot_quat_gadbb6d70a0619ba5fa864d8fab76a2936}{arm\_rotation2quaternion\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pInputRotations,\ }
+\DoxyCodeLine{00077\ \ \ \ \ float32\_t\ *pOutputQuaternions,\ \ }
+\DoxyCodeLine{00078\ \ \ \ \ uint32\_t\ nbQuaternions)}
+\DoxyCodeLine{00079\ \{}
+\DoxyCodeLine{00080\ \ \ \ float32\_t\ ro22,\ trace;}
+\DoxyCodeLine{00081\ \ \ \ f32x4\_t\ q1,q2,\ q;\ }
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \ float32\_t\ doubler;}
+\DoxyCodeLine{00084\ \ \ \ float32\_t\ s;}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \ \ \ q\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ \ \ \ \textcolor{keywordflow}{for}(uint32\_t\ nb=0;\ nb\ <\ nbQuaternions;\ nb++)}
+\DoxyCodeLine{00089\ \ \ \ \{}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ q1\ =\ vld1q(pInputRotations);}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ pInputRotations\ +=\ 4;}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \ \ \ \ q2\ =\ vld1q(pInputRotations);}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ pInputRotations\ +=\ 4;}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ \ \ ro22\ =\ *pInputRotations++;}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \ \ \ \ \ \ trace\ =\ R00\ +\ R11\ +\ R22;}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (trace\ >\ 0)}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ (void)\mbox{\hyperlink{group___s_q_r_t_gaa37d8b017ef0c8d356dc98fd78e2d96b}{arm\_sqrt\_f32}}(trace\ +\ 1.0f,\ \&doubler)\ ;\ \textcolor{comment}{//\ invs=4*qw}}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ doubler\ =\ 2.0f*doubler;}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ s\ =\ 1.0f\ /\ doubler;}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ q1\ =\ vmulq\_n\_f32(q1,s);}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ q2\ =\ vmulq\_n\_f32(q2,s);}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ q[0]\ =\ 0.25f\ *\ doubler;}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ q[1]\ =\ R21\ -\/\ R12;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ q[2]\ =\ R02\ -\/\ R20;}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ q[3]\ =\ R10\ -\/\ R01;}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ ((R00\ >\ R11)\ \&\&\ (R00\ >\ R22)\ )}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ (void)\mbox{\hyperlink{group___s_q_r_t_gaa37d8b017ef0c8d356dc98fd78e2d96b}{arm\_sqrt\_f32}}(1.0f\ +\ R00\ -\/\ R11\ -\/\ R22,\&doubler);\ \textcolor{comment}{//\ invs=4*qx}}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ doubler\ =\ 2.0f*doubler;}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ s\ =\ 1.0f\ /\ doubler;}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ q1\ =\ vmulq\_n\_f32(q1,s);}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ q2\ =\ vmulq\_n\_f32(q2,s);}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ q[0]\ =\ R21\ -\/\ R12;}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ q[1]\ =\ 0.25f\ *\ doubler;}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ q[2]\ =\ R01\ +\ R10;}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ q[3]\ =\ R02\ +\ R20;}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (R11\ >\ R22)}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ (void)\mbox{\hyperlink{group___s_q_r_t_gaa37d8b017ef0c8d356dc98fd78e2d96b}{arm\_sqrt\_f32}}(1.0f\ +\ R11\ -\/\ R00\ -\/\ R22,\&doubler);\ \textcolor{comment}{//\ invs=4*qy}}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ doubler\ =\ 2.0f*doubler;}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ s\ =\ 1.0f\ /\ doubler;}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ q1\ =\ vmulq\_n\_f32(q1,s);}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ q2\ =\ vmulq\_n\_f32(q2,s);}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ q[0]\ =\ R02\ -\/\ R20;}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ q[1]\ =\ R01\ +\ R10;}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ q[2]\ =\ 0.25f\ *\ doubler;}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ q[3]\ =\ R12\ +\ R21;}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ (void)\mbox{\hyperlink{group___s_q_r_t_gaa37d8b017ef0c8d356dc98fd78e2d96b}{arm\_sqrt\_f32}}(1.0f\ +\ R22\ -\/\ R00\ -\/\ R11,\&doubler);\ \textcolor{comment}{//\ invs=4*qz}}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ doubler\ =\ 2.0f*doubler;}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ s\ =\ 1.0f\ /\ doubler;}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ q1\ =\ vmulq\_n\_f32(q1,s);}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ q2\ =\ vmulq\_n\_f32(q2,s);}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ q[0]\ =\ R10\ -\/\ R01;}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ q[1]\ =\ R02\ +\ R20;}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ q[2]\ =\ R12\ +\ R21;}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ q[3]\ =\ 0.25f\ *\ doubler;}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \ \ \ \ \ \ vst1q(pOutputQuaternions,\ q);}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ pOutputQuaternions\ +=\ 4;}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \}}
+\DoxyCodeLine{00162\ \}}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00165\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___rot_quat_gadbb6d70a0619ba5fa864d8fab76a2936}{arm\_rotation2quaternion\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pInputRotations,\ }
+\DoxyCodeLine{00166\ \ \ \ \ float32\_t\ *pOutputQuaternions,\ \ }
+\DoxyCodeLine{00167\ \ \ \ \ uint32\_t\ nbQuaternions)}
+\DoxyCodeLine{00168\ \{}
+\DoxyCodeLine{00169\ \ \ \ uint32\_t\ nb;}
+\DoxyCodeLine{00170\ \ \ \ \textcolor{keywordflow}{for}(nb=0;\ nb\ <\ nbQuaternions;\ nb++)}
+\DoxyCodeLine{00171\ \ \ \ \{}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *r=\&pInputRotations[nb*9];}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ float32\_t\ *q=\&pOutputQuaternions[nb*4];}
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ float32\_t\ trace\ =\ RI(0,0)\ +\ RI(1,1)\ +\ RI(2,2);}
+\DoxyCodeLine{00176\ }
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ float32\_t\ doubler;}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ float32\_t\ s;}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (trace\ >\ 0.0f)}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ doubler\ =\ sqrtf(trace\ +\ 1.0f)\ *\ 2.0f;\ \textcolor{comment}{//\ invs=4*qw}}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ s\ =\ 1.0f\ /\ doubler;}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ q[0]\ =\ 0.25f\ *\ doubler;}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ q[1]\ =\ (RI(2,1)\ -\/\ RI(1,2))\ *\ s;}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ q[2]\ =\ (RI(0,2)\ -\/\ RI(2,0))\ *\ s;}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ q[3]\ =\ (RI(1,0)\ -\/\ RI(0,1))\ *\ s;}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ ((RI(0,0)\ >\ RI(1,1))\ \&\&\ (RI(0,0)\ >\ RI(2,2))\ )}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ doubler\ =\ sqrtf(1.0f\ +\ RI(0,0)\ -\/\ RI(1,1)\ -\/\ RI(2,2))\ *\ 2.0f;\ \textcolor{comment}{//\ invs=4*qx}}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ s\ =\ 1.0f\ /\ doubler;}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ q[0]\ =\ (RI(2,1)\ -\/\ RI(1,2))\ *\ s;}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ q[1]\ =\ 0.25f\ *\ doubler;}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ q[2]\ =\ (RI(0,1)\ +\ RI(1,0))\ *\ s;}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ q[3]\ =\ (RI(0,2)\ +\ RI(2,0))\ *\ s;}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (RI(1,1)\ >\ RI(2,2))}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ doubler\ =\ sqrtf(1.0f\ +\ RI(1,1)\ -\/\ RI(0,0)\ -\/\ RI(2,2))\ *\ 2.0f;\ \textcolor{comment}{//\ invs=4*qy}}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ s\ =\ 1.0f\ /\ doubler;}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ q[0]\ =\ (RI(0,2)\ -\/\ RI(2,0))\ *\ s;}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ q[1]\ =\ (RI(0,1)\ +\ RI(1,0))\ *\ s;}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ q[2]\ =\ 0.25f\ *\ doubler;}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ q[3]\ =\ (RI(1,2)\ +\ RI(2,1))\ *\ s;}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ doubler\ =\ sqrtf(1.0f\ +\ RI(2,2)\ -\/\ RI(0,0)\ -\/\ RI(1,1))\ *\ 2.0f;\ \textcolor{comment}{//\ invs=4*qz}}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ s\ =\ 1.0f\ /\ doubler;}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ q[0]\ =\ (RI(1,0)\ -\/\ RI(0,1))\ *\ s;}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ q[1]\ =\ (RI(0,2)\ +\ RI(2,0))\ *\ s;}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ q[2]\ =\ (RI(1,2)\ +\ RI(2,1))\ *\ s;}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ q[3]\ =\ 0.25f\ *\ doubler;}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00218\ }
+\DoxyCodeLine{00219\ \ \ \ \ \}}
+\DoxyCodeLine{00220\ \}}
+\DoxyCodeLine{00221\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00222\ }
+
+\end{DoxyCode}

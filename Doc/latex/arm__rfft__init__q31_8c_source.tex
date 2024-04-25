@@ -1,0 +1,217 @@
+\doxysection{arm\+\_\+rfft\+\_\+init\+\_\+q31.\+c}
+\hypertarget{arm__rfft__init__q31_8c_source}{}\label{arm__rfft__init__q31_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_rfft\_init\_q31.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_rfft\_init\_q31.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_rfft\_init\_q31.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ RFFT\ \&\ RIFFT\ Q31\ initialisation\ function}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/transform\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}arm\_common\_tables.h"{}}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ "{}arm\_const\_structs.h"{}}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00067\ arm\_status\ \mbox{\hyperlink{group___real_f_f_t_ga5abde938abbe72e95c5bab080eb33c45}{arm\_rfft\_init\_q31}}(}
+\DoxyCodeLine{00068\ \ \ \ \ \mbox{\hyperlink{structarm__rfft__instance__q31}{arm\_rfft\_instance\_q31}}\ *\ S,}
+\DoxyCodeLine{00069\ \ \ \ \ uint32\_t\ fftLenReal,}
+\DoxyCodeLine{00070\ \ \ \ \ uint32\_t\ ifftFlagR,}
+\DoxyCodeLine{00071\ \ \ \ \ uint32\_t\ bitReverseFlag)}
+\DoxyCodeLine{00072\ \{}
+\DoxyCodeLine{00073\ \ \ \ \ \ \textcolor{comment}{/*\ \ Initialise\ the\ default\ arm\ status\ */}}
+\DoxyCodeLine{00074\ \ \ \ \ arm\_status\ status\ =\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_FFT\_ALLOW\_TABLES)}}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ defined(ARM\_TABLE\_REALCOEF\_Q31)}}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \ \ \textcolor{comment}{/*\ \ Initialise\ the\ default\ arm\ status\ */}}
+\DoxyCodeLine{00081\ \ \ \ \ status\ =\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{comment}{/*\ \ Initialize\ the\ Real\ FFT\ length\ */}}
+\DoxyCodeLine{00084\ \ \ \ \ S-\/>fftLenReal\ =\ (uint16\_t)\ fftLenReal;}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \ \ \ \ \textcolor{comment}{/*\ \ Initialize\ the\ Twiddle\ coefficientA\ pointer\ */}}
+\DoxyCodeLine{00087\ \ \ \ \ S-\/>pTwiddleAReal\ =\ (q31\_t\ *)\ \mbox{\hyperlink{group___real_f_f_t___table_gaf1592a6cf0504675205074a43c3728a2}{realCoefAQ31}};}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{comment}{/*\ \ Initialize\ the\ Twiddle\ coefficientB\ pointer\ */}}
+\DoxyCodeLine{00090\ \ \ \ \ S-\/>pTwiddleBReal\ =\ (q31\_t\ *)\ \mbox{\hyperlink{group___real_f_f_t___table_ga1eb5745728a61c3715755f5d69a4a960}{realCoefBQ31}};}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{comment}{/*\ \ Initialize\ the\ Flag\ for\ selection\ of\ RFFT\ or\ RIFFT\ */}}
+\DoxyCodeLine{00093\ \ \ \ \ S-\/>ifftFlagR\ =\ (uint8\_t)\ ifftFlagR;}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \ \ \textcolor{comment}{/*\ \ Initialize\ the\ Flag\ for\ calculation\ Bit\ reversal\ or\ not\ */}}
+\DoxyCodeLine{00096\ \ \ \ \ S-\/>bitReverseFlagR\ =\ (uint8\_t)\ bitReverseFlag;}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{comment}{/*\ \ Initialization\ of\ coef\ modifier\ depending\ on\ the\ FFT\ length\ */}}
+\DoxyCodeLine{00099\ \ \ \ \ \textcolor{keywordflow}{switch}\ (S-\/>fftLenReal)}
+\DoxyCodeLine{00100\ \ \ \ \ \{}
+\DoxyCodeLine{00101\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_Q31\_4096)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FXT\_4096))}}
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{keywordflow}{case}\ 8192U:}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ S-\/>twidCoefRModifier\ =\ 1U;}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ \ status=\mbox{\hyperlink{group___complex_f_f_t_ga196bb4e5466c74650b6cc76bb2efdfe2}{arm\_cfft\_init\_q31}}(\&(S-\/>cfftInst),4096);}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (status\ !=\ ARM\_MATH\_SUCCESS)}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(status);}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00113\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#else}}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ S-\/>pCfft\ =\ \&arm\_cfft\_sR\_q31\_len4096;}
+\DoxyCodeLine{00115\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00117\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00118\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_Q31\_2048)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FXT\_2048))}}
+\DoxyCodeLine{00119\ \ \ \ \ \textcolor{keywordflow}{case}\ 4096U:}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ S-\/>twidCoefRModifier\ =\ 2U;}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ status=\mbox{\hyperlink{group___complex_f_f_t_ga196bb4e5466c74650b6cc76bb2efdfe2}{arm\_cfft\_init\_q31}}(\&(S-\/>cfftInst),2048);}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (status\ !=\ ARM\_MATH\_SUCCESS)}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(status);}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00128\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#else}}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ S-\/>pCfft\ =\ \&arm\_cfft\_sR\_q31\_len2048;}
+\DoxyCodeLine{00130\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00132\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00133\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_Q31\_1024)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FXT\_1024))}}
+\DoxyCodeLine{00134\ \ \ \ \ \textcolor{keywordflow}{case}\ 2048U:}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ S-\/>twidCoefRModifier\ =\ 4U;}
+\DoxyCodeLine{00136\ }
+\DoxyCodeLine{00137\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \ \ status=\mbox{\hyperlink{group___complex_f_f_t_ga196bb4e5466c74650b6cc76bb2efdfe2}{arm\_cfft\_init\_q31}}(\&(S-\/>cfftInst),1024);}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (status\ !=\ ARM\_MATH\_SUCCESS)}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(status);}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00143\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#else}}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ S-\/>pCfft\ =\ \&arm\_cfft\_sR\_q31\_len1024;}
+\DoxyCodeLine{00145\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00147\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00148\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_Q31\_512)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FXT\_512))}}
+\DoxyCodeLine{00149\ \ \ \ \ \textcolor{keywordflow}{case}\ 1024U:}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ S-\/>twidCoefRModifier\ =\ 8U;}
+\DoxyCodeLine{00151\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ status=\mbox{\hyperlink{group___complex_f_f_t_ga196bb4e5466c74650b6cc76bb2efdfe2}{arm\_cfft\_init\_q31}}(\&(S-\/>cfftInst),512);}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (status\ !=\ ARM\_MATH\_SUCCESS)}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(status);}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00157\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#else}}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \ S-\/>pCfft\ =\ \&arm\_cfft\_sR\_q31\_len512;}
+\DoxyCodeLine{00159\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00161\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00162\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_Q31\_256)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FXT\_256))}}
+\DoxyCodeLine{00163\ \ \ \ \ \textcolor{keywordflow}{case}\ 512U:}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ S-\/>twidCoefRModifier\ =\ 16U;}
+\DoxyCodeLine{00165\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ \ \ status=\mbox{\hyperlink{group___complex_f_f_t_ga196bb4e5466c74650b6cc76bb2efdfe2}{arm\_cfft\_init\_q31}}(\&(S-\/>cfftInst),256);}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (status\ !=\ ARM\_MATH\_SUCCESS)}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(status);}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00171\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#else}}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ S-\/>pCfft\ =\ \&arm\_cfft\_sR\_q31\_len256;}
+\DoxyCodeLine{00173\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00175\ \textcolor{preprocessor}{\#endif\ }}
+\DoxyCodeLine{00176\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_Q31\_128)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FXT\_128))}}
+\DoxyCodeLine{00177\ \ \ \ \ \textcolor{keywordflow}{case}\ 256U:}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ S-\/>twidCoefRModifier\ =\ 32U;}
+\DoxyCodeLine{00179\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ status=\mbox{\hyperlink{group___complex_f_f_t_ga196bb4e5466c74650b6cc76bb2efdfe2}{arm\_cfft\_init\_q31}}(\&(S-\/>cfftInst),128);}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (status\ !=\ ARM\_MATH\_SUCCESS)}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(status);}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00185\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#else}}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \ S-\/>pCfft\ =\ \&arm\_cfft\_sR\_q31\_len128;}
+\DoxyCodeLine{00187\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00189\ \textcolor{preprocessor}{\#endif\ }}
+\DoxyCodeLine{00190\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_Q31\_64)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FXT\_64))}}
+\DoxyCodeLine{00191\ \ \ \ \ \textcolor{keywordflow}{case}\ 128U:}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ S-\/>twidCoefRModifier\ =\ 64U;}
+\DoxyCodeLine{00193\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ status=\mbox{\hyperlink{group___complex_f_f_t_ga196bb4e5466c74650b6cc76bb2efdfe2}{arm\_cfft\_init\_q31}}(\&(S-\/>cfftInst),64);}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (status\ !=\ ARM\_MATH\_SUCCESS)}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(status);}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00199\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#else}}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ S-\/>pCfft\ =\ \&arm\_cfft\_sR\_q31\_len64;}
+\DoxyCodeLine{00201\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00203\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00204\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_Q31\_32)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FXT\_32))}}
+\DoxyCodeLine{00205\ \ \ \ \ \textcolor{keywordflow}{case}\ 64U:}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ S-\/>twidCoefRModifier\ =\ 128U;}
+\DoxyCodeLine{00207\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ status=\mbox{\hyperlink{group___complex_f_f_t_ga196bb4e5466c74650b6cc76bb2efdfe2}{arm\_cfft\_init\_q31}}(\&(S-\/>cfftInst),32);}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (status\ !=\ ARM\_MATH\_SUCCESS)}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(status);}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00213\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#else}}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ S-\/>pCfft\ =\ \&arm\_cfft\_sR\_q31\_len32;}
+\DoxyCodeLine{00215\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00217\ \textcolor{preprocessor}{\#endif\ }}
+\DoxyCodeLine{00218\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_Q31\_16)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FXT\_16))}}
+\DoxyCodeLine{00219\ \ \ \ \ \textcolor{keywordflow}{case}\ 32U:}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ S-\/>twidCoefRModifier\ =\ 256U;}
+\DoxyCodeLine{00221\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \ status=\mbox{\hyperlink{group___complex_f_f_t_ga196bb4e5466c74650b6cc76bb2efdfe2}{arm\_cfft\_init\_q31}}(\&(S-\/>cfftInst),16);}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (status\ !=\ ARM\_MATH\_SUCCESS)}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(status);}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00227\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#else}}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ S-\/>pCfft\ =\ \&arm\_cfft\_sR\_q31\_len16;}
+\DoxyCodeLine{00229\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \#endif}}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00231\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00232\ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Reporting\ argument\ error\ if\ rfftSize\ is\ not\ valid\ value\ */}}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ status\ =\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00236\ \ \ \ \ \}}
+\DoxyCodeLine{00237\ }
+\DoxyCodeLine{00238\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00239\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00240\ \ \ \ \ \textcolor{comment}{/*\ return\ the\ status\ of\ RFFT\ Init\ function\ */}}
+\DoxyCodeLine{00241\ \ \ \ \ \textcolor{keywordflow}{return}\ (status);}
+\DoxyCodeLine{00242\ \}}
+\DoxyCodeLine{00243\ }
+
+\end{DoxyCode}

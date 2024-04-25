@@ -72,11 +72,6 @@ void MX_USB_HOST_Process(void);
   * @brief  The application entry point.
   * @retval int
   * 
-  * main loop hier zit ook de blink.
-  * 
-  * Zie ik dit ook.
-  * 
-  * WEEJOOWW
   */
 int main(void)
 {

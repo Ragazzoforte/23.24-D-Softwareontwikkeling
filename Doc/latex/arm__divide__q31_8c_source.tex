@@ -1,0 +1,87 @@
+\doxysection{arm\+\_\+divide\+\_\+q31.\+c}
+\hypertarget{arm__divide__q31_8c_source}{}\label{arm__divide__q31_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/FastMathFunctions/arm\_divide\_q31.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/FastMathFunctions/arm\_divide\_q31.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_cos\_q31.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Fast\ cosine\ calculation\ for\ Q31\ values}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/fast\_math\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}arm\_common\_tables.h"{}}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <stdlib.h>}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00060\ arm\_status\ \mbox{\hyperlink{group__divide_ga250c0a49bd2e42282f3296d51138a5cb}{arm\_divide\_q31}}(q31\_t\ numerator,}
+\DoxyCodeLine{00061\ \ \ q31\_t\ denominator,}
+\DoxyCodeLine{00062\ \ \ q31\_t\ *quotient,}
+\DoxyCodeLine{00063\ \ \ int16\_t\ *shift)}
+\DoxyCodeLine{00064\ \{}
+\DoxyCodeLine{00065\ \ \ int16\_t\ sign=0;}
+\DoxyCodeLine{00066\ \ \ q63\_t\ temp;}
+\DoxyCodeLine{00067\ \ \ int16\_t\ shiftForNormalizing;}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ *shift\ =\ 0;}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ sign\ =\ (numerator>>31)\ \string^\ (denominator>>31);}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \ \ \textcolor{keywordflow}{if}\ (denominator\ ==\ 0)}
+\DoxyCodeLine{00074\ \ \ \{}
+\DoxyCodeLine{00075\ \ \ \ \ \ \textcolor{keywordflow}{if}\ (sign)}
+\DoxyCodeLine{00076\ \ \ \ \ \ \{}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ *quotient\ =\ 0x80000000;}
+\DoxyCodeLine{00078\ \ \ \ \ \ \}}
+\DoxyCodeLine{00079\ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00080\ \ \ \ \ \ \{}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ *quotient\ =\ 0x7FFFFFFF;}
+\DoxyCodeLine{00082\ \ \ \ \ \ \}}
+\DoxyCodeLine{00083\ \ \ \ \ \ \textcolor{keywordflow}{return}(ARM\_MATH\_NANINF);}
+\DoxyCodeLine{00084\ \ \ \}}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \ \ \mbox{\hyperlink{group___basic_abs_ga494bd5db5e2686d96f5548e80ba8ca89}{arm\_abs\_q31}}(\&numerator,\&numerator,1);}
+\DoxyCodeLine{00087\ \ \ \mbox{\hyperlink{group___basic_abs_ga494bd5db5e2686d96f5548e80ba8ca89}{arm\_abs\_q31}}(\&denominator,\&denominator,1);}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ temp\ =\ ((q63\_t)numerator\ <<\ 31)\ /\ ((q63\_t)denominator);}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \ \ shiftForNormalizing=\ 32\ -\/\ \mbox{\hyperlink{group___c_m_s_i_s___core___instruction_interface_ga5d5bb1527e042be4a9fa5a33f65cc248}{\_\_CLZ}}(temp\ >>\ 31);}
+\DoxyCodeLine{00092\ \ \ \textcolor{keywordflow}{if}\ (shiftForNormalizing\ >\ 0)}
+\DoxyCodeLine{00093\ \ \ \{}
+\DoxyCodeLine{00094\ \ \ \ \ \ *shift\ =\ shiftForNormalizing;}
+\DoxyCodeLine{00095\ \ \ \ \ \ temp\ =\ temp\ >>\ shiftForNormalizing;}
+\DoxyCodeLine{00096\ \ \ \}}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \ \ \textcolor{keywordflow}{if}\ (sign)}
+\DoxyCodeLine{00099\ \ \ \{}
+\DoxyCodeLine{00100\ \ \ \ \ temp\ =\ -\/temp;}
+\DoxyCodeLine{00101\ \ \ \}}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ *quotient=(q31\_t)temp;}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \textcolor{keywordflow}{return}(ARM\_MATH\_SUCCESS);}
+\DoxyCodeLine{00106\ \}}
+\DoxyCodeLine{00107\ }
+
+\end{DoxyCode}

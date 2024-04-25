@@ -1,0 +1,182 @@
+\doxysection{arm\+\_\+atan2\+\_\+q31.\+c}
+\hypertarget{arm__atan2__q31_8c_source}{}\label{arm__atan2__q31_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/FastMathFunctions/arm\_atan2\_q31.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/FastMathFunctions/arm\_atan2\_q31.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_atan2\_q31.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ float32\ Arc\ tangent\ of\ y/x}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 22\ April\ 2022}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.10.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2022\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/fast\_math\_functions.h"{}}\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}dsp/utils.h"{}}\ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00033\ \textcolor{comment}{}}
+\DoxyCodeLine{00034\ \textcolor{comment}{atan\ for\ argument\ between\ in\ [0,\ 1.0]}}
+\DoxyCodeLine{00035\ \textcolor{comment}{}}
+\DoxyCodeLine{00036\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{comment}{/*\ Q2.29\ */}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#define\ ATANHALF\_Q29\ 0xed63383}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#define\ PIHALF\_Q29\ 0x3243f6a9}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#define\ PIQ29\ 0x6487ed51}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#define\ ATAN2\_NB\_COEFS\_Q31\ 13}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{keyword}{static}\ \textcolor{keyword}{const}\ q31\_t\ atan2\_coefs\_q31[ATAN2\_NB\_COEFS\_Q31]=\{0x00000000}
+\DoxyCodeLine{00047\ ,0x7ffffffe}
+\DoxyCodeLine{00048\ ,0x000001b6}
+\DoxyCodeLine{00049\ ,0xd555158e}
+\DoxyCodeLine{00050\ ,0x00036463}
+\DoxyCodeLine{00051\ ,0x1985f617}
+\DoxyCodeLine{00052\ ,0x001992ae}
+\DoxyCodeLine{00053\ ,0xeed53a7f}
+\DoxyCodeLine{00054\ ,0xf8f15245}
+\DoxyCodeLine{00055\ ,0x2215a3a4}
+\DoxyCodeLine{00056\ ,0xe0fab004}
+\DoxyCodeLine{00057\ ,0x0cdd4825}
+\DoxyCodeLine{00058\ ,0xfddbc054}
+\DoxyCodeLine{00059\ \};}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \_\_STATIC\_FORCEINLINE\ q31\_t\ arm\_atan\_limited\_q31(q31\_t\ x)}
+\DoxyCodeLine{00063\ \{}
+\DoxyCodeLine{00064\ \ \ \ \ q63\_t\ res=(q63\_t)atan2\_coefs\_q31[ATAN2\_NB\_COEFS\_Q31-\/1];}
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keywordtype}{int}\ i=1;}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keywordflow}{for}(i=1;i<ATAN2\_NB\_COEFS\_Q31;i++)}
+\DoxyCodeLine{00067\ \ \ \ \ \{}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ res\ =\ ((q63\_t)\ x\ *\ res)\ >>\ 31U;}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ res\ =\ res\ +\ ((q63\_t)\ atan2\_coefs\_q31[ATAN2\_NB\_COEFS\_Q31-\/1-\/i])\ ;}
+\DoxyCodeLine{00070\ \ \ \ \ \}}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keywordflow}{return}(clip\_q63\_to\_q31(res>>2));}
+\DoxyCodeLine{00073\ \}}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \_\_STATIC\_FORCEINLINE\ q31\_t\ arm\_atan\_q31(q31\_t\ y,q31\_t\ x)}
+\DoxyCodeLine{00077\ \{}
+\DoxyCodeLine{00078\ \ \ \ \textcolor{keywordtype}{int}\ sign=0;}
+\DoxyCodeLine{00079\ \ \ \ q31\_t\ res=0;}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \textcolor{keywordflow}{if}\ (y<0)}
+\DoxyCodeLine{00082\ \ \ \ \{}
+\DoxyCodeLine{00083\ \ \ \ \ \ \mbox{\hyperlink{group___basic_negate_gad5054d19c205eebab5f2c6e42d8cbb3c}{arm\_negate\_q31}}(\&y,\&y,1);}
+\DoxyCodeLine{00084\ \ \ \ \ \ sign=1-\/sign;}
+\DoxyCodeLine{00085\ \ \ \ \}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \textcolor{keywordflow}{if}\ (x\ <\ 0)}
+\DoxyCodeLine{00088\ \ \ \ \{}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ sign=1\ -\/\ sign;}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \mbox{\hyperlink{group___basic_negate_gad5054d19c205eebab5f2c6e42d8cbb3c}{arm\_negate\_q31}}(\&x,\&x,1);}
+\DoxyCodeLine{00091\ \ \ \ \}}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \ \textcolor{keywordflow}{if}\ (y\ >\ x)}
+\DoxyCodeLine{00094\ \ \ \ \{}
+\DoxyCodeLine{00095\ \ \ \ \ q31\_t\ ratio;}
+\DoxyCodeLine{00096\ \ \ \ \ int16\_t\ shift;}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \ \ \ \ \mbox{\hyperlink{group__divide_ga250c0a49bd2e42282f3296d51138a5cb}{arm\_divide\_q31}}(x,y,\&ratio,\&shift);}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ \mbox{\hyperlink{group___basic_shift_gabc69335d1cf2eba1c469c8c8291f3589}{arm\_shift\_q31}}(\&ratio,shift,\&ratio,1);}
+\DoxyCodeLine{00101\ \ \ \ }
+\DoxyCodeLine{00102\ \ \ \ \ res\ =\ PIHALF\_Q29\ -\/\ arm\_atan\_limited\_q31(ratio);}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ }
+\DoxyCodeLine{00104\ \ \ \ \}}
+\DoxyCodeLine{00105\ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00106\ \ \ \ \{}
+\DoxyCodeLine{00107\ \ \ \ \ q31\_t\ ratio;}
+\DoxyCodeLine{00108\ \ \ \ \ int16\_t\ shift;}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \ \mbox{\hyperlink{group__divide_ga250c0a49bd2e42282f3296d51138a5cb}{arm\_divide\_q31}}(y,x,\&ratio,\&shift);}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \mbox{\hyperlink{group___basic_shift_gabc69335d1cf2eba1c469c8c8291f3589}{arm\_shift\_q31}}(\&ratio,shift,\&ratio,1);}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \ \ res\ =\ arm\_atan\_limited\_q31(ratio);}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \}}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ \ \textcolor{keywordflow}{if}\ (sign)}
+\DoxyCodeLine{00120\ \ \ \ \{}
+\DoxyCodeLine{00121\ \ \ \ \ \ \mbox{\hyperlink{group___basic_negate_gad5054d19c205eebab5f2c6e42d8cbb3c}{arm\_negate\_q31}}(\&res,\&res,1);}
+\DoxyCodeLine{00122\ \ \ \ \}}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \textcolor{keywordflow}{return}(res);}
+\DoxyCodeLine{00125\ \}}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00151\ arm\_status\ \mbox{\hyperlink{group__atan2_ga14e753643307e373abffa6d14ae7a3f3}{arm\_atan2\_q31}}(q31\_t\ y,q31\_t\ x,q31\_t\ *result)}
+\DoxyCodeLine{00152\ \{}
+\DoxyCodeLine{00153\ \ \ \ \ \textcolor{keywordflow}{if}\ (x\ >\ 0)}
+\DoxyCodeLine{00154\ \ \ \ \ \{}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ *result=arm\_atan\_q31(y,x);}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(ARM\_MATH\_SUCCESS);}
+\DoxyCodeLine{00157\ \ \ \ \ \}}
+\DoxyCodeLine{00158\ \ \ \ \ \textcolor{keywordflow}{if}\ (x\ <\ 0)}
+\DoxyCodeLine{00159\ \ \ \ \ \{}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (y\ >\ 0)}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ \ \ *result=arm\_atan\_q31(y,x)\ +\ PIQ29;}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (y\ <\ 0)}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ \ \ *result=arm\_atan\_q31(y,x)\ -\/\ PIQ29;}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (y<0)}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *result=\ -\/PIQ29;}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ *result=\ PIQ29;}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(ARM\_MATH\_SUCCESS);}
+\DoxyCodeLine{00180\ \ \ \ \ \}}
+\DoxyCodeLine{00181\ \ \ \ \ \textcolor{keywordflow}{if}\ (x\ ==\ 0)}
+\DoxyCodeLine{00182\ \ \ \ \ \{}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (y\ >\ 0)}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ *result=PIHALF\_Q29;}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(ARM\_MATH\_SUCCESS);}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (y\ <\ 0)}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ *result=-\/PIHALF\_Q29;}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(ARM\_MATH\_SUCCESS);}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00193\ \ \ \ \ \}}
+\DoxyCodeLine{00194\ \ \ \ \ }
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \ \ \ \ \textcolor{keywordflow}{return}(ARM\_MATH\_NANINF);}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00198\ \}}
+\DoxyCodeLine{00199\ }
+
+\end{DoxyCode}

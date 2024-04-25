@@ -1,0 +1,139 @@
+\doxysection{arm\+\_\+quaternion2rotation\+\_\+f32.\+c}
+\hypertarget{arm__quaternion2rotation__f32_8c_source}{}\label{arm__quaternion2rotation__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/QuaternionMathFunctions/arm\_quaternion2rotation\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/QuaternionMathFunctions/arm\_quaternion2rotation\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_quaternion2rotation\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Floating-\/point\ quaternion\ 2\ rotation\ conversion}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/quaternion\_math\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <math.h>}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00077\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___quat_rot_ga452ea33f74a02599424d71b4de26b0ba}{arm\_quaternion2rotation\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pInputQuaternions,\ }
+\DoxyCodeLine{00082\ \ \ \ \ float32\_t\ *pOutputRotations,\ }
+\DoxyCodeLine{00083\ \ \ \ \ uint32\_t\ nbQuaternions)}
+\DoxyCodeLine{00084\ \{}
+\DoxyCodeLine{00085\ \ \ f32x4\_t\ vec0,vec1,\ vec2\ ,vec3;}
+\DoxyCodeLine{00086\ \ \ float32\_t\ q2q3,\ tmp1,\ tmp2\ ;}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ \ \ \textcolor{keywordflow}{for}(uint32\_t\ nb=0;\ nb\ <\ nbQuaternions;\ nb++)}
+\DoxyCodeLine{00089\ \ \ \{}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \ \ \ \ \textcolor{comment}{//\ q0\ q1\ q2\ q3}}
+\DoxyCodeLine{00092\ \ \ \ \ vec0\ =\ vld1q(pInputQuaternions);}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{comment}{//\ q0\string^2\ q1\string^2\ q2\string^2\ q3\string^2}}
+\DoxyCodeLine{00095\ \ \ \ \ vec1\ =\ vmulq(vec0,vec0);}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{comment}{//\ q0\string^2\ q1q0\ q2q0\ q3q0}}
+\DoxyCodeLine{00098\ \ \ \ \ vec2\ =\ vmulq\_n\_f32(vec0,\ vgetq\_lane(vec0,0));}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ \textcolor{comment}{//\ 2\ (q0\string^2\ q1q0\ q2q0\ q3q0)}}
+\DoxyCodeLine{00101\ \ \ \ \ vec2\ =\ vmulq\_n\_f32(vec2,\ 2.0f);}
+\DoxyCodeLine{00102\ \ \ \ \ }
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{comment}{//\ 2\ q2q3}}
+\DoxyCodeLine{00105\ \ \ \ \ q2q3\ =\ vgetq\_lane(vec0,2)\ *\ vgetq\_lane(vec0,3);}
+\DoxyCodeLine{00106\ \ \ \ \ q2q3\ =\ q2q3\ *\ 2.0f;}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \textcolor{comment}{//\ 2\ (q0q1\ q1\string^2\ q2q1\ q3q1)}}
+\DoxyCodeLine{00109\ \ \ \ \ vec3\ =\ vmulq\_n\_f32(vec0,\ vgetq\_lane(vec0,1));}
+\DoxyCodeLine{00110\ \ \ \ \ vec3\ =\ vmulq\_n\_f32(vec3,\ 2.0f);}
+\DoxyCodeLine{00111\ \ \ \ }
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \ \ \ \ }
+\DoxyCodeLine{00114\ \ \ \ \ vec0\ =\ vsetq\_lane(vgetq\_lane(vec1,0)\ +\ vgetq\_lane(vec1,1),vec0,0);}
+\DoxyCodeLine{00115\ \ \ \ \ vec0\ =\ vsetq\_lane(vgetq\_lane(vec0,0)\ -\/\ vgetq\_lane(vec1,2),vec0,0);}
+\DoxyCodeLine{00116\ \ \ \ \ vec0\ =\ vsetq\_lane(vgetq\_lane(vec0,0)\ -\/\ vgetq\_lane(vec1,3),vec0,0);}
+\DoxyCodeLine{00117\ \ \ \ \ vec0\ =\ vsetq\_lane(vgetq\_lane(vec3,2)\ -\/\ vgetq\_lane(vec2,3),vec0,1);}
+\DoxyCodeLine{00118\ \ \ \ \ vec0\ =\ vsetq\_lane(vgetq\_lane(vec3,3)\ +\ vgetq\_lane(vec2,2),vec0,2);}
+\DoxyCodeLine{00119\ \ \ \ \ vec0\ =\ vsetq\_lane(vgetq\_lane(vec3,2)\ +\ vgetq\_lane(vec2,3),vec0,3);}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \ \ \ \ vst1q(pOutputRotations,\ vec0);}
+\DoxyCodeLine{00122\ \ \ \ \ pOutputRotations\ +=\ 4;}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ tmp1\ =\ vgetq\_lane(vec1,0)\ -\/\ vgetq\_lane(vec1,1);}
+\DoxyCodeLine{00125\ \ \ \ \ tmp2\ =\ vgetq\_lane(vec1,2)\ -\/\ vgetq\_lane(vec1,3);}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ }
+\DoxyCodeLine{00128\ \ \ \ \ vec0\ =\ vsetq\_lane(tmp1\ +\ tmp2,vec0,0);}
+\DoxyCodeLine{00129\ \ \ \ \ vec0\ =\ vsetq\_lane(q2q3\ -\/\ vgetq\_lane(vec2,1)\ ,vec0,1);}
+\DoxyCodeLine{00130\ \ \ \ \ vec0\ =\ vsetq\_lane(vgetq\_lane(vec3,3)\ -\/\ vgetq\_lane(vec2,2),vec0,2);}
+\DoxyCodeLine{00131\ \ \ \ \ vec0\ =\ vsetq\_lane(q2q3\ +\ vgetq\_lane(vec2,1)\ ,vec0,3);}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \ \ \ \ vst1q(pOutputRotations,\ vec0);}
+\DoxyCodeLine{00134\ \ \ \ \ pOutputRotations\ +=\ 4;}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00136\ \ \ \ \ *pOutputRotations\ =\ tmp1\ -\/\ tmp2;}
+\DoxyCodeLine{00137\ \ \ \ \ pOutputRotations\ ++;}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00139\ \ \ \ \ pInputQuaternions\ +=\ 4;}
+\DoxyCodeLine{00140\ \ \ \}}
+\DoxyCodeLine{00141\ \}}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00144\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___quat_rot_ga452ea33f74a02599424d71b4de26b0ba}{arm\_quaternion2rotation\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pInputQuaternions,\ }
+\DoxyCodeLine{00145\ \ \ \ \ float32\_t\ *pOutputRotations,\ }
+\DoxyCodeLine{00146\ \ \ \ \ uint32\_t\ nbQuaternions)}
+\DoxyCodeLine{00147\ \{}
+\DoxyCodeLine{00148\ \ \ \ uint32\_t\ nb;}
+\DoxyCodeLine{00149\ \ \ \ \textcolor{keywordflow}{for}(nb=0;\ nb\ <\ nbQuaternions;\ nb++)}
+\DoxyCodeLine{00150\ \ \ \ \{}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ float32\_t\ q00\ =\ SQ(pInputQuaternions[0\ +\ nb\ *\ 4]);}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ float32\_t\ q11\ =\ SQ(pInputQuaternions[1\ +\ nb\ *\ 4]);}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ float32\_t\ q22\ =\ SQ(pInputQuaternions[2\ +\ nb\ *\ 4]);}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ float32\_t\ q33\ =\ SQ(pInputQuaternions[3\ +\ nb\ *\ 4]);}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ float32\_t\ q01\ =\ \ pInputQuaternions[0\ +\ nb\ *\ 4]*pInputQuaternions[1\ +\ nb\ *\ 4];}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ float32\_t\ q02\ =\ \ pInputQuaternions[0\ +\ nb\ *\ 4]*pInputQuaternions[2\ +\ nb\ *\ 4];}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ float32\_t\ q03\ =\ \ pInputQuaternions[0\ +\ nb\ *\ 4]*pInputQuaternions[3\ +\ nb\ *\ 4];}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ float32\_t\ q12\ =\ \ pInputQuaternions[1\ +\ nb\ *\ 4]*pInputQuaternions[2\ +\ nb\ *\ 4];}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ float32\_t\ q13\ =\ \ pInputQuaternions[1\ +\ nb\ *\ 4]*pInputQuaternions[3\ +\ nb\ *\ 4];}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ float32\_t\ q23\ =\ \ pInputQuaternions[2\ +\ nb\ *\ 4]*pInputQuaternions[3\ +\ nb\ *\ 4];}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ float32\_t\ xx\ =\ q00\ +\ q11\ -\/\ q22\ -\/\ q33;}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ float32\_t\ yy\ =\ q00\ -\/\ q11\ +\ q22\ -\/\ q33;}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ float32\_t\ zz\ =\ q00\ -\/\ q11\ -\/\ q22\ +\ q33;}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ float32\_t\ xy\ =\ 2*(q12\ -\/\ q03);}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ float32\_t\ xz\ =\ 2*(q13\ +\ q02);}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ float32\_t\ yx\ =\ 2*(q12\ +\ q03);}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ float32\_t\ yz\ =\ 2*(q23\ -\/\ q01);}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ float32\_t\ zx\ =\ 2*(q13\ -\/\ q02);}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ float32\_t\ zy\ =\ 2*(q23\ +\ q01);}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ pOutputRotations[0\ +\ nb\ *\ 9]\ =\ xx;\ pOutputRotations[1\ +\ nb\ *\ 9]\ =\ xy;\ pOutputRotations[2\ +\ nb\ *\ 9]\ =\ xz;}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ pOutputRotations[3\ +\ nb\ *\ 9]\ =\ yx;\ pOutputRotations[4\ +\ nb\ *\ 9]\ =\ yy;\ pOutputRotations[5\ +\ nb\ *\ 9]\ =\ yz;}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ pOutputRotations[6\ +\ nb\ *\ 9]\ =\ zx;\ pOutputRotations[7\ +\ nb\ *\ 9]\ =\ zy;\ pOutputRotations[8\ +\ nb\ *\ 9]\ =\ zz;}
+\DoxyCodeLine{00175\ \ \ \ \}}
+\DoxyCodeLine{00176\ \}}
+\DoxyCodeLine{00177\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00178\ }
+
+\end{DoxyCode}

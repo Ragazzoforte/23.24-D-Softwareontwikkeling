@@ -1,0 +1,204 @@
+\doxysection{arm\+\_\+cmplx\+\_\+mag\+\_\+squared\+\_\+q15.\+c}
+\hypertarget{arm__cmplx__mag__squared__q15_8c_source}{}\label{arm__cmplx__mag__squared__q15_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/ComplexMathFunctions/arm\_cmplx\_mag\_squared\_q15.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/ComplexMathFunctions/arm\_cmplx\_mag\_squared\_q15.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_cmplx\_mag\_squared\_q15.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Q15\ complex\ magnitude\ squared}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/complex\_math\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group__cmplx__mag__squared_gafdd1e838db0aef7ec201611883bd444c}{arm\_cmplx\_mag\_squared\_q15}}(}
+\DoxyCodeLine{00054\ \ \ \textcolor{keyword}{const}\ q15\_t\ *\ pSrc,}
+\DoxyCodeLine{00055\ \ \ \ \ \ \ \ \ q15\_t\ *\ pDst,}
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ uint32\_t\ numSamples)}
+\DoxyCodeLine{00057\ \{}
+\DoxyCodeLine{00058\ \ \ int32\_t\ blockSize\ =\ numSamples;\ \ \textcolor{comment}{/*\ loop\ counters\ */}}
+\DoxyCodeLine{00059\ \ \ uint32\_t\ \ blkCnt;\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ loop\ counters\ */}}
+\DoxyCodeLine{00060\ \ \ q31\_t\ in;}
+\DoxyCodeLine{00061\ \ \ q31\_t\ acc0;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Accumulators\ */}}
+\DoxyCodeLine{00062\ \ \ q15x8x2\_t\ vecSrc;}
+\DoxyCodeLine{00063\ \ \ q15x8\_t\ vReal,\ vImag;}
+\DoxyCodeLine{00064\ \ \ q15x8\_t\ vMagSq;}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ }
+\DoxyCodeLine{00067\ \ \ blkCnt\ =\ blockSize\ >>\ 3;}
+\DoxyCodeLine{00068\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00069\ \ \ \{}
+\DoxyCodeLine{00070\ \ \ \ \ vecSrc\ =\ vld2q(pSrc);}
+\DoxyCodeLine{00071\ \ \ \ \ vReal\ =\ vmulhq(vecSrc.val[0],\ vecSrc.val[0]);}
+\DoxyCodeLine{00072\ \ \ \ \ vImag\ =\ vmulhq(vecSrc.val[1],\ vecSrc.val[1]);}
+\DoxyCodeLine{00073\ \ \ \ \ vMagSq\ =\ vqaddq(vReal,\ vImag);}
+\DoxyCodeLine{00074\ \ \ \ \ vMagSq\ =\ vshrq(vMagSq,\ 1);}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \ \ \ \ vst1q(pDst,\ vMagSq);}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \ \ \ \ pSrc\ +=\ 16;}
+\DoxyCodeLine{00079\ \ \ \ \ pDst\ +=\ 8;}
+\DoxyCodeLine{00080\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00081\ \textcolor{comment}{\ \ \ \ \ *\ Decrement\ the\ blkCnt\ loop\ counter}}
+\DoxyCodeLine{00082\ \textcolor{comment}{\ \ \ \ \ *\ Advance\ vector\ source\ and\ destination\ pointers}}
+\DoxyCodeLine{00083\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00084\ \ \ \ \ blkCnt\ -\/-\/;}
+\DoxyCodeLine{00085\ \ \ \}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00088\ \textcolor{comment}{\ \ \ *\ tail}}
+\DoxyCodeLine{00089\ \textcolor{comment}{\ \ \ */}}
+\DoxyCodeLine{00090\ \ \ blkCnt\ =\ blockSize\ \&\ 7;}
+\DoxyCodeLine{00091\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00092\ \ \ \{}
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{comment}{/*\ C[0]\ =\ (A[0]\ *\ A[0]\ +\ A[1]\ *\ A[1])\ */}}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \ \ in\ =\ read\_q15x2\_ia\ ((q15\_t\ **)\ \&pSrc);}
+\DoxyCodeLine{00096\ \ \ \ \ acc0\ =\ \_\_SMUAD(in,\ in);}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{comment}{/*\ store\ result\ in\ 3.13\ format\ in\ destination\ buffer.\ */}}
+\DoxyCodeLine{00099\ \ \ \ \ *pDst++\ =\ (q15\_t)\ (acc0\ >>\ 17);}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00103\ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00104\ \ \ \}}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \}}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00109\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group__cmplx__mag__squared_gafdd1e838db0aef7ec201611883bd444c}{arm\_cmplx\_mag\_squared\_q15}}(}
+\DoxyCodeLine{00110\ \ \ \textcolor{keyword}{const}\ q15\_t\ *\ pSrc,}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ q15\_t\ *\ pDst,}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ uint32\_t\ numSamples)}
+\DoxyCodeLine{00113\ \{}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ uint32\_t\ blkCnt;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ counter\ */}}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ q31\_t\ in;}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ q31\_t\ acc0;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Accumulators\ */}}
+\DoxyCodeLine{00119\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ q15\_t\ real,\ imag;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ input\ variables\ */}}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ q31\_t\ acc0,\ acc1;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Accumulators\ */}}
+\DoxyCodeLine{00122\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)}}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ 4\ outputs\ at\ a\ time\ */}}
+\DoxyCodeLine{00127\ \ \ blkCnt\ =\ numSamples\ >>\ 2U;}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00130\ \ \ \{}
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{comment}{/*\ C[0]\ =\ (A[0]\ *\ A[0]\ +\ A[1]\ *\ A[1])\ */}}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00134\ \ \ \ \ in\ =\ read\_q15x2\_ia\ ((q15\_t\ **)\ \&pSrc);}
+\DoxyCodeLine{00135\ \ \ \ \ acc0\ =\ \_\_SMUAD(in,\ in);}
+\DoxyCodeLine{00136\ \ \ \ \ \textcolor{comment}{/*\ store\ result\ in\ 3.13\ format\ in\ destination\ buffer.\ */}}
+\DoxyCodeLine{00137\ \ \ \ \ *pDst++\ =\ (q15\_t)\ (acc0\ >>\ 17);}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00139\ \ \ \ \ in\ =\ read\_q15x2\_ia\ ((q15\_t\ **)\ \&pSrc);}
+\DoxyCodeLine{00140\ \ \ \ \ acc0\ =\ \_\_SMUAD(in,\ in);}
+\DoxyCodeLine{00141\ \ \ \ \ *pDst++\ =\ (q15\_t)\ (acc0\ >>\ 17);}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \ \ in\ =\ read\_q15x2\_ia\ ((q15\_t\ **)\ \&pSrc);}
+\DoxyCodeLine{00144\ \ \ \ \ acc0\ =\ \_\_SMUAD(in,\ in);}
+\DoxyCodeLine{00145\ \ \ \ \ *pDst++\ =\ (q15\_t)\ (acc0\ >>\ 17);}
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00147\ \ \ \ \ in\ =\ read\_q15x2\_ia\ ((q15\_t\ **)\ \&pSrc);}
+\DoxyCodeLine{00148\ \ \ \ \ acc0\ =\ \_\_SMUAD(in,\ in);}
+\DoxyCodeLine{00149\ \ \ \ \ *pDst++\ =\ (q15\_t)\ (acc0\ >>\ 17);}
+\DoxyCodeLine{00150\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00151\ \ \ \ \ real\ =\ *pSrc++;}
+\DoxyCodeLine{00152\ \ \ \ \ imag\ =\ *pSrc++;}
+\DoxyCodeLine{00153\ \ \ \ \ acc0\ =\ ((q31\_t)\ real\ *\ real);}
+\DoxyCodeLine{00154\ \ \ \ \ acc1\ =\ ((q31\_t)\ imag\ *\ imag);}
+\DoxyCodeLine{00155\ \ \ \ \ \textcolor{comment}{/*\ store\ result\ in\ 3.13\ format\ in\ destination\ buffer.\ */}}
+\DoxyCodeLine{00156\ \ \ \ \ *pDst++\ =\ (q15\_t)\ (((q63\_t)\ acc0\ +\ acc1)\ >>\ 17);}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \ \ \ \ real\ =\ *pSrc++;}
+\DoxyCodeLine{00159\ \ \ \ \ imag\ =\ *pSrc++;}
+\DoxyCodeLine{00160\ \ \ \ \ acc0\ =\ ((q31\_t)\ real\ *\ real);}
+\DoxyCodeLine{00161\ \ \ \ \ acc1\ =\ ((q31\_t)\ imag\ *\ imag);}
+\DoxyCodeLine{00162\ \ \ \ \ *pDst++\ =\ (q15\_t)\ (((q63\_t)\ acc0\ +\ acc1)\ >>\ 17);}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \ \ \ \ real\ =\ *pSrc++;}
+\DoxyCodeLine{00165\ \ \ \ \ imag\ =\ *pSrc++;}
+\DoxyCodeLine{00166\ \ \ \ \ acc0\ =\ ((q31\_t)\ real\ *\ real);}
+\DoxyCodeLine{00167\ \ \ \ \ acc1\ =\ ((q31\_t)\ imag\ *\ imag);}
+\DoxyCodeLine{00168\ \ \ \ \ *pDst++\ =\ (q15\_t)\ (((q63\_t)\ acc0\ +\ acc1)\ >>\ 17);}
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \ \ \ \ real\ =\ *pSrc++;}
+\DoxyCodeLine{00171\ \ \ \ \ imag\ =\ *pSrc++;}
+\DoxyCodeLine{00172\ \ \ \ \ acc0\ =\ ((q31\_t)\ real\ *\ real);}
+\DoxyCodeLine{00173\ \ \ \ \ acc1\ =\ ((q31\_t)\ imag\ *\ imag);}
+\DoxyCodeLine{00174\ \ \ \ \ *pDst++\ =\ (q15\_t)\ (((q63\_t)\ acc0\ +\ acc1)\ >>\ 17);}
+\DoxyCodeLine{00175\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_DSP)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00176\ }
+\DoxyCodeLine{00177\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00178\ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00179\ \ \ \}}
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00181\ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ remaining\ outputs\ */}}
+\DoxyCodeLine{00182\ \ \ blkCnt\ =\ numSamples\ \%\ 0x4U;}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \ \ \textcolor{comment}{/*\ Initialize\ blkCnt\ with\ number\ of\ samples\ */}}
+\DoxyCodeLine{00187\ \ \ blkCnt\ =\ numSamples;}
+\DoxyCodeLine{00188\ }
+\DoxyCodeLine{00189\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_LOOPUNROLL)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00192\ \ \ \{}
+\DoxyCodeLine{00193\ \ \ \ \ \textcolor{comment}{/*\ C[0]\ =\ (A[0]\ *\ A[0]\ +\ A[1]\ *\ A[1])\ */}}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00196\ \ \ \ \ in\ =\ read\_q15x2\_ia\ ((q15\_t\ **)\ \&pSrc);}
+\DoxyCodeLine{00197\ \ \ \ \ acc0\ =\ \_\_SMUAD(in,\ in);}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00199\ \ \ \ \ \textcolor{comment}{/*\ store\ result\ in\ 3.13\ format\ in\ destination\ buffer.\ */}}
+\DoxyCodeLine{00200\ \ \ \ \ *pDst++\ =\ (q15\_t)\ (acc0\ >>\ 17);}
+\DoxyCodeLine{00201\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00202\ \ \ \ \ real\ =\ *pSrc++;}
+\DoxyCodeLine{00203\ \ \ \ \ imag\ =\ *pSrc++;}
+\DoxyCodeLine{00204\ \ \ \ \ acc0\ =\ ((q31\_t)\ real\ *\ real);}
+\DoxyCodeLine{00205\ \ \ \ \ acc1\ =\ ((q31\_t)\ imag\ *\ imag);}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00207\ \ \ \ \ \textcolor{comment}{/*\ store\ result\ in\ 3.13\ format\ in\ destination\ buffer.\ */}}
+\DoxyCodeLine{00208\ \ \ \ \ *pDst++\ =\ (q15\_t)\ (((q63\_t)\ acc0\ +\ acc1)\ >>\ 17);}
+\DoxyCodeLine{00209\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00210\ }
+\DoxyCodeLine{00211\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00212\ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00213\ \ \ \}}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \}}
+\DoxyCodeLine{00216\ }
+\DoxyCodeLine{00217\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEI)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00218\ }
+
+\end{DoxyCode}

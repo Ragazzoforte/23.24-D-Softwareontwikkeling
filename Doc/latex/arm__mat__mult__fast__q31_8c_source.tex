@@ -1,0 +1,342 @@
+\doxysection{arm\+\_\+mat\+\_\+mult\+\_\+fast\+\_\+q31.\+c}
+\hypertarget{arm__mat__mult__fast__q31_8c_source}{}\label{arm__mat__mult__fast__q31_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/MatrixFunctions/arm\_mat\_mult\_fast\_q31.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/MatrixFunctions/arm\_mat\_mult\_fast\_q31.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_mat\_mult\_fast\_q31.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Q31\ matrix\ multiplication\ (fast\ variant)}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/matrix\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00066\ arm\_status\ \mbox{\hyperlink{group___matrix_mult_ga2785e8c1b785348b0c439b56aaf585a3}{arm\_mat\_mult\_fast\_q31}}(}
+\DoxyCodeLine{00067\ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pSrcA,}
+\DoxyCodeLine{00068\ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pSrcB,}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structarm__matrix__instance__q31}{arm\_matrix\_instance\_q31}}\ *\ pDst)}
+\DoxyCodeLine{00070\ \{}
+\DoxyCodeLine{00071\ \ \ q31\_t\ *pInA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Input\ data\ matrix\ pointer\ A\ */}}
+\DoxyCodeLine{00072\ \ \ q31\_t\ *pInB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Input\ data\ matrix\ pointer\ B\ */}}
+\DoxyCodeLine{00073\ \ \ q31\_t\ *pInA2;}
+\DoxyCodeLine{00074\ \ \ q31\_t\ *px;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ output\ data\ matrix\ pointer\ */}}
+\DoxyCodeLine{00075\ \ \ q31\_t\ *px2;}
+\DoxyCodeLine{00076\ \ \ q31\_t\ sum1,\ sum2,\ sum3,\ sum4;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Accumulator\ */}}
+\DoxyCodeLine{00077\ \ \ q31\_t\ inA1,\ inA2,\ inB1,\ inB2;}
+\DoxyCodeLine{00078\ \ \ uint16\_t\ numRowsA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a1bcf80ccdc2acc29198f1592ae300390}{numRows}};\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Number\ of\ rows\ of\ input\ matrix\ A\ */}}
+\DoxyCodeLine{00079\ \ \ uint16\_t\ numColsB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}};\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Number\ of\ columns\ of\ input\ matrix\ B\ */}}
+\DoxyCodeLine{00080\ \ \ uint16\_t\ numColsA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}};\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Number\ of\ columns\ of\ input\ matrix\ A\ */}}
+\DoxyCodeLine{00081\ \ \ uint32\_t\ col,\ i\ =\ 0U,\ j,\ row\ =\ numRowsA,\ colCnt;\ \ \textcolor{comment}{/*\ Loop\ counters\ */}}
+\DoxyCodeLine{00082\ \ \ arm\_status\ status;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Status\ of\ matrix\ multiplication\ */}}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \textcolor{preprocessor}{\#ifdef\ ARM\_MATH\_MATRIX\_CHECK}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \textcolor{comment}{/*\ Check\ for\ matrix\ mismatch\ condition\ */}}
+\DoxyCodeLine{00088\ \ \ \textcolor{keywordflow}{if}\ ((pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}}\ !=\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a1bcf80ccdc2acc29198f1592ae300390}{numRows}})\ ||}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ (pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a1bcf80ccdc2acc29198f1592ae300390}{numRows}}\ !=\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a1bcf80ccdc2acc29198f1592ae300390}{numRows}})\ \ ||}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ (pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}}\ !=\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_a4bb5ec0d13eb4c9cf887aa8366a44117}{numCols}})\ \ \ \ )}
+\DoxyCodeLine{00091\ \ \ \{}
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{comment}{/*\ Set\ status\ as\ ARM\_MATH\_SIZE\_MISMATCH\ */}}
+\DoxyCodeLine{00093\ \ \ \ \ status\ =\ ARM\_MATH\_SIZE\_MISMATCH;}
+\DoxyCodeLine{00094\ \ \ \}}
+\DoxyCodeLine{00095\ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifdef\ ARM\_MATH\_MATRIX\_CHECK\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \{}
+\DoxyCodeLine{00100\ \ \ \ \ px\ =\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \ \ row\ =\ row\ >>\ 1U;}
+\DoxyCodeLine{00103\ \ \ \ \ px2\ =\ px\ +\ numColsB;}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \ \textcolor{comment}{/*\ The\ following\ loop\ performs\ the\ dot-\/product\ of\ each\ row\ in\ pSrcA\ with\ each\ column\ in\ pSrcB\ */}}
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{comment}{/*\ row\ loop\ */}}
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{keywordflow}{while}\ (row\ >\ 0U)}
+\DoxyCodeLine{00108\ \ \ \ \ \{}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \textcolor{comment}{/*\ For\ every\ row\ wise\ process,\ column\ loop\ counter\ is\ to\ be\ initiated\ */}}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ col\ =\ numColsB;}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \textcolor{comment}{/*\ For\ every\ row\ wise\ process,\ pIn2\ pointer\ is\ set\ to\ starting\ address\ of\ pSrcB\ data\ */}}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ pInB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \ \ \ \ j\ =\ 0U;}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ \ \ \ col\ =\ col\ >>\ 1U;}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \textcolor{comment}{/*\ column\ loop\ */}}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (col\ >\ 0U)}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Set\ the\ variable\ sum,\ that\ acts\ as\ accumulator,\ to\ zero\ */}}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ sum1\ =\ 0;}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ sum2\ =\ 0;}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ sum3\ =\ 0;}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ sum4\ =\ 0;}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Initiate\ data\ pointers\ */}}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ pInA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}}\ +\ i;}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ pInB\ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}}\ +\ j;}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ pInA2\ =\ pInA\ +\ numColsA;}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ colCnt\ =\ numColsA;}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ matrix\ multiplication\ */}}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (colCnt\ >\ 0U)}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ c(m,n)\ =\ a(1,1)\ *\ b(1,1)\ +\ a(1,2)\ *\ b(2,1)\ +\ ....\ +\ a(m,p)\ *\ b(p,n)\ */}}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ inA1\ =\ *pInA++;}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \ \ inB1\ =\ pInB[0];}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \ \ inA2\ =\ *pInA2++;}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \ \ inB2\ =\ pInB[1];}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ pInB\ +=\ numColsB;}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ \_\_SMMLA(inA1,\ inB1,\ sum1);}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ sum2\ =\ \_\_SMMLA(inA1,\ inB2,\ sum2);}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ sum3\ =\ \_\_SMMLA(inA2,\ inB1,\ sum3);}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ \ sum4\ =\ \_\_SMMLA(inA2,\ inB2,\ sum4);}
+\DoxyCodeLine{00151\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ (q31\_t)\ ((((q63\_t)\ sum1\ <<\ 32)\ +\ ((q63\_t)\ inA1\ *\ inB1))\ >>\ 32);}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ \ sum2\ =\ (q31\_t)\ ((((q63\_t)\ sum2\ <<\ 32)\ +\ ((q63\_t)\ inA1\ *\ inB2))\ >>\ 32);}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ sum3\ =\ (q31\_t)\ ((((q63\_t)\ sum3\ <<\ 32)\ +\ ((q63\_t)\ inA2\ *\ inB1))\ >>\ 32);}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ \ sum4\ =\ (q31\_t)\ ((((q63\_t)\ sum4\ <<\ 32)\ +\ ((q63\_t)\ inA2\ *\ inB2))\ >>\ 32);}
+\DoxyCodeLine{00156\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ \ colCnt-\/-\/;}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Convert\ the\ result\ from\ 2.30\ to\ 1.31\ format\ and\ store\ in\ destination\ buffer\ */}}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ *px++\ \ =\ sum1\ <<\ 1;}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ *px++\ \ =\ sum2\ <<\ 1;}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ *px2++\ =\ sum3\ <<\ 1;}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ *px2++\ =\ sum4\ <<\ 1;}
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ j\ +=\ 2;}
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ column\ loop\ counter\ */}}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ \ \ col-\/-\/;}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \ \ \ \ \ \ i\ =\ i\ +\ (numColsA\ <<\ 1U);}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ px\ \ =\ px2\ +\ (numColsB\ \&\ 1U);}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ px2\ =\ px\ \ +\ \ numColsB;}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ row\ loop\ counter\ */}}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ row-\/-\/;}
+\DoxyCodeLine{00180\ \ \ \ \ \}}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00182\ \ \ \ \ \textcolor{comment}{/*\ Compute\ any\ remaining\ odd\ row/column\ below\ */}}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{comment}{/*\ Compute\ remaining\ output\ column\ */}}
+\DoxyCodeLine{00185\ \ \ \ \ \textcolor{keywordflow}{if}\ (numColsB\ \&\ 1U)\ \{}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \textcolor{comment}{/*\ Avoid\ redundant\ computation\ of\ last\ element\ */}}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ row\ =\ numRowsA\ \&\ (\string~1U);}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \textcolor{comment}{/*\ Point\ to\ remaining\ unfilled\ column\ in\ output\ matrix\ */}}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ px\ =\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}}\ +\ numColsB-\/1;}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ pInA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}};}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \textcolor{comment}{/*\ row\ loop\ */}}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (row\ >\ 0)}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ point\ to\ last\ column\ in\ matrix\ B\ */}}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ pInB\ \ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}}\ +\ numColsB-\/1;}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Set\ variable\ sum1,\ that\ acts\ as\ accumulator,\ to\ zero\ */}}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ sum1\ \ =\ 0;}
+\DoxyCodeLine{00203\ }
+\DoxyCodeLine{00204\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)}}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ 4\ columns\ at\ a\ time.\ */}}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ colCnt\ =\ numColsA\ >>\ 2U;}
+\DoxyCodeLine{00208\ }
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ matrix\ multiplication\ */}}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (colCnt\ >\ 0U)}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00212\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ \_\_SMMLA(*pInA++,\ *pInB,\ sum1);}
+\DoxyCodeLine{00214\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ (q31\_t)\ ((((q63\_t)\ sum1\ <<\ 32)\ +\ ((q63\_t)\ *pInA++\ *\ *pInB))\ >>\ 32);}
+\DoxyCodeLine{00216\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ pInB\ +=\ numColsB;}
+\DoxyCodeLine{00218\ }
+\DoxyCodeLine{00219\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ \_\_SMMLA(*pInA++,\ *pInB,\ sum1);}
+\DoxyCodeLine{00221\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ (q31\_t)\ ((((q63\_t)\ sum1\ <<\ 32)\ +\ ((q63\_t)\ *pInA++\ *\ *pInB))\ >>\ 32);}
+\DoxyCodeLine{00223\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ pInB\ +=\ numColsB;}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ \_\_SMMLA(*pInA++,\ *pInB,\ sum1);}
+\DoxyCodeLine{00228\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ (q31\_t)\ ((((q63\_t)\ sum1\ <<\ 32)\ +\ ((q63\_t)\ *pInA++\ *\ *pInB))\ >>\ 32);}
+\DoxyCodeLine{00230\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \ \ pInB\ +=\ numColsB;}
+\DoxyCodeLine{00232\ }
+\DoxyCodeLine{00233\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ \_\_SMMLA(*pInA++,\ *pInB,\ sum1);}
+\DoxyCodeLine{00235\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ (q31\_t)\ ((((q63\_t)\ sum1\ <<\ 32)\ +\ ((q63\_t)\ *pInA++\ *\ *pInB))\ >>\ 32);}
+\DoxyCodeLine{00237\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ pInB\ +=\ numColsB;}
+\DoxyCodeLine{00239\ }
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ colCnt-\/-\/;}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00243\ }
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ remaining\ column\ */}}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ colCnt\ =\ numColsA\ \%\ 4U;}
+\DoxyCodeLine{00246\ }
+\DoxyCodeLine{00247\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00248\ }
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialize\ colCnt\ with\ number\ of\ columns\ */}}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ colCnt\ =\ numColsA;}
+\DoxyCodeLine{00251\ }
+\DoxyCodeLine{00252\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_LOOPUNROLL)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00253\ }
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (colCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00255\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ \_\_SMMLA(*pInA++,\ *pInB,\ sum1);}
+\DoxyCodeLine{00257\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ (q31\_t)\ ((((q63\_t)\ sum1\ <<\ 32)\ +\ ((q63\_t)\ *pInA++\ *\ *pInB))\ >>\ 32);}
+\DoxyCodeLine{00259\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \ \ pInB\ +=\ numColsB;}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \ \ colCnt-\/-\/;}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00264\ }
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Convert\ the\ result\ from\ 2.30\ to\ 1.31\ format\ and\ store\ in\ destination\ buffer\ */}}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ *px\ =\ sum1\ <<\ 1;}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ px\ +=\ numColsB;}
+\DoxyCodeLine{00268\ }
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ row\ loop\ counter\ */}}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ row-\/-\/;}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00272\ \ \ \ \ \}}
+\DoxyCodeLine{00273\ }
+\DoxyCodeLine{00274\ \ \ \ \ \textcolor{comment}{/*\ Compute\ remaining\ output\ row\ */}}
+\DoxyCodeLine{00275\ \ \ \ \ \textcolor{keywordflow}{if}\ (numRowsA\ \&\ 1U)\ \{}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \textcolor{comment}{/*\ point\ to\ last\ row\ in\ output\ matrix\ */}}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ px\ =\ pDst-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}}\ +\ (numColsB)\ *\ (numRowsA-\/1);}
+\DoxyCodeLine{00279\ }
+\DoxyCodeLine{00280\ \ \ \ \ \ \ col\ =\ numColsB;}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ i\ =\ 0U;}
+\DoxyCodeLine{00282\ }
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \textcolor{comment}{/*\ col\ loop\ */}}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (col\ >\ 0)}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ point\ to\ last\ row\ in\ matrix\ A\ */}}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ pInA\ =\ pSrcA-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}}\ +\ (numRowsA-\/1)\ *\ numColsA;}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ \ \ pInB\ \ =\ pSrcB-\/>\mbox{\hyperlink{structarm__matrix__instance__q31_ad296f76577326ff280726323536eed6d}{pData}}\ +\ i;}
+\DoxyCodeLine{00290\ }
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Set\ variable\ sum1,\ that\ acts\ as\ accumulator,\ to\ zero\ */}}
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ sum1\ \ =\ 0;}
+\DoxyCodeLine{00293\ }
+\DoxyCodeLine{00294\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)}}
+\DoxyCodeLine{00295\ }
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ 4\ columns\ at\ a\ time.\ */}}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ colCnt\ =\ numColsA\ >>\ 2U;}
+\DoxyCodeLine{00298\ }
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ matrix\ multiplication\ */}}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (colCnt\ >\ 0U)}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ \ \ inA1\ =\ *pInA++;}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ \ \ inA2\ =\ *pInA++;}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ \ \ inB1\ =\ *pInB;}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \ \ pInB\ +=\ numColsB;}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \ \ inB2\ =\ *pInB;}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ \ \ pInB\ +=\ numColsB;}
+\DoxyCodeLine{00308\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ \_\_SMMLA(inA1,\ inB1,\ sum1);}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ \_\_SMMLA(inA2,\ inB2,\ sum1);}
+\DoxyCodeLine{00311\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ (q31\_t)\ ((((q63\_t)\ sum1\ <<\ 32)\ +\ ((q63\_t)\ inA1\ *\ inB1))\ >>\ 32);}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ (q31\_t)\ ((((q63\_t)\ sum1\ <<\ 32)\ +\ ((q63\_t)\ inA2\ *\ inB2))\ >>\ 32);}
+\DoxyCodeLine{00314\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00315\ }
+\DoxyCodeLine{00316\ \ \ \ \ \ \ \ \ \ \ inA1\ =\ *pInA++;}
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ inA2\ =\ *pInA++;}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \ \ inB1\ =\ *pInB;}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \ \ pInB\ +=\ numColsB;}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \ \ inB2\ =\ *pInB;}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \ \ pInB\ +=\ numColsB;}
+\DoxyCodeLine{00322\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ \_\_SMMLA(inA1,\ inB1,\ sum1);}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ \_\_SMMLA(inA2,\ inB2,\ sum1);}
+\DoxyCodeLine{00325\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ (q31\_t)\ ((((q63\_t)\ sum1\ <<\ 32)\ +\ ((q63\_t)\ inA1\ *\ inB1))\ >>\ 32);}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ (q31\_t)\ ((((q63\_t)\ sum1\ <<\ 32)\ +\ ((q63\_t)\ inA2\ *\ inB2))\ >>\ 32);}
+\DoxyCodeLine{00328\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00329\ }
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ \ \ colCnt-\/-\/;}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00333\ }
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ remaining\ column\ */}}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ colCnt\ =\ numColsA\ \%\ 4U;}
+\DoxyCodeLine{00336\ }
+\DoxyCodeLine{00337\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00338\ }
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialize\ colCnt\ with\ number\ of\ columns\ */}}
+\DoxyCodeLine{00340\ \ \ \ \ \ \ \ \ colCnt\ =\ numColsA;}
+\DoxyCodeLine{00341\ }
+\DoxyCodeLine{00342\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_LOOPUNROLL)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00343\ }
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (colCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00345\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00346\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ \_\_SMMLA(*pInA++,\ *pInB,\ sum1);}
+\DoxyCodeLine{00347\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \ \ sum1\ =\ (q31\_t)\ ((((q63\_t)\ sum1\ <<\ 32)\ +\ ((q63\_t)\ *pInA++\ *\ *pInB))\ >>\ 32);}
+\DoxyCodeLine{00349\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \ \ pInB\ +=\ numColsB;}
+\DoxyCodeLine{00351\ }
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \ \ colCnt-\/-\/;}
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00354\ }
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Saturate\ and\ store\ the\ result\ in\ the\ destination\ buffer\ */}}
+\DoxyCodeLine{00356\ \ \ \ \ \ \ \ \ *px++\ =\ sum1\ <<\ 1;}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ i++;}
+\DoxyCodeLine{00358\ }
+\DoxyCodeLine{00359\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ col\ loop\ counter\ */}}
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ col-\/-\/;}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00362\ \ \ \ \ \}}
+\DoxyCodeLine{00363\ }
+\DoxyCodeLine{00364\ \ \ \ \ \textcolor{comment}{/*\ Set\ status\ as\ ARM\_MATH\_SUCCESS\ */}}
+\DoxyCodeLine{00365\ \ \ \ \ status\ =\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00366\ \ \ \}}
+\DoxyCodeLine{00367\ }
+\DoxyCodeLine{00368\ \ \ \textcolor{comment}{/*\ Return\ to\ application\ */}}
+\DoxyCodeLine{00369\ \ \ \textcolor{keywordflow}{return}\ (status);}
+\DoxyCodeLine{00370\ \}}
+\DoxyCodeLine{00371\ }
+
+\end{DoxyCode}

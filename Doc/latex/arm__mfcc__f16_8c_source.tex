@@ -1,0 +1,123 @@
+\doxysection{arm\+\_\+mfcc\+\_\+f16.\+c}
+\hypertarget{arm__mfcc__f16_8c_source}{}\label{arm__mfcc__f16_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_mfcc\_f16.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_mfcc\_f16.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_mfcc\_f16.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ MFCC\ function\ for\ the\ f16\ version}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 07\ September\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.10.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}dsp/transform\_functions\_f16.h"{}}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ "{}dsp/statistics\_functions\_f16.h"{}}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ "{}dsp/basic\_math\_functions\_f16.h"{}}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#include\ "{}dsp/complex\_math\_functions\_f16.h"{}}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#include\ "{}dsp/fast\_math\_functions\_f16.h"{}}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#include\ "{}dsp/matrix\_functions\_f16.h"{}}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{preprocessor}{\#if\ defined(ARM\_FLOAT16\_SUPPORTED)}}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00080\ \textcolor{keywordtype}{void}\ arm\_mfcc\_f16(}
+\DoxyCodeLine{00081\ \ \ \textcolor{keyword}{const}\ arm\_mfcc\_instance\_f16\ *\ S,}
+\DoxyCodeLine{00082\ \ \ float16\_t\ *pSrc,}
+\DoxyCodeLine{00083\ \ \ float16\_t\ *pDst,}
+\DoxyCodeLine{00084\ \ \ float16\_t\ *pTmp}
+\DoxyCodeLine{00085\ \ \ )}
+\DoxyCodeLine{00086\ \{}
+\DoxyCodeLine{00087\ \ \ float16\_t\ maxValue;}
+\DoxyCodeLine{00088\ \ \ uint32\_t\ \ index;\ }
+\DoxyCodeLine{00089\ \ \ uint32\_t\ i;}
+\DoxyCodeLine{00090\ \ \ float16\_t\ result;}
+\DoxyCodeLine{00091\ \ \ \textcolor{keyword}{const}\ float16\_t\ *coefs=S-\/>filterCoefs;}
+\DoxyCodeLine{00092\ \ \ arm\_matrix\_instance\_f16\ pDctMat;}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \ \ \textcolor{comment}{/*\ Normalize\ */}}
+\DoxyCodeLine{00095\ \ \ arm\_absmax\_f16(pSrc,S-\/>fftLen,\&maxValue,\&index);}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ arm\_scale\_f16(pSrc,1.0f16/(\_Float16)maxValue,pSrc,S-\/>fftLen);}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \textcolor{comment}{/*\ Multiply\ by\ window\ */}}
+\DoxyCodeLine{00100\ \ \ arm\_mult\_f16(pSrc,S-\/>windowCoefs,pSrc,S-\/>fftLen);}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \textcolor{comment}{/*\ Compute\ spectrum\ magnitude\ }}
+\DoxyCodeLine{00103\ \textcolor{comment}{\ \ */}}
+\DoxyCodeLine{00104\ \textcolor{preprocessor}{\#if\ defined(ARM\_MFCC\_CFFT\_BASED)}}
+\DoxyCodeLine{00105\ \ \ \textcolor{comment}{/*\ some\ HW\ accelerator\ for\ CMSIS-\/DSP\ used\ in\ some\ boards}}
+\DoxyCodeLine{00106\ \textcolor{comment}{\ \ \ \ \ are\ only\ providing\ acceleration\ for\ CFFT.}}
+\DoxyCodeLine{00107\ \textcolor{comment}{\ \ \ \ \ With\ ARM\_MFCC\_CFFT\_BASED\ enabled,\ CFFT\ is\ used\ and\ the\ MFCC}}
+\DoxyCodeLine{00108\ \textcolor{comment}{\ \ \ \ \ will\ be\ accelerated\ on\ those\ boards.}}
+\DoxyCodeLine{00109\ \textcolor{comment}{\ }}
+\DoxyCodeLine{00110\ \textcolor{comment}{\ \ \ \ \ The\ default\ is\ to\ use\ RFFT}}
+\DoxyCodeLine{00111\ \textcolor{comment}{\ \ */}}
+\DoxyCodeLine{00112\ \ \ \textcolor{comment}{/*\ Convert\ from\ real\ to\ complex\ */}}
+\DoxyCodeLine{00113\ \ \ \textcolor{keywordflow}{for}(i=0;\ i\ <\ S-\/>fftLen\ ;\ i++)}
+\DoxyCodeLine{00114\ \ \ \{}
+\DoxyCodeLine{00115\ \ \ \ \ pTmp[2*i]\ =\ pSrc[i];}
+\DoxyCodeLine{00116\ \ \ \ \ pTmp[2*i+1]\ =\ 0.0f16;}
+\DoxyCodeLine{00117\ \ \ \}}
+\DoxyCodeLine{00118\ \ \ arm\_cfft\_f16(\&(S-\/>cfft),pTmp,0,1);}
+\DoxyCodeLine{00119\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00120\ \ \ \textcolor{comment}{/*\ Default\ RFFT\ based\ implementation\ */}}
+\DoxyCodeLine{00121\ \ \ arm\_rfft\_fast\_f16(\&(S-\/>rfft),pSrc,pTmp,0);}
+\DoxyCodeLine{00122\ \ \ \textcolor{comment}{/*\ Unpack\ real\ values\ */}}
+\DoxyCodeLine{00123\ \ \ pTmp[S-\/>fftLen]=pTmp[1];}
+\DoxyCodeLine{00124\ \ \ pTmp[S-\/>fftLen+1]=0.0f16;}
+\DoxyCodeLine{00125\ \ \ pTmp[1]=0.0f;}
+\DoxyCodeLine{00126\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00127\ \ \ arm\_cmplx\_mag\_f16(pTmp,pSrc,S-\/>fftLen);}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ \ \ \textcolor{comment}{/*\ Apply\ MEL\ filters\ */}}
+\DoxyCodeLine{00130\ \ \ \textcolor{keywordflow}{for}(i=0;\ i<S-\/>nbMelFilters;\ i++)}
+\DoxyCodeLine{00131\ \ \ \{}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ arm\_dot\_prod\_f16(pSrc+S-\/>filterPos[i],}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ coefs,}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ S-\/>filterLengths[i],}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \&result);}
+\DoxyCodeLine{00136\ }
+\DoxyCodeLine{00137\ \ \ \ \ \ \ coefs\ +=\ S-\/>filterLengths[i];}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00139\ \ \ \ \ \ \ pTmp[i]\ =\ result;}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ \ \ \}}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \textcolor{comment}{/*\ Compute\ the\ log\ */}}
+\DoxyCodeLine{00144\ \ \ arm\_offset\_f16(pTmp,1.0e-\/4f16,pTmp,S-\/>nbMelFilters);}
+\DoxyCodeLine{00145\ \ \ arm\_vlog\_f16(pTmp,pTmp,S-\/>nbMelFilters);}
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00147\ \ \ \textcolor{comment}{/*\ Multiply\ with\ the\ DCT\ matrix\ */}}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ pDctMat.numRows=S-\/>nbDctOutputs;}
+\DoxyCodeLine{00150\ \ \ pDctMat.numCols=S-\/>nbMelFilters;}
+\DoxyCodeLine{00151\ \ \ pDctMat.pData=(float16\_t*)S-\/>dctCoefs;}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \ \ arm\_mat\_vec\_mult\_f16(\&pDctMat,\ pTmp,\ pDst);}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ }
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00156\ \}}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_FLOAT16\_SUPPORTED)\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

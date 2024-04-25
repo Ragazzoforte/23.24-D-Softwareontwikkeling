@@ -1,0 +1,205 @@
+\doxysection{arm\+\_\+vlog\+\_\+f16.\+c}
+\hypertarget{arm__vlog__f16_8c_source}{}\label{arm__vlog__f16_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/FastMathFunctions/arm\_vlog\_f16.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/FastMathFunctions/arm\_vlog\_f16.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_vlog\_f16.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Fast\ vectorized\ log}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/fast\_math\_functions\_f16.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}dsp/support\_functions\_f16.h"{}}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#if\ defined(ARM\_FLOAT16\_SUPPORTED)}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \textcolor{comment}{/*\ Degree\ of\ the\ polynomial\ approximation\ */}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#define\ NB\_DEG\_LOGF16\ 3}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00038\ \textcolor{comment}{Related\ to\ the\ Log2\ of\ the\ number\ of\ approximations.}}
+\DoxyCodeLine{00039\ \textcolor{comment}{For\ instance,\ with\ 3\ there\ are\ 1\ +\ 2\string^3\ polynomials}}
+\DoxyCodeLine{00040\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#define\ NB\_DIV\_LOGF16\ 3}}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \textcolor{comment}{/*\ Length\ of\ the\ LUT\ table\ */}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#define\ NB\_LUT\_LOGF16\ (NB\_DEG\_LOGF16+1)*(1\ +\ (1<<NB\_DIV\_LOGF16))}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00047\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00048\ \textcolor{comment}{}}
+\DoxyCodeLine{00049\ \textcolor{comment}{LUT\ of\ polynomial\ approximations.}}
+\DoxyCodeLine{00050\ \textcolor{comment}{}}
+\DoxyCodeLine{00051\ \textcolor{comment}{Could\ be\ generated\ with:}}
+\DoxyCodeLine{00052\ \textcolor{comment}{}}
+\DoxyCodeLine{00053\ \textcolor{comment}{ClearAll[lut,\ coefs,\ nb,\ deg];}}
+\DoxyCodeLine{00054\ \textcolor{comment}{nb\ =\ 3;}}
+\DoxyCodeLine{00055\ \textcolor{comment}{deg\ =\ 3;}}
+\DoxyCodeLine{00056\ \textcolor{comment}{lut\ =\ Table[}}
+\DoxyCodeLine{00057\ \textcolor{comment}{\ \ \ MiniMaxApproximation[}}
+\DoxyCodeLine{00058\ \textcolor{comment}{\ \ \ \ \ Log[x/2\string^nb\ +\ i],\ \{x,\ \{10\string^-\/6,\ 1.0/2\string^nb\},\ deg,\ 0\},}}
+\DoxyCodeLine{00059\ \textcolor{comment}{\ \ \ \ \ MaxIterations\ -\/>\ 1000][[2,\ 1]],\ \{i,\ 1,\ 2,\ (1.0/2\string^nb)\}];}}
+\DoxyCodeLine{00060\ \textcolor{comment}{coefs\ =\ Chop@Flatten[CoefficientList[lut,\ x]];}}
+\DoxyCodeLine{00061\ \textcolor{comment}{}}
+\DoxyCodeLine{00062\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00063\ \textcolor{keyword}{static}\ float16\_t\ lut\_logf16[NB\_LUT\_LOGF16]=\{}
+\DoxyCodeLine{00064\ \ \ \ 0,0.125,-\/0.00781197,0.00063974,0.117783,}
+\DoxyCodeLine{00065\ \ \ \ 0.111111,-\/0.00617212,0.000447935,0.223144,}
+\DoxyCodeLine{00066\ \ \ \ 0.1,-\/0.00499952,0.000327193,0.318454,0.0909091,}
+\DoxyCodeLine{00067\ \ \ \ -\/0.00413191,0.000246234,0.405465,0.0833333,}
+\DoxyCodeLine{00068\ \ \ \ -\/0.00347199,0.000189928,0.485508,0.0769231,}
+\DoxyCodeLine{00069\ \ \ \ -\/0.00295841,0.00014956,0.559616,0.0714286,}
+\DoxyCodeLine{00070\ \ \ \ -\/0.0025509,0.000119868,0.628609,0.0666667,}
+\DoxyCodeLine{00071\ \ \ \ -\/0.00222213,0.0000975436,0.693147,}
+\DoxyCodeLine{00072\ \ \ \ 0.0625,-\/0.00195305,0.0000804357\};}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ float16\_t\ logf16\_scalar(float16\_t\ x)}
+\DoxyCodeLine{00076\ \{}
+\DoxyCodeLine{00077\ \ \ \ \ int16\_t\ i\ =\ \ arm\_typecast\_s16\_f16(x);}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \ \ \ \ int32\_t\ vecExpUnBiased\ =\ (i\ >>\ 10)\ -\/\ 15;}
+\DoxyCodeLine{00080\ \ \ \ \ i\ =\ i\ -\/\ (vecExpUnBiased\ <<\ 10);}
+\DoxyCodeLine{00081\ \ \ \ \ float16\_t\ vecTmpFlt1\ =\ arm\_typecast\_f16\_s16(i);}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \ \ float16\_t\ *lut;}
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keywordtype}{int}\ n;}
+\DoxyCodeLine{00085\ \ \ \ \ float16\_t\ tmp,v;}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ tmp\ =\ ((\_Float16)vecTmpFlt1\ -\/\ 1.0f16)\ *\ (1\ <<\ NB\_DIV\_LOGF16);}
+\DoxyCodeLine{00088\ \ \ \ \ n\ =\ (int)floor((\textcolor{keywordtype}{double})tmp);}
+\DoxyCodeLine{00089\ \ \ \ \ v\ =\ (\_Float16)tmp\ -\/\ (\_Float16)n;}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \ \ \ \ lut\ =\ lut\_logf16\ +\ n\ *\ (1+NB\_DEG\_LOGF16);}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \ \ float16\_t\ res\ =\ lut[NB\_DEG\_LOGF16-\/1];}
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ j=NB\_DEG\_LOGF16-\/2;\ j\ >=0\ ;\ j-\/-\/)}
+\DoxyCodeLine{00095\ \ \ \ \ \{}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ res\ =\ (\_Float16)lut[j]\ +\ (\_Float16)v\ *\ (\_Float16)res;}
+\DoxyCodeLine{00097\ \ \ \ \ \}}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \ \ res\ =\ (\_Float16)res\ +\ 0.693147f16\ *\ (\_Float16)vecExpUnBiased;}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{keywordflow}{return}(res);}
+\DoxyCodeLine{00103\ \}}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVE\_FLOAT16)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \textcolor{preprocessor}{\#include\ "{}arm\_common\_tables.h"{}}}
+\DoxyCodeLine{00108\ \textcolor{preprocessor}{\#include\ "{}arm\_vec\_math\_f16.h"{}}}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ float16x8\_t\ vlogq\_lut\_f16(float16x8\_t\ vecIn)}
+\DoxyCodeLine{00112\ \{}
+\DoxyCodeLine{00113\ \ \ \ \ int16x8\_t\ i\ =\ \ vreinterpretq\_s16\_f16(vecIn);}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \ \ int16x8\_t\ vecExpUnBiased\ =\ vsubq\_n\_s16(vshrq\_n\_s16(i,10),\ 15);}
+\DoxyCodeLine{00116\ \ \ \ \ i\ =\ vsubq\_s16(i,vshlq\_n\_s16(vecExpUnBiased,10));}
+\DoxyCodeLine{00117\ \ \ \ \ float16x8\_t\ vecTmpFlt1\ =\ vreinterpretq\_f16\_s16(i);}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ float16x8\_t\ lutV;}
+\DoxyCodeLine{00121\ \ \ \ \ int16x8\_t\ n;}
+\DoxyCodeLine{00122\ \ \ \ \ int16x8\_t\ offset;}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ float16x8\_t\ tmp,v,res;}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \ \ \ \ tmp\ =\ vmulq\_n\_f16(vsubq\_n\_f16(vecTmpFlt1,1.0f16),(\_Float16)(1\ <<\ NB\_DIV\_LOGF16));}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \ \ \ \ n\ =\ vcvtq\_s16\_f16(tmp);}
+\DoxyCodeLine{00129\ \ \ \ \ v\ =\ vsubq\_f16(tmp,vcvtq\_f16\_s16(n));}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ offset\ =\ vmulq\_n\_s16(n,(1+NB\_DEG\_LOGF16));}
+\DoxyCodeLine{00133\ \ \ \ \ offset\ =\ vaddq\_n\_s16(offset,NB\_DEG\_LOGF16-\/1);}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \ \ res\ =\ vldrhq\_gather\_shifted\_offset\_f16(lut\_logf16,(uint16x8\_t)offset);}
+\DoxyCodeLine{00136\ \ \ \ \ offset\ =\ vsubq\_n\_s16(offset,1);}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \ \ \ \ \textcolor{keywordflow}{for}(\textcolor{keywordtype}{int}\ j=NB\_DEG\_LOGF16-\/2;\ j\ >=0\ ;\ j-\/-\/)}
+\DoxyCodeLine{00139\ \ \ \ \ \{}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ lutV\ =\ vldrhq\_gather\_shifted\_offset\_f16(lut\_logf16,(uint16x8\_t)offset);}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ res\ =\ vfmaq\_f16(lutV,v,res);}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ offset\ =\ vsubq\_n\_s16(offset,1);}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \ \ \ \ \}}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \ \ \ \ res\ =\ vfmaq\_n\_f16(res,vcvtq\_f16\_s16(vecExpUnBiased),0.693147f16);}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ \ \ \textcolor{keywordflow}{return}(res);}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \}}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00173\ \textcolor{keywordtype}{void}\ arm\_vlog\_f16(}
+\DoxyCodeLine{00174\ \ \ \textcolor{keyword}{const}\ float16\_t\ *\ pSrc,}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ float16\_t\ *\ pDst,}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ uint32\_t\ blockSize)}
+\DoxyCodeLine{00177\ \{}
+\DoxyCodeLine{00178\ \ \ \ uint32\_t\ blkCnt;}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVE\_FLOAT16)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00181\ \ \ \ f16x8\_t\ src;}
+\DoxyCodeLine{00182\ \ \ \ f16x8\_t\ dst;}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \ \ \ blkCnt\ =\ blockSize\ >>\ 3;}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00187\ \ \ \ \{}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ src\ =\ vld1q(pSrc);}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ dst\ =\ vlogq\_lut\_f16(src);}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ vst1q(pDst,\ dst);}
+\DoxyCodeLine{00191\ }
+\DoxyCodeLine{00192\ \ \ \ \ \ \ pSrc\ +=\ 8;}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ pDst\ +=\ 8;}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00196\ \ \ \ \}}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00198\ \ \ \ blkCnt\ =\ blockSize\ \&\ 7;}
+\DoxyCodeLine{00199\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00200\ \ \ \ blkCnt\ =\ blockSize;}
+\DoxyCodeLine{00201\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00203\ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00204\ \ \ \ \{}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \textcolor{comment}{/*\ C\ =\ log(A)\ */}}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \textcolor{comment}{/*\ Calculate\ log\ and\ store\ result\ in\ destination\ buffer.\ */}}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ *pDst++\ =\ logf16\_scalar(*pSrc++);}
+\DoxyCodeLine{00209\ }
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00212\ \ \ \ \}}
+\DoxyCodeLine{00213\ \}}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00216\ }
+\DoxyCodeLine{00222\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined(ARM\_FLOAT16\_SUPPORTED)\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

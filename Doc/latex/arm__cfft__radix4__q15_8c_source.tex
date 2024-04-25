@@ -1,0 +1,1767 @@
+\doxysection{arm\+\_\+cfft\+\_\+radix4\+\_\+q15.\+c}
+\hypertarget{arm__cfft__radix4__q15_8c_source}{}\label{arm__cfft__radix4__q15_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_cfft\_radix4\_q15.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_cfft\_radix4\_q15.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_cfft\_radix4\_q15.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ This\ file\ has\ function\ definition\ of\ Radix-\/4\ FFT\ \&\ IFFT\ function\ and}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ In-\/place\ bit\ reversal\ using\ bit\ reversal\ table}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00012\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}dsp/transform\_functions.h"{}}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{keywordtype}{void}\ arm\_radix4\_butterfly\_q15(}
+\DoxyCodeLine{00034\ \ \ \ \ \ \ \ \ q15\_t\ *\ pSrc16,}
+\DoxyCodeLine{00035\ \ \ \ \ \ \ \ \ uint32\_t\ fftLen,}
+\DoxyCodeLine{00036\ \ \ \textcolor{keyword}{const}\ q15\_t\ *\ pCoef16,}
+\DoxyCodeLine{00037\ \ \ \ \ \ \ \ \ uint32\_t\ twidCoefModifier);}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{keywordtype}{void}\ arm\_radix4\_butterfly\_inverse\_q15(}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ q15\_t\ *\ pSrc16,}
+\DoxyCodeLine{00041\ \ \ \ \ \ \ \ \ uint32\_t\ fftLen,}
+\DoxyCodeLine{00042\ \ \ \textcolor{keyword}{const}\ q15\_t\ *\ pCoef16,}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ uint32\_t\ twidCoefModifier);}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \textcolor{keywordtype}{void}\ arm\_bitreversal\_q15(}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ q15\_t\ *\ pSrc,}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ uint32\_t\ fftLen,}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ uint16\_t\ bitRevFactor,}
+\DoxyCodeLine{00049\ \ \ \textcolor{keyword}{const}\ uint16\_t\ *\ pBitRevTab);}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00077\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___complex_f_f_t_ga8d66cdac41b8bf6cefdb895456eee84a}{arm\_cfft\_radix4\_q15}}(}
+\DoxyCodeLine{00078\ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__cfft__radix4__instance__q15}{arm\_cfft\_radix4\_instance\_q15}}\ *\ S,}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ q15\_t\ *\ pSrc)}
+\DoxyCodeLine{00080\ \{}
+\DoxyCodeLine{00081\ \ \ \textcolor{keywordflow}{if}\ (S-\/>ifftFlag\ ==\ 1U)}
+\DoxyCodeLine{00082\ \ \ \{}
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{comment}{/*\ \ Complex\ IFFT\ radix-\/4\ \ */}}
+\DoxyCodeLine{00084\ \ \ \ \ arm\_radix4\_butterfly\_inverse\_q15(pSrc,\ S-\/>fftLen,\ S-\/>pTwiddle,\ S-\/>twidCoefModifier);}
+\DoxyCodeLine{00085\ \ \ \}}
+\DoxyCodeLine{00086\ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00087\ \ \ \{}
+\DoxyCodeLine{00088\ \ \ \ \ \textcolor{comment}{/*\ \ Complex\ FFT\ radix-\/4\ \ */}}
+\DoxyCodeLine{00089\ \ \ \ \ arm\_radix4\_butterfly\_q15(pSrc,\ S-\/>fftLen,\ S-\/>pTwiddle,\ S-\/>twidCoefModifier);}
+\DoxyCodeLine{00090\ \ \ \}}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \textcolor{keywordflow}{if}\ (S-\/>bitReverseFlag\ ==\ 1U)}
+\DoxyCodeLine{00093\ \ \ \{}
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{comment}{/*\ \ Bit\ Reversal\ */}}
+\DoxyCodeLine{00095\ \ \ \ \ arm\_bitreversal\_q15(pSrc,\ S-\/>fftLen,\ S-\/>bitRevFactor,\ S-\/>pBitRevTable);}
+\DoxyCodeLine{00096\ \ \ \}}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \}}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00104\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00105\ \textcolor{comment}{\ *\ Radix-\/4\ FFT\ algorithm\ used\ is\ :}}
+\DoxyCodeLine{00106\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00107\ \textcolor{comment}{\ *\ Input\ real\ and\ imaginary\ data:}}
+\DoxyCodeLine{00108\ \textcolor{comment}{\ *\ x(n)\ =\ xa\ +\ j\ *\ ya}}
+\DoxyCodeLine{00109\ \textcolor{comment}{\ *\ x(n+N/4\ )\ =\ xb\ +\ j\ *\ yb}}
+\DoxyCodeLine{00110\ \textcolor{comment}{\ *\ x(n+N/2\ )\ =\ xc\ +\ j\ *\ yc}}
+\DoxyCodeLine{00111\ \textcolor{comment}{\ *\ x(n+3N\ 4)\ =\ xd\ +\ j\ *\ yd}}
+\DoxyCodeLine{00112\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00113\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00114\ \textcolor{comment}{\ *\ Output\ real\ and\ imaginary\ data:}}
+\DoxyCodeLine{00115\ \textcolor{comment}{\ *\ x(4r)\ =\ xa'+\ j\ *\ ya'}}
+\DoxyCodeLine{00116\ \textcolor{comment}{\ *\ x(4r+1)\ =\ xb'+\ j\ *\ yb'}}
+\DoxyCodeLine{00117\ \textcolor{comment}{\ *\ x(4r+2)\ =\ xc'+\ j\ *\ yc'}}
+\DoxyCodeLine{00118\ \textcolor{comment}{\ *\ x(4r+3)\ =\ xd'+\ j\ *\ yd'}}
+\DoxyCodeLine{00119\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00120\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00121\ \textcolor{comment}{\ *\ Twiddle\ factors\ for\ radix-\/4\ FFT:}}
+\DoxyCodeLine{00122\ \textcolor{comment}{\ *\ Wn\ =\ co1\ +\ j\ *\ (-\/\ si1)}}
+\DoxyCodeLine{00123\ \textcolor{comment}{\ *\ W2n\ =\ co2\ +\ j\ *\ (-\/\ si2)}}
+\DoxyCodeLine{00124\ \textcolor{comment}{\ *\ W3n\ =\ co3\ +\ j\ *\ (-\/\ si3)}}
+\DoxyCodeLine{00125\ \textcolor{comment}{\ }}
+\DoxyCodeLine{00126\ \textcolor{comment}{\ *\ The\ real\ and\ imaginary\ output\ values\ for\ the\ radix-\/4\ butterfly\ are}}
+\DoxyCodeLine{00127\ \textcolor{comment}{\ *\ xa'\ =\ xa\ +\ xb\ +\ xc\ +\ xd}}
+\DoxyCodeLine{00128\ \textcolor{comment}{\ *\ ya'\ =\ ya\ +\ yb\ +\ yc\ +\ yd}}
+\DoxyCodeLine{00129\ \textcolor{comment}{\ *\ xb'\ =\ (xa+yb-\/xc-\/yd)*\ co1\ +\ (ya-\/xb-\/yc+xd)*\ (si1)}}
+\DoxyCodeLine{00130\ \textcolor{comment}{\ *\ yb'\ =\ (ya-\/xb-\/yc+xd)*\ co1\ -\/\ (xa+yb-\/xc-\/yd)*\ (si1)}}
+\DoxyCodeLine{00131\ \textcolor{comment}{\ *\ xc'\ =\ (xa-\/xb+xc-\/xd)*\ co2\ +\ (ya-\/yb+yc-\/yd)*\ (si2)}}
+\DoxyCodeLine{00132\ \textcolor{comment}{\ *\ yc'\ =\ (ya-\/yb+yc-\/yd)*\ co2\ -\/\ (xa-\/xb+xc-\/xd)*\ (si2)}}
+\DoxyCodeLine{00133\ \textcolor{comment}{\ *\ xd'\ =\ (xa-\/yb-\/xc+yd)*\ co3\ +\ (ya+xb-\/yc-\/xd)*\ (si3)}}
+\DoxyCodeLine{00134\ \textcolor{comment}{\ *\ yd'\ =\ (ya+xb-\/yc-\/xd)*\ co3\ -\/\ (xa-\/yb-\/xc+yd)*\ (si3)}}
+\DoxyCodeLine{00135\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00136\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00147\ \textcolor{keywordtype}{void}\ arm\_radix4\_butterfly\_q15(}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ q15\_t\ *\ pSrc16,}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ uint32\_t\ fftLen,}
+\DoxyCodeLine{00150\ \ \ \textcolor{keyword}{const}\ q15\_t\ *\ pCoef16,}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ uint32\_t\ twidCoefModifier)}
+\DoxyCodeLine{00152\ \{}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ q31\_t\ R,\ S,\ T,\ U;}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ q31\_t\ C1,\ C2,\ C3,\ out1,\ out2;}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ uint32\_t\ n1,\ n2,\ ic,\ i0,\ j,\ k;}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ q15\_t\ *ptr1;}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ q15\_t\ *pSi0;}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ q15\_t\ *pSi1;}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ q15\_t\ *pSi2;}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ q15\_t\ *pSi3;}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ q31\_t\ xaya,\ xbyb,\ xcyc,\ xdyd;}
+\DoxyCodeLine{00167\ }
+\DoxyCodeLine{00168\ \ \ \textcolor{comment}{/*\ Total\ process\ is\ divided\ into\ three\ stages\ */}}
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \ \ \textcolor{comment}{/*\ process\ first\ stage,\ middle\ stages,\ \&\ last\ stage\ */}}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \ \ \textcolor{comment}{/*\ \ Initializations\ for\ the\ first\ stage\ */}}
+\DoxyCodeLine{00173\ \ \ n2\ =\ fftLen;}
+\DoxyCodeLine{00174\ \ \ n1\ =\ n2;}
+\DoxyCodeLine{00175\ }
+\DoxyCodeLine{00176\ \ \ \textcolor{comment}{/*\ n2\ =\ fftLen/4\ */}}
+\DoxyCodeLine{00177\ \ \ n2\ >>=\ 2U;}
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00179\ \ \ \textcolor{comment}{/*\ Index\ for\ twiddle\ coefficient\ */}}
+\DoxyCodeLine{00180\ \ \ ic\ =\ 0U;}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00182\ \ \ \textcolor{comment}{/*\ Index\ for\ input\ read\ and\ output\ write\ */}}
+\DoxyCodeLine{00183\ \ \ j\ =\ n2;}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00185\ \ \ pSi0\ =\ pSrc16;}
+\DoxyCodeLine{00186\ \ \ pSi1\ =\ pSi0\ +\ 2\ *\ n2;}
+\DoxyCodeLine{00187\ \ \ pSi2\ =\ pSi1\ +\ 2\ *\ n2;}
+\DoxyCodeLine{00188\ \ \ pSi3\ =\ pSi2\ +\ 2\ *\ n2;}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00190\ \ \ \textcolor{comment}{/*\ Input\ is\ in\ 1.15(q15)\ format\ */}}
+\DoxyCodeLine{00191\ }
+\DoxyCodeLine{00192\ \ \ \textcolor{comment}{/*\ \ start\ of\ first\ stage\ process\ */}}
+\DoxyCodeLine{00193\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00194\ \ \ \{}
+\DoxyCodeLine{00195\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ implementation\ */}}
+\DoxyCodeLine{00196\ }
+\DoxyCodeLine{00197\ \ \ \ \ \textcolor{comment}{/*\ Reading\ i0,\ i0+fftLen/2\ inputs\ */}}
+\DoxyCodeLine{00198\ \ \ \ \ \textcolor{comment}{/*\ Read\ ya\ (real),\ xa(imag)\ input\ */}}
+\DoxyCodeLine{00199\ \ \ \ \ T\ =\ read\_q15x2\ (pSi0);}
+\DoxyCodeLine{00200\ \ \ \ \ T\ =\ \_\_SHADD16(T,\ 0);\ \textcolor{comment}{/*\ this\ is\ just\ a\ SIMD\ arithmetic\ shift\ right\ by\ 1\ */}}
+\DoxyCodeLine{00201\ \ \ \ \ T\ =\ \_\_SHADD16(T,\ 0);\ \textcolor{comment}{/*\ it\ turns\ out\ doing\ this\ twice\ is\ 2\ cycles,\ the\ alternative\ takes\ 3\ cycles\ */}}
+\DoxyCodeLine{00202\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00203\ \textcolor{comment}{\ \ \ \ in\ =\ ((int16\_t)\ (T\ \&\ 0xFFFF))\ >>\ 2;\ \ \ \ \ \ \ //\ alternative\ code\ that\ takes\ 3\ cycles}}
+\DoxyCodeLine{00204\ \textcolor{comment}{\ \ \ \ \ T\ =\ ((T\ >>\ 2)\ \&\ 0xFFFF0000)\ |\ (in\ \&\ 0xFFFF);}}
+\DoxyCodeLine{00205\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00207\ \ \ \ \ \textcolor{comment}{/*\ Read\ yc\ (real),\ xc(imag)\ input\ */}}
+\DoxyCodeLine{00208\ \ \ \ \ S\ =\ read\_q15x2\ (pSi2);}
+\DoxyCodeLine{00209\ \ \ \ \ S\ =\ \_\_SHADD16(S,\ 0);}
+\DoxyCodeLine{00210\ \ \ \ \ S\ =\ \_\_SHADD16(S,\ 0);}
+\DoxyCodeLine{00211\ }
+\DoxyCodeLine{00212\ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed((ya\ +\ yc),\ (xa\ +\ xc)\ )\ */}}
+\DoxyCodeLine{00213\ \ \ \ \ R\ =\ \_\_QADD16(T,\ S);}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \ \ \ \ \textcolor{comment}{/*\ S\ =\ packed((ya\ -\/\ yc),\ (xa\ -\/\ xc)\ )\ */}}
+\DoxyCodeLine{00216\ \ \ \ \ S\ =\ \_\_QSUB16(T,\ S);}
+\DoxyCodeLine{00217\ }
+\DoxyCodeLine{00218\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+fftLen/4\ ,\ i0+3fftLen/4\ inputs\ */}}
+\DoxyCodeLine{00219\ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{00220\ \ \ \ \ T\ =\ read\_q15x2\ (pSi1);}
+\DoxyCodeLine{00221\ \ \ \ \ T\ =\ \_\_SHADD16(T,\ 0);}
+\DoxyCodeLine{00222\ \ \ \ \ T\ =\ \_\_SHADD16(T,\ 0);}
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00224\ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{00225\ \ \ \ \ U\ =\ read\_q15x2\ (pSi3);}
+\DoxyCodeLine{00226\ \ \ \ \ U\ =\ \_\_SHADD16(U,\ 0);}
+\DoxyCodeLine{00227\ \ \ \ \ U\ =\ \_\_SHADD16(U,\ 0);}
+\DoxyCodeLine{00228\ }
+\DoxyCodeLine{00229\ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed((yb\ +\ yd),\ (xb\ +\ xd)\ )\ */}}
+\DoxyCodeLine{00230\ \ \ \ \ T\ =\ \_\_QADD16(T,\ U);}
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00232\ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ sample\ */}}
+\DoxyCodeLine{00233\ \ \ \ \ \textcolor{comment}{/*\ xa'\ =\ xa\ +\ xb\ +\ xc\ +\ xd\ */}}
+\DoxyCodeLine{00234\ \ \ \ \ \textcolor{comment}{/*\ ya'\ =\ ya\ +\ yb\ +\ yc\ +\ yd\ */}}
+\DoxyCodeLine{00235\ \ \ \ \ write\_q15x2\_ia\ (\&pSi0,\ \_\_SHADD16(R,\ T));}
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00237\ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed((ya\ +\ yc)\ -\/\ (yb\ +\ yd),\ (xa\ +\ xc)-\/\ (xb\ +\ xd))\ */}}
+\DoxyCodeLine{00238\ \ \ \ \ R\ =\ \_\_QSUB16(R,\ T);}
+\DoxyCodeLine{00239\ }
+\DoxyCodeLine{00240\ \ \ \ \ \textcolor{comment}{/*\ co2\ \&\ si2\ are\ read\ from\ SIMD\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{00241\ \ \ \ \ C2\ =\ read\_q15x2\ ((q15\_t\ *)\ pCoef16\ +\ (4U\ *\ ic));}
+\DoxyCodeLine{00242\ }
+\DoxyCodeLine{00243\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00244\ \ \ \ \ \textcolor{comment}{/*\ xc'\ =\ (xa-\/xb+xc-\/xd)*\ co2\ +\ (ya-\/yb+yc-\/yd)*\ (si2)\ */}}
+\DoxyCodeLine{00245\ \ \ \ \ out1\ =\ \_\_SMUAD(C2,\ R)\ >>\ 16U;}
+\DoxyCodeLine{00246\ \ \ \ \ \textcolor{comment}{/*\ yc'\ =\ (ya-\/yb+yc-\/yd)*\ co2\ -\/\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{00247\ \ \ \ \ out2\ =\ \_\_SMUSDX(C2,\ R);}
+\DoxyCodeLine{00248\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00249\ \ \ \ \ \textcolor{comment}{/*\ xc'\ =\ (ya-\/yb+yc-\/yd)*\ co2\ -\/\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{00250\ \ \ \ \ out1\ =\ \_\_SMUSDX(R,\ C2)\ >>\ 16U;}
+\DoxyCodeLine{00251\ \ \ \ \ \textcolor{comment}{/*\ yc'\ =\ (xa-\/xb+xc-\/xd)*\ co2\ +\ (ya-\/yb+yc-\/yd)*\ (si2)\ */}}
+\DoxyCodeLine{00252\ \ \ \ \ out2\ =\ \_\_SMUAD(C2,\ R);}
+\DoxyCodeLine{00253\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00255\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+fftLen/4\ */}}
+\DoxyCodeLine{00256\ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed(yb,\ xb)\ */}}
+\DoxyCodeLine{00257\ \ \ \ \ T\ =\ read\_q15x2\ (pSi1);}
+\DoxyCodeLine{00258\ \ \ \ \ T\ =\ \_\_SHADD16(T,\ 0);}
+\DoxyCodeLine{00259\ \ \ \ \ T\ =\ \_\_SHADD16(T,\ 0);}
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00261\ \ \ \ \ \textcolor{comment}{/*\ writing\ the\ butterfly\ processed\ i0\ +\ fftLen/4\ sample\ */}}
+\DoxyCodeLine{00262\ \ \ \ \ \textcolor{comment}{/*\ writing\ output(xc',\ yc')\ in\ little\ endian\ format\ */}}
+\DoxyCodeLine{00263\ \ \ \ \ write\_q15x2\_ia\ (\&pSi1,\ (q31\_t)\ \_\_PKHBT(\ out1,\ out2,\ 0\ ));}
+\DoxyCodeLine{00264\ }
+\DoxyCodeLine{00265\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ calculations\ */}}
+\DoxyCodeLine{00266\ \ \ \ \ \textcolor{comment}{/*\ U\ =\ packed(yd,\ xd)\ */}}
+\DoxyCodeLine{00267\ \ \ \ \ U\ =\ read\_q15x2\ (pSi3);}
+\DoxyCodeLine{00268\ \ \ \ \ U\ =\ \_\_SHADD16(U,\ 0);}
+\DoxyCodeLine{00269\ \ \ \ \ U\ =\ \_\_SHADD16(U,\ 0);}
+\DoxyCodeLine{00270\ }
+\DoxyCodeLine{00271\ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed(yb-\/yd,\ xb-\/xd)\ */}}
+\DoxyCodeLine{00272\ \ \ \ \ T\ =\ \_\_QSUB16(T,\ U);}
+\DoxyCodeLine{00273\ }
+\DoxyCodeLine{00274\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00275\ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed((ya-\/yc)\ +\ (xb-\/\ xd)\ ,\ (xa-\/xc)\ -\/\ (yb-\/yd))\ */}}
+\DoxyCodeLine{00276\ \ \ \ \ R\ =\ \_\_QASX(S,\ T);}
+\DoxyCodeLine{00277\ \ \ \ \ \textcolor{comment}{/*\ S\ =\ packed((ya-\/yc)\ -\/\ (xb-\/\ xd),\ \ (xa-\/xc)\ +\ (yb-\/yd))\ */}}
+\DoxyCodeLine{00278\ \ \ \ \ S\ =\ \_\_QSAX(S,\ T);}
+\DoxyCodeLine{00279\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00280\ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed((ya-\/yc)\ +\ (xb-\/\ xd)\ ,\ (xa-\/xc)\ -\/\ (yb-\/yd))\ */}}
+\DoxyCodeLine{00281\ \ \ \ \ R\ =\ \_\_QSAX(S,\ T);}
+\DoxyCodeLine{00282\ \ \ \ \ \textcolor{comment}{/*\ S\ =\ packed((ya-\/yc)\ -\/\ (xb-\/\ xd),\ \ (xa-\/xc)\ +\ (yb-\/yd))\ */}}
+\DoxyCodeLine{00283\ \ \ \ \ S\ =\ \_\_QASX(S,\ T);}
+\DoxyCodeLine{00284\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00285\ }
+\DoxyCodeLine{00286\ \ \ \ \ \textcolor{comment}{/*\ co1\ \&\ si1\ are\ read\ from\ SIMD\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{00287\ \ \ \ \ C1\ =\ read\_q15x2\ ((q15\_t\ *)\ pCoef16\ +\ (2U\ *\ ic));}
+\DoxyCodeLine{00288\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+fftLen/2\ sample\ */}}
+\DoxyCodeLine{00289\ }
+\DoxyCodeLine{00290\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00291\ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (xa+yb-\/xc-\/yd)*\ co1\ +\ (ya-\/xb-\/yc+xd)*\ (si1)\ */}}
+\DoxyCodeLine{00292\ \ \ \ \ out1\ =\ \_\_SMUAD(C1,\ S)\ >>\ 16U;}
+\DoxyCodeLine{00293\ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (ya-\/xb-\/yc+xd)*\ co1\ -\/\ (xa+yb-\/xc-\/yd)*\ (si1)\ */}}
+\DoxyCodeLine{00294\ \ \ \ \ out2\ =\ \_\_SMUSDX(C1,\ S);}
+\DoxyCodeLine{00295\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00296\ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (ya-\/xb-\/yc+xd)*\ co1\ -\/\ (xa+yb-\/xc-\/yd)*\ (si1)\ */}}
+\DoxyCodeLine{00297\ \ \ \ \ out1\ =\ \_\_SMUSDX(S,\ C1)\ >>\ 16U;}
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (xa+yb-\/xc-\/yd)*\ co1\ +\ (ya-\/xb-\/yc+xd)*\ (si1)\ */}}
+\DoxyCodeLine{00299\ \ \ \ \ out2\ =\ \_\_SMUAD(C1,\ S);}
+\DoxyCodeLine{00300\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00301\ }
+\DoxyCodeLine{00302\ \ \ \ \ \textcolor{comment}{/*\ writing\ output(xb',\ yb')\ in\ little\ endian\ format\ */}}
+\DoxyCodeLine{00303\ \ \ \ \ write\_q15x2\_ia\ (\&pSi2,\ \_\_PKHBT(\ out1,\ out2,\ 0\ ));}
+\DoxyCodeLine{00304\ }
+\DoxyCodeLine{00305\ \ \ \ \ \textcolor{comment}{/*\ co3\ \&\ si3\ are\ read\ from\ SIMD\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{00306\ \ \ \ \ C3\ =\ read\_q15x2\ ((q15\_t\ *)\ pCoef16\ +\ (6U\ *\ ic));}
+\DoxyCodeLine{00307\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+3fftLen/4\ sample\ */}}
+\DoxyCodeLine{00308\ }
+\DoxyCodeLine{00309\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00310\ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (xa-\/yb-\/xc+yd)*\ co3\ +\ (ya+xb-\/yc-\/xd)*\ (si3)\ */}}
+\DoxyCodeLine{00311\ \ \ \ \ out1\ =\ \_\_SMUAD(C3,\ R)\ >>\ 16U;}
+\DoxyCodeLine{00312\ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (ya+xb-\/yc-\/xd)*\ co3\ -\/\ (xa-\/yb-\/xc+yd)*\ (si3)\ */}}
+\DoxyCodeLine{00313\ \ \ \ \ out2\ =\ \_\_SMUSDX(C3,\ R);}
+\DoxyCodeLine{00314\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00315\ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (ya+xb-\/yc-\/xd)*\ co3\ -\/\ (xa-\/yb-\/xc+yd)*\ (si3)\ */}}
+\DoxyCodeLine{00316\ \ \ \ \ out1\ =\ \_\_SMUSDX(R,\ C3)\ >>\ 16U;}
+\DoxyCodeLine{00317\ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (xa-\/yb-\/xc+yd)*\ co3\ +\ (ya+xb-\/yc-\/xd)*\ (si3)\ */}}
+\DoxyCodeLine{00318\ \ \ \ \ out2\ =\ \_\_SMUAD(C3,\ R);}
+\DoxyCodeLine{00319\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00320\ }
+\DoxyCodeLine{00321\ \ \ \ \ \textcolor{comment}{/*\ writing\ output(xd',\ yd')\ in\ little\ endian\ format\ */}}
+\DoxyCodeLine{00322\ \ \ \ \ write\_q15x2\_ia\ (\&pSi3,\ \_\_PKHBT(\ out1,\ out2,\ 0\ ));}
+\DoxyCodeLine{00323\ }
+\DoxyCodeLine{00324\ \ \ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{00325\ \ \ \ \ ic\ =\ ic\ +\ twidCoefModifier;}
+\DoxyCodeLine{00326\ }
+\DoxyCodeLine{00327\ \ \ \}\ \textcolor{keywordflow}{while}\ (-\/-\/j);}
+\DoxyCodeLine{00328\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 4.11(q11)\ format\ */}}
+\DoxyCodeLine{00329\ }
+\DoxyCodeLine{00330\ \ \ \textcolor{comment}{/*\ end\ of\ first\ stage\ process\ */}}
+\DoxyCodeLine{00331\ }
+\DoxyCodeLine{00332\ }
+\DoxyCodeLine{00333\ \ \ \textcolor{comment}{/*\ start\ of\ middle\ stage\ process\ */}}
+\DoxyCodeLine{00334\ }
+\DoxyCodeLine{00335\ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{00336\ \ \ twidCoefModifier\ <<=\ 2U;}
+\DoxyCodeLine{00337\ }
+\DoxyCodeLine{00338\ \ \ \textcolor{comment}{/*\ \ Calculation\ of\ Middle\ stage\ */}}
+\DoxyCodeLine{00339\ \ \ \textcolor{keywordflow}{for}\ (k\ =\ fftLen\ /\ 4U;\ k\ >\ 4U;\ k\ >>=\ 2U)}
+\DoxyCodeLine{00340\ \ \ \{}
+\DoxyCodeLine{00341\ \ \ \ \ \textcolor{comment}{/*\ \ Initializations\ for\ the\ middle\ stage\ */}}
+\DoxyCodeLine{00342\ \ \ \ \ n1\ =\ n2;}
+\DoxyCodeLine{00343\ \ \ \ \ n2\ >>=\ 2U;}
+\DoxyCodeLine{00344\ \ \ \ \ ic\ =\ 0U;}
+\DoxyCodeLine{00345\ }
+\DoxyCodeLine{00346\ \ \ \ \ \textcolor{keywordflow}{for}\ (j\ =\ 0U;\ j\ <=\ (n2\ -\/\ 1U);\ j++)}
+\DoxyCodeLine{00347\ \ \ \ \ \{}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ index\ calculation\ for\ the\ coefficients\ */}}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ C1\ =\ read\_q15x2\ ((q15\_t\ *)\ pCoef16\ +\ (2U\ *\ ic));}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ C2\ =\ read\_q15x2\ ((q15\_t\ *)\ pCoef16\ +\ (4U\ *\ ic));}
+\DoxyCodeLine{00351\ \ \ \ \ \ \ C3\ =\ read\_q15x2\ ((q15\_t\ *)\ pCoef16\ +\ (6U\ *\ ic));}
+\DoxyCodeLine{00352\ }
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ ic\ =\ ic\ +\ twidCoefModifier;}
+\DoxyCodeLine{00355\ }
+\DoxyCodeLine{00356\ \ \ \ \ \ \ pSi0\ =\ pSrc16\ +\ 2\ *\ j;}
+\DoxyCodeLine{00357\ \ \ \ \ \ \ pSi1\ =\ pSi0\ +\ 2\ *\ n2;}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ pSi2\ =\ pSi1\ +\ 2\ *\ n2;}
+\DoxyCodeLine{00359\ \ \ \ \ \ \ pSi3\ =\ pSi2\ +\ 2\ *\ n2;}
+\DoxyCodeLine{00360\ }
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ implementation\ */}}
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i0\ =\ j;\ i0\ <\ fftLen;\ i0\ +=\ n1)}
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0,\ i0+fftLen/2\ inputs\ */}}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ ya\ (real),\ xa(imag)\ input\ */}}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \ T\ =\ read\_q15x2\ (pSi0);}
+\DoxyCodeLine{00367\ }
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yc\ (real),\ xc(imag)\ input\ */}}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ S\ =\ read\_q15x2\ (pSi2);}
+\DoxyCodeLine{00370\ }
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed(\ (ya\ +\ yc),\ (xa\ +\ xc))\ */}}
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \ R\ =\ \_\_QADD16(T,\ S);}
+\DoxyCodeLine{00373\ }
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ S\ =\ packed((ya\ -\/\ yc),\ (xa\ -\/\ xc))\ */}}
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ S\ =\ \_\_QSUB16(T,\ S);}
+\DoxyCodeLine{00376\ }
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+fftLen/4\ ,\ i0+3fftLen/4\ inputs\ */}}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \ \ T\ =\ read\_q15x2\ (pSi1);}
+\DoxyCodeLine{00380\ }
+\DoxyCodeLine{00381\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{00382\ \ \ \ \ \ \ \ \ U\ =\ read\_q15x2\ (pSi3);}
+\DoxyCodeLine{00383\ }
+\DoxyCodeLine{00384\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed(\ (yb\ +\ yd),\ (xb\ +\ xd))\ */}}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \ \ T\ =\ \_\_QADD16(T,\ U);}
+\DoxyCodeLine{00386\ }
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ sample\ */}}
+\DoxyCodeLine{00388\ }
+\DoxyCodeLine{00389\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xa'\ =\ xa\ +\ xb\ +\ xc\ +\ xd\ */}}
+\DoxyCodeLine{00390\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ ya'\ =\ ya\ +\ yb\ +\ yc\ +\ yd\ */}}
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SHADD16(R,\ T);}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SHADD16(out1,\ 0);}
+\DoxyCodeLine{00393\ \ \ \ \ \ \ \ \ write\_q15x2\ (pSi0,\ out1);}
+\DoxyCodeLine{00394\ \ \ \ \ \ \ \ \ pSi0\ +=\ 2\ *\ n1;}
+\DoxyCodeLine{00395\ }
+\DoxyCodeLine{00396\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed(\ (ya\ +\ yc)\ -\/\ (yb\ +\ yd),\ (xa\ +\ xc)\ -\/\ (xb\ +\ xd))\ */}}
+\DoxyCodeLine{00397\ \ \ \ \ \ \ \ \ R\ =\ \_\_SHSUB16(R,\ T);}
+\DoxyCodeLine{00398\ }
+\DoxyCodeLine{00399\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ (ya-\/yb+yc-\/yd)*\ (si2)\ +\ (xa-\/xb+xc-\/xd)*\ co2\ */}}
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SMUAD(C2,\ R)\ >>\ 16U;}
+\DoxyCodeLine{00402\ }
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ (ya-\/yb+yc-\/yd)*\ co2\ -\/\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ out2\ =\ \_\_SMUSDX(C2,\ R);}
+\DoxyCodeLine{00405\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00406\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ (ya-\/yb+yc-\/yd)*\ co2\ -\/\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SMUSDX(R,\ C2)\ >>\ 16U;}
+\DoxyCodeLine{00408\ }
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ (ya-\/yb+yc-\/yd)*\ (si2)\ +\ (xa-\/xb+xc-\/xd)*\ co2\ */}}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ out2\ =\ \_\_SMUAD(C2,\ R);}
+\DoxyCodeLine{00411\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00412\ }
+\DoxyCodeLine{00413\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+3fftLen/4\ */}}
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \ \ T\ =\ read\_q15x2\ (pSi1);}
+\DoxyCodeLine{00416\ }
+\DoxyCodeLine{00417\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ +\ fftLen/4\ sample\ */}}
+\DoxyCodeLine{00418\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xc'\ =\ (xa-\/xb+xc-\/xd)*\ co2\ +\ (ya-\/yb+yc-\/yd)*\ (si2)\ */}}
+\DoxyCodeLine{00419\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ yc'\ =\ (ya-\/yb+yc-\/yd)*\ co2\ -\/\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \ \ write\_q15x2\ (pSi1,\ \_\_PKHBT(\ out1,\ out2,\ 0\ ));}
+\DoxyCodeLine{00421\ \ \ \ \ \ \ \ \ pSi1\ +=\ 2\ *\ n1;}
+\DoxyCodeLine{00422\ }
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ calculations\ */}}
+\DoxyCodeLine{00424\ }
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ U\ =\ read\_q15x2\ (pSi3);}
+\DoxyCodeLine{00427\ }
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed(yb-\/yd,\ xb-\/xd)\ */}}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ T\ =\ \_\_QSUB16(T,\ U);}
+\DoxyCodeLine{00430\ }
+\DoxyCodeLine{00431\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00432\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed((ya-\/yc)\ +\ (xb-\/\ xd)\ ,\ (xa-\/xc)\ -\/\ (yb-\/yd))\ */}}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \ \ R\ =\ \_\_SHASX(S,\ T);}
+\DoxyCodeLine{00434\ }
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ S\ =\ packed((ya-\/yc)\ -\/\ (xb-\/\ xd),\ \ (xa-\/xc)\ +\ (yb-\/yd))\ */}}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \ \ S\ =\ \_\_SHSAX(S,\ T);}
+\DoxyCodeLine{00437\ }
+\DoxyCodeLine{00438\ }
+\DoxyCodeLine{00439\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+fftLen/2\ sample\ */}}
+\DoxyCodeLine{00440\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SMUAD(C1,\ S)\ >>\ 16U;}
+\DoxyCodeLine{00441\ \ \ \ \ \ \ \ \ out2\ =\ \_\_SMUSDX(C1,\ S);}
+\DoxyCodeLine{00442\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00443\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed((ya-\/yc)\ +\ (xb-\/\ xd)\ ,\ (xa-\/xc)\ -\/\ (yb-\/yd))\ */}}
+\DoxyCodeLine{00444\ \ \ \ \ \ \ \ \ R\ =\ \_\_SHSAX(S,\ T);}
+\DoxyCodeLine{00445\ }
+\DoxyCodeLine{00446\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ S\ =\ packed((ya-\/yc)\ -\/\ (xb-\/\ xd),\ \ (xa-\/xc)\ +\ (yb-\/yd))\ */}}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \ \ S\ =\ \_\_SHASX(S,\ T);}
+\DoxyCodeLine{00448\ }
+\DoxyCodeLine{00449\ }
+\DoxyCodeLine{00450\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+fftLen/2\ sample\ */}}
+\DoxyCodeLine{00451\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SMUSDX(S,\ C1)\ >>\ 16U;}
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \ \ out2\ =\ \_\_SMUAD(C1,\ S);}
+\DoxyCodeLine{00453\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00454\ }
+\DoxyCodeLine{00455\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (xa+yb-\/xc-\/yd)*\ co1\ +\ (ya-\/xb-\/yc+xd)*\ (si1)\ */}}
+\DoxyCodeLine{00456\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (ya-\/xb-\/yc+xd)*\ co1\ -\/\ (xa+yb-\/xc-\/yd)*\ (si1)\ */}}
+\DoxyCodeLine{00457\ \ \ \ \ \ \ \ \ write\_q15x2\ (pSi2,\ \_\_PKHBT(\ out1,\ out2,\ 0\ ));}
+\DoxyCodeLine{00458\ \ \ \ \ \ \ \ \ pSi2\ +=\ 2\ *\ n1;}
+\DoxyCodeLine{00459\ }
+\DoxyCodeLine{00460\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+3fftLen/4\ sample\ */}}
+\DoxyCodeLine{00461\ }
+\DoxyCodeLine{00462\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00463\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SMUAD(C3,\ R)\ >>\ 16U;}
+\DoxyCodeLine{00464\ \ \ \ \ \ \ \ \ out2\ =\ \_\_SMUSDX(C3,\ R);}
+\DoxyCodeLine{00465\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00466\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SMUSDX(R,\ C3)\ >>\ 16U;}
+\DoxyCodeLine{00467\ \ \ \ \ \ \ \ \ out2\ =\ \_\_SMUAD(C3,\ R);}
+\DoxyCodeLine{00468\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00469\ }
+\DoxyCodeLine{00470\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (xa-\/yb-\/xc+yd)*\ co3\ +\ (ya+xb-\/yc-\/xd)*\ (si3)\ */}}
+\DoxyCodeLine{00471\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (ya+xb-\/yc-\/xd)*\ co3\ -\/\ (xa-\/yb-\/xc+yd)*\ (si3)\ */}}
+\DoxyCodeLine{00472\ \ \ \ \ \ \ \ \ write\_q15x2\ (pSi3,\ \_\_PKHBT(\ out1,\ out2,\ 0\ ));}
+\DoxyCodeLine{00473\ \ \ \ \ \ \ \ \ pSi3\ +=\ 2\ *\ n1;}
+\DoxyCodeLine{00474\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00475\ \ \ \ \ \}}
+\DoxyCodeLine{00476\ \ \ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{00477\ \ \ \ \ twidCoefModifier\ <<=\ 2U;}
+\DoxyCodeLine{00478\ \ \ \}}
+\DoxyCodeLine{00479\ \ \ \textcolor{comment}{/*\ end\ of\ middle\ stage\ process\ */}}
+\DoxyCodeLine{00480\ }
+\DoxyCodeLine{00481\ }
+\DoxyCodeLine{00482\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 10.6(q6)\ format\ for\ the\ 1024\ point\ */}}
+\DoxyCodeLine{00483\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 8.8(q8)\ format\ for\ the\ 256\ point\ */}}
+\DoxyCodeLine{00484\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 6.10(q10)\ format\ for\ the\ 64\ point\ */}}
+\DoxyCodeLine{00485\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 4.12(q12)\ format\ for\ the\ 16\ point\ */}}
+\DoxyCodeLine{00486\ }
+\DoxyCodeLine{00487\ \ \ \textcolor{comment}{/*\ \ Initializations\ for\ the\ last\ stage\ */}}
+\DoxyCodeLine{00488\ \ \ j\ =\ fftLen\ >>\ 2;}
+\DoxyCodeLine{00489\ }
+\DoxyCodeLine{00490\ \ \ ptr1\ =\ \&pSrc16[0];}
+\DoxyCodeLine{00491\ }
+\DoxyCodeLine{00492\ \ \ \textcolor{comment}{/*\ start\ of\ last\ stage\ process\ */}}
+\DoxyCodeLine{00493\ }
+\DoxyCodeLine{00494\ \ \ \textcolor{comment}{/*\ \ Butterfly\ implementation\ */}}
+\DoxyCodeLine{00495\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00496\ \ \ \{}
+\DoxyCodeLine{00497\ \ \ \ \ \textcolor{comment}{/*\ Read\ xa\ (real),\ ya(imag)\ input\ */}}
+\DoxyCodeLine{00498\ \ \ \ \ xaya\ =\ read\_q15x2\_ia\ (\&ptr1);}
+\DoxyCodeLine{00499\ }
+\DoxyCodeLine{00500\ \ \ \ \ \textcolor{comment}{/*\ Read\ xb\ (real),\ yb(imag)\ input\ */}}
+\DoxyCodeLine{00501\ \ \ \ \ xbyb\ =\ read\_q15x2\_ia\ (\&ptr1);}
+\DoxyCodeLine{00502\ }
+\DoxyCodeLine{00503\ \ \ \ \ \textcolor{comment}{/*\ Read\ xc\ (real),\ yc(imag)\ input\ */}}
+\DoxyCodeLine{00504\ \ \ \ \ xcyc\ =\ read\_q15x2\_ia\ (\&ptr1);}
+\DoxyCodeLine{00505\ }
+\DoxyCodeLine{00506\ \ \ \ \ \textcolor{comment}{/*\ Read\ xd\ (real),\ yd(imag)\ input\ */}}
+\DoxyCodeLine{00507\ \ \ \ \ xdyd\ =\ read\_q15x2\_ia\ (\&ptr1);}
+\DoxyCodeLine{00508\ }
+\DoxyCodeLine{00509\ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed((ya\ +\ yc),\ (xa\ +\ xc))\ */}}
+\DoxyCodeLine{00510\ \ \ \ \ R\ =\ \_\_QADD16(xaya,\ xcyc);}
+\DoxyCodeLine{00511\ }
+\DoxyCodeLine{00512\ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed((yb\ +\ yd),\ (xb\ +\ xd))\ */}}
+\DoxyCodeLine{00513\ \ \ \ \ T\ =\ \_\_QADD16(xbyb,\ xdyd);}
+\DoxyCodeLine{00514\ }
+\DoxyCodeLine{00515\ \ \ \ \ \textcolor{comment}{/*\ pointer\ updation\ for\ writing\ */}}
+\DoxyCodeLine{00516\ \ \ \ \ ptr1\ =\ ptr1\ -\/\ 8U;}
+\DoxyCodeLine{00517\ }
+\DoxyCodeLine{00518\ }
+\DoxyCodeLine{00519\ \ \ \ \ \textcolor{comment}{/*\ xa'\ =\ xa\ +\ xb\ +\ xc\ +\ xd\ */}}
+\DoxyCodeLine{00520\ \ \ \ \ \textcolor{comment}{/*\ ya'\ =\ ya\ +\ yb\ +\ yc\ +\ yd\ */}}
+\DoxyCodeLine{00521\ \ \ \ \ write\_q15x2\_ia\ (\&ptr1,\ \_\_SHADD16(R,\ T));}
+\DoxyCodeLine{00522\ }
+\DoxyCodeLine{00523\ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed((yb\ +\ yd),\ (xb\ +\ xd))\ */}}
+\DoxyCodeLine{00524\ \ \ \ \ T\ =\ \_\_QADD16(xbyb,\ xdyd);}
+\DoxyCodeLine{00525\ }
+\DoxyCodeLine{00526\ \ \ \ \ \textcolor{comment}{/*\ xc'\ =\ (xa-\/xb+xc-\/xd)\ */}}
+\DoxyCodeLine{00527\ \ \ \ \ \textcolor{comment}{/*\ yc'\ =\ (ya-\/yb+yc-\/yd)\ */}}
+\DoxyCodeLine{00528\ \ \ \ \ write\_q15x2\_ia\ (\&ptr1,\ \_\_SHSUB16(R,\ T));}
+\DoxyCodeLine{00529\ }
+\DoxyCodeLine{00530\ \ \ \ \ \textcolor{comment}{/*\ S\ =\ packed((ya\ -\/\ yc),\ (xa\ -\/\ xc))\ */}}
+\DoxyCodeLine{00531\ \ \ \ \ S\ =\ \_\_QSUB16(xaya,\ xcyc);}
+\DoxyCodeLine{00532\ }
+\DoxyCodeLine{00533\ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{00534\ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed(\ (yb\ -\/\ yd),\ (xb\ -\/\ xd))\ \ */}}
+\DoxyCodeLine{00535\ \ \ \ \ U\ =\ \_\_QSUB16(xbyb,\ xdyd);}
+\DoxyCodeLine{00536\ }
+\DoxyCodeLine{00537\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00538\ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (xa+yb-\/xc-\/yd)\ */}}
+\DoxyCodeLine{00539\ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (ya-\/xb-\/yc+xd)\ */}}
+\DoxyCodeLine{00540\ \ \ \ \ write\_q15x2\_ia\ (\&ptr1,\ \_\_SHSAX(S,\ U));}
+\DoxyCodeLine{00541\ }
+\DoxyCodeLine{00542\ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (xa-\/yb-\/xc+yd)\ */}}
+\DoxyCodeLine{00543\ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (ya+xb-\/yc-\/xd)\ */}}
+\DoxyCodeLine{00544\ \ \ \ \ write\_q15x2\_ia\ (\&ptr1,\ \_\_SHASX(S,\ U));}
+\DoxyCodeLine{00545\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00546\ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (xa+yb-\/xc-\/yd)\ */}}
+\DoxyCodeLine{00547\ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (ya-\/xb-\/yc+xd)\ */}}
+\DoxyCodeLine{00548\ \ \ \ \ write\_q15x2\_ia\ (\&ptr1,\ \_\_SHASX(S,\ U));}
+\DoxyCodeLine{00549\ }
+\DoxyCodeLine{00550\ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (xa-\/yb-\/xc+yd)\ */}}
+\DoxyCodeLine{00551\ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (ya+xb-\/yc-\/xd)\ */}}
+\DoxyCodeLine{00552\ \ \ \ \ write\_q15x2\_ia\ (\&ptr1,\ \_\_SHSAX(S,\ U));}
+\DoxyCodeLine{00553\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00554\ }
+\DoxyCodeLine{00555\ \ \ \}\ \textcolor{keywordflow}{while}\ (-\/-\/j);}
+\DoxyCodeLine{00556\ }
+\DoxyCodeLine{00557\ \ \ \textcolor{comment}{/*\ end\ of\ last\ stage\ process\ */}}
+\DoxyCodeLine{00558\ }
+\DoxyCodeLine{00559\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 11.5(q5)\ format\ for\ the\ 1024\ point\ */}}
+\DoxyCodeLine{00560\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 9.7(q7)\ format\ for\ the\ 256\ point\ \ \ */}}
+\DoxyCodeLine{00561\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 7.9(q9)\ format\ for\ the\ 64\ point\ \ */}}
+\DoxyCodeLine{00562\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 5.11(q11)\ format\ for\ the\ 16\ point\ \ */}}
+\DoxyCodeLine{00563\ }
+\DoxyCodeLine{00564\ }
+\DoxyCodeLine{00565\ \textcolor{preprocessor}{\#else\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_DSP)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00566\ }
+\DoxyCodeLine{00567\ \ \ \ \ \ \ \ \ q15\_t\ R0,\ R1,\ S0,\ S1,\ T0,\ T1,\ U0,\ U1;}
+\DoxyCodeLine{00568\ \ \ \ \ \ \ \ \ q15\_t\ Co1,\ Si1,\ Co2,\ Si2,\ Co3,\ Si3,\ out1,\ out2;}
+\DoxyCodeLine{00569\ \ \ \ \ \ \ \ \ uint32\_t\ n1,\ n2,\ ic,\ i0,\ i1,\ i2,\ i3,\ j,\ k;}
+\DoxyCodeLine{00570\ }
+\DoxyCodeLine{00571\ \ \ \textcolor{comment}{/*\ Total\ process\ is\ divided\ into\ three\ stages\ */}}
+\DoxyCodeLine{00572\ }
+\DoxyCodeLine{00573\ \ \ \textcolor{comment}{/*\ process\ first\ stage,\ middle\ stages,\ \&\ last\ stage\ */}}
+\DoxyCodeLine{00574\ }
+\DoxyCodeLine{00575\ \ \ \textcolor{comment}{/*\ \ Initializations\ for\ the\ first\ stage\ */}}
+\DoxyCodeLine{00576\ \ \ n2\ =\ fftLen;}
+\DoxyCodeLine{00577\ \ \ n1\ =\ n2;}
+\DoxyCodeLine{00578\ }
+\DoxyCodeLine{00579\ \ \ \textcolor{comment}{/*\ n2\ =\ fftLen/4\ */}}
+\DoxyCodeLine{00580\ \ \ n2\ >>=\ 2U;}
+\DoxyCodeLine{00581\ }
+\DoxyCodeLine{00582\ \ \ \textcolor{comment}{/*\ Index\ for\ twiddle\ coefficient\ */}}
+\DoxyCodeLine{00583\ \ \ ic\ =\ 0U;}
+\DoxyCodeLine{00584\ }
+\DoxyCodeLine{00585\ \ \ \textcolor{comment}{/*\ Index\ for\ input\ read\ and\ output\ write\ */}}
+\DoxyCodeLine{00586\ \ \ i0\ =\ 0U;}
+\DoxyCodeLine{00587\ \ \ j\ =\ n2;}
+\DoxyCodeLine{00588\ }
+\DoxyCodeLine{00589\ \ \ \textcolor{comment}{/*\ Input\ is\ in\ 1.15(q15)\ format\ */}}
+\DoxyCodeLine{00590\ }
+\DoxyCodeLine{00591\ \ \ \textcolor{comment}{/*\ \ start\ of\ first\ stage\ process\ */}}
+\DoxyCodeLine{00592\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00593\ \ \ \{}
+\DoxyCodeLine{00594\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ implementation\ */}}
+\DoxyCodeLine{00595\ }
+\DoxyCodeLine{00596\ \ \ \ \ \textcolor{comment}{/*\ \ index\ calculation\ for\ the\ input\ as,\ */}}
+\DoxyCodeLine{00597\ \ \ \ \ \textcolor{comment}{/*\ \ pSrc16[i0\ +\ 0],\ pSrc16[i0\ +\ fftLen/4],\ pSrc16[i0\ +\ fftLen/2],\ pSrc16[i0\ +\ 3fftLen/4]\ */}}
+\DoxyCodeLine{00598\ \ \ \ \ i1\ =\ i0\ +\ n2;}
+\DoxyCodeLine{00599\ \ \ \ \ i2\ =\ i1\ +\ n2;}
+\DoxyCodeLine{00600\ \ \ \ \ i3\ =\ i2\ +\ n2;}
+\DoxyCodeLine{00601\ }
+\DoxyCodeLine{00602\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0,\ i0+fftLen/2\ inputs\ */}}
+\DoxyCodeLine{00603\ }
+\DoxyCodeLine{00604\ \ \ \ \ \textcolor{comment}{/*\ input\ is\ down\ scale\ by\ 4\ to\ avoid\ overflow\ */}}
+\DoxyCodeLine{00605\ \ \ \ \ \textcolor{comment}{/*\ Read\ ya\ (real),\ xa(imag)\ input\ */}}
+\DoxyCodeLine{00606\ \ \ \ \ T0\ =\ pSrc16[i0\ *\ 2U]\ >>\ 2U;}
+\DoxyCodeLine{00607\ \ \ \ \ T1\ =\ pSrc16[(i0\ *\ 2U)\ +\ 1U]\ >>\ 2U;}
+\DoxyCodeLine{00608\ }
+\DoxyCodeLine{00609\ \ \ \ \ \textcolor{comment}{/*\ input\ is\ down\ scale\ by\ 4\ to\ avoid\ overflow\ */}}
+\DoxyCodeLine{00610\ \ \ \ \ \textcolor{comment}{/*\ Read\ yc\ (real),\ xc(imag)\ input\ */}}
+\DoxyCodeLine{00611\ \ \ \ \ S0\ =\ pSrc16[i2\ *\ 2U]\ >>\ 2U;}
+\DoxyCodeLine{00612\ \ \ \ \ S1\ =\ pSrc16[(i2\ *\ 2U)\ +\ 1U]\ >>\ 2U;}
+\DoxyCodeLine{00613\ }
+\DoxyCodeLine{00614\ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya\ +\ yc)\ */}}
+\DoxyCodeLine{00615\ \ \ \ \ R0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ +\ S0,\ 16U);}
+\DoxyCodeLine{00616\ \ \ \ \ \textcolor{comment}{/*\ R1\ =\ (xa\ +\ xc)\ */}}
+\DoxyCodeLine{00617\ \ \ \ \ R1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ +\ S1,\ 16U);}
+\DoxyCodeLine{00618\ }
+\DoxyCodeLine{00619\ \ \ \ \ \textcolor{comment}{/*\ S0\ =\ (ya\ -\/\ yc)\ */}}
+\DoxyCodeLine{00620\ \ \ \ \ S0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ -\/\ S0,\ 16);}
+\DoxyCodeLine{00621\ \ \ \ \ \textcolor{comment}{/*\ S1\ =\ (xa\ -\/\ xc)\ */}}
+\DoxyCodeLine{00622\ \ \ \ \ S1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ -\/\ S1,\ 16);}
+\DoxyCodeLine{00623\ }
+\DoxyCodeLine{00624\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+fftLen/4\ ,\ i0+3fftLen/4\ inputs\ */}}
+\DoxyCodeLine{00625\ \ \ \ \ \textcolor{comment}{/*\ input\ is\ down\ scale\ by\ 4\ to\ avoid\ overflow\ */}}
+\DoxyCodeLine{00626\ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{00627\ \ \ \ \ T0\ =\ pSrc16[i1\ *\ 2U]\ >>\ 2U;}
+\DoxyCodeLine{00628\ \ \ \ \ T1\ =\ pSrc16[(i1\ *\ 2U)\ +\ 1U]\ >>\ 2U;}
+\DoxyCodeLine{00629\ }
+\DoxyCodeLine{00630\ \ \ \ \ \textcolor{comment}{/*\ input\ is\ down\ scale\ by\ 4\ to\ avoid\ overflow\ */}}
+\DoxyCodeLine{00631\ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{00632\ \ \ \ \ U0\ =\ pSrc16[i3\ *\ 2U]\ >>\ 2U;}
+\DoxyCodeLine{00633\ \ \ \ \ U1\ =\ pSrc16[(i3\ *\ 2U)\ +\ 1]\ >>\ 2U;}
+\DoxyCodeLine{00634\ }
+\DoxyCodeLine{00635\ \ \ \ \ \textcolor{comment}{/*\ T0\ =\ (yb\ +\ yd)\ */}}
+\DoxyCodeLine{00636\ \ \ \ \ T0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ +\ U0,\ 16U);}
+\DoxyCodeLine{00637\ \ \ \ \ \textcolor{comment}{/*\ T1\ =\ (xb\ +\ xd)\ */}}
+\DoxyCodeLine{00638\ \ \ \ \ T1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ +\ U1,\ 16U);}
+\DoxyCodeLine{00639\ }
+\DoxyCodeLine{00640\ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ sample\ */}}
+\DoxyCodeLine{00641\ \ \ \ \ \textcolor{comment}{/*\ ya'\ =\ ya\ +\ yb\ +\ yc\ +\ yd\ */}}
+\DoxyCodeLine{00642\ \ \ \ \ \textcolor{comment}{/*\ xa'\ =\ xa\ +\ xb\ +\ xc\ +\ xd\ */}}
+\DoxyCodeLine{00643\ \ \ \ \ pSrc16[i0\ *\ 2U]\ =\ (R0\ >>\ 1U)\ +\ (T0\ >>\ 1U);}
+\DoxyCodeLine{00644\ \ \ \ \ pSrc16[(i0\ *\ 2U)\ +\ 1U]\ =\ (R1\ >>\ 1U)\ +\ (T1\ >>\ 1U);}
+\DoxyCodeLine{00645\ }
+\DoxyCodeLine{00646\ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya\ +\ yc)\ -\/\ (yb\ +\ yd)\ */}}
+\DoxyCodeLine{00647\ \ \ \ \ \textcolor{comment}{/*\ R1\ =\ (xa\ +\ xc)\ -\/\ (xb\ +\ xd)\ */}}
+\DoxyCodeLine{00648\ \ \ \ \ R0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(R0\ -\/\ T0,\ 16U);}
+\DoxyCodeLine{00649\ \ \ \ \ R1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(R1\ -\/\ T1,\ 16U);}
+\DoxyCodeLine{00650\ }
+\DoxyCodeLine{00651\ \ \ \ \ \textcolor{comment}{/*\ co2\ \&\ si2\ are\ read\ from\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{00652\ \ \ \ \ Co2\ =\ pCoef16[2U\ *\ ic\ *\ 2U];}
+\DoxyCodeLine{00653\ \ \ \ \ Si2\ =\ pCoef16[(2U\ *\ ic\ *\ 2U)\ +\ 1];}
+\DoxyCodeLine{00654\ }
+\DoxyCodeLine{00655\ \ \ \ \ \textcolor{comment}{/*\ xc'\ =\ (xa-\/xb+xc-\/xd)*\ co2\ +\ (ya-\/yb+yc-\/yd)*\ (si2)\ */}}
+\DoxyCodeLine{00656\ \ \ \ \ out1\ =\ (q15\_t)\ ((Co2\ *\ R0\ +\ Si2\ *\ R1)\ >>\ 16U);}
+\DoxyCodeLine{00657\ \ \ \ \ \textcolor{comment}{/*\ yc'\ =\ (ya-\/yb+yc-\/yd)*\ co2\ -\/\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{00658\ \ \ \ \ out2\ =\ (q15\_t)\ ((-\/Si2\ *\ R0\ +\ Co2\ *\ R1)\ >>\ 16U);}
+\DoxyCodeLine{00659\ }
+\DoxyCodeLine{00660\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+fftLen/4\ */}}
+\DoxyCodeLine{00661\ \ \ \ \ \textcolor{comment}{/*\ input\ is\ down\ scale\ by\ 4\ to\ avoid\ overflow\ */}}
+\DoxyCodeLine{00662\ \ \ \ \ \textcolor{comment}{/*\ T0\ =\ yb,\ T1\ =\ \ xb\ */}}
+\DoxyCodeLine{00663\ \ \ \ \ T0\ =\ pSrc16[i1\ *\ 2U]\ >>\ 2;}
+\DoxyCodeLine{00664\ \ \ \ \ T1\ =\ pSrc16[(i1\ *\ 2U)\ +\ 1]\ >>\ 2;}
+\DoxyCodeLine{00665\ }
+\DoxyCodeLine{00666\ \ \ \ \ \textcolor{comment}{/*\ writing\ the\ butterfly\ processed\ i0\ +\ fftLen/4\ sample\ */}}
+\DoxyCodeLine{00667\ \ \ \ \ \textcolor{comment}{/*\ writing\ output(xc',\ yc')\ in\ little\ endian\ format\ */}}
+\DoxyCodeLine{00668\ \ \ \ \ pSrc16[i1\ *\ 2U]\ =\ out1;}
+\DoxyCodeLine{00669\ \ \ \ \ pSrc16[(i1\ *\ 2U)\ +\ 1]\ =\ out2;}
+\DoxyCodeLine{00670\ }
+\DoxyCodeLine{00671\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ calculations\ */}}
+\DoxyCodeLine{00672\ \ \ \ \ \textcolor{comment}{/*\ input\ is\ down\ scale\ by\ 4\ to\ avoid\ overflow\ */}}
+\DoxyCodeLine{00673\ \ \ \ \ \textcolor{comment}{/*\ U0\ =\ yd,\ U1\ =\ xd\ */}}
+\DoxyCodeLine{00674\ \ \ \ \ U0\ =\ pSrc16[i3\ *\ 2U]\ >>\ 2;}
+\DoxyCodeLine{00675\ \ \ \ \ U1\ =\ pSrc16[(i3\ *\ 2U)\ +\ 1]\ >>\ 2;}
+\DoxyCodeLine{00676\ \ \ \ \ \textcolor{comment}{/*\ T0\ =\ yb-\/yd\ */}}
+\DoxyCodeLine{00677\ \ \ \ \ T0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ -\/\ U0,\ 16);}
+\DoxyCodeLine{00678\ \ \ \ \ \textcolor{comment}{/*\ T1\ =\ xb-\/xd\ */}}
+\DoxyCodeLine{00679\ \ \ \ \ T1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ -\/\ U1,\ 16);}
+\DoxyCodeLine{00680\ }
+\DoxyCodeLine{00681\ \ \ \ \ \textcolor{comment}{/*\ R1\ =\ (ya-\/yc)\ +\ (xb-\/\ xd),\ \ R0\ =\ (xa-\/xc)\ -\/\ (yb-\/yd))\ */}}
+\DoxyCodeLine{00682\ \ \ \ \ R0\ =\ (q15\_t)\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}((q31\_t)\ (S0\ -\/\ T1),\ 16);}
+\DoxyCodeLine{00683\ \ \ \ \ R1\ =\ (q15\_t)\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}((q31\_t)\ (S1\ +\ T0),\ 16);}
+\DoxyCodeLine{00684\ }
+\DoxyCodeLine{00685\ \ \ \ \ \textcolor{comment}{/*\ S1\ =\ (ya-\/yc)\ -\/\ (xb-\/\ xd),\ S0\ =\ (xa-\/xc)\ +\ (yb-\/yd))\ */}}
+\DoxyCodeLine{00686\ \ \ \ \ S0\ =\ (q15\_t)\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(((q31\_t)\ S0\ +\ T1),\ 16U);}
+\DoxyCodeLine{00687\ \ \ \ \ S1\ =\ (q15\_t)\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(((q31\_t)\ S1\ -\/\ T0),\ 16U);}
+\DoxyCodeLine{00688\ }
+\DoxyCodeLine{00689\ \ \ \ \ \textcolor{comment}{/*\ co1\ \&\ si1\ are\ read\ from\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{00690\ \ \ \ \ Co1\ =\ pCoef16[ic\ *\ 2U];}
+\DoxyCodeLine{00691\ \ \ \ \ Si1\ =\ pCoef16[(ic\ *\ 2U)\ +\ 1];}
+\DoxyCodeLine{00692\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+fftLen/2\ sample\ */}}
+\DoxyCodeLine{00693\ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (xa+yb-\/xc-\/yd)*\ co1\ +\ (ya-\/xb-\/yc+xd)*\ (si1)\ */}}
+\DoxyCodeLine{00694\ \ \ \ \ out1\ =\ (q15\_t)\ ((Si1\ *\ S1\ +\ Co1\ *\ S0)\ >>\ 16);}
+\DoxyCodeLine{00695\ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (ya-\/xb-\/yc+xd)*\ co1\ -\/\ (xa+yb-\/xc-\/yd)*\ (si1)\ */}}
+\DoxyCodeLine{00696\ \ \ \ \ out2\ =\ (q15\_t)\ ((-\/Si1\ *\ S0\ +\ Co1\ *\ S1)\ >>\ 16);}
+\DoxyCodeLine{00697\ }
+\DoxyCodeLine{00698\ \ \ \ \ \textcolor{comment}{/*\ writing\ output(xb',\ yb')\ in\ little\ endian\ format\ */}}
+\DoxyCodeLine{00699\ \ \ \ \ pSrc16[i2\ *\ 2U]\ =\ out1;}
+\DoxyCodeLine{00700\ \ \ \ \ pSrc16[(i2\ *\ 2U)\ +\ 1]\ =\ out2;}
+\DoxyCodeLine{00701\ }
+\DoxyCodeLine{00702\ \ \ \ \ \textcolor{comment}{/*\ Co3\ \&\ si3\ are\ read\ from\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{00703\ \ \ \ \ Co3\ =\ pCoef16[3U\ *\ (ic\ *\ 2U)];}
+\DoxyCodeLine{00704\ \ \ \ \ Si3\ =\ pCoef16[(3U\ *\ (ic\ *\ 2U))\ +\ 1];}
+\DoxyCodeLine{00705\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+3fftLen/4\ sample\ */}}
+\DoxyCodeLine{00706\ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (xa-\/yb-\/xc+yd)*\ Co3\ +\ (ya+xb-\/yc-\/xd)*\ (si3)\ */}}
+\DoxyCodeLine{00707\ \ \ \ \ out1\ =\ (q15\_t)\ ((Si3\ *\ R1\ +\ Co3\ *\ R0)\ >>\ 16U);}
+\DoxyCodeLine{00708\ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (ya+xb-\/yc-\/xd)*\ Co3\ -\/\ (xa-\/yb-\/xc+yd)*\ (si3)\ */}}
+\DoxyCodeLine{00709\ \ \ \ \ out2\ =\ (q15\_t)\ ((-\/Si3\ *\ R0\ +\ Co3\ *\ R1)\ >>\ 16U);}
+\DoxyCodeLine{00710\ \ \ \ \ \textcolor{comment}{/*\ writing\ output(xd',\ yd')\ in\ little\ endian\ format\ */}}
+\DoxyCodeLine{00711\ \ \ \ \ pSrc16[i3\ *\ 2U]\ =\ out1;}
+\DoxyCodeLine{00712\ \ \ \ \ pSrc16[(i3\ *\ 2U)\ +\ 1]\ =\ out2;}
+\DoxyCodeLine{00713\ }
+\DoxyCodeLine{00714\ \ \ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{00715\ \ \ \ \ ic\ =\ ic\ +\ twidCoefModifier;}
+\DoxyCodeLine{00716\ }
+\DoxyCodeLine{00717\ \ \ \ \ \textcolor{comment}{/*\ \ Updating\ input\ index\ */}}
+\DoxyCodeLine{00718\ \ \ \ \ i0\ =\ i0\ +\ 1U;}
+\DoxyCodeLine{00719\ }
+\DoxyCodeLine{00720\ \ \ \}\ \textcolor{keywordflow}{while}\ (-\/-\/j);}
+\DoxyCodeLine{00721\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 4.11(q11)\ format\ */}}
+\DoxyCodeLine{00722\ }
+\DoxyCodeLine{00723\ \ \ \textcolor{comment}{/*\ end\ of\ first\ stage\ process\ */}}
+\DoxyCodeLine{00724\ }
+\DoxyCodeLine{00725\ }
+\DoxyCodeLine{00726\ \ \ \textcolor{comment}{/*\ start\ of\ middle\ stage\ process\ */}}
+\DoxyCodeLine{00727\ }
+\DoxyCodeLine{00728\ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{00729\ \ \ twidCoefModifier\ <<=\ 2U;}
+\DoxyCodeLine{00730\ }
+\DoxyCodeLine{00731\ \ \ \textcolor{comment}{/*\ \ Calculation\ of\ Middle\ stage\ */}}
+\DoxyCodeLine{00732\ \ \ \textcolor{keywordflow}{for}\ (k\ =\ fftLen\ /\ 4U;\ k\ >\ 4U;\ k\ >>=\ 2U)}
+\DoxyCodeLine{00733\ \ \ \{}
+\DoxyCodeLine{00734\ \ \ \ \ \textcolor{comment}{/*\ \ Initializations\ for\ the\ middle\ stage\ */}}
+\DoxyCodeLine{00735\ \ \ \ \ n1\ =\ n2;}
+\DoxyCodeLine{00736\ \ \ \ \ n2\ >>=\ 2U;}
+\DoxyCodeLine{00737\ \ \ \ \ ic\ =\ 0U;}
+\DoxyCodeLine{00738\ }
+\DoxyCodeLine{00739\ \ \ \ \ \textcolor{keywordflow}{for}\ (j\ =\ 0U;\ j\ <=\ (n2\ -\/\ 1U);\ j++)}
+\DoxyCodeLine{00740\ \ \ \ \ \{}
+\DoxyCodeLine{00741\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ index\ calculation\ for\ the\ coefficients\ */}}
+\DoxyCodeLine{00742\ \ \ \ \ \ \ Co1\ =\ pCoef16[ic\ *\ 2U];}
+\DoxyCodeLine{00743\ \ \ \ \ \ \ Si1\ =\ pCoef16[(ic\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{00744\ \ \ \ \ \ \ Co2\ =\ pCoef16[2U\ *\ (ic\ *\ 2U)];}
+\DoxyCodeLine{00745\ \ \ \ \ \ \ Si2\ =\ pCoef16[(2U\ *\ (ic\ *\ 2U))\ +\ 1U];}
+\DoxyCodeLine{00746\ \ \ \ \ \ \ Co3\ =\ pCoef16[3U\ *\ (ic\ *\ 2U)];}
+\DoxyCodeLine{00747\ \ \ \ \ \ \ Si3\ =\ pCoef16[(3U\ *\ (ic\ *\ 2U))\ +\ 1U];}
+\DoxyCodeLine{00748\ }
+\DoxyCodeLine{00749\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{00750\ \ \ \ \ \ \ ic\ =\ ic\ +\ twidCoefModifier;}
+\DoxyCodeLine{00751\ }
+\DoxyCodeLine{00752\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ implementation\ */}}
+\DoxyCodeLine{00753\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i0\ =\ j;\ i0\ <\ fftLen;\ i0\ +=\ n1)}
+\DoxyCodeLine{00754\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00755\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ index\ calculation\ for\ the\ input\ as,\ */}}
+\DoxyCodeLine{00756\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ pSrc16[i0\ +\ 0],\ pSrc16[i0\ +\ fftLen/4],\ pSrc16[i0\ +\ fftLen/2],\ pSrc16[i0\ +\ 3fftLen/4]\ */}}
+\DoxyCodeLine{00757\ \ \ \ \ \ \ \ \ i1\ =\ i0\ +\ n2;}
+\DoxyCodeLine{00758\ \ \ \ \ \ \ \ \ i2\ =\ i1\ +\ n2;}
+\DoxyCodeLine{00759\ \ \ \ \ \ \ \ \ i3\ =\ i2\ +\ n2;}
+\DoxyCodeLine{00760\ }
+\DoxyCodeLine{00761\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0,\ i0+fftLen/2\ inputs\ */}}
+\DoxyCodeLine{00762\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ ya\ (real),\ xa(imag)\ input\ */}}
+\DoxyCodeLine{00763\ \ \ \ \ \ \ \ \ T0\ =\ pSrc16[i0\ *\ 2U];}
+\DoxyCodeLine{00764\ \ \ \ \ \ \ \ \ T1\ =\ pSrc16[(i0\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{00765\ }
+\DoxyCodeLine{00766\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yc\ (real),\ xc(imag)\ input\ */}}
+\DoxyCodeLine{00767\ \ \ \ \ \ \ \ \ S0\ =\ pSrc16[i2\ *\ 2U];}
+\DoxyCodeLine{00768\ \ \ \ \ \ \ \ \ S1\ =\ pSrc16[(i2\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{00769\ }
+\DoxyCodeLine{00770\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya\ +\ yc),\ R1\ =\ (xa\ +\ xc)\ */}}
+\DoxyCodeLine{00771\ \ \ \ \ \ \ \ \ R0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ +\ S0,\ 16);}
+\DoxyCodeLine{00772\ \ \ \ \ \ \ \ \ R1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ +\ S1,\ 16);}
+\DoxyCodeLine{00773\ }
+\DoxyCodeLine{00774\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ S0\ =\ (ya\ -\/\ yc),\ S1\ =(xa\ -\/\ xc)\ */}}
+\DoxyCodeLine{00775\ \ \ \ \ \ \ \ \ S0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ -\/\ S0,\ 16);}
+\DoxyCodeLine{00776\ \ \ \ \ \ \ \ \ S1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ -\/\ S1,\ 16);}
+\DoxyCodeLine{00777\ }
+\DoxyCodeLine{00778\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+fftLen/4\ ,\ i0+3fftLen/4\ inputs\ */}}
+\DoxyCodeLine{00779\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{00780\ \ \ \ \ \ \ \ \ T0\ =\ pSrc16[i1\ *\ 2U];}
+\DoxyCodeLine{00781\ \ \ \ \ \ \ \ \ T1\ =\ pSrc16[(i1\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{00782\ }
+\DoxyCodeLine{00783\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{00784\ \ \ \ \ \ \ \ \ U0\ =\ pSrc16[i3\ *\ 2U];}
+\DoxyCodeLine{00785\ \ \ \ \ \ \ \ \ U1\ =\ pSrc16[(i3\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{00786\ }
+\DoxyCodeLine{00787\ }
+\DoxyCodeLine{00788\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ T0\ =\ (yb\ +\ yd),\ T1\ =\ (xb\ +\ xd)\ */}}
+\DoxyCodeLine{00789\ \ \ \ \ \ \ \ \ T0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ +\ U0,\ 16);}
+\DoxyCodeLine{00790\ \ \ \ \ \ \ \ \ T1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ +\ U1,\ 16);}
+\DoxyCodeLine{00791\ }
+\DoxyCodeLine{00792\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ sample\ */}}
+\DoxyCodeLine{00793\ }
+\DoxyCodeLine{00794\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xa'\ =\ xa\ +\ xb\ +\ xc\ +\ xd\ */}}
+\DoxyCodeLine{00795\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ ya'\ =\ ya\ +\ yb\ +\ yc\ +\ yd\ */}}
+\DoxyCodeLine{00796\ \ \ \ \ \ \ \ \ out1\ =\ ((R0\ >>\ 1U)\ +\ (T0\ >>\ 1U))\ >>\ 1U;}
+\DoxyCodeLine{00797\ \ \ \ \ \ \ \ \ out2\ =\ ((R1\ >>\ 1U)\ +\ (T1\ >>\ 1U))\ >>\ 1U;}
+\DoxyCodeLine{00798\ }
+\DoxyCodeLine{00799\ \ \ \ \ \ \ \ \ pSrc16[i0\ *\ 2U]\ =\ out1;}
+\DoxyCodeLine{00800\ \ \ \ \ \ \ \ \ pSrc16[(2U\ *\ i0)\ +\ 1U]\ =\ out2;}
+\DoxyCodeLine{00801\ }
+\DoxyCodeLine{00802\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya\ +\ yc)\ -\/\ (yb\ +\ yd),\ R1\ =\ (xa\ +\ xc)\ -\/\ (xb\ +\ xd)\ */}}
+\DoxyCodeLine{00803\ \ \ \ \ \ \ \ \ R0\ =\ (R0\ >>\ 1U)\ -\/\ (T0\ >>\ 1U);}
+\DoxyCodeLine{00804\ \ \ \ \ \ \ \ \ R1\ =\ (R1\ >>\ 1U)\ -\/\ (T1\ >>\ 1U);}
+\DoxyCodeLine{00805\ }
+\DoxyCodeLine{00806\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ (ya-\/yb+yc-\/yd)*\ (si2)\ +\ (xa-\/xb+xc-\/xd)*\ co2\ */}}
+\DoxyCodeLine{00807\ \ \ \ \ \ \ \ \ out1\ =\ (q15\_t)\ ((Co2\ *\ R0\ +\ Si2\ *\ R1)\ >>\ 16U);}
+\DoxyCodeLine{00808\ }
+\DoxyCodeLine{00809\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ (ya-\/yb+yc-\/yd)*\ co2\ -\/\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{00810\ \ \ \ \ \ \ \ \ out2\ =\ (q15\_t)\ ((-\/Si2\ *\ R0\ +\ Co2\ *\ R1)\ >>\ 16U);}
+\DoxyCodeLine{00811\ }
+\DoxyCodeLine{00812\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+3fftLen/4\ */}}
+\DoxyCodeLine{00813\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{00814\ \ \ \ \ \ \ \ \ T0\ =\ pSrc16[i1\ *\ 2U];}
+\DoxyCodeLine{00815\ \ \ \ \ \ \ \ \ T1\ =\ pSrc16[(i1\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{00816\ }
+\DoxyCodeLine{00817\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ +\ fftLen/4\ sample\ */}}
+\DoxyCodeLine{00818\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xc'\ =\ (xa-\/xb+xc-\/xd)*\ co2\ +\ (ya-\/yb+yc-\/yd)*\ (si2)\ */}}
+\DoxyCodeLine{00819\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ yc'\ =\ (ya-\/yb+yc-\/yd)*\ co2\ -\/\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{00820\ \ \ \ \ \ \ \ \ pSrc16[i1\ *\ 2U]\ =\ out1;}
+\DoxyCodeLine{00821\ \ \ \ \ \ \ \ \ pSrc16[(i1\ *\ 2U)\ +\ 1U]\ =\ out2;}
+\DoxyCodeLine{00822\ }
+\DoxyCodeLine{00823\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ calculations\ */}}
+\DoxyCodeLine{00824\ }
+\DoxyCodeLine{00825\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{00826\ \ \ \ \ \ \ \ \ U0\ =\ pSrc16[i3\ *\ 2U];}
+\DoxyCodeLine{00827\ \ \ \ \ \ \ \ \ U1\ =\ pSrc16[(i3\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{00828\ }
+\DoxyCodeLine{00829\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ T0\ =\ yb-\/yd,\ T1\ =\ xb-\/xd\ */}}
+\DoxyCodeLine{00830\ \ \ \ \ \ \ \ \ T0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ -\/\ U0,\ 16);}
+\DoxyCodeLine{00831\ \ \ \ \ \ \ \ \ T1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ -\/\ U1,\ 16);}
+\DoxyCodeLine{00832\ }
+\DoxyCodeLine{00833\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya-\/yc)\ +\ (xb-\/\ xd),\ R1\ =\ (xa-\/xc)\ -\/\ (yb-\/yd))\ */}}
+\DoxyCodeLine{00834\ \ \ \ \ \ \ \ \ R0\ =\ (S0\ >>\ 1U)\ -\/\ (T1\ >>\ 1U);}
+\DoxyCodeLine{00835\ \ \ \ \ \ \ \ \ R1\ =\ (S1\ >>\ 1U)\ +\ (T0\ >>\ 1U);}
+\DoxyCodeLine{00836\ }
+\DoxyCodeLine{00837\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ S0\ =\ (ya-\/yc)\ -\/\ (xb-\/\ xd),\ S1\ =\ (xa-\/xc)\ +\ (yb-\/yd))\ */}}
+\DoxyCodeLine{00838\ \ \ \ \ \ \ \ \ S0\ =\ (S0\ >>\ 1U)\ +\ (T1\ >>\ 1U);}
+\DoxyCodeLine{00839\ \ \ \ \ \ \ \ \ S1\ =\ (S1\ >>\ 1U)\ -\/\ (T0\ >>\ 1U);}
+\DoxyCodeLine{00840\ }
+\DoxyCodeLine{00841\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+fftLen/2\ sample\ */}}
+\DoxyCodeLine{00842\ \ \ \ \ \ \ \ \ out1\ =\ (q15\_t)\ ((Co1\ *\ S0\ +\ Si1\ *\ S1)\ >>\ 16U);}
+\DoxyCodeLine{00843\ }
+\DoxyCodeLine{00844\ \ \ \ \ \ \ \ \ out2\ =\ (q15\_t)\ ((-\/Si1\ *\ S0\ +\ Co1\ *\ S1)\ >>\ 16U);}
+\DoxyCodeLine{00845\ }
+\DoxyCodeLine{00846\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (xa+yb-\/xc-\/yd)*\ co1\ +\ (ya-\/xb-\/yc+xd)*\ (si1)\ */}}
+\DoxyCodeLine{00847\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (ya-\/xb-\/yc+xd)*\ co1\ -\/\ (xa+yb-\/xc-\/yd)*\ (si1)\ */}}
+\DoxyCodeLine{00848\ \ \ \ \ \ \ \ \ pSrc16[i2\ *\ 2U]\ =\ out1;}
+\DoxyCodeLine{00849\ \ \ \ \ \ \ \ \ pSrc16[(i2\ *\ 2U)\ +\ 1U]\ =\ out2;}
+\DoxyCodeLine{00850\ }
+\DoxyCodeLine{00851\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+3fftLen/4\ sample\ */}}
+\DoxyCodeLine{00852\ \ \ \ \ \ \ \ \ out1\ =\ (q15\_t)\ ((Si3\ *\ R1\ +\ Co3\ *\ R0)\ >>\ 16U);}
+\DoxyCodeLine{00853\ }
+\DoxyCodeLine{00854\ \ \ \ \ \ \ \ \ out2\ =\ (q15\_t)\ ((-\/Si3\ *\ R0\ +\ Co3\ *\ R1)\ >>\ 16U);}
+\DoxyCodeLine{00855\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (xa-\/yb-\/xc+yd)*\ Co3\ +\ (ya+xb-\/yc-\/xd)*\ (si3)\ */}}
+\DoxyCodeLine{00856\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (ya+xb-\/yc-\/xd)*\ Co3\ -\/\ (xa-\/yb-\/xc+yd)*\ (si3)\ */}}
+\DoxyCodeLine{00857\ \ \ \ \ \ \ \ \ pSrc16[i3\ *\ 2U]\ =\ out1;}
+\DoxyCodeLine{00858\ \ \ \ \ \ \ \ \ pSrc16[(i3\ *\ 2U)\ +\ 1U]\ =\ out2;}
+\DoxyCodeLine{00859\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00860\ \ \ \ \ \}}
+\DoxyCodeLine{00861\ \ \ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{00862\ \ \ \ \ twidCoefModifier\ <<=\ 2U;}
+\DoxyCodeLine{00863\ \ \ \}}
+\DoxyCodeLine{00864\ \ \ \textcolor{comment}{/*\ end\ of\ middle\ stage\ process\ */}}
+\DoxyCodeLine{00865\ }
+\DoxyCodeLine{00866\ }
+\DoxyCodeLine{00867\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 10.6(q6)\ format\ for\ the\ 1024\ point\ */}}
+\DoxyCodeLine{00868\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 8.8(q8)\ format\ for\ the\ 256\ point\ */}}
+\DoxyCodeLine{00869\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 6.10(q10)\ format\ for\ the\ 64\ point\ */}}
+\DoxyCodeLine{00870\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 4.12(q12)\ format\ for\ the\ 16\ point\ */}}
+\DoxyCodeLine{00871\ }
+\DoxyCodeLine{00872\ \ \ \textcolor{comment}{/*\ \ Initializations\ for\ the\ last\ stage\ */}}
+\DoxyCodeLine{00873\ \ \ n1\ =\ n2;}
+\DoxyCodeLine{00874\ \ \ n2\ >>=\ 2U;}
+\DoxyCodeLine{00875\ }
+\DoxyCodeLine{00876\ \ \ \textcolor{comment}{/*\ start\ of\ last\ stage\ process\ */}}
+\DoxyCodeLine{00877\ }
+\DoxyCodeLine{00878\ \ \ \textcolor{comment}{/*\ \ Butterfly\ implementation\ */}}
+\DoxyCodeLine{00879\ \ \ \textcolor{keywordflow}{for}\ (i0\ =\ 0U;\ i0\ <=\ (fftLen\ -\/\ n1);\ i0\ +=\ n1)}
+\DoxyCodeLine{00880\ \ \ \{}
+\DoxyCodeLine{00881\ \ \ \ \ \textcolor{comment}{/*\ \ index\ calculation\ for\ the\ input\ as,\ */}}
+\DoxyCodeLine{00882\ \ \ \ \ \textcolor{comment}{/*\ \ pSrc16[i0\ +\ 0],\ pSrc16[i0\ +\ fftLen/4],\ pSrc16[i0\ +\ fftLen/2],\ pSrc16[i0\ +\ 3fftLen/4]\ */}}
+\DoxyCodeLine{00883\ \ \ \ \ i1\ =\ i0\ +\ n2;}
+\DoxyCodeLine{00884\ \ \ \ \ i2\ =\ i1\ +\ n2;}
+\DoxyCodeLine{00885\ \ \ \ \ i3\ =\ i2\ +\ n2;}
+\DoxyCodeLine{00886\ }
+\DoxyCodeLine{00887\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0,\ i0+fftLen/2\ inputs\ */}}
+\DoxyCodeLine{00888\ \ \ \ \ \textcolor{comment}{/*\ Read\ ya\ (real),\ xa(imag)\ input\ */}}
+\DoxyCodeLine{00889\ \ \ \ \ T0\ =\ pSrc16[i0\ *\ 2U];}
+\DoxyCodeLine{00890\ \ \ \ \ T1\ =\ pSrc16[(i0\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{00891\ }
+\DoxyCodeLine{00892\ \ \ \ \ \textcolor{comment}{/*\ Read\ yc\ (real),\ xc(imag)\ input\ */}}
+\DoxyCodeLine{00893\ \ \ \ \ S0\ =\ pSrc16[i2\ *\ 2U];}
+\DoxyCodeLine{00894\ \ \ \ \ S1\ =\ pSrc16[(i2\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{00895\ }
+\DoxyCodeLine{00896\ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya\ +\ yc),\ R1\ =\ (xa\ +\ xc)\ */}}
+\DoxyCodeLine{00897\ \ \ \ \ R0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ +\ S0,\ 16U);}
+\DoxyCodeLine{00898\ \ \ \ \ R1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ +\ S1,\ 16U);}
+\DoxyCodeLine{00899\ }
+\DoxyCodeLine{00900\ \ \ \ \ \textcolor{comment}{/*\ S0\ =\ (ya\ -\/\ yc),\ S1\ =\ (xa\ -\/\ xc)\ */}}
+\DoxyCodeLine{00901\ \ \ \ \ S0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ -\/\ S0,\ 16U);}
+\DoxyCodeLine{00902\ \ \ \ \ S1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ -\/\ S1,\ 16U);}
+\DoxyCodeLine{00903\ }
+\DoxyCodeLine{00904\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+fftLen/4\ ,\ i0+3fftLen/4\ inputs\ */}}
+\DoxyCodeLine{00905\ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{00906\ \ \ \ \ T0\ =\ pSrc16[i1\ *\ 2U];}
+\DoxyCodeLine{00907\ \ \ \ \ T1\ =\ pSrc16[(i1\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{00908\ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{00909\ \ \ \ \ U0\ =\ pSrc16[i3\ *\ 2U];}
+\DoxyCodeLine{00910\ \ \ \ \ U1\ =\ pSrc16[(i3\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{00911\ }
+\DoxyCodeLine{00912\ \ \ \ \ \textcolor{comment}{/*\ T0\ =\ (yb\ +\ yd),\ T1\ =\ (xb\ +\ xd))\ */}}
+\DoxyCodeLine{00913\ \ \ \ \ T0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ +\ U0,\ 16U);}
+\DoxyCodeLine{00914\ \ \ \ \ T1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ +\ U1,\ 16U);}
+\DoxyCodeLine{00915\ }
+\DoxyCodeLine{00916\ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ sample\ */}}
+\DoxyCodeLine{00917\ \ \ \ \ \textcolor{comment}{/*\ xa'\ =\ xa\ +\ xb\ +\ xc\ +\ xd\ */}}
+\DoxyCodeLine{00918\ \ \ \ \ \textcolor{comment}{/*\ ya'\ =\ ya\ +\ yb\ +\ yc\ +\ yd\ */}}
+\DoxyCodeLine{00919\ \ \ \ \ pSrc16[i0\ *\ 2U]\ =\ (R0\ >>\ 1U)\ +\ (T0\ >>\ 1U);}
+\DoxyCodeLine{00920\ \ \ \ \ pSrc16[(i0\ *\ 2U)\ +\ 1U]\ =\ (R1\ >>\ 1U)\ +\ (T1\ >>\ 1U);}
+\DoxyCodeLine{00921\ }
+\DoxyCodeLine{00922\ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya\ +\ yc)\ -\/\ (yb\ +\ yd),\ R1\ =\ (xa\ +\ xc)\ -\/\ (xb\ +\ xd)\ */}}
+\DoxyCodeLine{00923\ \ \ \ \ R0\ =\ (R0\ >>\ 1U)\ -\/\ (T0\ >>\ 1U);}
+\DoxyCodeLine{00924\ \ \ \ \ R1\ =\ (R1\ >>\ 1U)\ -\/\ (T1\ >>\ 1U);}
+\DoxyCodeLine{00925\ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{00926\ \ \ \ \ T0\ =\ pSrc16[i1\ *\ 2U];}
+\DoxyCodeLine{00927\ \ \ \ \ T1\ =\ pSrc16[(i1\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{00928\ }
+\DoxyCodeLine{00929\ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ +\ fftLen/4\ sample\ */}}
+\DoxyCodeLine{00930\ \ \ \ \ \textcolor{comment}{/*\ xc'\ =\ (xa-\/xb+xc-\/xd)\ */}}
+\DoxyCodeLine{00931\ \ \ \ \ \textcolor{comment}{/*\ yc'\ =\ (ya-\/yb+yc-\/yd)\ */}}
+\DoxyCodeLine{00932\ \ \ \ \ pSrc16[i1\ *\ 2U]\ =\ R0;}
+\DoxyCodeLine{00933\ \ \ \ \ pSrc16[(i1\ *\ 2U)\ +\ 1U]\ =\ R1;}
+\DoxyCodeLine{00934\ }
+\DoxyCodeLine{00935\ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{00936\ \ \ \ \ U0\ =\ pSrc16[i3\ *\ 2U];}
+\DoxyCodeLine{00937\ \ \ \ \ U1\ =\ pSrc16[(i3\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{00938\ \ \ \ \ \textcolor{comment}{/*\ T0\ =\ (yb\ -\/\ yd),\ T1\ =\ (xb\ -\/\ xd)\ \ */}}
+\DoxyCodeLine{00939\ \ \ \ \ T0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ -\/\ U0,\ 16U);}
+\DoxyCodeLine{00940\ \ \ \ \ T1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ -\/\ U1,\ 16U);}
+\DoxyCodeLine{00941\ }
+\DoxyCodeLine{00942\ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ +\ fftLen/2\ sample\ */}}
+\DoxyCodeLine{00943\ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (xa+yb-\/xc-\/yd)\ */}}
+\DoxyCodeLine{00944\ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (ya-\/xb-\/yc+xd)\ */}}
+\DoxyCodeLine{00945\ \ \ \ \ pSrc16[i2\ *\ 2U]\ =\ (S0\ >>\ 1U)\ +\ (T1\ >>\ 1U);}
+\DoxyCodeLine{00946\ \ \ \ \ pSrc16[(i2\ *\ 2U)\ +\ 1U]\ =\ (S1\ >>\ 1U)\ -\/\ (T0\ >>\ 1U);}
+\DoxyCodeLine{00947\ }
+\DoxyCodeLine{00948\ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ +\ 3fftLen/4\ sample\ */}}
+\DoxyCodeLine{00949\ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (xa-\/yb-\/xc+yd)\ */}}
+\DoxyCodeLine{00950\ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (ya+xb-\/yc-\/xd)\ */}}
+\DoxyCodeLine{00951\ \ \ \ \ pSrc16[i3\ *\ 2U]\ =\ (S0\ >>\ 1U)\ -\/\ (T1\ >>\ 1U);}
+\DoxyCodeLine{00952\ \ \ \ \ pSrc16[(i3\ *\ 2U)\ +\ 1U]\ =\ (S1\ >>\ 1U)\ +\ (T0\ >>\ 1U);}
+\DoxyCodeLine{00953\ }
+\DoxyCodeLine{00954\ \ \ \}}
+\DoxyCodeLine{00955\ }
+\DoxyCodeLine{00956\ \ \ \textcolor{comment}{/*\ end\ of\ last\ stage\ process\ */}}
+\DoxyCodeLine{00957\ }
+\DoxyCodeLine{00958\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 11.5(q5)\ format\ for\ the\ 1024\ point\ */}}
+\DoxyCodeLine{00959\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 9.7(q7)\ format\ for\ the\ 256\ point\ \ \ */}}
+\DoxyCodeLine{00960\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 7.9(q9)\ format\ for\ the\ 64\ point\ \ */}}
+\DoxyCodeLine{00961\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 5.11(q11)\ format\ for\ the\ 16\ point\ \ */}}
+\DoxyCodeLine{00962\ }
+\DoxyCodeLine{00963\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_DSP)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00964\ }
+\DoxyCodeLine{00965\ \}}
+\DoxyCodeLine{00966\ }
+\DoxyCodeLine{00967\ }
+\DoxyCodeLine{00977\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00978\ \textcolor{comment}{\ *\ Radix-\/4\ IFFT\ algorithm\ used\ is\ :}}
+\DoxyCodeLine{00979\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00980\ \textcolor{comment}{\ *\ CIFFT\ uses\ same\ twiddle\ coefficients\ as\ CFFT\ function}}
+\DoxyCodeLine{00981\ \textcolor{comment}{\ *\ \ x[k]\ =\ x[n]\ +\ (j)k\ *\ x[n\ +\ fftLen/4]\ +\ (-\/1)k\ *\ x[n+fftLen/2]\ +\ (-\/j)k\ *\ x[n+3*fftLen/4]}}
+\DoxyCodeLine{00982\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00983\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00984\ \textcolor{comment}{\ *\ IFFT\ is\ implemented\ with\ following\ changes\ in\ equations\ from\ FFT}}
+\DoxyCodeLine{00985\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00986\ \textcolor{comment}{\ *\ Input\ real\ and\ imaginary\ data:}}
+\DoxyCodeLine{00987\ \textcolor{comment}{\ *\ x(n)\ =\ xa\ +\ j\ *\ ya}}
+\DoxyCodeLine{00988\ \textcolor{comment}{\ *\ x(n+N/4\ )\ =\ xb\ +\ j\ *\ yb}}
+\DoxyCodeLine{00989\ \textcolor{comment}{\ *\ x(n+N/2\ )\ =\ xc\ +\ j\ *\ yc}}
+\DoxyCodeLine{00990\ \textcolor{comment}{\ *\ x(n+3N\ 4)\ =\ xd\ +\ j\ *\ yd}}
+\DoxyCodeLine{00991\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00992\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00993\ \textcolor{comment}{\ *\ Output\ real\ and\ imaginary\ data:}}
+\DoxyCodeLine{00994\ \textcolor{comment}{\ *\ x(4r)\ =\ xa'+\ j\ *\ ya'}}
+\DoxyCodeLine{00995\ \textcolor{comment}{\ *\ x(4r+1)\ =\ xb'+\ j\ *\ yb'}}
+\DoxyCodeLine{00996\ \textcolor{comment}{\ *\ x(4r+2)\ =\ xc'+\ j\ *\ yc'}}
+\DoxyCodeLine{00997\ \textcolor{comment}{\ *\ x(4r+3)\ =\ xd'+\ j\ *\ yd'}}
+\DoxyCodeLine{00998\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00999\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{01000\ \textcolor{comment}{\ *\ Twiddle\ factors\ for\ radix-\/4\ IFFT:}}
+\DoxyCodeLine{01001\ \textcolor{comment}{\ *\ Wn\ =\ co1\ +\ j\ *\ (si1)}}
+\DoxyCodeLine{01002\ \textcolor{comment}{\ *\ W2n\ =\ co2\ +\ j\ *\ (si2)}}
+\DoxyCodeLine{01003\ \textcolor{comment}{\ *\ W3n\ =\ co3\ +\ j\ *\ (si3)}}
+\DoxyCodeLine{01004\ \textcolor{comment}{\ }}
+\DoxyCodeLine{01005\ \textcolor{comment}{\ *\ The\ real\ and\ imaginary\ output\ values\ for\ the\ radix-\/4\ butterfly\ are}}
+\DoxyCodeLine{01006\ \textcolor{comment}{\ *\ xa'\ =\ xa\ +\ xb\ +\ xc\ +\ xd}}
+\DoxyCodeLine{01007\ \textcolor{comment}{\ *\ ya'\ =\ ya\ +\ yb\ +\ yc\ +\ yd}}
+\DoxyCodeLine{01008\ \textcolor{comment}{\ *\ xb'\ =\ (xa-\/yb-\/xc+yd)*\ co1\ -\/\ (ya+xb-\/yc-\/xd)*\ (si1)}}
+\DoxyCodeLine{01009\ \textcolor{comment}{\ *\ yb'\ =\ (ya+xb-\/yc-\/xd)*\ co1\ +\ (xa-\/yb-\/xc+yd)*\ (si1)}}
+\DoxyCodeLine{01010\ \textcolor{comment}{\ *\ xc'\ =\ (xa-\/xb+xc-\/xd)*\ co2\ -\/\ (ya-\/yb+yc-\/yd)*\ (si2)}}
+\DoxyCodeLine{01011\ \textcolor{comment}{\ *\ yc'\ =\ (ya-\/yb+yc-\/yd)*\ co2\ +\ (xa-\/xb+xc-\/xd)*\ (si2)}}
+\DoxyCodeLine{01012\ \textcolor{comment}{\ *\ xd'\ =\ (xa+yb-\/xc-\/yd)*\ co3\ -\/\ (ya-\/xb-\/yc+xd)*\ (si3)}}
+\DoxyCodeLine{01013\ \textcolor{comment}{\ *\ yd'\ =\ (ya-\/xb-\/yc+xd)*\ co3\ +\ (xa+yb-\/xc-\/yd)*\ (si3)}}
+\DoxyCodeLine{01014\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{01015\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{01016\ }
+\DoxyCodeLine{01017\ \textcolor{keywordtype}{void}\ arm\_radix4\_butterfly\_inverse\_q15(}
+\DoxyCodeLine{01018\ \ \ \ \ \ \ \ \ q15\_t\ *\ pSrc16,}
+\DoxyCodeLine{01019\ \ \ \ \ \ \ \ \ uint32\_t\ fftLen,}
+\DoxyCodeLine{01020\ \ \ \textcolor{keyword}{const}\ q15\_t\ *\ pCoef16,}
+\DoxyCodeLine{01021\ \ \ \ \ \ \ \ \ uint32\_t\ twidCoefModifier)}
+\DoxyCodeLine{01022\ \{}
+\DoxyCodeLine{01023\ }
+\DoxyCodeLine{01024\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{01025\ }
+\DoxyCodeLine{01026\ \ \ \ \ \ \ \ \ q31\_t\ R,\ S,\ T,\ U;}
+\DoxyCodeLine{01027\ \ \ \ \ \ \ \ \ q31\_t\ C1,\ C2,\ C3,\ out1,\ out2;}
+\DoxyCodeLine{01028\ \ \ \ \ \ \ \ \ uint32\_t\ n1,\ n2,\ ic,\ i0,\ j,\ k;}
+\DoxyCodeLine{01029\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{01030\ \ \ \ \ \ \ \ \ q15\_t\ *ptr1;}
+\DoxyCodeLine{01031\ \ \ \ \ \ \ \ \ q15\_t\ *pSi0;}
+\DoxyCodeLine{01032\ \ \ \ \ \ \ \ \ q15\_t\ *pSi1;}
+\DoxyCodeLine{01033\ \ \ \ \ \ \ \ \ q15\_t\ *pSi2;}
+\DoxyCodeLine{01034\ \ \ \ \ \ \ \ \ q15\_t\ *pSi3;}
+\DoxyCodeLine{01035\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{01036\ \ \ \ \ \ \ \ \ q31\_t\ xaya,\ xbyb,\ xcyc,\ xdyd;}
+\DoxyCodeLine{01037\ }
+\DoxyCodeLine{01038\ \ \ \textcolor{comment}{/*\ Total\ process\ is\ divided\ into\ three\ stages\ */}}
+\DoxyCodeLine{01039\ }
+\DoxyCodeLine{01040\ \ \ \textcolor{comment}{/*\ process\ first\ stage,\ middle\ stages,\ \&\ last\ stage\ */}}
+\DoxyCodeLine{01041\ }
+\DoxyCodeLine{01042\ \ \ \textcolor{comment}{/*\ \ Initializations\ for\ the\ first\ stage\ */}}
+\DoxyCodeLine{01043\ \ \ n2\ =\ fftLen;}
+\DoxyCodeLine{01044\ \ \ n1\ =\ n2;}
+\DoxyCodeLine{01045\ }
+\DoxyCodeLine{01046\ \ \ \textcolor{comment}{/*\ n2\ =\ fftLen/4\ */}}
+\DoxyCodeLine{01047\ \ \ n2\ >>=\ 2U;}
+\DoxyCodeLine{01048\ }
+\DoxyCodeLine{01049\ \ \ \textcolor{comment}{/*\ Index\ for\ twiddle\ coefficient\ */}}
+\DoxyCodeLine{01050\ \ \ ic\ =\ 0U;}
+\DoxyCodeLine{01051\ }
+\DoxyCodeLine{01052\ \ \ \textcolor{comment}{/*\ Index\ for\ input\ read\ and\ output\ write\ */}}
+\DoxyCodeLine{01053\ \ \ j\ =\ n2;}
+\DoxyCodeLine{01054\ }
+\DoxyCodeLine{01055\ \ \ pSi0\ =\ pSrc16;}
+\DoxyCodeLine{01056\ \ \ pSi1\ =\ pSi0\ +\ 2\ *\ n2;}
+\DoxyCodeLine{01057\ \ \ pSi2\ =\ pSi1\ +\ 2\ *\ n2;}
+\DoxyCodeLine{01058\ \ \ pSi3\ =\ pSi2\ +\ 2\ *\ n2;}
+\DoxyCodeLine{01059\ }
+\DoxyCodeLine{01060\ \ \ \textcolor{comment}{/*\ Input\ is\ in\ 1.15(q15)\ format\ */}}
+\DoxyCodeLine{01061\ }
+\DoxyCodeLine{01062\ \ \ \textcolor{comment}{/*\ \ start\ of\ first\ stage\ process\ */}}
+\DoxyCodeLine{01063\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{01064\ \ \ \{}
+\DoxyCodeLine{01065\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ implementation\ */}}
+\DoxyCodeLine{01066\ }
+\DoxyCodeLine{01067\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0,\ i0+fftLen/2\ inputs\ */}}
+\DoxyCodeLine{01068\ \ \ \ \ \textcolor{comment}{/*\ Read\ ya\ (real),\ xa(imag)\ input\ */}}
+\DoxyCodeLine{01069\ \ \ \ \ T\ =\ read\_q15x2\ (pSi0);}
+\DoxyCodeLine{01070\ \ \ \ \ T\ =\ \_\_SHADD16(T,\ 0);}
+\DoxyCodeLine{01071\ \ \ \ \ T\ =\ \_\_SHADD16(T,\ 0);}
+\DoxyCodeLine{01072\ }
+\DoxyCodeLine{01073\ \ \ \ \ \textcolor{comment}{/*\ Read\ yc\ (real),\ xc(imag)\ input\ */}}
+\DoxyCodeLine{01074\ \ \ \ \ S\ =\ read\_q15x2\ (pSi2);}
+\DoxyCodeLine{01075\ \ \ \ \ S\ =\ \_\_SHADD16(S,\ 0);}
+\DoxyCodeLine{01076\ \ \ \ \ S\ =\ \_\_SHADD16(S,\ 0);}
+\DoxyCodeLine{01077\ }
+\DoxyCodeLine{01078\ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed((ya\ +\ yc),\ (xa\ +\ xc)\ )\ */}}
+\DoxyCodeLine{01079\ \ \ \ \ R\ =\ \_\_QADD16(T,\ S);}
+\DoxyCodeLine{01080\ }
+\DoxyCodeLine{01081\ \ \ \ \ \textcolor{comment}{/*\ S\ =\ packed((ya\ -\/\ yc),\ (xa\ -\/\ xc)\ )\ */}}
+\DoxyCodeLine{01082\ \ \ \ \ S\ =\ \_\_QSUB16(T,\ S);}
+\DoxyCodeLine{01083\ }
+\DoxyCodeLine{01084\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+fftLen/4\ ,\ i0+3fftLen/4\ inputs\ */}}
+\DoxyCodeLine{01085\ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{01086\ \ \ \ \ T\ =\ read\_q15x2\ (pSi1);}
+\DoxyCodeLine{01087\ \ \ \ \ T\ =\ \_\_SHADD16(T,\ 0);}
+\DoxyCodeLine{01088\ \ \ \ \ T\ =\ \_\_SHADD16(T,\ 0);}
+\DoxyCodeLine{01089\ }
+\DoxyCodeLine{01090\ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{01091\ \ \ \ \ U\ =\ read\_q15x2\ (pSi3);}
+\DoxyCodeLine{01092\ \ \ \ \ U\ =\ \_\_SHADD16(U,\ 0);}
+\DoxyCodeLine{01093\ \ \ \ \ U\ =\ \_\_SHADD16(U,\ 0);}
+\DoxyCodeLine{01094\ }
+\DoxyCodeLine{01095\ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed((yb\ +\ yd),\ (xb\ +\ xd)\ )\ */}}
+\DoxyCodeLine{01096\ \ \ \ \ T\ =\ \_\_QADD16(T,\ U);}
+\DoxyCodeLine{01097\ }
+\DoxyCodeLine{01098\ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ sample\ */}}
+\DoxyCodeLine{01099\ \ \ \ \ \textcolor{comment}{/*\ xa'\ =\ xa\ +\ xb\ +\ xc\ +\ xd\ */}}
+\DoxyCodeLine{01100\ \ \ \ \ \textcolor{comment}{/*\ ya'\ =\ ya\ +\ yb\ +\ yc\ +\ yd\ */}}
+\DoxyCodeLine{01101\ \ \ \ \ write\_q15x2\_ia\ (\&pSi0,\ \_\_SHADD16(R,\ T));}
+\DoxyCodeLine{01102\ }
+\DoxyCodeLine{01103\ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed((ya\ +\ yc)\ -\/\ (yb\ +\ yd),\ (xa\ +\ xc)-\/\ (xb\ +\ xd))\ */}}
+\DoxyCodeLine{01104\ \ \ \ \ R\ =\ \_\_QSUB16(R,\ T);}
+\DoxyCodeLine{01105\ }
+\DoxyCodeLine{01106\ \ \ \ \ \textcolor{comment}{/*\ co2\ \&\ si2\ are\ read\ from\ SIMD\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{01107\ \ \ \ \ C2\ =\ read\_q15x2\ ((q15\_t\ *)\ pCoef16\ +\ (4U\ *\ ic));}
+\DoxyCodeLine{01108\ }
+\DoxyCodeLine{01109\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{01110\ \ \ \ \ \textcolor{comment}{/*\ xc'\ =\ (xa-\/xb+xc-\/xd)*\ co2\ +\ (ya-\/yb+yc-\/yd)*\ (si2)\ */}}
+\DoxyCodeLine{01111\ \ \ \ \ out1\ =\ \_\_SMUSD(C2,\ R)\ >>\ 16U;}
+\DoxyCodeLine{01112\ \ \ \ \ \textcolor{comment}{/*\ yc'\ =\ (ya-\/yb+yc-\/yd)*\ co2\ -\/\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{01113\ \ \ \ \ out2\ =\ \_\_SMUADX(C2,\ R);}
+\DoxyCodeLine{01114\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01115\ \ \ \ \ \textcolor{comment}{/*\ xc'\ =\ (ya-\/yb+yc-\/yd)*\ co2\ -\/\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{01116\ \ \ \ \ out1\ =\ \_\_SMUADX(C2,\ R)\ >>\ 16U;}
+\DoxyCodeLine{01117\ \ \ \ \ \textcolor{comment}{/*\ yc'\ =\ (xa-\/xb+xc-\/xd)*\ co2\ +\ (ya-\/yb+yc-\/yd)*\ (si2)\ */}}
+\DoxyCodeLine{01118\ \ \ \ \ out2\ =\ \_\_SMUSD(\_\_QSUB16(0,\ C2),\ R);}
+\DoxyCodeLine{01119\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01120\ }
+\DoxyCodeLine{01121\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+fftLen/4\ */}}
+\DoxyCodeLine{01122\ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed(yb,\ xb)\ */}}
+\DoxyCodeLine{01123\ \ \ \ \ T\ =\ read\_q15x2\ (pSi1);}
+\DoxyCodeLine{01124\ \ \ \ \ T\ =\ \_\_SHADD16(T,\ 0);}
+\DoxyCodeLine{01125\ \ \ \ \ T\ =\ \_\_SHADD16(T,\ 0);}
+\DoxyCodeLine{01126\ }
+\DoxyCodeLine{01127\ \ \ \ \ \textcolor{comment}{/*\ writing\ the\ butterfly\ processed\ i0\ +\ fftLen/4\ sample\ */}}
+\DoxyCodeLine{01128\ \ \ \ \ \textcolor{comment}{/*\ writing\ output(xc',\ yc')\ in\ little\ endian\ format\ */}}
+\DoxyCodeLine{01129\ \ \ \ \ write\_q15x2\_ia\ (\&pSi1,\ (q31\_t)\ \_\_PKHBT(\ out1,\ out2,\ 0\ ));}
+\DoxyCodeLine{01130\ }
+\DoxyCodeLine{01131\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ calculations\ */}}
+\DoxyCodeLine{01132\ \ \ \ \ \textcolor{comment}{/*\ U\ =\ packed(yd,\ xd)\ */}}
+\DoxyCodeLine{01133\ \ \ \ \ U\ =\ read\_q15x2\ (pSi3);}
+\DoxyCodeLine{01134\ \ \ \ \ U\ =\ \_\_SHADD16(U,\ 0);}
+\DoxyCodeLine{01135\ \ \ \ \ U\ =\ \_\_SHADD16(U,\ 0);}
+\DoxyCodeLine{01136\ }
+\DoxyCodeLine{01137\ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed(yb-\/yd,\ xb-\/xd)\ */}}
+\DoxyCodeLine{01138\ \ \ \ \ T\ =\ \_\_QSUB16(T,\ U);}
+\DoxyCodeLine{01139\ }
+\DoxyCodeLine{01140\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{01141\ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed((ya-\/yc)\ +\ (xb-\/\ xd)\ ,\ (xa-\/xc)\ -\/\ (yb-\/yd))\ */}}
+\DoxyCodeLine{01142\ \ \ \ \ R\ =\ \_\_QSAX(S,\ T);}
+\DoxyCodeLine{01143\ \ \ \ \ \textcolor{comment}{/*\ S\ =\ packed((ya-\/yc)\ +\ (xb-\/\ xd),\ \ (xa-\/xc)\ -\/\ (yb-\/yd))\ */}}
+\DoxyCodeLine{01144\ \ \ \ \ S\ =\ \_\_QASX(S,\ T);}
+\DoxyCodeLine{01145\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01146\ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed((ya-\/yc)\ +\ (xb-\/\ xd)\ ,\ (xa-\/xc)\ -\/\ (yb-\/yd))\ */}}
+\DoxyCodeLine{01147\ \ \ \ \ R\ =\ \_\_QASX(S,\ T);}
+\DoxyCodeLine{01148\ \ \ \ \ \textcolor{comment}{/*\ S\ =\ packed((ya-\/yc)\ -\/\ (xb-\/\ xd),\ \ (xa-\/xc)\ +\ (yb-\/yd))\ */}}
+\DoxyCodeLine{01149\ \ \ \ \ S\ =\ \_\_QSAX(S,\ T);}
+\DoxyCodeLine{01150\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01151\ }
+\DoxyCodeLine{01152\ \ \ \ \ \textcolor{comment}{/*\ co1\ \&\ si1\ are\ read\ from\ SIMD\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{01153\ \ \ \ \ C1\ =\ read\_q15x2\ ((q15\_t\ *)\ pCoef16\ +\ (2U\ *\ ic));}
+\DoxyCodeLine{01154\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+fftLen/2\ sample\ */}}
+\DoxyCodeLine{01155\ }
+\DoxyCodeLine{01156\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{01157\ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (xa+yb-\/xc-\/yd)*\ co1\ +\ (ya-\/xb-\/yc+xd)*\ (si1)\ */}}
+\DoxyCodeLine{01158\ \ \ \ \ out1\ =\ \_\_SMUSD(C1,\ S)\ >>\ 16U;}
+\DoxyCodeLine{01159\ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (ya-\/xb-\/yc+xd)*\ co1\ -\/\ (xa+yb-\/xc-\/yd)*\ (si1)\ */}}
+\DoxyCodeLine{01160\ \ \ \ \ out2\ =\ \_\_SMUADX(C1,\ S);}
+\DoxyCodeLine{01161\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01162\ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (ya-\/xb-\/yc+xd)*\ co1\ -\/\ (xa+yb-\/xc-\/yd)*\ (si1)\ */}}
+\DoxyCodeLine{01163\ \ \ \ \ out1\ =\ \_\_SMUADX(C1,\ S)\ >>\ 16U;}
+\DoxyCodeLine{01164\ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (xa+yb-\/xc-\/yd)*\ co1\ +\ (ya-\/xb-\/yc+xd)*\ (si1)\ */}}
+\DoxyCodeLine{01165\ \ \ \ \ out2\ =\ \_\_SMUSD(\_\_QSUB16(0,\ C1),\ S);}
+\DoxyCodeLine{01166\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01167\ }
+\DoxyCodeLine{01168\ \ \ \ \ \textcolor{comment}{/*\ writing\ output(xb',\ yb')\ in\ little\ endian\ format\ */}}
+\DoxyCodeLine{01169\ \ \ \ \ write\_q15x2\_ia\ (\&pSi2,\ \_\_PKHBT(\ out1,\ out2,\ 0\ ));}
+\DoxyCodeLine{01170\ }
+\DoxyCodeLine{01171\ \ \ \ \ \textcolor{comment}{/*\ co3\ \&\ si3\ are\ read\ from\ SIMD\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{01172\ \ \ \ \ C3\ =\ read\_q15x2\ ((q15\_t\ *)\ pCoef16\ +\ (6U\ *\ ic));}
+\DoxyCodeLine{01173\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+3fftLen/4\ sample\ */}}
+\DoxyCodeLine{01174\ }
+\DoxyCodeLine{01175\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{01176\ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (xa-\/yb-\/xc+yd)*\ co3\ +\ (ya+xb-\/yc-\/xd)*\ (si3)\ */}}
+\DoxyCodeLine{01177\ \ \ \ \ out1\ =\ \_\_SMUSD(C3,\ R)\ >>\ 16U;}
+\DoxyCodeLine{01178\ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (ya+xb-\/yc-\/xd)*\ co3\ -\/\ (xa-\/yb-\/xc+yd)*\ (si3)\ */}}
+\DoxyCodeLine{01179\ \ \ \ \ out2\ =\ \_\_SMUADX(C3,\ R);}
+\DoxyCodeLine{01180\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01181\ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (ya+xb-\/yc-\/xd)*\ co3\ -\/\ (xa-\/yb-\/xc+yd)*\ (si3)\ */}}
+\DoxyCodeLine{01182\ \ \ \ \ out1\ =\ \_\_SMUADX(C3,\ R)\ >>\ 16U;}
+\DoxyCodeLine{01183\ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (xa-\/yb-\/xc+yd)*\ co3\ +\ (ya+xb-\/yc-\/xd)*\ (si3)\ */}}
+\DoxyCodeLine{01184\ \ \ \ \ out2\ =\ \_\_SMUSD(\_\_QSUB16(0,\ C3),\ R);}
+\DoxyCodeLine{01185\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01186\ }
+\DoxyCodeLine{01187\ \ \ \ \ \textcolor{comment}{/*\ writing\ output(xd',\ yd')\ in\ little\ endian\ format\ */}}
+\DoxyCodeLine{01188\ \ \ \ \ write\_q15x2\_ia\ (\&pSi3,\ \_\_PKHBT(\ out1,\ out2,\ 0\ ));}
+\DoxyCodeLine{01189\ }
+\DoxyCodeLine{01190\ \ \ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{01191\ \ \ \ \ ic\ =\ ic\ +\ twidCoefModifier;}
+\DoxyCodeLine{01192\ }
+\DoxyCodeLine{01193\ \ \ \}\ \textcolor{keywordflow}{while}\ (-\/-\/j);}
+\DoxyCodeLine{01194\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 4.11(q11)\ format\ */}}
+\DoxyCodeLine{01195\ }
+\DoxyCodeLine{01196\ \ \ \textcolor{comment}{/*\ end\ of\ first\ stage\ process\ */}}
+\DoxyCodeLine{01197\ }
+\DoxyCodeLine{01198\ }
+\DoxyCodeLine{01199\ \ \ \textcolor{comment}{/*\ start\ of\ middle\ stage\ process\ */}}
+\DoxyCodeLine{01200\ }
+\DoxyCodeLine{01201\ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{01202\ \ \ twidCoefModifier\ <<=\ 2U;}
+\DoxyCodeLine{01203\ }
+\DoxyCodeLine{01204\ \ \ \textcolor{comment}{/*\ \ Calculation\ of\ Middle\ stage\ */}}
+\DoxyCodeLine{01205\ \ \ \textcolor{keywordflow}{for}\ (k\ =\ fftLen\ /\ 4U;\ k\ >\ 4U;\ k\ >>=\ 2U)}
+\DoxyCodeLine{01206\ \ \ \{}
+\DoxyCodeLine{01207\ \ \ \ \ \textcolor{comment}{/*\ \ Initializations\ for\ the\ middle\ stage\ */}}
+\DoxyCodeLine{01208\ \ \ \ \ n1\ =\ n2;}
+\DoxyCodeLine{01209\ \ \ \ \ n2\ >>=\ 2U;}
+\DoxyCodeLine{01210\ \ \ \ \ ic\ =\ 0U;}
+\DoxyCodeLine{01211\ }
+\DoxyCodeLine{01212\ \ \ \ \ \textcolor{keywordflow}{for}\ (j\ =\ 0U;\ j\ <=\ (n2\ -\/\ 1U);\ j++)}
+\DoxyCodeLine{01213\ \ \ \ \ \{}
+\DoxyCodeLine{01214\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ index\ calculation\ for\ the\ coefficients\ */}}
+\DoxyCodeLine{01215\ \ \ \ \ \ \ C1\ =\ read\_q15x2\ ((q15\_t\ *)\ pCoef16\ +\ (2U\ *\ ic));}
+\DoxyCodeLine{01216\ \ \ \ \ \ \ C2\ =\ read\_q15x2\ ((q15\_t\ *)\ pCoef16\ +\ (4U\ *\ ic));}
+\DoxyCodeLine{01217\ \ \ \ \ \ \ C3\ =\ read\_q15x2\ ((q15\_t\ *)\ pCoef16\ +\ (6U\ *\ ic));}
+\DoxyCodeLine{01218\ }
+\DoxyCodeLine{01219\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{01220\ \ \ \ \ \ \ ic\ =\ ic\ +\ twidCoefModifier;}
+\DoxyCodeLine{01221\ }
+\DoxyCodeLine{01222\ \ \ \ \ \ \ pSi0\ =\ pSrc16\ +\ 2\ *\ j;}
+\DoxyCodeLine{01223\ \ \ \ \ \ \ pSi1\ =\ pSi0\ +\ 2\ *\ n2;}
+\DoxyCodeLine{01224\ \ \ \ \ \ \ pSi2\ =\ pSi1\ +\ 2\ *\ n2;}
+\DoxyCodeLine{01225\ \ \ \ \ \ \ pSi3\ =\ pSi2\ +\ 2\ *\ n2;}
+\DoxyCodeLine{01226\ }
+\DoxyCodeLine{01227\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ implementation\ */}}
+\DoxyCodeLine{01228\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i0\ =\ j;\ i0\ <\ fftLen;\ i0\ +=\ n1)}
+\DoxyCodeLine{01229\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01230\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0,\ i0+fftLen/2\ inputs\ */}}
+\DoxyCodeLine{01231\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ ya\ (real),\ xa(imag)\ input\ */}}
+\DoxyCodeLine{01232\ \ \ \ \ \ \ \ \ T\ =\ read\_q15x2\ (pSi0);}
+\DoxyCodeLine{01233\ }
+\DoxyCodeLine{01234\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yc\ (real),\ xc(imag)\ input\ */}}
+\DoxyCodeLine{01235\ \ \ \ \ \ \ \ \ S\ =\ read\_q15x2\ (pSi2);}
+\DoxyCodeLine{01236\ }
+\DoxyCodeLine{01237\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed(\ (ya\ +\ yc),\ (xa\ +\ xc))\ */}}
+\DoxyCodeLine{01238\ \ \ \ \ \ \ \ \ R\ =\ \_\_QADD16(T,\ S);}
+\DoxyCodeLine{01239\ }
+\DoxyCodeLine{01240\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ S\ =\ packed((ya\ -\/\ yc),\ (xa\ -\/\ xc))\ */}}
+\DoxyCodeLine{01241\ \ \ \ \ \ \ \ \ S\ =\ \_\_QSUB16(T,\ S);}
+\DoxyCodeLine{01242\ }
+\DoxyCodeLine{01243\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+fftLen/4\ ,\ i0+3fftLen/4\ inputs\ */}}
+\DoxyCodeLine{01244\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{01245\ \ \ \ \ \ \ \ \ T\ =\ read\_q15x2\ (pSi1);}
+\DoxyCodeLine{01246\ }
+\DoxyCodeLine{01247\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{01248\ \ \ \ \ \ \ \ \ U\ =\ read\_q15x2\ (pSi3);}
+\DoxyCodeLine{01249\ }
+\DoxyCodeLine{01250\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed(\ (yb\ +\ yd),\ (xb\ +\ xd))\ */}}
+\DoxyCodeLine{01251\ \ \ \ \ \ \ \ \ T\ =\ \_\_QADD16(T,\ U);}
+\DoxyCodeLine{01252\ }
+\DoxyCodeLine{01253\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ sample\ */}}
+\DoxyCodeLine{01254\ }
+\DoxyCodeLine{01255\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xa'\ =\ xa\ +\ xb\ +\ xc\ +\ xd\ */}}
+\DoxyCodeLine{01256\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ ya'\ =\ ya\ +\ yb\ +\ yc\ +\ yd\ */}}
+\DoxyCodeLine{01257\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SHADD16(R,\ T);}
+\DoxyCodeLine{01258\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SHADD16(out1,\ 0);}
+\DoxyCodeLine{01259\ \ \ \ \ \ \ \ \ write\_q15x2\ (pSi0,\ out1);}
+\DoxyCodeLine{01260\ \ \ \ \ \ \ \ \ pSi0\ +=\ 2\ *\ n1;}
+\DoxyCodeLine{01261\ }
+\DoxyCodeLine{01262\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed(\ (ya\ +\ yc)\ -\/\ (yb\ +\ yd),\ (xa\ +\ xc)\ -\/\ (xb\ +\ xd))\ */}}
+\DoxyCodeLine{01263\ \ \ \ \ \ \ \ \ R\ =\ \_\_SHSUB16(R,\ T);}
+\DoxyCodeLine{01264\ }
+\DoxyCodeLine{01265\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{01266\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ (ya-\/yb+yc-\/yd)*\ (si2)\ +\ (xa-\/xb+xc-\/xd)*\ co2\ */}}
+\DoxyCodeLine{01267\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SMUSD(C2,\ R)\ >>\ 16U;}
+\DoxyCodeLine{01268\ }
+\DoxyCodeLine{01269\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ (ya-\/yb+yc-\/yd)*\ co2\ -\/\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{01270\ \ \ \ \ \ \ \ \ out2\ =\ \_\_SMUADX(C2,\ R);}
+\DoxyCodeLine{01271\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01272\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ (ya-\/yb+yc-\/yd)*\ co2\ -\/\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{01273\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SMUADX(R,\ C2)\ >>\ 16U;}
+\DoxyCodeLine{01274\ }
+\DoxyCodeLine{01275\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ (ya-\/yb+yc-\/yd)*\ (si2)\ +\ (xa-\/xb+xc-\/xd)*\ co2\ */}}
+\DoxyCodeLine{01276\ \ \ \ \ \ \ \ \ out2\ =\ \_\_SMUSD(\_\_QSUB16(0,\ C2),\ R);}
+\DoxyCodeLine{01277\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01278\ }
+\DoxyCodeLine{01279\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+3fftLen/4\ */}}
+\DoxyCodeLine{01280\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{01281\ \ \ \ \ \ \ \ \ T\ =\ read\_q15x2\ (pSi1);}
+\DoxyCodeLine{01282\ }
+\DoxyCodeLine{01283\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ +\ fftLen/4\ sample\ */}}
+\DoxyCodeLine{01284\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xc'\ =\ (xa-\/xb+xc-\/xd)*\ co2\ +\ (ya-\/yb+yc-\/yd)*\ (si2)\ */}}
+\DoxyCodeLine{01285\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ yc'\ =\ (ya-\/yb+yc-\/yd)*\ co2\ -\/\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{01286\ \ \ \ \ \ \ \ \ write\_q15x2\ (pSi1,\ \_\_PKHBT(\ out1,\ out2,\ 0\ ));}
+\DoxyCodeLine{01287\ \ \ \ \ \ \ \ \ pSi1\ +=\ 2\ *\ n1;}
+\DoxyCodeLine{01288\ }
+\DoxyCodeLine{01289\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ calculations\ */}}
+\DoxyCodeLine{01290\ }
+\DoxyCodeLine{01291\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{01292\ \ \ \ \ \ \ \ \ U\ =\ read\_q15x2\ (pSi3);}
+\DoxyCodeLine{01293\ }
+\DoxyCodeLine{01294\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed(yb-\/yd,\ xb-\/xd)\ */}}
+\DoxyCodeLine{01295\ \ \ \ \ \ \ \ \ T\ =\ \_\_QSUB16(T,\ U);}
+\DoxyCodeLine{01296\ }
+\DoxyCodeLine{01297\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{01298\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed((ya-\/yc)\ +\ (xb-\/\ xd)\ ,\ (xa-\/xc)\ -\/\ (yb-\/yd))\ */}}
+\DoxyCodeLine{01299\ \ \ \ \ \ \ \ \ R\ =\ \_\_SHSAX(S,\ T);}
+\DoxyCodeLine{01300\ }
+\DoxyCodeLine{01301\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ S\ =\ packed((ya-\/yc)\ -\/\ (xb-\/\ xd),\ \ (xa-\/xc)\ +\ (yb-\/yd))\ */}}
+\DoxyCodeLine{01302\ \ \ \ \ \ \ \ \ S\ =\ \_\_SHASX(S,\ T);}
+\DoxyCodeLine{01303\ }
+\DoxyCodeLine{01304\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+fftLen/2\ sample\ */}}
+\DoxyCodeLine{01305\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SMUSD(C1,\ S)\ >>\ 16U;}
+\DoxyCodeLine{01306\ \ \ \ \ \ \ \ \ out2\ =\ \_\_SMUADX(C1,\ S);}
+\DoxyCodeLine{01307\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01308\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed((ya-\/yc)\ +\ (xb-\/\ xd)\ ,\ (xa-\/xc)\ -\/\ (yb-\/yd))\ */}}
+\DoxyCodeLine{01309\ \ \ \ \ \ \ \ \ R\ =\ \_\_SHASX(S,\ T);}
+\DoxyCodeLine{01310\ }
+\DoxyCodeLine{01311\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ S\ =\ packed((ya-\/yc)\ -\/\ (xb-\/\ xd),\ \ (xa-\/xc)\ +\ (yb-\/yd))\ */}}
+\DoxyCodeLine{01312\ \ \ \ \ \ \ \ \ S\ =\ \_\_SHSAX(S,\ T);}
+\DoxyCodeLine{01313\ }
+\DoxyCodeLine{01314\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+fftLen/2\ sample\ */}}
+\DoxyCodeLine{01315\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SMUADX(S,\ C1)\ >>\ 16U;}
+\DoxyCodeLine{01316\ \ \ \ \ \ \ \ \ out2\ =\ \_\_SMUSD(\_\_QSUB16(0,\ C1),\ S);}
+\DoxyCodeLine{01317\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01318\ }
+\DoxyCodeLine{01319\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (xa+yb-\/xc-\/yd)*\ co1\ +\ (ya-\/xb-\/yc+xd)*\ (si1)\ */}}
+\DoxyCodeLine{01320\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (ya-\/xb-\/yc+xd)*\ co1\ -\/\ (xa+yb-\/xc-\/yd)*\ (si1)\ */}}
+\DoxyCodeLine{01321\ \ \ \ \ \ \ \ \ write\_q15x2\ (pSi2,\ \_\_PKHBT(\ out1,\ out2,\ 0\ ));}
+\DoxyCodeLine{01322\ \ \ \ \ \ \ \ \ pSi2\ +=\ 2\ *\ n1;}
+\DoxyCodeLine{01323\ }
+\DoxyCodeLine{01324\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+3fftLen/4\ sample\ */}}
+\DoxyCodeLine{01325\ }
+\DoxyCodeLine{01326\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{01327\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SMUSD(C3,\ R)\ >>\ 16U;}
+\DoxyCodeLine{01328\ \ \ \ \ \ \ \ \ out2\ =\ \_\_SMUADX(C3,\ R);}
+\DoxyCodeLine{01329\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01330\ \ \ \ \ \ \ \ \ out1\ =\ \_\_SMUADX(C3,\ R)\ >>\ 16U;}
+\DoxyCodeLine{01331\ \ \ \ \ \ \ \ \ out2\ =\ \_\_SMUSD(\_\_QSUB16(0,\ C3),\ R);}
+\DoxyCodeLine{01332\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01333\ }
+\DoxyCodeLine{01334\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (xa-\/yb-\/xc+yd)*\ co3\ +\ (ya+xb-\/yc-\/xd)*\ (si3)\ */}}
+\DoxyCodeLine{01335\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (ya+xb-\/yc-\/xd)*\ co3\ -\/\ (xa-\/yb-\/xc+yd)*\ (si3)\ */}}
+\DoxyCodeLine{01336\ \ \ \ \ \ \ \ \ write\_q15x2\ (pSi3,\ \_\_PKHBT(\ out1,\ out2,\ 0\ ));}
+\DoxyCodeLine{01337\ \ \ \ \ \ \ \ \ pSi3\ +=\ 2\ *\ n1;}
+\DoxyCodeLine{01338\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01339\ \ \ \ \ \}}
+\DoxyCodeLine{01340\ \ \ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{01341\ \ \ \ \ twidCoefModifier\ <<=\ 2U;}
+\DoxyCodeLine{01342\ \ \ \}}
+\DoxyCodeLine{01343\ \ \ \textcolor{comment}{/*\ end\ of\ middle\ stage\ process\ */}}
+\DoxyCodeLine{01344\ }
+\DoxyCodeLine{01345\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 10.6(q6)\ format\ for\ the\ 1024\ point\ */}}
+\DoxyCodeLine{01346\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 8.8(q8)\ format\ for\ the\ 256\ point\ */}}
+\DoxyCodeLine{01347\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 6.10(q10)\ format\ for\ the\ 64\ point\ */}}
+\DoxyCodeLine{01348\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 4.12(q12)\ format\ for\ the\ 16\ point\ */}}
+\DoxyCodeLine{01349\ }
+\DoxyCodeLine{01350\ \ \ \textcolor{comment}{/*\ \ Initializations\ for\ the\ last\ stage\ */}}
+\DoxyCodeLine{01351\ \ \ j\ =\ fftLen\ >>\ 2;}
+\DoxyCodeLine{01352\ }
+\DoxyCodeLine{01353\ \ \ ptr1\ =\ \&pSrc16[0];}
+\DoxyCodeLine{01354\ }
+\DoxyCodeLine{01355\ \ \ \textcolor{comment}{/*\ start\ of\ last\ stage\ process\ */}}
+\DoxyCodeLine{01356\ }
+\DoxyCodeLine{01357\ \ \ \textcolor{comment}{/*\ \ Butterfly\ implementation\ */}}
+\DoxyCodeLine{01358\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{01359\ \ \ \{}
+\DoxyCodeLine{01360\ \ \ \ \ \textcolor{comment}{/*\ Read\ xa\ (real),\ ya(imag)\ input\ */}}
+\DoxyCodeLine{01361\ \ \ \ \ xaya\ =\ read\_q15x2\_ia\ (\&ptr1);}
+\DoxyCodeLine{01362\ }
+\DoxyCodeLine{01363\ \ \ \ \ \textcolor{comment}{/*\ Read\ xb\ (real),\ yb(imag)\ input\ */}}
+\DoxyCodeLine{01364\ \ \ \ \ xbyb\ =\ read\_q15x2\_ia\ (\&ptr1);}
+\DoxyCodeLine{01365\ }
+\DoxyCodeLine{01366\ \ \ \ \ \textcolor{comment}{/*\ Read\ xc\ (real),\ yc(imag)\ input\ */}}
+\DoxyCodeLine{01367\ \ \ \ \ xcyc\ =\ read\_q15x2\_ia\ (\&ptr1);}
+\DoxyCodeLine{01368\ }
+\DoxyCodeLine{01369\ \ \ \ \ \textcolor{comment}{/*\ Read\ xd\ (real),\ yd(imag)\ input\ */}}
+\DoxyCodeLine{01370\ \ \ \ \ xdyd\ =\ read\_q15x2\_ia\ (\&ptr1);}
+\DoxyCodeLine{01371\ }
+\DoxyCodeLine{01372\ \ \ \ \ \textcolor{comment}{/*\ R\ =\ packed((ya\ +\ yc),\ (xa\ +\ xc))\ */}}
+\DoxyCodeLine{01373\ \ \ \ \ R\ =\ \_\_QADD16(xaya,\ xcyc);}
+\DoxyCodeLine{01374\ }
+\DoxyCodeLine{01375\ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed((yb\ +\ yd),\ (xb\ +\ xd))\ */}}
+\DoxyCodeLine{01376\ \ \ \ \ T\ =\ \_\_QADD16(xbyb,\ xdyd);}
+\DoxyCodeLine{01377\ }
+\DoxyCodeLine{01378\ \ \ \ \ \textcolor{comment}{/*\ pointer\ updation\ for\ writing\ */}}
+\DoxyCodeLine{01379\ \ \ \ \ ptr1\ =\ ptr1\ -\/\ 8U;}
+\DoxyCodeLine{01380\ }
+\DoxyCodeLine{01381\ }
+\DoxyCodeLine{01382\ \ \ \ \ \textcolor{comment}{/*\ xa'\ =\ xa\ +\ xb\ +\ xc\ +\ xd\ */}}
+\DoxyCodeLine{01383\ \ \ \ \ \textcolor{comment}{/*\ ya'\ =\ ya\ +\ yb\ +\ yc\ +\ yd\ */}}
+\DoxyCodeLine{01384\ \ \ \ \ write\_q15x2\_ia\ (\&ptr1,\ \_\_SHADD16(R,\ T));}
+\DoxyCodeLine{01385\ }
+\DoxyCodeLine{01386\ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed((yb\ +\ yd),\ (xb\ +\ xd))\ */}}
+\DoxyCodeLine{01387\ \ \ \ \ T\ =\ \_\_QADD16(xbyb,\ xdyd);}
+\DoxyCodeLine{01388\ }
+\DoxyCodeLine{01389\ \ \ \ \ \textcolor{comment}{/*\ xc'\ =\ (xa-\/xb+xc-\/xd)\ */}}
+\DoxyCodeLine{01390\ \ \ \ \ \textcolor{comment}{/*\ yc'\ =\ (ya-\/yb+yc-\/yd)\ */}}
+\DoxyCodeLine{01391\ \ \ \ \ write\_q15x2\_ia\ (\&ptr1,\ \_\_SHSUB16(R,\ T));}
+\DoxyCodeLine{01392\ }
+\DoxyCodeLine{01393\ \ \ \ \ \textcolor{comment}{/*\ S\ =\ packed((ya\ -\/\ yc),\ (xa\ -\/\ xc))\ */}}
+\DoxyCodeLine{01394\ \ \ \ \ S\ =\ \_\_QSUB16(xaya,\ xcyc);}
+\DoxyCodeLine{01395\ }
+\DoxyCodeLine{01396\ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{01397\ \ \ \ \ \textcolor{comment}{/*\ T\ =\ packed(\ (yb\ -\/\ yd),\ (xb\ -\/\ xd))\ \ */}}
+\DoxyCodeLine{01398\ \ \ \ \ U\ =\ \_\_QSUB16(xbyb,\ xdyd);}
+\DoxyCodeLine{01399\ }
+\DoxyCodeLine{01400\ \textcolor{preprocessor}{\#ifndef\ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{01401\ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (xa+yb-\/xc-\/yd)\ */}}
+\DoxyCodeLine{01402\ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (ya-\/xb-\/yc+xd)\ */}}
+\DoxyCodeLine{01403\ \ \ \ \ write\_q15x2\_ia\ (\&ptr1,\ \_\_SHASX(S,\ U));}
+\DoxyCodeLine{01404\ }
+\DoxyCodeLine{01405\ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (xa-\/yb-\/xc+yd)\ */}}
+\DoxyCodeLine{01406\ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (ya+xb-\/yc-\/xd)\ */}}
+\DoxyCodeLine{01407\ \ \ \ \ write\_q15x2\_ia\ (\&ptr1,\ \_\_SHSAX(S,\ U));}
+\DoxyCodeLine{01408\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01409\ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (xa+yb-\/xc-\/yd)\ */}}
+\DoxyCodeLine{01410\ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (ya-\/xb-\/yc+xd)\ */}}
+\DoxyCodeLine{01411\ \ \ \ \ write\_q15x2\_ia\ (\&ptr1,\ \_\_SHSAX(S,\ U));}
+\DoxyCodeLine{01412\ }
+\DoxyCodeLine{01413\ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (xa-\/yb-\/xc+yd)\ */}}
+\DoxyCodeLine{01414\ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (ya+xb-\/yc-\/xd)\ */}}
+\DoxyCodeLine{01415\ \ \ \ \ write\_q15x2\_ia\ (\&ptr1,\ \_\_SHASX(S,\ U));}
+\DoxyCodeLine{01416\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01417\ }
+\DoxyCodeLine{01418\ \ \ \}\ \textcolor{keywordflow}{while}\ (-\/-\/j);}
+\DoxyCodeLine{01419\ }
+\DoxyCodeLine{01420\ \ \ \textcolor{comment}{/*\ end\ of\ last\ stage\ \ process\ */}}
+\DoxyCodeLine{01421\ }
+\DoxyCodeLine{01422\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 11.5(q5)\ format\ for\ the\ 1024\ point\ */}}
+\DoxyCodeLine{01423\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 9.7(q7)\ format\ for\ the\ 256\ point\ \ \ */}}
+\DoxyCodeLine{01424\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 7.9(q9)\ format\ for\ the\ 64\ point\ \ */}}
+\DoxyCodeLine{01425\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 5.11(q11)\ format\ for\ the\ 16\ point\ \ */}}
+\DoxyCodeLine{01426\ }
+\DoxyCodeLine{01427\ }
+\DoxyCodeLine{01428\ \textcolor{preprocessor}{\#else\ }\textcolor{comment}{/*\ arm\_radix4\_butterfly\_inverse\_q15\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01429\ }
+\DoxyCodeLine{01430\ \ \ \ \ \ \ \ \ q15\_t\ R0,\ R1,\ S0,\ S1,\ T0,\ T1,\ U0,\ U1;}
+\DoxyCodeLine{01431\ \ \ \ \ \ \ \ \ q15\_t\ Co1,\ Si1,\ Co2,\ Si2,\ Co3,\ Si3,\ out1,\ out2;}
+\DoxyCodeLine{01432\ \ \ \ \ \ \ \ \ uint32\_t\ n1,\ n2,\ ic,\ i0,\ i1,\ i2,\ i3,\ j,\ k;}
+\DoxyCodeLine{01433\ }
+\DoxyCodeLine{01434\ \ \ \textcolor{comment}{/*\ Total\ process\ is\ divided\ into\ three\ stages\ */}}
+\DoxyCodeLine{01435\ }
+\DoxyCodeLine{01436\ \ \ \textcolor{comment}{/*\ process\ first\ stage,\ middle\ stages,\ \&\ last\ stage\ */}}
+\DoxyCodeLine{01437\ }
+\DoxyCodeLine{01438\ \ \ \textcolor{comment}{/*\ \ Initializations\ for\ the\ first\ stage\ */}}
+\DoxyCodeLine{01439\ \ \ n2\ =\ fftLen;}
+\DoxyCodeLine{01440\ \ \ n1\ =\ n2;}
+\DoxyCodeLine{01441\ }
+\DoxyCodeLine{01442\ \ \ \textcolor{comment}{/*\ n2\ =\ fftLen/4\ */}}
+\DoxyCodeLine{01443\ \ \ n2\ >>=\ 2U;}
+\DoxyCodeLine{01444\ }
+\DoxyCodeLine{01445\ \ \ \textcolor{comment}{/*\ Index\ for\ twiddle\ coefficient\ */}}
+\DoxyCodeLine{01446\ \ \ ic\ =\ 0U;}
+\DoxyCodeLine{01447\ }
+\DoxyCodeLine{01448\ \ \ \textcolor{comment}{/*\ Index\ for\ input\ read\ and\ output\ write\ */}}
+\DoxyCodeLine{01449\ \ \ i0\ =\ 0U;}
+\DoxyCodeLine{01450\ }
+\DoxyCodeLine{01451\ \ \ j\ =\ n2;}
+\DoxyCodeLine{01452\ }
+\DoxyCodeLine{01453\ \ \ \textcolor{comment}{/*\ Input\ is\ in\ 1.15(q15)\ format\ */}}
+\DoxyCodeLine{01454\ }
+\DoxyCodeLine{01455\ \ \ \textcolor{comment}{/*\ \ Start\ of\ first\ stage\ process\ */}}
+\DoxyCodeLine{01456\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{01457\ \ \ \{}
+\DoxyCodeLine{01458\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ implementation\ */}}
+\DoxyCodeLine{01459\ }
+\DoxyCodeLine{01460\ \ \ \ \ \textcolor{comment}{/*\ \ index\ calculation\ for\ the\ input\ as,\ */}}
+\DoxyCodeLine{01461\ \ \ \ \ \textcolor{comment}{/*\ \ pSrc16[i0\ +\ 0],\ pSrc16[i0\ +\ fftLen/4],\ pSrc16[i0\ +\ fftLen/2],\ pSrc16[i0\ +\ 3fftLen/4]\ */}}
+\DoxyCodeLine{01462\ \ \ \ \ i1\ =\ i0\ +\ n2;}
+\DoxyCodeLine{01463\ \ \ \ \ i2\ =\ i1\ +\ n2;}
+\DoxyCodeLine{01464\ \ \ \ \ i3\ =\ i2\ +\ n2;}
+\DoxyCodeLine{01465\ }
+\DoxyCodeLine{01466\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0,\ i0+fftLen/2\ inputs\ */}}
+\DoxyCodeLine{01467\ \ \ \ \ \textcolor{comment}{/*\ input\ is\ down\ scale\ by\ 4\ to\ avoid\ overflow\ */}}
+\DoxyCodeLine{01468\ \ \ \ \ \textcolor{comment}{/*\ Read\ ya\ (real),\ xa(imag)\ input\ */}}
+\DoxyCodeLine{01469\ \ \ \ \ T0\ =\ pSrc16[i0\ *\ 2U]\ >>\ 2U;}
+\DoxyCodeLine{01470\ \ \ \ \ T1\ =\ pSrc16[(i0\ *\ 2U)\ +\ 1U]\ >>\ 2U;}
+\DoxyCodeLine{01471\ \ \ \ \ \textcolor{comment}{/*\ input\ is\ down\ scale\ by\ 4\ to\ avoid\ overflow\ */}}
+\DoxyCodeLine{01472\ \ \ \ \ \textcolor{comment}{/*\ Read\ yc\ (real),\ xc(imag)\ input\ */}}
+\DoxyCodeLine{01473\ \ \ \ \ S0\ =\ pSrc16[i2\ *\ 2U]\ >>\ 2U;}
+\DoxyCodeLine{01474\ \ \ \ \ S1\ =\ pSrc16[(i2\ *\ 2U)\ +\ 1U]\ >>\ 2U;}
+\DoxyCodeLine{01475\ }
+\DoxyCodeLine{01476\ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya\ +\ yc),\ R1\ =\ (xa\ +\ xc)\ */}}
+\DoxyCodeLine{01477\ \ \ \ \ R0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ +\ S0,\ 16U);}
+\DoxyCodeLine{01478\ \ \ \ \ R1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ +\ S1,\ 16U);}
+\DoxyCodeLine{01479\ \ \ \ \ \textcolor{comment}{/*\ S0\ =\ (ya\ -\/\ yc),\ S1\ =\ (xa\ -\/\ xc)\ */}}
+\DoxyCodeLine{01480\ \ \ \ \ S0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ -\/\ S0,\ 16U);}
+\DoxyCodeLine{01481\ \ \ \ \ S1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ -\/\ S1,\ 16U);}
+\DoxyCodeLine{01482\ }
+\DoxyCodeLine{01483\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+fftLen/4\ ,\ i0+3fftLen/4\ inputs\ */}}
+\DoxyCodeLine{01484\ \ \ \ \ \textcolor{comment}{/*\ input\ is\ down\ scale\ by\ 4\ to\ avoid\ overflow\ */}}
+\DoxyCodeLine{01485\ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{01486\ \ \ \ \ T0\ =\ pSrc16[i1\ *\ 2U]\ >>\ 2U;}
+\DoxyCodeLine{01487\ \ \ \ \ T1\ =\ pSrc16[(i1\ *\ 2U)\ +\ 1U]\ >>\ 2U;}
+\DoxyCodeLine{01488\ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{01489\ \ \ \ \ \textcolor{comment}{/*\ input\ is\ down\ scale\ by\ 4\ to\ avoid\ overflow\ */}}
+\DoxyCodeLine{01490\ \ \ \ \ U0\ =\ pSrc16[i3\ *\ 2U]\ >>\ 2U;}
+\DoxyCodeLine{01491\ \ \ \ \ U1\ =\ pSrc16[(i3\ *\ 2U)\ +\ 1U]\ >>\ 2U;}
+\DoxyCodeLine{01492\ }
+\DoxyCodeLine{01493\ \ \ \ \ \textcolor{comment}{/*\ T0\ =\ (yb\ +\ yd),\ T1\ =\ (xb\ +\ xd)\ */}}
+\DoxyCodeLine{01494\ \ \ \ \ T0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ +\ U0,\ 16U);}
+\DoxyCodeLine{01495\ \ \ \ \ T1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ +\ U1,\ 16U);}
+\DoxyCodeLine{01496\ }
+\DoxyCodeLine{01497\ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ sample\ */}}
+\DoxyCodeLine{01498\ \ \ \ \ \textcolor{comment}{/*\ xa'\ =\ xa\ +\ xb\ +\ xc\ +\ xd\ */}}
+\DoxyCodeLine{01499\ \ \ \ \ \textcolor{comment}{/*\ ya'\ =\ ya\ +\ yb\ +\ yc\ +\ yd\ */}}
+\DoxyCodeLine{01500\ \ \ \ \ pSrc16[i0\ *\ 2U]\ =\ (R0\ >>\ 1U)\ +\ (T0\ >>\ 1U);}
+\DoxyCodeLine{01501\ \ \ \ \ pSrc16[(i0\ *\ 2U)\ +\ 1U]\ =\ (R1\ >>\ 1U)\ +\ (T1\ >>\ 1U);}
+\DoxyCodeLine{01502\ }
+\DoxyCodeLine{01503\ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya\ +\ yc)\ -\/\ (yb\ +\ yd),\ R1\ =\ (xa\ +\ xc)-\/\ (xb\ +\ xd)\ */}}
+\DoxyCodeLine{01504\ \ \ \ \ R0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(R0\ -\/\ T0,\ 16U);}
+\DoxyCodeLine{01505\ \ \ \ \ R1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(R1\ -\/\ T1,\ 16U);}
+\DoxyCodeLine{01506\ \ \ \ \ \textcolor{comment}{/*\ co2\ \&\ si2\ are\ read\ from\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{01507\ \ \ \ \ Co2\ =\ pCoef16[2U\ *\ ic\ *\ 2U];}
+\DoxyCodeLine{01508\ \ \ \ \ Si2\ =\ pCoef16[(2U\ *\ ic\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01509\ \ \ \ \ \textcolor{comment}{/*\ xc'\ =\ (xa-\/xb+xc-\/xd)*\ co2\ -\/\ (ya-\/yb+yc-\/yd)*\ (si2)\ */}}
+\DoxyCodeLine{01510\ \ \ \ \ out1\ =\ (q15\_t)\ ((Co2\ *\ R0\ -\/\ Si2\ *\ R1)\ >>\ 16U);}
+\DoxyCodeLine{01511\ \ \ \ \ \textcolor{comment}{/*\ yc'\ =\ (ya-\/yb+yc-\/yd)*\ co2\ +\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{01512\ \ \ \ \ out2\ =\ (q15\_t)\ ((Si2\ *\ R0\ +\ Co2\ *\ R1)\ >>\ 16U);}
+\DoxyCodeLine{01513\ }
+\DoxyCodeLine{01514\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+fftLen/4\ */}}
+\DoxyCodeLine{01515\ \ \ \ \ \textcolor{comment}{/*\ input\ is\ down\ scale\ by\ 4\ to\ avoid\ overflow\ */}}
+\DoxyCodeLine{01516\ \ \ \ \ \textcolor{comment}{/*\ T0\ =\ yb,\ T1\ =\ xb\ */}}
+\DoxyCodeLine{01517\ \ \ \ \ T0\ =\ pSrc16[i1\ *\ 2U]\ >>\ 2U;}
+\DoxyCodeLine{01518\ \ \ \ \ T1\ =\ pSrc16[(i1\ *\ 2U)\ +\ 1U]\ >>\ 2U;}
+\DoxyCodeLine{01519\ }
+\DoxyCodeLine{01520\ \ \ \ \ \textcolor{comment}{/*\ writing\ the\ butterfly\ processed\ i0\ +\ fftLen/4\ sample\ */}}
+\DoxyCodeLine{01521\ \ \ \ \ \textcolor{comment}{/*\ writing\ output(xc',\ yc')\ in\ little\ endian\ format\ */}}
+\DoxyCodeLine{01522\ \ \ \ \ pSrc16[i1\ *\ 2U]\ =\ out1;}
+\DoxyCodeLine{01523\ \ \ \ \ pSrc16[(i1\ *\ 2U)\ +\ 1U]\ =\ out2;}
+\DoxyCodeLine{01524\ }
+\DoxyCodeLine{01525\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ calculations\ */}}
+\DoxyCodeLine{01526\ \ \ \ \ \textcolor{comment}{/*\ input\ is\ down\ scale\ by\ 4\ to\ avoid\ overflow\ */}}
+\DoxyCodeLine{01527\ \ \ \ \ \textcolor{comment}{/*\ U0\ =\ yd,\ U1\ =\ xd)\ */}}
+\DoxyCodeLine{01528\ \ \ \ \ U0\ =\ pSrc16[i3\ *\ 2U]\ >>\ 2U;}
+\DoxyCodeLine{01529\ \ \ \ \ U1\ =\ pSrc16[(i3\ *\ 2U)\ +\ 1U]\ >>\ 2U;}
+\DoxyCodeLine{01530\ }
+\DoxyCodeLine{01531\ \ \ \ \ \textcolor{comment}{/*\ T0\ =\ yb-\/yd,\ T1\ =\ xb-\/xd)\ */}}
+\DoxyCodeLine{01532\ \ \ \ \ T0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ -\/\ U0,\ 16U);}
+\DoxyCodeLine{01533\ \ \ \ \ T1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ -\/\ U1,\ 16U);}
+\DoxyCodeLine{01534\ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya-\/yc)\ -\/\ (xb-\/\ xd)\ ,\ R1\ =\ (xa-\/xc)\ +\ (yb-\/yd)\ */}}
+\DoxyCodeLine{01535\ \ \ \ \ R0\ =\ (q15\_t)\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}((q31\_t)\ (S0\ +\ T1),\ 16);}
+\DoxyCodeLine{01536\ \ \ \ \ R1\ =\ (q15\_t)\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}((q31\_t)\ (S1\ -\/\ T0),\ 16);}
+\DoxyCodeLine{01537\ \ \ \ \ \textcolor{comment}{/*\ S\ =\ (ya-\/yc)\ +\ (xb-\/\ xd),\ S1\ =\ (xa-\/xc)\ -\/\ (yb-\/yd)\ */}}
+\DoxyCodeLine{01538\ \ \ \ \ S0\ =\ (q15\_t)\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}((q31\_t)\ (S0\ -\/\ T1),\ 16);}
+\DoxyCodeLine{01539\ \ \ \ \ S1\ =\ (q15\_t)\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}((q31\_t)\ (S1\ +\ T0),\ 16);}
+\DoxyCodeLine{01540\ }
+\DoxyCodeLine{01541\ \ \ \ \ \textcolor{comment}{/*\ co1\ \&\ si1\ are\ read\ from\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{01542\ \ \ \ \ Co1\ =\ pCoef16[ic\ *\ 2U];}
+\DoxyCodeLine{01543\ \ \ \ \ Si1\ =\ pCoef16[(ic\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01544\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+fftLen/2\ sample\ */}}
+\DoxyCodeLine{01545\ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (xa-\/yb-\/xc+yd)*\ co1\ -\/\ (ya+xb-\/yc-\/xd)*\ (si1)\ */}}
+\DoxyCodeLine{01546\ \ \ \ \ out1\ =\ (q15\_t)\ ((Co1\ *\ S0\ -\/\ Si1\ *\ S1)\ >>\ 16U);}
+\DoxyCodeLine{01547\ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (ya+xb-\/yc-\/xd)*\ co1\ +\ (xa-\/yb-\/xc+yd)*\ (si1)\ */}}
+\DoxyCodeLine{01548\ \ \ \ \ out2\ =\ (q15\_t)\ ((Si1\ *\ S0\ +\ Co1\ *\ S1)\ >>\ 16U);}
+\DoxyCodeLine{01549\ \ \ \ \ \textcolor{comment}{/*\ writing\ output(xb',\ yb')\ in\ little\ endian\ format\ */}}
+\DoxyCodeLine{01550\ \ \ \ \ pSrc16[i2\ *\ 2U]\ =\ out1;}
+\DoxyCodeLine{01551\ \ \ \ \ pSrc16[(i2\ *\ 2U)\ +\ 1U]\ =\ out2;}
+\DoxyCodeLine{01552\ }
+\DoxyCodeLine{01553\ \ \ \ \ \textcolor{comment}{/*\ Co3\ \&\ si3\ are\ read\ from\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{01554\ \ \ \ \ Co3\ =\ pCoef16[3U\ *\ ic\ *\ 2U];}
+\DoxyCodeLine{01555\ \ \ \ \ Si3\ =\ pCoef16[(3U\ *\ ic\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01556\ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+3fftLen/4\ sample\ */}}
+\DoxyCodeLine{01557\ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (xa+yb-\/xc-\/yd)*\ Co3\ -\/\ (ya-\/xb-\/yc+xd)*\ (si3)\ */}}
+\DoxyCodeLine{01558\ \ \ \ \ out1\ =\ (q15\_t)\ ((Co3\ *\ R0\ -\/\ Si3\ *\ R1)\ >>\ 16U);}
+\DoxyCodeLine{01559\ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (ya-\/xb-\/yc+xd)*\ Co3\ +\ (xa+yb-\/xc-\/yd)*\ (si3)\ */}}
+\DoxyCodeLine{01560\ \ \ \ \ out2\ =\ (q15\_t)\ ((Si3\ *\ R0\ +\ Co3\ *\ R1)\ >>\ 16U);}
+\DoxyCodeLine{01561\ \ \ \ \ \textcolor{comment}{/*\ writing\ output(xd',\ yd')\ in\ little\ endian\ format\ */}}
+\DoxyCodeLine{01562\ \ \ \ \ pSrc16[i3\ *\ 2U]\ =\ out1;}
+\DoxyCodeLine{01563\ \ \ \ \ pSrc16[(i3\ *\ 2U)\ +\ 1U]\ =\ out2;}
+\DoxyCodeLine{01564\ }
+\DoxyCodeLine{01565\ \ \ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{01566\ \ \ \ \ ic\ =\ ic\ +\ twidCoefModifier;}
+\DoxyCodeLine{01567\ }
+\DoxyCodeLine{01568\ \ \ \ \ \textcolor{comment}{/*\ \ Updating\ input\ index\ */}}
+\DoxyCodeLine{01569\ \ \ \ \ i0\ =\ i0\ +\ 1U;}
+\DoxyCodeLine{01570\ }
+\DoxyCodeLine{01571\ \ \ \}\ \textcolor{keywordflow}{while}\ (-\/-\/j);}
+\DoxyCodeLine{01572\ }
+\DoxyCodeLine{01573\ \ \ \textcolor{comment}{/*\ \ End\ of\ first\ stage\ process\ */}}
+\DoxyCodeLine{01574\ }
+\DoxyCodeLine{01575\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 4.11(q11)\ format\ */}}
+\DoxyCodeLine{01576\ }
+\DoxyCodeLine{01577\ }
+\DoxyCodeLine{01578\ \ \ \textcolor{comment}{/*\ \ Start\ of\ Middle\ stage\ process\ */}}
+\DoxyCodeLine{01579\ }
+\DoxyCodeLine{01580\ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{01581\ \ \ twidCoefModifier\ <<=\ 2U;}
+\DoxyCodeLine{01582\ }
+\DoxyCodeLine{01583\ \ \ \textcolor{comment}{/*\ \ Calculation\ of\ Middle\ stage\ */}}
+\DoxyCodeLine{01584\ \ \ \textcolor{keywordflow}{for}\ (k\ =\ fftLen\ /\ 4U;\ k\ >\ 4U;\ k\ >>=\ 2U)}
+\DoxyCodeLine{01585\ \ \ \{}
+\DoxyCodeLine{01586\ \ \ \ \ \textcolor{comment}{/*\ \ Initializations\ for\ the\ middle\ stage\ */}}
+\DoxyCodeLine{01587\ \ \ \ \ n1\ =\ n2;}
+\DoxyCodeLine{01588\ \ \ \ \ n2\ >>=\ 2U;}
+\DoxyCodeLine{01589\ \ \ \ \ ic\ =\ 0U;}
+\DoxyCodeLine{01590\ }
+\DoxyCodeLine{01591\ \ \ \ \ \textcolor{keywordflow}{for}\ (j\ =\ 0U;\ j\ <=\ (n2\ -\/\ 1U);\ j++)}
+\DoxyCodeLine{01592\ \ \ \ \ \{}
+\DoxyCodeLine{01593\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ index\ calculation\ for\ the\ coefficients\ */}}
+\DoxyCodeLine{01594\ \ \ \ \ \ \ Co1\ =\ pCoef16[ic\ *\ 2U];}
+\DoxyCodeLine{01595\ \ \ \ \ \ \ Si1\ =\ pCoef16[(ic\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01596\ \ \ \ \ \ \ Co2\ =\ pCoef16[2U\ *\ ic\ *\ 2U];}
+\DoxyCodeLine{01597\ \ \ \ \ \ \ Si2\ =\ pCoef16[2U\ *\ ic\ *\ 2U\ +\ 1U];}
+\DoxyCodeLine{01598\ \ \ \ \ \ \ Co3\ =\ pCoef16[3U\ *\ ic\ *\ 2U];}
+\DoxyCodeLine{01599\ \ \ \ \ \ \ Si3\ =\ pCoef16[(3U\ *\ ic\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01600\ }
+\DoxyCodeLine{01601\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{01602\ \ \ \ \ \ \ ic\ =\ ic\ +\ twidCoefModifier;}
+\DoxyCodeLine{01603\ }
+\DoxyCodeLine{01604\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ implementation\ */}}
+\DoxyCodeLine{01605\ \ \ \ \ \ \ \textcolor{keywordflow}{for}\ (i0\ =\ j;\ i0\ <\ fftLen;\ i0\ +=\ n1)}
+\DoxyCodeLine{01606\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{01607\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ index\ calculation\ for\ the\ input\ as,\ */}}
+\DoxyCodeLine{01608\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ pSrc16[i0\ +\ 0],\ pSrc16[i0\ +\ fftLen/4],\ pSrc16[i0\ +\ fftLen/2],\ pSrc16[i0\ +\ 3fftLen/4]\ */}}
+\DoxyCodeLine{01609\ \ \ \ \ \ \ \ \ i1\ =\ i0\ +\ n2;}
+\DoxyCodeLine{01610\ \ \ \ \ \ \ \ \ i2\ =\ i1\ +\ n2;}
+\DoxyCodeLine{01611\ \ \ \ \ \ \ \ \ i3\ =\ i2\ +\ n2;}
+\DoxyCodeLine{01612\ }
+\DoxyCodeLine{01613\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0,\ i0+fftLen/2\ inputs\ */}}
+\DoxyCodeLine{01614\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ ya\ (real),\ xa(imag)\ input\ */}}
+\DoxyCodeLine{01615\ \ \ \ \ \ \ \ \ T0\ =\ pSrc16[i0\ *\ 2U];}
+\DoxyCodeLine{01616\ \ \ \ \ \ \ \ \ T1\ =\ pSrc16[(i0\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01617\ }
+\DoxyCodeLine{01618\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yc\ (real),\ xc(imag)\ input\ */}}
+\DoxyCodeLine{01619\ \ \ \ \ \ \ \ \ S0\ =\ pSrc16[i2\ *\ 2U];}
+\DoxyCodeLine{01620\ \ \ \ \ \ \ \ \ S1\ =\ pSrc16[(i2\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01621\ }
+\DoxyCodeLine{01622\ }
+\DoxyCodeLine{01623\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya\ +\ yc),\ R1\ =\ (xa\ +\ xc)\ */}}
+\DoxyCodeLine{01624\ \ \ \ \ \ \ \ \ R0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ +\ S0,\ 16U);}
+\DoxyCodeLine{01625\ \ \ \ \ \ \ \ \ R1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ +\ S1,\ 16U);}
+\DoxyCodeLine{01626\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ S0\ =\ (ya\ -\/\ yc),\ S1\ =\ (xa\ -\/\ xc)\ */}}
+\DoxyCodeLine{01627\ \ \ \ \ \ \ \ \ S0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ -\/\ S0,\ 16U);}
+\DoxyCodeLine{01628\ \ \ \ \ \ \ \ \ S1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ -\/\ S1,\ 16U);}
+\DoxyCodeLine{01629\ }
+\DoxyCodeLine{01630\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+fftLen/4\ ,\ i0+3fftLen/4\ inputs\ */}}
+\DoxyCodeLine{01631\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{01632\ \ \ \ \ \ \ \ \ T0\ =\ pSrc16[i1\ *\ 2U];}
+\DoxyCodeLine{01633\ \ \ \ \ \ \ \ \ T1\ =\ pSrc16[(i1\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01634\ }
+\DoxyCodeLine{01635\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{01636\ \ \ \ \ \ \ \ \ U0\ =\ pSrc16[i3\ *\ 2U];}
+\DoxyCodeLine{01637\ \ \ \ \ \ \ \ \ U1\ =\ pSrc16[(i3\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01638\ }
+\DoxyCodeLine{01639\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ T0\ =\ (yb\ +\ yd),\ T1\ =\ (xb\ +\ xd)\ */}}
+\DoxyCodeLine{01640\ \ \ \ \ \ \ \ \ T0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ +\ U0,\ 16U);}
+\DoxyCodeLine{01641\ \ \ \ \ \ \ \ \ T1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ +\ U1,\ 16U);}
+\DoxyCodeLine{01642\ }
+\DoxyCodeLine{01643\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ sample\ */}}
+\DoxyCodeLine{01644\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xa'\ =\ xa\ +\ xb\ +\ xc\ +\ xd\ */}}
+\DoxyCodeLine{01645\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ ya'\ =\ ya\ +\ yb\ +\ yc\ +\ yd\ */}}
+\DoxyCodeLine{01646\ \ \ \ \ \ \ \ \ pSrc16[i0\ *\ 2U]\ =\ ((R0\ >>\ 1U)\ +\ (T0\ >>\ 1U))\ >>\ 1U;}
+\DoxyCodeLine{01647\ \ \ \ \ \ \ \ \ pSrc16[(i0\ *\ 2U)\ +\ 1U]\ =\ ((R1\ >>\ 1U)\ +\ (T1\ >>\ 1U))\ >>\ 1U;}
+\DoxyCodeLine{01648\ }
+\DoxyCodeLine{01649\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya\ +\ yc)\ -\/\ (yb\ +\ yd),\ R1\ =\ (xa\ +\ xc)\ -\/\ (xb\ +\ xd)\ */}}
+\DoxyCodeLine{01650\ \ \ \ \ \ \ \ \ R0\ =\ (R0\ >>\ 1U)\ -\/\ (T0\ >>\ 1U);}
+\DoxyCodeLine{01651\ \ \ \ \ \ \ \ \ R1\ =\ (R1\ >>\ 1U)\ -\/\ (T1\ >>\ 1U);}
+\DoxyCodeLine{01652\ }
+\DoxyCodeLine{01653\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ (ya-\/yb+yc-\/yd)*\ (si2)\ -\/\ (xa-\/xb+xc-\/xd)*\ co2\ */}}
+\DoxyCodeLine{01654\ \ \ \ \ \ \ \ \ out1\ =\ (q15\_t)\ ((Co2\ *\ R0\ -\/\ Si2\ *\ R1)\ >>\ 16);}
+\DoxyCodeLine{01655\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ (ya-\/yb+yc-\/yd)*\ co2\ +\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{01656\ \ \ \ \ \ \ \ \ out2\ =\ (q15\_t)\ ((Si2\ *\ R0\ +\ Co2\ *\ R1)\ >>\ 16);}
+\DoxyCodeLine{01657\ }
+\DoxyCodeLine{01658\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+3fftLen/4\ */}}
+\DoxyCodeLine{01659\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{01660\ \ \ \ \ \ \ \ \ T0\ =\ pSrc16[i1\ *\ 2U];}
+\DoxyCodeLine{01661\ \ \ \ \ \ \ \ \ T1\ =\ pSrc16[(i1\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01662\ }
+\DoxyCodeLine{01663\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ +\ fftLen/4\ sample\ */}}
+\DoxyCodeLine{01664\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xc'\ =\ (xa-\/xb+xc-\/xd)*\ co2\ -\/\ (ya-\/yb+yc-\/yd)*\ (si2)\ */}}
+\DoxyCodeLine{01665\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ yc'\ =\ (ya-\/yb+yc-\/yd)*\ co2\ +\ (xa-\/xb+xc-\/xd)*\ (si2)\ */}}
+\DoxyCodeLine{01666\ \ \ \ \ \ \ \ \ pSrc16[i1\ *\ 2U]\ =\ out1;}
+\DoxyCodeLine{01667\ \ \ \ \ \ \ \ \ pSrc16[(i1\ *\ 2U)\ +\ 1U]\ =\ out2;}
+\DoxyCodeLine{01668\ }
+\DoxyCodeLine{01669\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ calculations\ */}}
+\DoxyCodeLine{01670\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{01671\ \ \ \ \ \ \ \ \ U0\ =\ pSrc16[i3\ *\ 2U];}
+\DoxyCodeLine{01672\ \ \ \ \ \ \ \ \ U1\ =\ pSrc16[(i3\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01673\ }
+\DoxyCodeLine{01674\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ T0\ =\ yb-\/yd,\ T1\ =\ xb-\/xd)\ */}}
+\DoxyCodeLine{01675\ \ \ \ \ \ \ \ \ T0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ -\/\ U0,\ 16U);}
+\DoxyCodeLine{01676\ \ \ \ \ \ \ \ \ T1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ -\/\ U1,\ 16U);}
+\DoxyCodeLine{01677\ }
+\DoxyCodeLine{01678\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya-\/yc)\ -\/\ (xb-\/\ xd)\ ,\ R1\ =\ (xa-\/xc)\ +\ (yb-\/yd)\ */}}
+\DoxyCodeLine{01679\ \ \ \ \ \ \ \ \ R0\ =\ (S0\ >>\ 1U)\ +\ (T1\ >>\ 1U);}
+\DoxyCodeLine{01680\ \ \ \ \ \ \ \ \ R1\ =\ (S1\ >>\ 1U)\ -\/\ (T0\ >>\ 1U);}
+\DoxyCodeLine{01681\ }
+\DoxyCodeLine{01682\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ S1\ =\ (ya-\/yc)\ +\ (xb-\/\ xd),\ S1\ =\ (xa-\/xc)\ -\/\ (yb-\/yd)\ */}}
+\DoxyCodeLine{01683\ \ \ \ \ \ \ \ \ S0\ =\ (S0\ >>\ 1U)\ -\/\ (T1\ >>\ 1U);}
+\DoxyCodeLine{01684\ \ \ \ \ \ \ \ \ S1\ =\ (S1\ >>\ 1U)\ +\ (T0\ >>\ 1U);}
+\DoxyCodeLine{01685\ }
+\DoxyCodeLine{01686\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+fftLen/2\ sample\ */}}
+\DoxyCodeLine{01687\ \ \ \ \ \ \ \ \ out1\ =\ (q15\_t)\ ((Co1\ *\ S0\ -\/\ Si1\ *\ S1)\ >>\ 16U);}
+\DoxyCodeLine{01688\ \ \ \ \ \ \ \ \ out2\ =\ (q15\_t)\ ((Si1\ *\ S0\ +\ Co1\ *\ S1)\ >>\ 16U);}
+\DoxyCodeLine{01689\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (xa-\/yb-\/xc+yd)*\ co1\ -\/\ (ya+xb-\/yc-\/xd)*\ (si1)\ */}}
+\DoxyCodeLine{01690\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (ya+xb-\/yc-\/xd)*\ co1\ +\ (xa-\/yb-\/xc+yd)*\ (si1)\ */}}
+\DoxyCodeLine{01691\ \ \ \ \ \ \ \ \ pSrc16[i2\ *\ 2U]\ =\ out1;}
+\DoxyCodeLine{01692\ \ \ \ \ \ \ \ \ pSrc16[(i2\ *\ 2U)\ +\ 1U]\ =\ out2;}
+\DoxyCodeLine{01693\ }
+\DoxyCodeLine{01694\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Butterfly\ process\ for\ the\ i0+3fftLen/4\ sample\ */}}
+\DoxyCodeLine{01695\ \ \ \ \ \ \ \ \ out1\ =\ (q15\_t)\ ((Co3\ *\ R0\ -\/\ Si3\ *\ R1)\ >>\ 16U);}
+\DoxyCodeLine{01696\ }
+\DoxyCodeLine{01697\ \ \ \ \ \ \ \ \ out2\ =\ (q15\_t)\ ((Si3\ *\ R0\ +\ Co3\ *\ R1)\ >>\ 16U);}
+\DoxyCodeLine{01698\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (xa+yb-\/xc-\/yd)*\ Co3\ -\/\ (ya-\/xb-\/yc+xd)*\ (si3)\ */}}
+\DoxyCodeLine{01699\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (ya-\/xb-\/yc+xd)*\ Co3\ +\ (xa+yb-\/xc-\/yd)*\ (si3)\ */}}
+\DoxyCodeLine{01700\ \ \ \ \ \ \ \ \ pSrc16[i3\ *\ 2U]\ =\ out1;}
+\DoxyCodeLine{01701\ \ \ \ \ \ \ \ \ pSrc16[(i3\ *\ 2U)\ +\ 1U]\ =\ out2;}
+\DoxyCodeLine{01702\ }
+\DoxyCodeLine{01703\ }
+\DoxyCodeLine{01704\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{01705\ \ \ \ \ \}}
+\DoxyCodeLine{01706\ \ \ \ \ \textcolor{comment}{/*\ \ Twiddle\ coefficients\ index\ modifier\ */}}
+\DoxyCodeLine{01707\ \ \ \ \ twidCoefModifier\ <<=\ 2U;}
+\DoxyCodeLine{01708\ \ \ \}}
+\DoxyCodeLine{01709\ \ \ \textcolor{comment}{/*\ \ End\ of\ Middle\ stages\ process\ */}}
+\DoxyCodeLine{01710\ }
+\DoxyCodeLine{01711\ }
+\DoxyCodeLine{01712\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 10.6(q6)\ format\ for\ the\ 1024\ point\ */}}
+\DoxyCodeLine{01713\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 8.8(q8)\ format\ for\ the\ 256\ point\ \ \ */}}
+\DoxyCodeLine{01714\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 6.10(q10)\ format\ for\ the\ 64\ point\ \ */}}
+\DoxyCodeLine{01715\ \ \ \textcolor{comment}{/*\ data\ is\ in\ 4.12(q12)\ format\ for\ the\ 16\ point\ \ */}}
+\DoxyCodeLine{01716\ }
+\DoxyCodeLine{01717\ \ \ \textcolor{comment}{/*\ start\ of\ last\ stage\ process\ */}}
+\DoxyCodeLine{01718\ }
+\DoxyCodeLine{01719\ }
+\DoxyCodeLine{01720\ \ \ \textcolor{comment}{/*\ \ Initializations\ for\ the\ last\ stage\ */}}
+\DoxyCodeLine{01721\ \ \ n1\ =\ n2;}
+\DoxyCodeLine{01722\ \ \ n2\ >>=\ 2U;}
+\DoxyCodeLine{01723\ }
+\DoxyCodeLine{01724\ \ \ \textcolor{comment}{/*\ \ Butterfly\ implementation\ */}}
+\DoxyCodeLine{01725\ \ \ \textcolor{keywordflow}{for}\ (i0\ =\ 0U;\ i0\ <=\ (fftLen\ -\/\ n1);\ i0\ +=\ n1)}
+\DoxyCodeLine{01726\ \ \ \{}
+\DoxyCodeLine{01727\ \ \ \ \ \textcolor{comment}{/*\ \ index\ calculation\ for\ the\ input\ as,\ */}}
+\DoxyCodeLine{01728\ \ \ \ \ \textcolor{comment}{/*\ \ pSrc16[i0\ +\ 0],\ pSrc16[i0\ +\ fftLen/4],\ pSrc16[i0\ +\ fftLen/2],\ pSrc16[i0\ +\ 3fftLen/4]\ */}}
+\DoxyCodeLine{01729\ \ \ \ \ i1\ =\ i0\ +\ n2;}
+\DoxyCodeLine{01730\ \ \ \ \ i2\ =\ i1\ +\ n2;}
+\DoxyCodeLine{01731\ \ \ \ \ i3\ =\ i2\ +\ n2;}
+\DoxyCodeLine{01732\ }
+\DoxyCodeLine{01733\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0,\ i0+fftLen/2\ inputs\ */}}
+\DoxyCodeLine{01734\ \ \ \ \ \textcolor{comment}{/*\ Read\ ya\ (real),\ xa(imag)\ input\ */}}
+\DoxyCodeLine{01735\ \ \ \ \ T0\ =\ pSrc16[i0\ *\ 2U];}
+\DoxyCodeLine{01736\ \ \ \ \ T1\ =\ pSrc16[(i0\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01737\ \ \ \ \ \textcolor{comment}{/*\ Read\ yc\ (real),\ xc(imag)\ input\ */}}
+\DoxyCodeLine{01738\ \ \ \ \ S0\ =\ pSrc16[i2\ *\ 2U];}
+\DoxyCodeLine{01739\ \ \ \ \ S1\ =\ pSrc16[(i2\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01740\ }
+\DoxyCodeLine{01741\ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya\ +\ yc),\ R1\ =\ (xa\ +\ xc)\ */}}
+\DoxyCodeLine{01742\ \ \ \ \ R0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ +\ S0,\ 16U);}
+\DoxyCodeLine{01743\ \ \ \ \ R1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ +\ S1,\ 16U);}
+\DoxyCodeLine{01744\ \ \ \ \ \textcolor{comment}{/*\ S0\ =\ (ya\ -\/\ yc),\ S1\ =\ (xa\ -\/\ xc)\ */}}
+\DoxyCodeLine{01745\ \ \ \ \ S0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ -\/\ S0,\ 16U);}
+\DoxyCodeLine{01746\ \ \ \ \ S1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ -\/\ S1,\ 16U);}
+\DoxyCodeLine{01747\ }
+\DoxyCodeLine{01748\ \ \ \ \ \textcolor{comment}{/*\ \ Reading\ i0+fftLen/4\ ,\ i0+3fftLen/4\ inputs\ */}}
+\DoxyCodeLine{01749\ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{01750\ \ \ \ \ T0\ =\ pSrc16[i1\ *\ 2U];}
+\DoxyCodeLine{01751\ \ \ \ \ T1\ =\ pSrc16[(i1\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01752\ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{01753\ \ \ \ \ U0\ =\ pSrc16[i3\ *\ 2U];}
+\DoxyCodeLine{01754\ \ \ \ \ U1\ =\ pSrc16[(i3\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01755\ }
+\DoxyCodeLine{01756\ \ \ \ \ \textcolor{comment}{/*\ T0\ =\ (yb\ +\ yd),\ T1\ =\ (xb\ +\ xd)\ */}}
+\DoxyCodeLine{01757\ \ \ \ \ T0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ +\ U0,\ 16U);}
+\DoxyCodeLine{01758\ \ \ \ \ T1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ +\ U1,\ 16U);}
+\DoxyCodeLine{01759\ }
+\DoxyCodeLine{01760\ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ sample\ */}}
+\DoxyCodeLine{01761\ \ \ \ \ \textcolor{comment}{/*\ xa'\ =\ xa\ +\ xb\ +\ xc\ +\ xd\ */}}
+\DoxyCodeLine{01762\ \ \ \ \ \textcolor{comment}{/*\ ya'\ =\ ya\ +\ yb\ +\ yc\ +\ yd\ */}}
+\DoxyCodeLine{01763\ \ \ \ \ pSrc16[i0\ *\ 2U]\ =\ (R0\ >>\ 1U)\ +\ (T0\ >>\ 1U);}
+\DoxyCodeLine{01764\ \ \ \ \ pSrc16[(i0\ *\ 2U)\ +\ 1U]\ =\ (R1\ >>\ 1U)\ +\ (T1\ >>\ 1U);}
+\DoxyCodeLine{01765\ }
+\DoxyCodeLine{01766\ \ \ \ \ \textcolor{comment}{/*\ R0\ =\ (ya\ +\ yc)\ -\/\ (yb\ +\ yd),\ R1\ =\ (xa\ +\ xc)\ -\/\ (xb\ +\ xd)\ */}}
+\DoxyCodeLine{01767\ \ \ \ \ R0\ =\ (R0\ >>\ 1U)\ -\/\ (T0\ >>\ 1U);}
+\DoxyCodeLine{01768\ \ \ \ \ R1\ =\ (R1\ >>\ 1U)\ -\/\ (T1\ >>\ 1U);}
+\DoxyCodeLine{01769\ }
+\DoxyCodeLine{01770\ \ \ \ \ \textcolor{comment}{/*\ Read\ yb\ (real),\ xb(imag)\ input\ */}}
+\DoxyCodeLine{01771\ \ \ \ \ T0\ =\ pSrc16[i1\ *\ 2U];}
+\DoxyCodeLine{01772\ \ \ \ \ T1\ =\ pSrc16[(i1\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01773\ }
+\DoxyCodeLine{01774\ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ +\ fftLen/4\ sample\ */}}
+\DoxyCodeLine{01775\ \ \ \ \ \textcolor{comment}{/*\ xc'\ =\ (xa-\/xb+xc-\/xd)\ */}}
+\DoxyCodeLine{01776\ \ \ \ \ \textcolor{comment}{/*\ yc'\ =\ (ya-\/yb+yc-\/yd)\ */}}
+\DoxyCodeLine{01777\ \ \ \ \ pSrc16[i1\ *\ 2U]\ =\ R0;}
+\DoxyCodeLine{01778\ \ \ \ \ pSrc16[(i1\ *\ 2U)\ +\ 1U]\ =\ R1;}
+\DoxyCodeLine{01779\ }
+\DoxyCodeLine{01780\ \ \ \ \ \textcolor{comment}{/*\ Read\ yd\ (real),\ xd(imag)\ input\ */}}
+\DoxyCodeLine{01781\ \ \ \ \ U0\ =\ pSrc16[i3\ *\ 2U];}
+\DoxyCodeLine{01782\ \ \ \ \ U1\ =\ pSrc16[(i3\ *\ 2U)\ +\ 1U];}
+\DoxyCodeLine{01783\ \ \ \ \ \textcolor{comment}{/*\ T0\ =\ (yb\ -\/\ yd),\ T1\ =\ (xb\ -\/\ xd)\ */}}
+\DoxyCodeLine{01784\ \ \ \ \ T0\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T0\ -\/\ U0,\ 16U);}
+\DoxyCodeLine{01785\ \ \ \ \ T1\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}(T1\ -\/\ U1,\ 16U);}
+\DoxyCodeLine{01786\ }
+\DoxyCodeLine{01787\ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ +\ fftLen/2\ sample\ */}}
+\DoxyCodeLine{01788\ \ \ \ \ \textcolor{comment}{/*\ xb'\ =\ (xa-\/yb-\/xc+yd)\ */}}
+\DoxyCodeLine{01789\ \ \ \ \ \textcolor{comment}{/*\ yb'\ =\ (ya+xb-\/yc-\/xd)\ */}}
+\DoxyCodeLine{01790\ \ \ \ \ pSrc16[i2\ *\ 2U]\ =\ (S0\ >>\ 1U)\ -\/\ (T1\ >>\ 1U);}
+\DoxyCodeLine{01791\ \ \ \ \ pSrc16[(i2\ *\ 2U)\ +\ 1U]\ =\ (S1\ >>\ 1U)\ +\ (T0\ >>\ 1U);}
+\DoxyCodeLine{01792\ }
+\DoxyCodeLine{01793\ }
+\DoxyCodeLine{01794\ \ \ \ \ \textcolor{comment}{/*\ \ writing\ the\ butterfly\ processed\ i0\ +\ 3fftLen/4\ sample\ */}}
+\DoxyCodeLine{01795\ \ \ \ \ \textcolor{comment}{/*\ xd'\ =\ (xa+yb-\/xc-\/yd)\ */}}
+\DoxyCodeLine{01796\ \ \ \ \ \textcolor{comment}{/*\ yd'\ =\ (ya-\/xb-\/yc+xd)\ */}}
+\DoxyCodeLine{01797\ \ \ \ \ pSrc16[i3\ *\ 2U]\ =\ (S0\ >>\ 1U)\ +\ (T1\ >>\ 1U);}
+\DoxyCodeLine{01798\ \ \ \ \ pSrc16[(i3\ *\ 2U)\ +\ 1U]\ =\ (S1\ >>\ 1U)\ -\/\ (T0\ >>\ 1U);}
+\DoxyCodeLine{01799\ \ \ \}}
+\DoxyCodeLine{01800\ \ \ \textcolor{comment}{/*\ end\ of\ last\ stage\ \ process\ */}}
+\DoxyCodeLine{01801\ }
+\DoxyCodeLine{01802\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 11.5(q5)\ format\ for\ the\ 1024\ point\ */}}
+\DoxyCodeLine{01803\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 9.7(q7)\ format\ for\ the\ 256\ point\ \ \ */}}
+\DoxyCodeLine{01804\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 7.9(q9)\ format\ for\ the\ 64\ point\ \ */}}
+\DoxyCodeLine{01805\ \ \ \textcolor{comment}{/*\ output\ is\ in\ 5.11(q11)\ format\ for\ the\ 16\ point\ \ */}}
+\DoxyCodeLine{01806\ }
+\DoxyCodeLine{01807\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_DSP)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01808\ }
+\DoxyCodeLine{01809\ \}}
+
+\end{DoxyCode}

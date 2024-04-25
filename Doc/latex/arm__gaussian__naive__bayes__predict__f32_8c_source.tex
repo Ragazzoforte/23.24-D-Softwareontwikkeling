@@ -1,0 +1,382 @@
+\doxysection{arm\+\_\+gaussian\+\_\+naive\+\_\+bayes\+\_\+predict\+\_\+f32.\+c}
+\hypertarget{arm__gaussian__naive__bayes__predict__f32_8c_source}{}\label{arm__gaussian__naive__bayes__predict__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/BayesFunctions/arm\_gaussian\_naive\_bayes\_predict\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/BayesFunctions/arm\_gaussian\_naive\_bayes\_predict\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_naive\_gaussian\_bayes\_predict\_f32}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Naive\ Gaussian\ Bayesian\ Estimator}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/bayes\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <limits.h>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <math.h>}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#define\ PI\_F\ 3.1415926535897932384626433832795f}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#define\ DPI\_F\ (2.0f*3.1415926535897932384626433832795f)}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\#include\ "{}arm\_vec\_math.h"{}}}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ uint32\_t\ \mbox{\hyperlink{group__group_bayes_ga23f942747fc13865a66bf14bb44dd299}{arm\_gaussian\_naive\_bayes\_predict\_f32}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32}{arm\_gaussian\_naive\_bayes\_instance\_f32}}\ *S,\ }
+\DoxyCodeLine{00059\ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ in,\ }
+\DoxyCodeLine{00060\ \ \ \ float32\_t\ *pOutputProbabilities,}
+\DoxyCodeLine{00061\ \ \ \ float32\_t\ *pBufferB}
+\DoxyCodeLine{00062\ \ \ \ )}
+\DoxyCodeLine{00063\ \{}
+\DoxyCodeLine{00064\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ \ nbClass;}
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pTheta\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a60ddd36c1b1e0c25bc9d3e09e59c7d40}{theta}};}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSigma\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a42033b12e3779c533791e69d144bf8b0}{sigma}};}
+\DoxyCodeLine{00067\ \ \ \ \ float32\_t\ \ \ \ \ \ *buffer\ =\ pOutputProbabilities;}
+\DoxyCodeLine{00068\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pIn\ =\ in;}
+\DoxyCodeLine{00069\ \ \ \ \ float32\_t\ \ \ \ \ \ \ result;}
+\DoxyCodeLine{00070\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vsigma;}
+\DoxyCodeLine{00071\ \ \ \ \ float32\_t\ \ \ \ \ \ \ tmp;}
+\DoxyCodeLine{00072\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vacc1,\ vacc2;}
+\DoxyCodeLine{00073\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ index;}
+\DoxyCodeLine{00074\ \ \ \ \ float32\_t\ \ \ \ \ \ \ *logclassPriors=pBufferB;}
+\DoxyCodeLine{00075\ \ \ \ \ float32\_t\ \ \ \ \ \ *pLogPrior\ =\ logclassPriors;}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \mbox{\hyperlink{group__vlog_ga1a97d95af11d143b26334c8ff278443e}{arm\_vlog\_f32}}((float32\_t\ *)\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a3643f22834fcd6a940367776b7ef3674}{classPriors}},\ logclassPriors,\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a40aa206e9576a40e06c7eafbf881b49e}{numberOfClasses}});}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \ \ \ \ pTheta\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a60ddd36c1b1e0c25bc9d3e09e59c7d40}{theta}};}
+\DoxyCodeLine{00080\ \ \ \ \ pSigma\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a42033b12e3779c533791e69d144bf8b0}{sigma}};}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \ \ \ \ \textcolor{keywordflow}{for}\ (nbClass\ =\ 0;\ nbClass\ <\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a40aa206e9576a40e06c7eafbf881b49e}{numberOfClasses}};\ nbClass++)\ \{}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ pIn\ =\ in;}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ vacc1\ =\ vdupq\_n\_f32(0);}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ vacc2\ =\ vdupq\_n\_f32(0);}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ \ blkCnt\ =S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}}\ >>\ 2;}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vinvSigma,\ vtmp;}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ \ \ \ vsigma\ =\ vaddq\_n\_f32(vld1q(pSigma),\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ad2b99521268e7cfcceceb2a14dd8b9a1}{epsilon}});}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ \ \ \ vacc1\ =\ vaddq(vacc1,\ vlogq\_f32(vmulq\_n\_f32(vsigma,\ 2.0f\ *\ PI)));}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ \ \ \ vinvSigma\ =\ vrecip\_medprec\_f32(vsigma);}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ vtmp\ =\ vsubq(vld1q(pIn),\ vld1q(pTheta));}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ squaring\ */}}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ \ \ \ vtmp\ =\ vmulq(vtmp,\ vtmp);}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ vacc2\ =\ vfmaq(vacc2,\ vtmp,\ vinvSigma);}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ \ \ pIn\ +=\ 4;}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ \ \ pTheta\ +=\ 4;}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ \ \ \ pSigma\ +=\ 4;}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ blkCnt\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}}\ \&\ 3;}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p0\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vinvSigma,\ vtmp;}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ vsigma\ =\ vaddq\_n\_f32(vld1q(pSigma),\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ad2b99521268e7cfcceceb2a14dd8b9a1}{epsilon}});}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ vacc1\ =}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ vaddq\_m\_f32(vacc1,\ vacc1,\ vlogq\_f32(vmulq\_n\_f32(vsigma,\ 2.0f\ *\ PI)),\ p0);}
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ vinvSigma\ =\ vrecip\_medprec\_f32(vsigma);}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ vtmp\ =\ vsubq(vld1q(pIn),\ vld1q(pTheta));}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ squaring\ */}}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ \ \ vtmp\ =\ vmulq(vtmp,\ vtmp);}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ vacc2\ =\ vfmaq\_m\_f32(vacc2,\ vtmp,\ vinvSigma,\ p0);}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ \ \ \ pTheta\ +=\ blkCnt;}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ pSigma\ +=\ blkCnt;}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ tmp\ =\ -\/0.5f\ *\ vecAddAcrossF32Mve(vacc1);}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ tmp\ -\/=\ 0.5f\ *\ vecAddAcrossF32Mve(vacc2);}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ *buffer\ =\ tmp\ +\ *pLogPrior++;}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ buffer++;}
+\DoxyCodeLine{00135\ \ \ \ \ \}}
+\DoxyCodeLine{00136\ }
+\DoxyCodeLine{00137\ \ \ \ \ \mbox{\hyperlink{group___max_gad1eabd31544fe59c414d9ce5bd0cc151}{arm\_max\_f32}}(pOutputProbabilities,\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a40aa206e9576a40e06c7eafbf881b49e}{numberOfClasses}},\ \&result,\ \&index);}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00139\ \ \ \ \ \textcolor{keywordflow}{return}\ (index);}
+\DoxyCodeLine{00140\ \}}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_NEON)}}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \textcolor{preprocessor}{\#include\ "{}NEMath.h"{}}}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ uint32\_t\ \mbox{\hyperlink{group__group_bayes_ga23f942747fc13865a66bf14bb44dd299}{arm\_gaussian\_naive\_bayes\_predict\_f32}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32}{arm\_gaussian\_naive\_bayes\_instance\_f32}}\ *S,\ }
+\DoxyCodeLine{00151\ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ in,\ }
+\DoxyCodeLine{00152\ \ \ \ float32\_t\ *pOutputProbabilities,}
+\DoxyCodeLine{00153\ \ \ \ float32\_t\ *pBufferB)}
+\DoxyCodeLine{00154\ \{}
+\DoxyCodeLine{00155\ \ \ \ \ }
+\DoxyCodeLine{00156\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pPrior\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a3643f22834fcd6a940367776b7ef3674}{classPriors}};}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pTheta\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a60ddd36c1b1e0c25bc9d3e09e59c7d40}{theta}};}
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSigma\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a42033b12e3779c533791e69d144bf8b0}{sigma}};}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pTheta1\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a60ddd36c1b1e0c25bc9d3e09e59c7d40}{theta}}\ +\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};}
+\DoxyCodeLine{00162\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSigma1\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a42033b12e3779c533791e69d144bf8b0}{sigma}}\ +\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \ \ \ \ float32\_t\ *buffer\ =\ pOutputProbabilities;}
+\DoxyCodeLine{00165\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pIn=in;}
+\DoxyCodeLine{00166\ }
+\DoxyCodeLine{00167\ \ \ \ \ float32\_t\ result;}
+\DoxyCodeLine{00168\ \ \ \ \ float32\_t\ sigma,sigma1;}
+\DoxyCodeLine{00169\ \ \ \ \ float32\_t\ tmp,tmp1;}
+\DoxyCodeLine{00170\ \ \ \ \ uint32\_t\ index;}
+\DoxyCodeLine{00171\ \ \ \ \ uint32\_t\ vecBlkCnt;}
+\DoxyCodeLine{00172\ \ \ \ \ uint32\_t\ classBlkCnt;}
+\DoxyCodeLine{00173\ \ \ \ \ float32x4\_t\ epsilonV;}
+\DoxyCodeLine{00174\ \ \ \ \ float32x4\_t\ sigmaV,sigmaV1;}
+\DoxyCodeLine{00175\ \ \ \ \ float32x4\_t\ tmpV,tmpVb,tmpV1;}
+\DoxyCodeLine{00176\ \ \ \ \ float32x2\_t\ tmpV2;}
+\DoxyCodeLine{00177\ \ \ \ \ float32x4\_t\ thetaV,thetaV1;}
+\DoxyCodeLine{00178\ \ \ \ \ float32x4\_t\ inV;}
+\DoxyCodeLine{00179\ \ \ \ \ (void)pBufferB;}
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00181\ \ \ \ \ epsilonV\ =\ vdupq\_n\_f32(S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ad2b99521268e7cfcceceb2a14dd8b9a1}{epsilon}});}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ \ \ \ \ classBlkCnt\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a40aa206e9576a40e06c7eafbf881b49e}{numberOfClasses}}\ >>\ 1;}
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{keywordflow}{while}(classBlkCnt\ >\ 0)}
+\DoxyCodeLine{00185\ \ \ \ \ \{}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ pIn\ =\ in;}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ tmp\ =\ logf(*pPrior++);}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ tmp1\ =\ logf(*pPrior++);}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ tmpV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ tmpV1\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ vecBlkCnt\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}}\ >>\ 2;}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(vecBlkCnt\ >\ 0)}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ sigmaV\ =\ vld1q\_f32(pSigma);}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ thetaV\ =\ vld1q\_f32(pTheta);}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \ \ \ sigmaV1\ =\ vld1q\_f32(pSigma1);}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \ \ \ thetaV1\ =\ vld1q\_f32(pTheta1);}
+\DoxyCodeLine{00203\ }
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \ \ \ inV\ =\ vld1q\_f32(pIn);}
+\DoxyCodeLine{00205\ }
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \ \ \ sigmaV\ =\ vaddq\_f32(sigmaV,\ epsilonV);}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \ \ \ sigmaV1\ =\ vaddq\_f32(sigmaV1,\ epsilonV);}
+\DoxyCodeLine{00208\ }
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vmulq\_n\_f32(sigmaV,DPI\_F);}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vlogq\_f32(tmpVb);}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ tmpV\ =\ vmlsq\_n\_f32(tmpV,tmpVb,0.5f);}
+\DoxyCodeLine{00212\ }
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vmulq\_n\_f32(sigmaV1,DPI\_F);}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vlogq\_f32(tmpVb);}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ tmpV1\ =\ vmlsq\_n\_f32(tmpV1,tmpVb,0.5f);}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vsubq\_f32(inV,thetaV);}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vmulq\_f32(tmpVb,tmpVb);}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vmulq\_f32(tmpVb,\ vinvq\_f32(sigmaV));}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ tmpV\ =\ vmlsq\_n\_f32(tmpV,tmpVb,0.5f);}
+\DoxyCodeLine{00221\ }
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vsubq\_f32(inV,thetaV1);}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vmulq\_f32(tmpVb,tmpVb);}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vmulq\_f32(tmpVb,\ vinvq\_f32(sigmaV1));}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \ \ \ tmpV1\ =\ vmlsq\_n\_f32(tmpV1,tmpVb,0.5f);}
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \ \ \ pIn\ +=\ 4;}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ pTheta\ +=\ 4;}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ pSigma\ +=\ 4;}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \ \ \ pTheta1\ +=\ 4;}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \ \ \ pSigma1\ +=\ 4;}
+\DoxyCodeLine{00232\ }
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ vecBlkCnt-\/-\/;}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ tmpV2\ =\ vpadd\_f32(vget\_low\_f32(tmpV),vget\_high\_f32(tmpV));}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ tmp\ +=\ vget\_lane\_f32(tmpV2,\ 0)\ +\ vget\_lane\_f32(tmpV2,\ 1);}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ tmpV2\ =\ vpadd\_f32(vget\_low\_f32(tmpV1),vget\_high\_f32(tmpV1));}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ tmp1\ +=\ vget\_lane\_f32(tmpV2,\ 0)\ +\ vget\_lane\_f32(tmpV2,\ 1);}
+\DoxyCodeLine{00240\ }
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ vecBlkCnt\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}}\ \&\ 3;}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(vecBlkCnt\ >\ 0)}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \ \ \ sigma\ =\ *pSigma\ +\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ad2b99521268e7cfcceceb2a14dd8b9a1}{epsilon}};}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ sigma1\ =\ *pSigma1\ +\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ad2b99521268e7cfcceceb2a14dd8b9a1}{epsilon}};}
+\DoxyCodeLine{00246\ }
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ tmp\ -\/=\ 0.5f*logf(2.0f\ *\ PI\_F\ *\ sigma);}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \ \ \ tmp\ -\/=\ 0.5f*(*pIn\ -\/\ *pTheta)\ *\ (*pIn\ -\/\ *pTheta)\ /\ sigma;}
+\DoxyCodeLine{00249\ }
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \ \ \ tmp1\ -\/=\ 0.5f*logf(2.0f\ *\ PI\_F\ *\ sigma1);}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \ \ \ tmp1\ -\/=\ 0.5f*(*pIn\ -\/\ *pTheta1)\ *\ (*pIn\ -\/\ *pTheta1)\ /\ sigma1;}
+\DoxyCodeLine{00252\ }
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ \ \ \ pIn++;}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ \ \ \ pTheta++;}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \ \ \ pSigma++;}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ \ \ \ pTheta1++;}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \ \ \ pSigma1++;}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \ \ \ vecBlkCnt-\/-\/;}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ *buffer++\ =\ tmp;}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ *buffer++\ =\ tmp1;}
+\DoxyCodeLine{00263\ }
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ pSigma\ +=\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ pTheta\ +=\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ pSigma1\ +=\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ pTheta1\ +=\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ classBlkCnt-\/-\/;}
+\DoxyCodeLine{00270\ \ \ \ \ \}}
+\DoxyCodeLine{00271\ }
+\DoxyCodeLine{00272\ \ \ \ \ classBlkCnt\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a40aa206e9576a40e06c7eafbf881b49e}{numberOfClasses}}\ \&\ 1;}
+\DoxyCodeLine{00273\ }
+\DoxyCodeLine{00274\ \ \ \ \ \textcolor{keywordflow}{while}(classBlkCnt\ >\ 0)}
+\DoxyCodeLine{00275\ \ \ \ \ \{}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ pIn\ =\ in;}
+\DoxyCodeLine{00279\ }
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ tmp\ =\ logf(*pPrior++);}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \ \ tmpV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00282\ }
+\DoxyCodeLine{00283\ \ \ \ \ \ \ \ \ vecBlkCnt\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}}\ >>\ 2;}
+\DoxyCodeLine{00284\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(vecBlkCnt\ >\ 0)}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \ \ \ \ \ sigmaV\ =\ vld1q\_f32(pSigma);}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \ \ \ \ \ thetaV\ =\ vld1q\_f32(pTheta);}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ \ \ \ \ \ inV\ =\ vld1q\_f32(pIn);}
+\DoxyCodeLine{00289\ }
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ \ \ \ sigmaV\ =\ vaddq\_f32(sigmaV,\ epsilonV);}
+\DoxyCodeLine{00291\ }
+\DoxyCodeLine{00292\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vmulq\_n\_f32(sigmaV,DPI\_F);}
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vlogq\_f32(tmpVb);}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ \ \ \ tmpV\ =\ vmlsq\_n\_f32(tmpV,tmpVb,0.5f);}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vsubq\_f32(inV,thetaV);}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vmulq\_f32(tmpVb,tmpVb);}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ \ \ \ tmpVb\ =\ vmulq\_f32(tmpVb,\ vinvq\_f32(sigmaV));}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ \ \ \ tmpV\ =\ vmlsq\_n\_f32(tmpV,tmpVb,0.5f);}
+\DoxyCodeLine{00300\ }
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ \ \ \ pIn\ +=\ 4;}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ \ \ \ pTheta\ +=\ 4;}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ \ \ \ pSigma\ +=\ 4;}
+\DoxyCodeLine{00304\ }
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ \ \ \ vecBlkCnt-\/-\/;}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ tmpV2\ =\ vpadd\_f32(vget\_low\_f32(tmpV),vget\_high\_f32(tmpV));}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ tmp\ +=\ vget\_lane\_f32(tmpV2,\ 0)\ +\ vget\_lane\_f32(tmpV2,\ 1);}
+\DoxyCodeLine{00309\ }
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ vecBlkCnt\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}}\ \&\ 3;}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(vecBlkCnt\ >\ 0)}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00313\ \ \ \ \ \ \ \ \ \ \ \ sigma\ =\ *pSigma\ +\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ad2b99521268e7cfcceceb2a14dd8b9a1}{epsilon}};}
+\DoxyCodeLine{00314\ \ \ \ \ \ \ \ \ \ \ \ tmp\ -\/=\ 0.5f*logf(2.0f\ *\ PI\_F\ *\ sigma);}
+\DoxyCodeLine{00315\ \ \ \ \ \ \ \ \ \ \ \ tmp\ -\/=\ 0.5f*(*pIn\ -\/\ *pTheta)\ *\ (*pIn\ -\/\ *pTheta)\ /\ sigma;}
+\DoxyCodeLine{00316\ }
+\DoxyCodeLine{00317\ \ \ \ \ \ \ \ \ \ \ \ pIn++;}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ \ \ \ pTheta++;}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ \ \ \ pSigma++;}
+\DoxyCodeLine{00320\ \ \ \ \ \ \ \ \ \ \ \ vecBlkCnt-\/-\/;}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00322\ }
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ *buffer++\ =\ tmp;}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ classBlkCnt-\/-\/;}
+\DoxyCodeLine{00326\ \ \ \ \ \}}
+\DoxyCodeLine{00327\ }
+\DoxyCodeLine{00328\ \ \ \ \ \mbox{\hyperlink{group___max_gad1eabd31544fe59c414d9ce5bd0cc151}{arm\_max\_f32}}(pOutputProbabilities,S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a40aa206e9576a40e06c7eafbf881b49e}{numberOfClasses}},\&result,\&index);}
+\DoxyCodeLine{00329\ }
+\DoxyCodeLine{00330\ \ \ \ \ \textcolor{keywordflow}{return}(index);}
+\DoxyCodeLine{00331\ \}}
+\DoxyCodeLine{00332\ }
+\DoxyCodeLine{00333\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00334\ }
+\DoxyCodeLine{00335\ uint32\_t\ \mbox{\hyperlink{group__group_bayes_ga23f942747fc13865a66bf14bb44dd299}{arm\_gaussian\_naive\_bayes\_predict\_f32}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32}{arm\_gaussian\_naive\_bayes\_instance\_f32}}\ *S,\ }
+\DoxyCodeLine{00336\ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ in,\ }
+\DoxyCodeLine{00337\ \ \ \ float32\_t\ *pOutputProbabilities,}
+\DoxyCodeLine{00338\ \ \ \ float32\_t\ *pBufferB)}
+\DoxyCodeLine{00339\ \{}
+\DoxyCodeLine{00340\ \ \ \ \ uint32\_t\ nbClass;}
+\DoxyCodeLine{00341\ \ \ \ \ uint32\_t\ nbDim;}
+\DoxyCodeLine{00342\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pPrior\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a3643f22834fcd6a940367776b7ef3674}{classPriors}};}
+\DoxyCodeLine{00343\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pTheta\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a60ddd36c1b1e0c25bc9d3e09e59c7d40}{theta}};}
+\DoxyCodeLine{00344\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSigma\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a42033b12e3779c533791e69d144bf8b0}{sigma}};}
+\DoxyCodeLine{00345\ \ \ \ \ float32\_t\ *buffer\ =\ pOutputProbabilities;}
+\DoxyCodeLine{00346\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pIn=in;}
+\DoxyCodeLine{00347\ \ \ \ \ float32\_t\ result;}
+\DoxyCodeLine{00348\ \ \ \ \ float32\_t\ sigma;}
+\DoxyCodeLine{00349\ \ \ \ \ float32\_t\ tmp;}
+\DoxyCodeLine{00350\ \ \ \ \ float32\_t\ acc1,acc2;}
+\DoxyCodeLine{00351\ \ \ \ \ uint32\_t\ index;}
+\DoxyCodeLine{00352\ }
+\DoxyCodeLine{00353\ \ \ \ \ (void)pBufferB;}
+\DoxyCodeLine{00354\ }
+\DoxyCodeLine{00355\ \ \ \ \ pTheta=S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a60ddd36c1b1e0c25bc9d3e09e59c7d40}{theta}};}
+\DoxyCodeLine{00356\ \ \ \ \ pSigma=S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a42033b12e3779c533791e69d144bf8b0}{sigma}};}
+\DoxyCodeLine{00357\ }
+\DoxyCodeLine{00358\ \ \ \ \ \textcolor{keywordflow}{for}(nbClass\ =\ 0;\ nbClass\ <\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a40aa206e9576a40e06c7eafbf881b49e}{numberOfClasses}};\ nbClass++)}
+\DoxyCodeLine{00359\ \ \ \ \ \{}
+\DoxyCodeLine{00360\ }
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00362\ \ \ \ \ \ \ \ \ pIn\ =\ in;}
+\DoxyCodeLine{00363\ }
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ tmp\ =\ 0.0;}
+\DoxyCodeLine{00365\ \ \ \ \ \ \ \ \ acc1\ =\ 0.0f;}
+\DoxyCodeLine{00366\ \ \ \ \ \ \ \ \ acc2\ =\ 0.0f;}
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(nbDim\ =\ 0;\ nbDim\ <\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};\ nbDim++)}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \ \ \ sigma\ =\ *pSigma\ +\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ad2b99521268e7cfcceceb2a14dd8b9a1}{epsilon}};}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \ \ \ acc1\ +=\ logf(2.0f\ *\ PI\_F\ *\ sigma);}
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \ \ \ \ \ acc2\ +=\ (*pIn\ -\/\ *pTheta)\ *\ (*pIn\ -\/\ *pTheta)\ /\ sigma;}
+\DoxyCodeLine{00372\ }
+\DoxyCodeLine{00373\ \ \ \ \ \ \ \ \ \ \ \ pIn++;}
+\DoxyCodeLine{00374\ \ \ \ \ \ \ \ \ \ \ \ pTheta++;}
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ \ \ \ pSigma++;}
+\DoxyCodeLine{00376\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00377\ }
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ tmp\ =\ -\/0.5f\ *\ acc1;}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ \ \ tmp\ -\/=\ 0.5f\ *\ acc2;}
+\DoxyCodeLine{00380\ }
+\DoxyCodeLine{00381\ }
+\DoxyCodeLine{00382\ \ \ \ \ \ \ \ \ *buffer\ =\ tmp\ +\ logf(*pPrior++);}
+\DoxyCodeLine{00383\ \ \ \ \ \ \ \ \ buffer++;}
+\DoxyCodeLine{00384\ \ \ \ \ \}}
+\DoxyCodeLine{00385\ }
+\DoxyCodeLine{00386\ \ \ \ \ \mbox{\hyperlink{group___max_gad1eabd31544fe59c414d9ce5bd0cc151}{arm\_max\_f32}}(pOutputProbabilities,S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_a40aa206e9576a40e06c7eafbf881b49e}{numberOfClasses}},\&result,\&index);}
+\DoxyCodeLine{00387\ }
+\DoxyCodeLine{00388\ \ \ \ \ \textcolor{keywordflow}{return}(index);}
+\DoxyCodeLine{00389\ \}}
+\DoxyCodeLine{00390\ }
+\DoxyCodeLine{00391\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00392\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00393\ }
+
+\end{DoxyCode}

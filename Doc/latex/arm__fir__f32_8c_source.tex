@@ -1,0 +1,1168 @@
+\doxysection{arm\+\_\+fir\+\_\+f32.\+c}
+\hypertarget{arm__fir__f32_8c_source}{}\label{arm__fir__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/FilteringFunctions/arm\_fir\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/FilteringFunctions/arm\_fir\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_fir\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Floating-\/point\ FIR\ filter\ processing\ function}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/filtering\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00151\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \textcolor{preprocessor}{\#define\ FIR\_F32\_MAX\_COEF\_BLK\ \ \ \ \ \ \ \ 8}}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \textcolor{preprocessor}{\#define\ FIR\_F32\_CORE(pSamples,\ c,\ NB\_TAPS)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00156\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ vecAcc0\ =\ vdupq\_n\_f32(0.0f);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00157\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ for\ (int\ i\ =\ 0;\ i\ <\ NB\_TAPS;\ i++)\ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00158\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[i]);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00159\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c[i]);\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}}
+\DoxyCodeLine{00160\ \textcolor{preprocessor}{\ \ \ \ \ \ \ \ \}}}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \textcolor{preprocessor}{\#define\ NB\_TAPS\ 4}}
+\DoxyCodeLine{00164\ \_\_STATIC\_INLINE\ \textcolor{keywordtype}{void}\ arm\_fir\_f32\_1\_4\_mve(\textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__fir__instance__f32}{arm\_fir\_instance\_f32}}\ *\ S,\ }
+\DoxyCodeLine{00165\ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ \_\_restrict\ pSrc,\ }
+\DoxyCodeLine{00166\ \ \ float32\_t\ *\ \_\_restrict\ pDst,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00167\ \{}
+\DoxyCodeLine{00168\ \ \ \ \ float32\_t\ *pRefStatePtr\ =\ S-\/>pState\ +\ blockSize;}
+\DoxyCodeLine{00169\ \ \ \ \ float32\_t\ \ \ \ \ \ *pState\ =\ pRefStatePtr;\ \textcolor{comment}{/*\ State\ pointer\ */}}
+\DoxyCodeLine{00170\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pCoeffs\ =\ S-\/>pCoeffs;\ \ \ \ \ \ \textcolor{comment}{/*\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{00171\ \ \ \ \ float32\_t\ \ \ \ \ \ *pStateCur;\ \ \textcolor{comment}{/*\ Points\ to\ the\ current\ sample\ of\ the\ state\ */}}
+\DoxyCodeLine{00172\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSamples;\ \ \textcolor{comment}{/*\ Temporary\ pointer\ to\ the\ sample\ buffer\ */}}
+\DoxyCodeLine{00173\ \ \ \ \ float32\_t\ \ \ \ \ \ *pOutput;\ \ \ \ \textcolor{comment}{/*\ Temporary\ pointer\ to\ the\ output\ buffer\ */}}
+\DoxyCodeLine{00174\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pTempSrc;\ \ \textcolor{comment}{/*\ Temporary\ pointer\ to\ the\ source\ data\ */}}
+\DoxyCodeLine{00175\ \ \ \ \ float32\_t\ \ \ \ \ \ *pTempDest;\ \ \textcolor{comment}{/*\ Temporary\ pointer\ to\ the\ destination\ buffer\ */}}
+\DoxyCodeLine{00176\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ numTaps\ =\ S-\/>numTaps;\ \ \ \ \ \ \ \textcolor{comment}{/*\ Number\ of\ filter\ coefficients\ in\ the\ filter\ */}}
+\DoxyCodeLine{00177\ \ \ \ \ int32\_t\ \ \ \ \ \ \ \ \ blkCnt;}
+\DoxyCodeLine{00178\ \ \ \ \ float32x4\_t\ \ \ \ \ \ \ \ \ vecIn0;}
+\DoxyCodeLine{00179\ \ \ \ \ float32x4\_t\ \ \ \ \ \ \ \ \ vecAcc0;}
+\DoxyCodeLine{00180\ \ \ \ \ float32\_t\ \ \ \ \ \ \ c[NB\_TAPS];}
+\DoxyCodeLine{00181\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pCoeffsCur\ =\ pCoeffs;}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00184\ \textcolor{comment}{\ \ \ \ \ *\ pState\ points\ to\ state\ array\ which\ contains\ previous\ frame\ (numTaps\ -\/\ 1)\ samples}}
+\DoxyCodeLine{00185\ \textcolor{comment}{\ \ \ \ \ *\ pStateCur\ points\ to\ the\ location\ where\ the\ new\ input\ data\ should\ be\ written}}
+\DoxyCodeLine{00186\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00187\ \ \ \ \ pStateCur\ =\ \&(pState[(numTaps\ -\/\ 1u)]);}
+\DoxyCodeLine{00188\ \ \ \ \ pTempSrc\ =\ pSrc;}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00190\ \ \ \ \ pSamples\ =\ pState;}
+\DoxyCodeLine{00191\ \ \ \ \ pOutput\ =\ pDst;}
+\DoxyCodeLine{00192\ }
+\DoxyCodeLine{00193\ \ \ \ \ \textcolor{keywordflow}{for}\ (\textcolor{keywordtype}{int}\ i\ =\ 0;\ i\ <\ NB\_TAPS;\ i++)}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ c[i]\ =\ *pCoeffsCur++;}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00197\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0)\ \{}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00199\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Save\ 4\ input\ samples\ in\ the\ history\ buffer}}
+\DoxyCodeLine{00200\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ vst1q(pStateCur,\ vld1q(pTempSrc));}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ pStateCur\ +=\ 4;}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ pTempSrc\ +=\ 4;}
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ FIR\_F32\_CORE(pSamples,\ c,\ NB\_TAPS);}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ vst1q(pOutput,\ vecAcc0);}
+\DoxyCodeLine{00208\ }
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ pOutput\ +=\ 4;}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ pSamples\ +=\ 4;}
+\DoxyCodeLine{00211\ }
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00213\ \ \ \ \ \}}
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00216\ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt)}
+\DoxyCodeLine{00217\ \ \ \ \ \{}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p0\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ vst1q(pStateCur,\ vld1q(pTempSrc));}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ pStateCur\ +=\ 4;}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ pTempSrc\ +=\ 4;}
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ FIR\_F32\_CORE(pSamples,\ c,\ NB\_TAPS);}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ vstrwq\_p\_f32(pOutput,\ vecAcc0,\ p0);}
+\DoxyCodeLine{00227\ \ \ \ \ \}}
+\DoxyCodeLine{00228\ }
+\DoxyCodeLine{00229\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00230\ \textcolor{comment}{\ \ \ \ \ *\ Copy\ the\ samples\ back\ into\ the\ history\ buffer\ start}}
+\DoxyCodeLine{00231\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00232\ \ \ \ \ pTempSrc\ =\ \&pState[blockSize];}
+\DoxyCodeLine{00233\ \ \ \ \ pTempDest\ =\ pState;}
+\DoxyCodeLine{00234\ }
+\DoxyCodeLine{00235\ \ \ \ \ blkCnt\ =\ numTaps\ -\/\ 1;}
+\DoxyCodeLine{00236\ \ \ \ \ \textcolor{keywordflow}{do}\ \{}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00238\ }
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ vstrwq\_p\_f32(pTempDest,\ vldrwq\_z\_f32(pTempSrc,\ p),\ p);}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ pTempSrc\ +=\ 4;}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ pTempDest\ +=\ 4;}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ blkCnt\ -\/=\ 4;}
+\DoxyCodeLine{00243\ \ \ \ \ \}}
+\DoxyCodeLine{00244\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0);}
+\DoxyCodeLine{00245\ \}}
+\DoxyCodeLine{00246\ \textcolor{preprocessor}{\#undef\ NB\_TAPS}}
+\DoxyCodeLine{00247\ }
+\DoxyCodeLine{00248\ \_\_STATIC\_INLINE\ \textcolor{keywordtype}{void}\ arm\_fir\_f32\_5\_8\_mve(\textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__fir__instance__f32}{arm\_fir\_instance\_f32}}\ *\ S,\ }
+\DoxyCodeLine{00249\ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ \_\_restrict\ pSrc,\ }
+\DoxyCodeLine{00250\ \ \ float32\_t\ *\ \_\_restrict\ pDst,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00251\ \{}
+\DoxyCodeLine{00252\ \ \ \ \ float32\_t\ *pRefStatePtr\ =\ S-\/>pState\ +\ blockSize;}
+\DoxyCodeLine{00253\ \ \ \ \ float32\_t\ *pState\ =\ pRefStatePtr;\ \ \ \ \ \ \textcolor{comment}{/*\ State\ pointer\ */}}
+\DoxyCodeLine{00254\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pCoeffs\ =\ S-\/>pCoeffs;\ \ \ \ \textcolor{comment}{/*\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{00255\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSamples;\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ pointer\ to\ the\ sample\ buffer\ */}}
+\DoxyCodeLine{00256\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pTempSrc;\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ pointer\ to\ the\ source\ data\ */}}
+\DoxyCodeLine{00257\ \ \ \ \ float32\_t\ *pTempDest;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ pointer\ to\ the\ destination\ buffer\ */}}
+\DoxyCodeLine{00258\ \ \ \ \ uint32\_t\ \ numTaps\ =\ S-\/>numTaps;\ \ \ \ \ \textcolor{comment}{/*\ Number\ of\ filter\ coefficients\ in\ the\ filter\ */}}
+\DoxyCodeLine{00259\ \ \ \ \ int32\_t\ \ blkCnt;}
+\DoxyCodeLine{00260\ \ \ \ \ float32\_t\ c0,\ c1,\ c2,\ c3;}
+\DoxyCodeLine{00261\ \ \ \ \ float32\_t\ c4,\ c5,\ c6,\ c7;}
+\DoxyCodeLine{00262\ }
+\DoxyCodeLine{00263\ }
+\DoxyCodeLine{00264\ \ \ \ \ pTempSrc\ =\ pSrc;}
+\DoxyCodeLine{00265\ \ \ \ \ pTempDest\ =\ \&(pState[(numTaps\ -\/\ 1u)]);}
+\DoxyCodeLine{00266\ \ \ \ \ \textcolor{keywordtype}{int}\ cnt\ =\ blockSize;}
+\DoxyCodeLine{00267\ \ \ \ \ \textcolor{keywordflow}{do}\ \{}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ mve\_pred16\_t\ p0\ =\ vctp32q(cnt);}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ vstrwq\_p\_f32(pTempDest,\ vld1q(pTempSrc),\ p0);}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ pTempDest\ +=\ 4;}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ pTempSrc\ +=\ 4;}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ cnt\ -\/=\ 4;}
+\DoxyCodeLine{00273\ \ \ \ \ \}\ \textcolor{keywordflow}{while}(cnt\ >\ 0);}
+\DoxyCodeLine{00274\ }
+\DoxyCodeLine{00275\ }
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00277\ \ \ \ \ pSamples\ =\ pState;}
+\DoxyCodeLine{00278\ \ \ \ \ c0\ =\ *pCoeffs++;}
+\DoxyCodeLine{00279\ \ \ \ \ c1\ =\ *pCoeffs++;}
+\DoxyCodeLine{00280\ \ \ \ \ c2\ =\ *pCoeffs++;}
+\DoxyCodeLine{00281\ \ \ \ \ c3\ =\ *pCoeffs++;}
+\DoxyCodeLine{00282\ \ \ \ \ c4\ =\ *pCoeffs++;}
+\DoxyCodeLine{00283\ \ \ \ \ c5\ =\ *pCoeffs++;}
+\DoxyCodeLine{00284\ \ \ \ \ c6\ =\ *pCoeffs++;}
+\DoxyCodeLine{00285\ \ \ \ \ c7\ =\ *pCoeffs++;}
+\DoxyCodeLine{00286\ }
+\DoxyCodeLine{00287\ \ \ \ \ cnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00288\ \ \ \ \ \textcolor{keywordflow}{while}(cnt\ >\ 0)\ }
+\DoxyCodeLine{00289\ \ \ \ \ \{}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ \ \ float32x4\_t\ vecAcc0;}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ \ \ float32x4\_t\ vecIn0;}
+\DoxyCodeLine{00292\ }
+\DoxyCodeLine{00293\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(pSamples);}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vmulq(vecIn0,\ c0);}
+\DoxyCodeLine{00295\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[1]);}
+\DoxyCodeLine{00296\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c1);}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[2]);}
+\DoxyCodeLine{00298\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c2);}
+\DoxyCodeLine{00299\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[3]);}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c3);}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[4]);}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c4);}
+\DoxyCodeLine{00303\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[5]);}
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c5);}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[6]);}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c6);}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[7]);}
+\DoxyCodeLine{00308\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c7);}
+\DoxyCodeLine{00309\ \ \ \ \ \ \ \ \ pSamples\ +=\ 4;}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ \ \ vst1q(pDst,\ vecAcc0);}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ \ \ cnt-\/-\/;}
+\DoxyCodeLine{00312\ \ \ \ \ \ \ \ \ pDst\ +=\ 4;}
+\DoxyCodeLine{00313\ \ \ \ \ \}}
+\DoxyCodeLine{00314\ }
+\DoxyCodeLine{00315\ \ \ \ \ cnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00316\ \ \ \ \ \textcolor{keywordflow}{if}\ (cnt\ >\ 0)\ }
+\DoxyCodeLine{00317\ \ \ \ \ \{}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ float32x4\_t\ vecAcc0;}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ float32x4\_t\ vecIn0;}
+\DoxyCodeLine{00320\ }
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ mve\_pred16\_t\ p0\ =\ vctp32q(cnt);}
+\DoxyCodeLine{00322\ }
+\DoxyCodeLine{00323\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(pSamples);}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vmulq(vecIn0,\ c0);}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[1]);}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c1);}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[2]);}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c2);}
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[3]);}
+\DoxyCodeLine{00330\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c3);}
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[4]);}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c4);}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[5]);}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c5);}
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[6]);}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c6);}
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[7]);}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c7);}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ vstrwq\_p\_f32(pDst,\ vecAcc0,p0);}
+\DoxyCodeLine{00340\ \ \ \ \ \}}
+\DoxyCodeLine{00341\ }
+\DoxyCodeLine{00342\ }
+\DoxyCodeLine{00343\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00344\ \textcolor{comment}{\ \ \ \ \ *\ Copy\ the\ samples\ back\ into\ the\ history\ buffer\ start}}
+\DoxyCodeLine{00345\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00346\ \ \ \ \ pTempSrc\ =\ \&pState[blockSize];}
+\DoxyCodeLine{00347\ \ \ \ \ pTempDest\ =\ pState;}
+\DoxyCodeLine{00348\ \ \ \ \ blkCnt\ =\ numTaps;}
+\DoxyCodeLine{00349\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0)}
+\DoxyCodeLine{00350\ \ \ \ \ \{}
+\DoxyCodeLine{00351\ \ \ \ \ \ \ \ \ *pTempDest++\ =\ *pTempSrc++;}
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00353\ \ \ \ \ \}}
+\DoxyCodeLine{00354\ \}}
+\DoxyCodeLine{00355\ }
+\DoxyCodeLine{00356\ }
+\DoxyCodeLine{00357\ }
+\DoxyCodeLine{00358\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___f_i_r_ga0cf008f650a75f5e2cf82d10691b64d9}{arm\_fir\_f32}}(}
+\DoxyCodeLine{00359\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__fir__instance__f32}{arm\_fir\_instance\_f32}}\ *\ S,}
+\DoxyCodeLine{00360\ \textcolor{keyword}{const}\ float32\_t\ *\ pSrc,}
+\DoxyCodeLine{00361\ float32\_t\ *\ pDst,}
+\DoxyCodeLine{00362\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00363\ \{}
+\DoxyCodeLine{00364\ \ \ \ \ \textcolor{comment}{/*\ }}
+\DoxyCodeLine{00365\ \textcolor{comment}{\ \ \ \ \ \ \ S-\/>pState\ is\ the\ arm\_fir\_partial\_accu}}
+\DoxyCodeLine{00366\ \textcolor{comment}{\ \ \ \ \ \ \ S-\/>pState\ +\ blockSize\ is\ the\ FIR\ state}}
+\DoxyCodeLine{00367\ \textcolor{comment}{\ \ \ \ */}}
+\DoxyCodeLine{00368\ \ \ \ \ float32\_t\ *pRefStatePtr\ =\ S-\/>pState\ +\ blockSize;}
+\DoxyCodeLine{00369\ \ \ \ \ float32\_t\ *pState\ =\ pRefStatePtr\ ;\ \ \ \ \ \ \textcolor{comment}{/*\ State\ pointer\ */}}
+\DoxyCodeLine{00370\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pCoeffs\ =\ S-\/>pCoeffs;\ \ \ \ \textcolor{comment}{/*\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{00371\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSamples;\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ pointer\ to\ the\ sample\ buffer\ */}}
+\DoxyCodeLine{00372\ \ \ \ \ float32\_t\ *pOutput;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ pointer\ to\ the\ output\ buffer\ */}}
+\DoxyCodeLine{00373\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pTempSrc;\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ pointer\ to\ the\ source\ data\ */}}
+\DoxyCodeLine{00374\ \ \ \ \ float32\_t\ *pTempDest;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ pointer\ to\ the\ destination\ buffer\ */}}
+\DoxyCodeLine{00375\ \ \ \ \ uint32\_t\ \ numTaps\ =\ S-\/>numTaps;\ \ \ \ \ \textcolor{comment}{/*\ Number\ of\ filter\ coefficients\ in\ the\ filter\ */}}
+\DoxyCodeLine{00376\ \ \ \ \ uint32\_t\ \ blkCnt;}
+\DoxyCodeLine{00377\ \ \ \ \ float32\_t\ c0,\ c1,\ c2,\ c3;}
+\DoxyCodeLine{00378\ \ \ \ \ float32\_t\ c4,\ c5,\ c6,\ c7;}
+\DoxyCodeLine{00379\ }
+\DoxyCodeLine{00380\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00381\ \textcolor{comment}{\ \ \ \ \ *\ [1\ to\ 8\ taps]\ specialized\ routines}}
+\DoxyCodeLine{00382\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00383\ \ \ \ \ \textcolor{keywordflow}{if}\ (numTaps\ <=\ 4)}
+\DoxyCodeLine{00384\ \ \ \ \ \{}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \ \ arm\_fir\_f32\_1\_4\_mve(S,\ pSrc,\ pDst,\ blockSize);}
+\DoxyCodeLine{00386\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00387\ \ \ \ \ \}}
+\DoxyCodeLine{00388\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ (numTaps\ <=\ 8)}
+\DoxyCodeLine{00389\ \ \ \ \ \{}
+\DoxyCodeLine{00390\ \ \ \ \ \ \ \ \ arm\_fir\_f32\_5\_8\_mve(S,\ pSrc,\ pDst,\ blockSize);}
+\DoxyCodeLine{00391\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00392\ \ \ \ \ \}}
+\DoxyCodeLine{00393\ }
+\DoxyCodeLine{00394\ \ \ \ \ pTempSrc\ =\ pSrc;}
+\DoxyCodeLine{00395\ \ \ \ \ pTempDest\ =\ \&(pState[(numTaps\ -\/\ 1u)]);}
+\DoxyCodeLine{00396\ \ \ \ \ \textcolor{keywordtype}{int}\ cnt\ =\ blockSize;}
+\DoxyCodeLine{00397\ \ \ \ \ \textcolor{keywordflow}{do}\ \{}
+\DoxyCodeLine{00398\ \ \ \ \ \ \ \ \ mve\_pred16\_t\ p0\ =\ vctp32q(cnt);}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \ \ vstrwq\_p\_f32(pTempDest,\ vld1q(pTempSrc),\ p0);}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \ \ pTempDest\ +=\ 4;}
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \ \ pTempSrc\ +=\ 4;}
+\DoxyCodeLine{00402\ \ \ \ \ \ \ \ \ cnt\ -\/=\ 4;}
+\DoxyCodeLine{00403\ \ \ \ \ \}\ \textcolor{keywordflow}{while}(cnt\ >\ 0);}
+\DoxyCodeLine{00404\ }
+\DoxyCodeLine{00405\ \ \ \ \ float32\_t\ *partial\_accu\_ptr\ =\ S-\/>pState;}
+\DoxyCodeLine{00406\ }
+\DoxyCodeLine{00407\ \ \ \ \ pSamples\ =\ pState;}
+\DoxyCodeLine{00408\ \ \ \ \ c0\ =\ *pCoeffs++;}
+\DoxyCodeLine{00409\ \ \ \ \ c1\ =\ *pCoeffs++;}
+\DoxyCodeLine{00410\ \ \ \ \ c2\ =\ *pCoeffs++;}
+\DoxyCodeLine{00411\ \ \ \ \ c3\ =\ *pCoeffs++;}
+\DoxyCodeLine{00412\ \ \ \ \ c4\ =\ *pCoeffs++;}
+\DoxyCodeLine{00413\ \ \ \ \ c5\ =\ *pCoeffs++;}
+\DoxyCodeLine{00414\ \ \ \ \ c6\ =\ *pCoeffs++;}
+\DoxyCodeLine{00415\ \ \ \ \ c7\ =\ *pCoeffs++;}
+\DoxyCodeLine{00416\ }
+\DoxyCodeLine{00417\ \ \ \ \ cnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00418\ \ \ \ \ \textcolor{keywordflow}{while}(cnt\ >\ 0)\ \{}
+\DoxyCodeLine{00419\ \ \ \ \ \ \ \ \ float32x4\_t\ vecAcc0;}
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \ \ float32x4\_t\ vecIn0;}
+\DoxyCodeLine{00421\ }
+\DoxyCodeLine{00422\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(pSamples);}
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vmulq(vecIn0,\ c0);}
+\DoxyCodeLine{00424\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[1]);}
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c1);}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[2]);}
+\DoxyCodeLine{00427\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c2);}
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[3]);}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c3);}
+\DoxyCodeLine{00430\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[4]);}
+\DoxyCodeLine{00431\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c4);}
+\DoxyCodeLine{00432\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[5]);}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c5);}
+\DoxyCodeLine{00434\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[6]);}
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c6);}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[7]);}
+\DoxyCodeLine{00437\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c7);}
+\DoxyCodeLine{00438\ \ \ \ \ \ \ \ \ pSamples\ +=\ 4;}
+\DoxyCodeLine{00439\ \ \ \ \ \ \ \ \ vst1q(partial\_accu\_ptr,\ vecAcc0);}
+\DoxyCodeLine{00440\ \ \ \ \ \ \ \ \ cnt-\/-\/;}
+\DoxyCodeLine{00441\ \ \ \ \ \ \ \ \ partial\_accu\_ptr\ +=\ 4;}
+\DoxyCodeLine{00442\ \ \ \ \ \}}
+\DoxyCodeLine{00443\ }
+\DoxyCodeLine{00444\ \ \ \ \ cnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00445\ \ \ \ \ \textcolor{keywordflow}{if}\ (cnt\ >\ 0)\ }
+\DoxyCodeLine{00446\ \ \ \ \ \{}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \ \ float32x4\_t\ vecAcc0;}
+\DoxyCodeLine{00448\ \ \ \ \ \ \ \ \ float32x4\_t\ vecIn0;}
+\DoxyCodeLine{00449\ }
+\DoxyCodeLine{00450\ \ \ \ \ \ \ \ \ mve\_pred16\_t\ p0\ =\ vctp32q(cnt);}
+\DoxyCodeLine{00451\ }
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(pSamples);}
+\DoxyCodeLine{00453\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vmulq(vecIn0,\ c0);}
+\DoxyCodeLine{00454\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[1]);}
+\DoxyCodeLine{00455\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c1);}
+\DoxyCodeLine{00456\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[2]);}
+\DoxyCodeLine{00457\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c2);}
+\DoxyCodeLine{00458\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[3]);}
+\DoxyCodeLine{00459\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c3);}
+\DoxyCodeLine{00460\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[4]);}
+\DoxyCodeLine{00461\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c4);}
+\DoxyCodeLine{00462\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[5]);}
+\DoxyCodeLine{00463\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c5);}
+\DoxyCodeLine{00464\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[6]);}
+\DoxyCodeLine{00465\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c6);}
+\DoxyCodeLine{00466\ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[7]);}
+\DoxyCodeLine{00467\ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c7);}
+\DoxyCodeLine{00468\ \ \ \ \ \ \ \ \ vstrwq\_p\_f32(partial\_accu\_ptr,\ vecAcc0,p0);}
+\DoxyCodeLine{00469\ \ \ \ \ \}}
+\DoxyCodeLine{00470\ }
+\DoxyCodeLine{00471\ \ \ \ \ \textcolor{keywordtype}{int}\ localTaps\ =\ numTaps\ -\/\ FIR\_F32\_MAX\_COEF\_BLK;}
+\DoxyCodeLine{00472\ \ \ \ \ \textcolor{keywordtype}{int}\ sample\_offset\ =\ FIR\_F32\_MAX\_COEF\_BLK;}
+\DoxyCodeLine{00473\ \ \ \ \ \textcolor{keywordflow}{while}\ (localTaps\ >\ FIR\_F32\_MAX\_COEF\_BLK)\ \{}
+\DoxyCodeLine{00474\ \ \ \ \ \ \ \ \ c0\ =\ *pCoeffs++;}
+\DoxyCodeLine{00475\ \ \ \ \ \ \ \ \ c1\ =\ *pCoeffs++;}
+\DoxyCodeLine{00476\ \ \ \ \ \ \ \ \ c2\ =\ *pCoeffs++;}
+\DoxyCodeLine{00477\ \ \ \ \ \ \ \ \ c3\ =\ *pCoeffs++;}
+\DoxyCodeLine{00478\ \ \ \ \ \ \ \ \ c4\ =\ *pCoeffs++;}
+\DoxyCodeLine{00479\ \ \ \ \ \ \ \ \ c5\ =\ *pCoeffs++;}
+\DoxyCodeLine{00480\ \ \ \ \ \ \ \ \ c6\ =\ *pCoeffs++;}
+\DoxyCodeLine{00481\ \ \ \ \ \ \ \ \ c7\ =\ *pCoeffs++;}
+\DoxyCodeLine{00482\ }
+\DoxyCodeLine{00483\ \ \ \ \ \ \ \ \ partial\_accu\_ptr\ =\ S-\/>pState;}
+\DoxyCodeLine{00484\ \ \ \ \ \ \ \ \ pSamples\ =\ pState\ +\ sample\_offset;}
+\DoxyCodeLine{00485\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ cnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00486\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(cnt\ >\ 0)\ \{}
+\DoxyCodeLine{00487\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ vecAcc0;}
+\DoxyCodeLine{00488\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ vecIn0;}
+\DoxyCodeLine{00489\ }
+\DoxyCodeLine{00490\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(pSamples);}
+\DoxyCodeLine{00491\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vmulq(vecIn0,\ c0);}
+\DoxyCodeLine{00492\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[1]);}
+\DoxyCodeLine{00493\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c1);}
+\DoxyCodeLine{00494\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[2]);}
+\DoxyCodeLine{00495\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c2);}
+\DoxyCodeLine{00496\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[3]);}
+\DoxyCodeLine{00497\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c3);}
+\DoxyCodeLine{00498\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[4]);}
+\DoxyCodeLine{00499\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c4);}
+\DoxyCodeLine{00500\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[5]);}
+\DoxyCodeLine{00501\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c5);}
+\DoxyCodeLine{00502\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[6]);}
+\DoxyCodeLine{00503\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c6);}
+\DoxyCodeLine{00504\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[7]);}
+\DoxyCodeLine{00505\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c7);}
+\DoxyCodeLine{00506\ \ \ \ \ \ \ \ \ \ \ \ \ pSamples\ +=\ 4;}
+\DoxyCodeLine{00507\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ +=\ vld1q\_f32(partial\_accu\_ptr);}
+\DoxyCodeLine{00508\ \ \ \ \ \ \ \ \ \ \ \ \ vst1q(partial\_accu\_ptr,\ vecAcc0);}
+\DoxyCodeLine{00509\ \ \ \ \ \ \ \ \ \ \ \ \ cnt-\/-\/;}
+\DoxyCodeLine{00510\ \ \ \ \ \ \ \ \ \ \ \ \ partial\_accu\_ptr\ +=\ 4;}
+\DoxyCodeLine{00511\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00512\ }
+\DoxyCodeLine{00513\ \ \ \ \ \ \ \ \ cnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00514\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (cnt\ >\ 0)\ \{}
+\DoxyCodeLine{00515\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ vecAcc0;}
+\DoxyCodeLine{00516\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ vecIn0;}
+\DoxyCodeLine{00517\ }
+\DoxyCodeLine{00518\ \ \ \ \ \ \ \ \ \ \ \ \ mve\_pred16\_t\ p0\ =\ vctp32q(cnt);}
+\DoxyCodeLine{00519\ }
+\DoxyCodeLine{00520\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(pSamples);}
+\DoxyCodeLine{00521\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vmulq(vecIn0,\ c0);}
+\DoxyCodeLine{00522\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[1]);}
+\DoxyCodeLine{00523\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c1);}
+\DoxyCodeLine{00524\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[2]);}
+\DoxyCodeLine{00525\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c2);}
+\DoxyCodeLine{00526\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[3]);}
+\DoxyCodeLine{00527\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c3);}
+\DoxyCodeLine{00528\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[4]);}
+\DoxyCodeLine{00529\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c4);}
+\DoxyCodeLine{00530\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[5]);}
+\DoxyCodeLine{00531\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c5);}
+\DoxyCodeLine{00532\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[6]);}
+\DoxyCodeLine{00533\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c6);}
+\DoxyCodeLine{00534\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[7]);}
+\DoxyCodeLine{00535\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c7);}
+\DoxyCodeLine{00536\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ +=\ vld1q\_f32(partial\_accu\_ptr);}
+\DoxyCodeLine{00537\ \ \ \ \ \ \ \ \ \ \ \ \ vstrwq\_p\_f32(partial\_accu\_ptr,\ vecAcc0,p0);}
+\DoxyCodeLine{00538\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00539\ }
+\DoxyCodeLine{00540\ \ \ \ \ \ \ \ \ localTaps\ -\/=\ FIR\_F32\_MAX\_COEF\_BLK;}
+\DoxyCodeLine{00541\ \ \ \ \ \ \ \ \ sample\_offset\ +=\ FIR\_F32\_MAX\_COEF\_BLK;}
+\DoxyCodeLine{00542\ \ \ \ \ \}}
+\DoxyCodeLine{00543\ }
+\DoxyCodeLine{00544\ \ \ \ \ pSamples\ =\ pState\ +\ sample\_offset;}
+\DoxyCodeLine{00545\ }
+\DoxyCodeLine{00546\ \ \ \ \ \textcolor{keywordflow}{if}\ (localTaps\ >\ 4)\ \{}
+\DoxyCodeLine{00547\ \ \ \ \ \ \ \ \ c0\ =\ *pCoeffs++;}
+\DoxyCodeLine{00548\ \ \ \ \ \ \ \ \ c1\ =\ *pCoeffs++;}
+\DoxyCodeLine{00549\ \ \ \ \ \ \ \ \ c2\ =\ *pCoeffs++;}
+\DoxyCodeLine{00550\ \ \ \ \ \ \ \ \ c3\ =\ *pCoeffs++;}
+\DoxyCodeLine{00551\ \ \ \ \ \ \ \ \ c4\ =\ *pCoeffs++;}
+\DoxyCodeLine{00552\ \ \ \ \ \ \ \ \ c5\ =\ *pCoeffs++;}
+\DoxyCodeLine{00553\ \ \ \ \ \ \ \ \ c6\ =\ *pCoeffs++;}
+\DoxyCodeLine{00554\ \ \ \ \ \ \ \ \ c7\ =\ *pCoeffs++;}
+\DoxyCodeLine{00555\ \ \ \ \ \ \ \ \ pOutput\ =\ pDst;}
+\DoxyCodeLine{00556\ }
+\DoxyCodeLine{00557\ \ \ \ \ \ \ \ \ partial\_accu\_ptr\ =\ S-\/>pState;}
+\DoxyCodeLine{00558\ \ \ \ \ \ \ \ \ cnt\ =\ blockSize\ \ >>\ 2;}
+\DoxyCodeLine{00559\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(cnt\ >\ 0)\ \{}
+\DoxyCodeLine{00560\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ vecAcc0;}
+\DoxyCodeLine{00561\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ vecIn0;}
+\DoxyCodeLine{00562\ }
+\DoxyCodeLine{00563\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(pSamples);}
+\DoxyCodeLine{00564\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vmulq(vecIn0,\ c0);}
+\DoxyCodeLine{00565\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[1]);}
+\DoxyCodeLine{00566\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c1);}
+\DoxyCodeLine{00567\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[2]);}
+\DoxyCodeLine{00568\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c2);}
+\DoxyCodeLine{00569\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[3]);}
+\DoxyCodeLine{00570\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c3);}
+\DoxyCodeLine{00571\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[4]);}
+\DoxyCodeLine{00572\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c4);}
+\DoxyCodeLine{00573\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[5]);}
+\DoxyCodeLine{00574\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c5);}
+\DoxyCodeLine{00575\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[6]);}
+\DoxyCodeLine{00576\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c6);}
+\DoxyCodeLine{00577\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[7]);}
+\DoxyCodeLine{00578\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c7);}
+\DoxyCodeLine{00579\ \ \ \ \ \ \ \ \ \ \ \ \ pSamples\ +=\ 4;}
+\DoxyCodeLine{00580\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ pap\ =\ vld1q\_f32(partial\_accu\_ptr);}
+\DoxyCodeLine{00581\ \ \ \ \ \ \ \ \ \ \ \ \ vst1q(pOutput,\ vecAcc0+pap);}
+\DoxyCodeLine{00582\ \ \ \ \ \ \ \ \ \ \ \ \ cnt-\/-\/;}
+\DoxyCodeLine{00583\ \ \ \ \ \ \ \ \ \ \ \ \ partial\_accu\_ptr\ +=\ 4;}
+\DoxyCodeLine{00584\ \ \ \ \ \ \ \ \ \ \ \ \ pOutput\ +=\ 4;}
+\DoxyCodeLine{00585\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00586\ }
+\DoxyCodeLine{00587\ \ \ \ \ \ \ \ \ cnt\ =\ blockSize\ \ \&\ 3;}
+\DoxyCodeLine{00588\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (cnt\ >\ 0)\ \{}
+\DoxyCodeLine{00589\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ vecAcc0;}
+\DoxyCodeLine{00590\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ vecIn0;}
+\DoxyCodeLine{00591\ }
+\DoxyCodeLine{00592\ \ \ \ \ \ \ \ \ \ \ \ \ mve\_pred16\_t\ p0\ =\ vctp32q(cnt);}
+\DoxyCodeLine{00593\ }
+\DoxyCodeLine{00594\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(pSamples);}
+\DoxyCodeLine{00595\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vmulq(vecIn0,\ c0);}
+\DoxyCodeLine{00596\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[1]);}
+\DoxyCodeLine{00597\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c1);}
+\DoxyCodeLine{00598\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[2]);}
+\DoxyCodeLine{00599\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c2);}
+\DoxyCodeLine{00600\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[3]);}
+\DoxyCodeLine{00601\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c3);}
+\DoxyCodeLine{00602\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[4]);}
+\DoxyCodeLine{00603\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c4);}
+\DoxyCodeLine{00604\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[5]);}
+\DoxyCodeLine{00605\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c5);}
+\DoxyCodeLine{00606\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[6]);}
+\DoxyCodeLine{00607\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c6);}
+\DoxyCodeLine{00608\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[7]);}
+\DoxyCodeLine{00609\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c7);}
+\DoxyCodeLine{00610\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ pap\ =\ vld1q\_f32(partial\_accu\_ptr);}
+\DoxyCodeLine{00611\ \ \ \ \ \ \ \ \ \ \ \ \ vstrwq\_p\_f32(pOutput,\ vecAcc0+pap,p0);}
+\DoxyCodeLine{00612\ \ \ \ \ \ \ \ \ \ \ \ \ pOutput\ +=\ cnt;}
+\DoxyCodeLine{00613\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00614\ \ \ \ \ \}}
+\DoxyCodeLine{00615\ \ \ \ \ \textcolor{keywordflow}{else}\ \{}
+\DoxyCodeLine{00616\ \ \ \ \ \ \ \ \ c0\ =\ *pCoeffs++;}
+\DoxyCodeLine{00617\ \ \ \ \ \ \ \ \ c1\ =\ *pCoeffs++;}
+\DoxyCodeLine{00618\ \ \ \ \ \ \ \ \ c2\ =\ *pCoeffs++;}
+\DoxyCodeLine{00619\ \ \ \ \ \ \ \ \ c3\ =\ *pCoeffs++;}
+\DoxyCodeLine{00620\ \ \ \ \ \ \ \ \ pOutput\ =\ pDst;}
+\DoxyCodeLine{00621\ }
+\DoxyCodeLine{00622\ \ \ \ \ \ \ \ \ partial\_accu\_ptr\ =\ S-\/>pState;}
+\DoxyCodeLine{00623\ \ \ \ \ \ \ \ \ cnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00624\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}(cnt\ >\ 0)\ \{}
+\DoxyCodeLine{00625\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ vecAcc0;}
+\DoxyCodeLine{00626\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ vecIn0;}
+\DoxyCodeLine{00627\ }
+\DoxyCodeLine{00628\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(pSamples);}
+\DoxyCodeLine{00629\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vmulq(vecIn0,\ c0);}
+\DoxyCodeLine{00630\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[1]);}
+\DoxyCodeLine{00631\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c1);}
+\DoxyCodeLine{00632\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[2]);}
+\DoxyCodeLine{00633\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c2);}
+\DoxyCodeLine{00634\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[3]);}
+\DoxyCodeLine{00635\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c3);}
+\DoxyCodeLine{00636\ \ \ \ \ \ \ \ \ \ \ \ \ pSamples\ +=\ 4;}
+\DoxyCodeLine{00637\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ pap\ =\ vld1q\_f32(partial\_accu\_ptr);}
+\DoxyCodeLine{00638\ \ \ \ \ \ \ \ \ \ \ \ \ vst1q(pOutput,\ vecAcc0+pap);}
+\DoxyCodeLine{00639\ \ \ \ \ \ \ \ \ \ \ \ \ cnt-\/-\/;}
+\DoxyCodeLine{00640\ \ \ \ \ \ \ \ \ \ \ \ \ partial\_accu\_ptr\ +=\ 4;}
+\DoxyCodeLine{00641\ \ \ \ \ \ \ \ \ \ \ \ \ pOutput\ +=\ 4;}
+\DoxyCodeLine{00642\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00643\ }
+\DoxyCodeLine{00644\ \ \ \ \ \ \ \ \ cnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00645\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (cnt\ >\ 0)\ \{}
+\DoxyCodeLine{00646\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ vecAcc0;}
+\DoxyCodeLine{00647\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ vecIn0;}
+\DoxyCodeLine{00648\ }
+\DoxyCodeLine{00649\ \ \ \ \ \ \ \ \ \ \ \ \ mve\_pred16\_t\ p0\ =\ vctp32q(cnt);}
+\DoxyCodeLine{00650\ }
+\DoxyCodeLine{00651\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(pSamples);}
+\DoxyCodeLine{00652\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vmulq(vecIn0,\ c0);}
+\DoxyCodeLine{00653\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[1]);}
+\DoxyCodeLine{00654\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c1);}
+\DoxyCodeLine{00655\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[2]);}
+\DoxyCodeLine{00656\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c2);}
+\DoxyCodeLine{00657\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn0\ =\ vld1q(\&pSamples[3]);}
+\DoxyCodeLine{00658\ \ \ \ \ \ \ \ \ \ \ \ \ vecAcc0\ =\ vfmaq(vecAcc0,\ vecIn0,\ c3);}
+\DoxyCodeLine{00659\ \ \ \ \ \ \ \ \ \ \ \ \ float32x4\_t\ pap\ =\ vld1q\_f32(partial\_accu\_ptr);}
+\DoxyCodeLine{00660\ \ \ \ \ \ \ \ \ \ \ \ \ vstrwq\_p\_f32(pOutput,\ vecAcc0+pap,p0);}
+\DoxyCodeLine{00661\ \ \ \ \ \ \ \ \ \ \ \ \ pOutput\ +=\ cnt;}
+\DoxyCodeLine{00662\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00663\ \ \ \ \ \}}
+\DoxyCodeLine{00664\ }
+\DoxyCodeLine{00665\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00666\ \textcolor{comment}{\ \ \ \ \ *\ Copy\ the\ samples\ back\ into\ the\ history\ buffer\ start}}
+\DoxyCodeLine{00667\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00668\ \ \ \ \ pTempSrc\ =\ \&pRefStatePtr[blockSize];}
+\DoxyCodeLine{00669\ \ \ \ \ pTempDest\ =\ pRefStatePtr;}
+\DoxyCodeLine{00670\ }
+\DoxyCodeLine{00671\ \ \ \ \ blkCnt\ =\ numTaps\ >>\ 2;}
+\DoxyCodeLine{00672\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0)}
+\DoxyCodeLine{00673\ \ \ \ \ \{}
+\DoxyCodeLine{00674\ \ \ \ \ \ \ \ \ vst1q(pTempDest,\ vld1q(pTempSrc));}
+\DoxyCodeLine{00675\ \ \ \ \ \ \ \ \ pTempSrc\ +=\ 4;}
+\DoxyCodeLine{00676\ \ \ \ \ \ \ \ \ pTempDest\ +=\ 4;}
+\DoxyCodeLine{00677\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00678\ \ \ \ \ \}}
+\DoxyCodeLine{00679\ \ \ \ \ blkCnt\ =\ numTaps\ \&\ 3;}
+\DoxyCodeLine{00680\ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ >\ 0)}
+\DoxyCodeLine{00681\ \ \ \ \ \{}
+\DoxyCodeLine{00682\ \ \ \ \ \ \ \ \ mve\_pred16\_t\ p0\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00683\ \ \ \ \ \ \ \ \ vstrwq\_p\_f32(pTempDest,\ vld1q(pTempSrc),\ p0);}
+\DoxyCodeLine{00684\ \ \ \ \ \}}
+\DoxyCodeLine{00685\ \}}
+\DoxyCodeLine{00686\ }
+\DoxyCodeLine{00687\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00688\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_NEON)}}
+\DoxyCodeLine{00689\ }
+\DoxyCodeLine{00690\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___f_i_r_ga0cf008f650a75f5e2cf82d10691b64d9}{arm\_fir\_f32}}(}
+\DoxyCodeLine{00691\ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__fir__instance__f32}{arm\_fir\_instance\_f32}}\ *\ S,}
+\DoxyCodeLine{00692\ \textcolor{keyword}{const}\ float32\_t\ *\ pSrc,}
+\DoxyCodeLine{00693\ float32\_t\ *\ pDst,}
+\DoxyCodeLine{00694\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00695\ \{}
+\DoxyCodeLine{00696\ \ \ \ float32\_t\ *pState\ =\ S-\/>pState;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ State\ pointer\ */}}
+\DoxyCodeLine{00697\ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pCoeffs\ =\ S-\/>pCoeffs;\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{00698\ \ \ \ float32\_t\ *pStateCurnt;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Points\ to\ the\ current\ sample\ of\ the\ state\ */}}
+\DoxyCodeLine{00699\ \ \ \ float32\_t\ *px;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ pointers\ for\ state\ buffer\ */}}
+\DoxyCodeLine{00700\ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pb;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ pointers\ for\ coefficient\ buffer\ */}}
+\DoxyCodeLine{00701\ \ \ \ uint32\_t\ numTaps\ =\ S-\/>numTaps;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Number\ of\ filter\ coefficients\ in\ the\ filter\ */}}
+\DoxyCodeLine{00702\ \ \ \ uint32\_t\ i,\ tapCnt,\ blkCnt;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ counters\ */}}
+\DoxyCodeLine{00703\ }
+\DoxyCodeLine{00704\ \ \ \ float32x4\_t\ accv0,accv1,samples0,samples1,x0,x1,x2,xa,xb,b;}
+\DoxyCodeLine{00705\ \ \ \ float32\_t\ acc;}
+\DoxyCodeLine{00706\ }
+\DoxyCodeLine{00707\ \ \ \ \textcolor{comment}{/*\ S-\/>pState\ points\ to\ state\ array\ which\ contains\ previous\ frame\ (numTaps\ -\/\ 1)\ samples\ */}}
+\DoxyCodeLine{00708\ \ \ \ \textcolor{comment}{/*\ pStateCurnt\ points\ to\ the\ location\ where\ the\ new\ input\ data\ should\ be\ written\ */}}
+\DoxyCodeLine{00709\ \ \ \ pStateCurnt\ =\ \&(S-\/>pState[(numTaps\ -\/\ 1U)]);}
+\DoxyCodeLine{00710\ }
+\DoxyCodeLine{00711\ \ \ \ \textcolor{comment}{/*\ Loop\ unrolling\ */}}
+\DoxyCodeLine{00712\ \ \ \ blkCnt\ =\ blockSize\ >>\ 3;}
+\DoxyCodeLine{00713\ }
+\DoxyCodeLine{00714\ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00715\ \ \ \ \{}
+\DoxyCodeLine{00716\ \ \ \ \ \ \ \textcolor{comment}{/*\ Copy\ 8\ samples\ at\ a\ time\ into\ state\ buffers\ */}}
+\DoxyCodeLine{00717\ \ \ \ \ \ \ samples0\ =\ vld1q\_f32(pSrc);}
+\DoxyCodeLine{00718\ \ \ \ \ \ \ vst1q\_f32(pStateCurnt,samples0);}
+\DoxyCodeLine{00719\ }
+\DoxyCodeLine{00720\ \ \ \ \ \ \ pStateCurnt\ +=\ 4;}
+\DoxyCodeLine{00721\ \ \ \ \ \ \ pSrc\ +=\ 4\ ;}
+\DoxyCodeLine{00722\ }
+\DoxyCodeLine{00723\ \ \ \ \ \ \ samples1\ =\ vld1q\_f32(pSrc);}
+\DoxyCodeLine{00724\ \ \ \ \ \ \ vst1q\_f32(pStateCurnt,samples1);}
+\DoxyCodeLine{00725\ }
+\DoxyCodeLine{00726\ \ \ \ \ \ \ pStateCurnt\ +=\ 4;}
+\DoxyCodeLine{00727\ \ \ \ \ \ \ pSrc\ +=\ 4\ ;}
+\DoxyCodeLine{00728\ }
+\DoxyCodeLine{00729\ \ \ \ \ \ \ \textcolor{comment}{/*\ Set\ the\ accumulators\ to\ zero\ */}}
+\DoxyCodeLine{00730\ \ \ \ \ \ \ accv0\ =\ vdupq\_n\_f32(0);}
+\DoxyCodeLine{00731\ \ \ \ \ \ \ accv1\ =\ vdupq\_n\_f32(0);}
+\DoxyCodeLine{00732\ }
+\DoxyCodeLine{00733\ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialize\ state\ pointer\ */}}
+\DoxyCodeLine{00734\ \ \ \ \ \ \ px\ =\ pState;}
+\DoxyCodeLine{00735\ }
+\DoxyCodeLine{00736\ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialize\ coefficient\ pointer\ */}}
+\DoxyCodeLine{00737\ \ \ \ \ \ \ pb\ =\ pCoeffs;}
+\DoxyCodeLine{00738\ }
+\DoxyCodeLine{00739\ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ unroling\ */}}
+\DoxyCodeLine{00740\ \ \ \ \ \ \ i\ =\ numTaps\ >>\ 2;}
+\DoxyCodeLine{00741\ }
+\DoxyCodeLine{00742\ \ \ \ \ \ \ \textcolor{comment}{/*\ Perform\ the\ multiply-\/accumulates\ */}}
+\DoxyCodeLine{00743\ \ \ \ \ \ \ x0\ =\ vld1q\_f32(px);}
+\DoxyCodeLine{00744\ \ \ \ \ \ \ x1\ =\ vld1q\_f32(px\ +\ 4);}
+\DoxyCodeLine{00745\ }
+\DoxyCodeLine{00746\ \ \ \ \ \ \ \textcolor{keywordflow}{while}(i\ >\ 0)}
+\DoxyCodeLine{00747\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00748\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ acc\ =\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps-\/1]\ +\ b[numTaps-\/2]\ *\ x[n-\/numTaps-\/2]\ +\ b[numTaps-\/3]\ *\ x[n-\/numTaps-\/3]\ +...+\ b[0]\ *\ x[0]\ */}}
+\DoxyCodeLine{00749\ \ \ \ \ \ \ \ \ \ x2\ =\ vld1q\_f32(px\ +\ 8);}
+\DoxyCodeLine{00750\ \ \ \ \ \ \ \ \ \ b\ =\ vld1q\_f32(pb);}
+\DoxyCodeLine{00751\ \ \ \ \ \ \ \ \ \ xa\ =\ x0;}
+\DoxyCodeLine{00752\ \ \ \ \ \ \ \ \ \ xb\ =\ x1;}
+\DoxyCodeLine{00753\ \ \ \ \ \ \ \ \ \ accv0\ =\ vmlaq\_n\_f32(accv0,xa,vgetq\_lane\_f32(b,\ 0));}
+\DoxyCodeLine{00754\ \ \ \ \ \ \ \ \ \ accv1\ =\ vmlaq\_n\_f32(accv1,xb,vgetq\_lane\_f32(b,\ 0));}
+\DoxyCodeLine{00755\ }
+\DoxyCodeLine{00756\ \ \ \ \ \ \ \ \ \ xa\ =\ vextq\_f32(x0,x1,1);}
+\DoxyCodeLine{00757\ \ \ \ \ \ \ \ \ \ xb\ =\ vextq\_f32(x1,x2,1);}
+\DoxyCodeLine{00758\ }
+\DoxyCodeLine{00759\ \ \ \ \ \ \ \ \ \ accv0\ =\ vmlaq\_n\_f32(accv0,xa,vgetq\_lane\_f32(b,\ 1));}
+\DoxyCodeLine{00760\ \ \ \ \ \ \ \ \ \ accv1\ =\ vmlaq\_n\_f32(accv1,xb,vgetq\_lane\_f32(b,\ 1));}
+\DoxyCodeLine{00761\ }
+\DoxyCodeLine{00762\ \ \ \ \ \ \ \ \ \ xa\ =\ vextq\_f32(x0,x1,2);}
+\DoxyCodeLine{00763\ \ \ \ \ \ \ \ \ \ xb\ =\ vextq\_f32(x1,x2,2);}
+\DoxyCodeLine{00764\ }
+\DoxyCodeLine{00765\ \ \ \ \ \ \ \ \ \ accv0\ =\ vmlaq\_n\_f32(accv0,xa,vgetq\_lane\_f32(b,\ 2));}
+\DoxyCodeLine{00766\ \ \ \ \ \ \ \ \ \ accv1\ =\ vmlaq\_n\_f32(accv1,xb,vgetq\_lane\_f32(b,\ 2));}
+\DoxyCodeLine{00767\ }
+\DoxyCodeLine{00768\ \ \ \ \ \ \ \ \ \ xa\ =\ vextq\_f32(x0,x1,3);}
+\DoxyCodeLine{00769\ \ \ \ \ \ \ \ \ \ xb\ =\ vextq\_f32(x1,x2,3);}
+\DoxyCodeLine{00770\ }
+\DoxyCodeLine{00771\ \ \ \ \ \ \ \ \ \ accv0\ =\ vmlaq\_n\_f32(accv0,xa,vgetq\_lane\_f32(b,\ 3));}
+\DoxyCodeLine{00772\ \ \ \ \ \ \ \ \ \ accv1\ =\ vmlaq\_n\_f32(accv1,xb,vgetq\_lane\_f32(b,\ 3));}
+\DoxyCodeLine{00773\ }
+\DoxyCodeLine{00774\ \ \ \ \ \ \ \ \ \ pb\ +=\ 4;}
+\DoxyCodeLine{00775\ \ \ \ \ \ \ \ \ \ x0\ =\ x1;}
+\DoxyCodeLine{00776\ \ \ \ \ \ \ \ \ \ x1\ =\ x2;}
+\DoxyCodeLine{00777\ \ \ \ \ \ \ \ \ \ px\ +=\ 4;}
+\DoxyCodeLine{00778\ \ \ \ \ \ \ \ \ \ i-\/-\/;}
+\DoxyCodeLine{00779\ }
+\DoxyCodeLine{00780\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00781\ }
+\DoxyCodeLine{00782\ \ \ \ \ \ \ \textcolor{comment}{/*\ Tail\ */}}
+\DoxyCodeLine{00783\ \ \ \ \ \ \ i\ =\ numTaps\ \&\ 3;}
+\DoxyCodeLine{00784\ \ \ \ \ \ \ x2\ =\ vld1q\_f32(px\ +\ 8);}
+\DoxyCodeLine{00785\ }
+\DoxyCodeLine{00786\ \ \ \ \ \ \ \textcolor{comment}{/*\ Perform\ the\ multiply-\/accumulates\ */}}
+\DoxyCodeLine{00787\ \ \ \ \ \ \ \textcolor{keywordflow}{switch}(i)}
+\DoxyCodeLine{00788\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00789\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 3:}
+\DoxyCodeLine{00790\ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00791\ \ \ \ \ \ \ \ \ \ \ \ accv0\ =\ vmlaq\_n\_f32(accv0,x0,*pb);}
+\DoxyCodeLine{00792\ \ \ \ \ \ \ \ \ \ \ \ accv1\ =\ vmlaq\_n\_f32(accv1,x1,*pb);}
+\DoxyCodeLine{00793\ }
+\DoxyCodeLine{00794\ \ \ \ \ \ \ \ \ \ \ \ pb++;}
+\DoxyCodeLine{00795\ }
+\DoxyCodeLine{00796\ \ \ \ \ \ \ \ \ \ \ \ xa\ =\ vextq\_f32(x0,x1,1);}
+\DoxyCodeLine{00797\ \ \ \ \ \ \ \ \ \ \ \ xb\ =\ vextq\_f32(x1,x2,1);}
+\DoxyCodeLine{00798\ }
+\DoxyCodeLine{00799\ \ \ \ \ \ \ \ \ \ \ \ accv0\ =\ vmlaq\_n\_f32(accv0,xa,*pb);}
+\DoxyCodeLine{00800\ \ \ \ \ \ \ \ \ \ \ \ accv1\ =\ vmlaq\_n\_f32(accv1,xb,*pb);}
+\DoxyCodeLine{00801\ }
+\DoxyCodeLine{00802\ \ \ \ \ \ \ \ \ \ \ \ pb++;}
+\DoxyCodeLine{00803\ }
+\DoxyCodeLine{00804\ \ \ \ \ \ \ \ \ \ \ \ xa\ =\ vextq\_f32(x0,x1,2);}
+\DoxyCodeLine{00805\ \ \ \ \ \ \ \ \ \ \ \ xb\ =\ vextq\_f32(x1,x2,2);}
+\DoxyCodeLine{00806\ }
+\DoxyCodeLine{00807\ \ \ \ \ \ \ \ \ \ \ \ accv0\ =\ vmlaq\_n\_f32(accv0,xa,*pb);}
+\DoxyCodeLine{00808\ \ \ \ \ \ \ \ \ \ \ \ accv1\ =\ vmlaq\_n\_f32(accv1,xb,*pb);}
+\DoxyCodeLine{00809\ }
+\DoxyCodeLine{00810\ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00811\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00812\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 2:}
+\DoxyCodeLine{00813\ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00814\ \ \ \ \ \ \ \ \ \ \ \ accv0\ =\ vmlaq\_n\_f32(accv0,x0,*pb);}
+\DoxyCodeLine{00815\ \ \ \ \ \ \ \ \ \ \ \ accv1\ =\ vmlaq\_n\_f32(accv1,x1,*pb);}
+\DoxyCodeLine{00816\ }
+\DoxyCodeLine{00817\ \ \ \ \ \ \ \ \ \ \ \ pb++;}
+\DoxyCodeLine{00818\ }
+\DoxyCodeLine{00819\ \ \ \ \ \ \ \ \ \ \ \ xa\ =\ vextq\_f32(x0,x1,1);}
+\DoxyCodeLine{00820\ \ \ \ \ \ \ \ \ \ \ \ xb\ =\ vextq\_f32(x1,x2,1);}
+\DoxyCodeLine{00821\ }
+\DoxyCodeLine{00822\ \ \ \ \ \ \ \ \ \ \ \ accv0\ =\ vmlaq\_n\_f32(accv0,xa,*pb);}
+\DoxyCodeLine{00823\ \ \ \ \ \ \ \ \ \ \ \ accv1\ =\ vmlaq\_n\_f32(accv1,xb,*pb);}
+\DoxyCodeLine{00824\ }
+\DoxyCodeLine{00825\ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00826\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00827\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{case}\ 1:}
+\DoxyCodeLine{00828\ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00829\ }
+\DoxyCodeLine{00830\ \ \ \ \ \ \ \ \ \ \ \ accv0\ =\ vmlaq\_n\_f32(accv0,x0,*pb);}
+\DoxyCodeLine{00831\ \ \ \ \ \ \ \ \ \ \ \ accv1\ =\ vmlaq\_n\_f32(accv1,x1,*pb);}
+\DoxyCodeLine{00832\ }
+\DoxyCodeLine{00833\ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00834\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00835\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00836\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00837\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00838\ }
+\DoxyCodeLine{00839\ \ \ \ \ \ \ \textcolor{comment}{/*\ The\ result\ is\ stored\ in\ the\ destination\ buffer.\ */}}
+\DoxyCodeLine{00840\ \ \ \ \ \ \ vst1q\_f32(pDst,accv0);}
+\DoxyCodeLine{00841\ \ \ \ \ \ \ pDst\ +=\ 4;}
+\DoxyCodeLine{00842\ \ \ \ \ \ \ vst1q\_f32(pDst,accv1);}
+\DoxyCodeLine{00843\ \ \ \ \ \ \ pDst\ +=\ 4;}
+\DoxyCodeLine{00844\ }
+\DoxyCodeLine{00845\ \ \ \ \ \ \ \textcolor{comment}{/*\ Advance\ state\ pointer\ by\ 8\ for\ the\ next\ 8\ samples\ */}}
+\DoxyCodeLine{00846\ \ \ \ \ \ \ pState\ =\ pState\ +\ 8;}
+\DoxyCodeLine{00847\ }
+\DoxyCodeLine{00848\ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00849\ \ \ \ \}}
+\DoxyCodeLine{00850\ }
+\DoxyCodeLine{00851\ \ \ \ \textcolor{comment}{/*\ Tail\ */}}
+\DoxyCodeLine{00852\ \ \ \ blkCnt\ =\ blockSize\ \&\ 0x7;}
+\DoxyCodeLine{00853\ }
+\DoxyCodeLine{00854\ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00855\ \ \ \ \{}
+\DoxyCodeLine{00856\ \ \ \ \ \ \ \textcolor{comment}{/*\ Copy\ one\ sample\ at\ a\ time\ into\ state\ buffer\ */}}
+\DoxyCodeLine{00857\ \ \ \ \ \ \ *pStateCurnt++\ =\ *pSrc++;}
+\DoxyCodeLine{00858\ }
+\DoxyCodeLine{00859\ \ \ \ \ \ \ \textcolor{comment}{/*\ Set\ the\ accumulator\ to\ zero\ */}}
+\DoxyCodeLine{00860\ \ \ \ \ \ \ acc\ =\ 0.0f;}
+\DoxyCodeLine{00861\ }
+\DoxyCodeLine{00862\ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialize\ state\ pointer\ */}}
+\DoxyCodeLine{00863\ \ \ \ \ \ \ px\ =\ pState;}
+\DoxyCodeLine{00864\ }
+\DoxyCodeLine{00865\ \ \ \ \ \ \ \textcolor{comment}{/*\ Initialize\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{00866\ \ \ \ \ \ \ pb\ =\ pCoeffs;}
+\DoxyCodeLine{00867\ }
+\DoxyCodeLine{00868\ \ \ \ \ \ \ i\ =\ numTaps;}
+\DoxyCodeLine{00869\ }
+\DoxyCodeLine{00870\ \ \ \ \ \ \ \textcolor{comment}{/*\ Perform\ the\ multiply-\/accumulates\ */}}
+\DoxyCodeLine{00871\ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00872\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00873\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ acc\ =\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps-\/1]\ +\ b[numTaps-\/2]\ *\ x[n-\/numTaps-\/2]\ +\ b[numTaps-\/3]\ *\ x[n-\/numTaps-\/3]\ +...+\ b[0]\ *\ x[0]\ */}}
+\DoxyCodeLine{00874\ \ \ \ \ \ \ \ \ \ acc\ +=\ *px++\ *\ *pb++;}
+\DoxyCodeLine{00875\ \ \ \ \ \ \ \ \ \ i-\/-\/;}
+\DoxyCodeLine{00876\ }
+\DoxyCodeLine{00877\ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (i\ >\ 0U);}
+\DoxyCodeLine{00878\ }
+\DoxyCodeLine{00879\ \ \ \ \ \ \ \textcolor{comment}{/*\ The\ result\ is\ stored\ in\ the\ destination\ buffer.\ */}}
+\DoxyCodeLine{00880\ \ \ \ \ \ \ *pDst++\ =\ acc;}
+\DoxyCodeLine{00881\ }
+\DoxyCodeLine{00882\ \ \ \ \ \ \ \textcolor{comment}{/*\ Advance\ state\ pointer\ by\ 1\ for\ the\ next\ sample\ */}}
+\DoxyCodeLine{00883\ \ \ \ \ \ \ pState\ =\ pState\ +\ 1;}
+\DoxyCodeLine{00884\ }
+\DoxyCodeLine{00885\ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00886\ \ \ \ \}}
+\DoxyCodeLine{00887\ }
+\DoxyCodeLine{00888\ \ \ \ \textcolor{comment}{/*\ Processing\ is\ complete.}}
+\DoxyCodeLine{00889\ \textcolor{comment}{\ \ \ **\ Now\ copy\ the\ last\ numTaps\ -\/\ 1\ samples\ to\ the\ starting\ of\ the\ state\ buffer.}}
+\DoxyCodeLine{00890\ \textcolor{comment}{\ \ \ **\ This\ prepares\ the\ state\ buffer\ for\ the\ next\ function\ call.\ */}}
+\DoxyCodeLine{00891\ }
+\DoxyCodeLine{00892\ \ \ \ \textcolor{comment}{/*\ Points\ to\ the\ start\ of\ the\ state\ buffer\ */}}
+\DoxyCodeLine{00893\ \ \ \ pStateCurnt\ =\ S-\/>pState;}
+\DoxyCodeLine{00894\ }
+\DoxyCodeLine{00895\ \ \ \ \textcolor{comment}{/*\ Copy\ numTaps\ number\ of\ values\ */}}
+\DoxyCodeLine{00896\ \ \ \ tapCnt\ =\ numTaps\ -\/\ 1U;}
+\DoxyCodeLine{00897\ }
+\DoxyCodeLine{00898\ \ \ \ \textcolor{comment}{/*\ Copy\ data\ */}}
+\DoxyCodeLine{00899\ \ \ \ \textcolor{keywordflow}{while}\ (tapCnt\ >\ 0U)}
+\DoxyCodeLine{00900\ \ \ \ \{}
+\DoxyCodeLine{00901\ \ \ \ \ \ \ *pStateCurnt++\ =\ *pState++;}
+\DoxyCodeLine{00902\ }
+\DoxyCodeLine{00903\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ the\ loop\ counter\ */}}
+\DoxyCodeLine{00904\ \ \ \ \ \ \ tapCnt-\/-\/;}
+\DoxyCodeLine{00905\ \ \ \ \}}
+\DoxyCodeLine{00906\ }
+\DoxyCodeLine{00907\ \}}
+\DoxyCodeLine{00908\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00909\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___f_i_r_ga0cf008f650a75f5e2cf82d10691b64d9}{arm\_fir\_f32}}(}
+\DoxyCodeLine{00910\ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__fir__instance__f32}{arm\_fir\_instance\_f32}}\ *\ S,}
+\DoxyCodeLine{00911\ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ pSrc,}
+\DoxyCodeLine{00912\ \ \ \ \ \ \ \ \ float32\_t\ *\ pDst,}
+\DoxyCodeLine{00913\ \ \ \ \ \ \ \ \ uint32\_t\ blockSize)}
+\DoxyCodeLine{00914\ \{}
+\DoxyCodeLine{00915\ \ \ \ \ \ \ \ \ float32\_t\ *pState\ =\ S-\/>pState;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ State\ pointer\ */}}
+\DoxyCodeLine{00916\ \ \ \textcolor{keyword}{const}\ float32\_t\ *pCoeffs\ =\ S-\/>pCoeffs;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{00917\ \ \ \ \ \ \ \ \ float32\_t\ *pStateCurnt;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Points\ to\ the\ current\ sample\ of\ the\ state\ */}}
+\DoxyCodeLine{00918\ \ \ \ \ \ \ \ \ float32\_t\ *px;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ pointer\ for\ state\ buffer\ */}}
+\DoxyCodeLine{00919\ \ \ \textcolor{keyword}{const}\ float32\_t\ *pb;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ pointer\ for\ coefficient\ buffer\ */}}
+\DoxyCodeLine{00920\ \ \ \ \ \ \ \ \ float32\_t\ acc0;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Accumulator\ */}}
+\DoxyCodeLine{00921\ \ \ \ \ \ \ \ \ uint32\_t\ numTaps\ =\ S-\/>numTaps;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Number\ of\ filter\ coefficients\ in\ the\ filter\ */}}
+\DoxyCodeLine{00922\ \ \ \ \ \ \ \ \ uint32\_t\ i,\ tapCnt,\ blkCnt;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ counters\ */}}
+\DoxyCodeLine{00923\ }
+\DoxyCodeLine{00924\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)}}
+\DoxyCodeLine{00925\ \ \ \ \ \ \ \ \ float32\_t\ acc1,\ acc2,\ acc3,\ acc4,\ acc5,\ acc6,\ acc7;\ \ \ \ \ \textcolor{comment}{/*\ Accumulators\ */}}
+\DoxyCodeLine{00926\ \ \ \ \ \ \ \ \ float32\_t\ x0,\ x1,\ x2,\ x3,\ x4,\ x5,\ x6,\ x7;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ variables\ to\ hold\ state\ values\ */}}
+\DoxyCodeLine{00927\ \ \ \ \ \ \ \ \ float32\_t\ c0;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ variable\ to\ hold\ coefficient\ value\ */}}
+\DoxyCodeLine{00928\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00929\ }
+\DoxyCodeLine{00930\ \ \ \textcolor{comment}{/*\ S-\/>pState\ points\ to\ state\ array\ which\ contains\ previous\ frame\ (numTaps\ -\/\ 1)\ samples\ */}}
+\DoxyCodeLine{00931\ \ \ \textcolor{comment}{/*\ pStateCurnt\ points\ to\ the\ location\ where\ the\ new\ input\ data\ should\ be\ written\ */}}
+\DoxyCodeLine{00932\ \ \ pStateCurnt\ =\ \&(S-\/>pState[(numTaps\ -\/\ 1U)]);}
+\DoxyCodeLine{00933\ }
+\DoxyCodeLine{00934\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)}}
+\DoxyCodeLine{00935\ }
+\DoxyCodeLine{00936\ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ 8\ output\ values\ simultaneously.}}
+\DoxyCodeLine{00937\ \textcolor{comment}{\ \ \ *\ The\ variables\ acc0\ ...\ acc7\ hold\ output\ values\ that\ are\ being\ computed:}}
+\DoxyCodeLine{00938\ \textcolor{comment}{\ \ \ *}}
+\DoxyCodeLine{00939\ \textcolor{comment}{\ \ \ *\ \ \ \ acc0\ =\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps-\/1]\ +\ b[numTaps-\/2]\ *\ x[n-\/numTaps-\/2]\ +\ b[numTaps-\/3]\ *\ x[n-\/numTaps-\/3]\ +...+\ b[0]\ *\ x[0]}}
+\DoxyCodeLine{00940\ \textcolor{comment}{\ \ \ *\ \ \ \ acc1\ =\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps]\ \ \ +\ b[numTaps-\/2]\ *\ x[n-\/numTaps-\/1]\ +\ b[numTaps-\/3]\ *\ x[n-\/numTaps-\/2]\ +...+\ b[0]\ *\ x[1]}}
+\DoxyCodeLine{00941\ \textcolor{comment}{\ \ \ *\ \ \ \ acc2\ =\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps+1]\ +\ b[numTaps-\/2]\ *\ x[n-\/numTaps]\ \ \ +\ b[numTaps-\/3]\ *\ x[n-\/numTaps-\/1]\ +...+\ b[0]\ *\ x[2]}}
+\DoxyCodeLine{00942\ \textcolor{comment}{\ \ \ *\ \ \ \ acc3\ =\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps+2]\ +\ b[numTaps-\/2]\ *\ x[n-\/numTaps+1]\ +\ b[numTaps-\/3]\ *\ x[n-\/numTaps]\ \ \ +...+\ b[0]\ *\ x[3]}}
+\DoxyCodeLine{00943\ \textcolor{comment}{\ \ \ */}}
+\DoxyCodeLine{00944\ }
+\DoxyCodeLine{00945\ \ \ blkCnt\ =\ blockSize\ >>\ 3U;}
+\DoxyCodeLine{00946\ }
+\DoxyCodeLine{00947\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00948\ \ \ \{}
+\DoxyCodeLine{00949\ \ \ \ \ \textcolor{comment}{/*\ Copy\ 4\ new\ input\ samples\ into\ the\ state\ buffer.\ */}}
+\DoxyCodeLine{00950\ \ \ \ \ *pStateCurnt++\ =\ *pSrc++;}
+\DoxyCodeLine{00951\ \ \ \ \ *pStateCurnt++\ =\ *pSrc++;}
+\DoxyCodeLine{00952\ \ \ \ \ *pStateCurnt++\ =\ *pSrc++;}
+\DoxyCodeLine{00953\ \ \ \ \ *pStateCurnt++\ =\ *pSrc++;}
+\DoxyCodeLine{00954\ }
+\DoxyCodeLine{00955\ \ \ \ \ \textcolor{comment}{/*\ Set\ all\ accumulators\ to\ zero\ */}}
+\DoxyCodeLine{00956\ \ \ \ \ acc0\ =\ 0.0f;}
+\DoxyCodeLine{00957\ \ \ \ \ acc1\ =\ 0.0f;}
+\DoxyCodeLine{00958\ \ \ \ \ acc2\ =\ 0.0f;}
+\DoxyCodeLine{00959\ \ \ \ \ acc3\ =\ 0.0f;}
+\DoxyCodeLine{00960\ \ \ \ \ acc4\ =\ 0.0f;}
+\DoxyCodeLine{00961\ \ \ \ \ acc5\ =\ 0.0f;}
+\DoxyCodeLine{00962\ \ \ \ \ acc6\ =\ 0.0f;}
+\DoxyCodeLine{00963\ \ \ \ \ acc7\ =\ 0.0f;}
+\DoxyCodeLine{00964\ }
+\DoxyCodeLine{00965\ \ \ \ \ \textcolor{comment}{/*\ Initialize\ state\ pointer\ */}}
+\DoxyCodeLine{00966\ \ \ \ \ px\ =\ pState;}
+\DoxyCodeLine{00967\ }
+\DoxyCodeLine{00968\ \ \ \ \ \textcolor{comment}{/*\ Initialize\ coefficient\ pointer\ */}}
+\DoxyCodeLine{00969\ \ \ \ \ pb\ =\ pCoeffs;}
+\DoxyCodeLine{00970\ }
+\DoxyCodeLine{00971\ \ \ \ \ \textcolor{comment}{/*\ This\ is\ separated\ from\ the\ others\ to\ avoid}}
+\DoxyCodeLine{00972\ \textcolor{comment}{\ \ \ \ \ *\ a\ call\ to\ \_\_aeabi\_memmove\ which\ would\ be\ slower}}
+\DoxyCodeLine{00973\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00974\ \ \ \ \ *pStateCurnt++\ =\ *pSrc++;}
+\DoxyCodeLine{00975\ \ \ \ \ *pStateCurnt++\ =\ *pSrc++;}
+\DoxyCodeLine{00976\ \ \ \ \ *pStateCurnt++\ =\ *pSrc++;}
+\DoxyCodeLine{00977\ \ \ \ \ *pStateCurnt++\ =\ *pSrc++;}
+\DoxyCodeLine{00978\ }
+\DoxyCodeLine{00979\ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ first\ 7\ samples\ from\ the\ state\ buffer:\ \ x[n-\/numTaps],\ x[n-\/numTaps-\/1],\ x[n-\/numTaps-\/2]\ */}}
+\DoxyCodeLine{00980\ \ \ \ \ x0\ =\ *px++;}
+\DoxyCodeLine{00981\ \ \ \ \ x1\ =\ *px++;}
+\DoxyCodeLine{00982\ \ \ \ \ x2\ =\ *px++;}
+\DoxyCodeLine{00983\ \ \ \ \ x3\ =\ *px++;}
+\DoxyCodeLine{00984\ \ \ \ \ x4\ =\ *px++;}
+\DoxyCodeLine{00985\ \ \ \ \ x5\ =\ *px++;}
+\DoxyCodeLine{00986\ \ \ \ \ x6\ =\ *px++;}
+\DoxyCodeLine{00987\ }
+\DoxyCodeLine{00988\ \ \ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ process\ 8\ taps\ at\ a\ time.\ */}}
+\DoxyCodeLine{00989\ \ \ \ \ tapCnt\ =\ numTaps\ >>\ 3U;}
+\DoxyCodeLine{00990\ }
+\DoxyCodeLine{00991\ \ \ \ \ \textcolor{keywordflow}{while}\ (tapCnt\ >\ 0U)}
+\DoxyCodeLine{00992\ \ \ \ \ \{}
+\DoxyCodeLine{00993\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ b[numTaps-\/1]\ coefficient\ */}}
+\DoxyCodeLine{00994\ \ \ \ \ \ \ c0\ =\ *(pb++);}
+\DoxyCodeLine{00995\ }
+\DoxyCodeLine{00996\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ x[n-\/numTaps-\/3]\ sample\ */}}
+\DoxyCodeLine{00997\ \ \ \ \ \ \ x7\ =\ *(px++);}
+\DoxyCodeLine{00998\ }
+\DoxyCodeLine{00999\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc0\ +=\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps]\ */}}
+\DoxyCodeLine{01000\ \ \ \ \ \ \ acc0\ +=\ x0\ *\ c0;}
+\DoxyCodeLine{01001\ }
+\DoxyCodeLine{01002\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc1\ +=\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps-\/1]\ */}}
+\DoxyCodeLine{01003\ \ \ \ \ \ \ acc1\ +=\ x1\ *\ c0;}
+\DoxyCodeLine{01004\ }
+\DoxyCodeLine{01005\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc2\ +=\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps-\/2]\ */}}
+\DoxyCodeLine{01006\ \ \ \ \ \ \ acc2\ +=\ x2\ *\ c0;}
+\DoxyCodeLine{01007\ }
+\DoxyCodeLine{01008\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc3\ +=\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps-\/3]\ */}}
+\DoxyCodeLine{01009\ \ \ \ \ \ \ acc3\ +=\ x3\ *\ c0;}
+\DoxyCodeLine{01010\ }
+\DoxyCodeLine{01011\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc4\ +=\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps-\/4]\ */}}
+\DoxyCodeLine{01012\ \ \ \ \ \ \ acc4\ +=\ x4\ *\ c0;}
+\DoxyCodeLine{01013\ }
+\DoxyCodeLine{01014\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc1\ +=\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps-\/5]\ */}}
+\DoxyCodeLine{01015\ \ \ \ \ \ \ acc5\ +=\ x5\ *\ c0;}
+\DoxyCodeLine{01016\ }
+\DoxyCodeLine{01017\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc2\ +=\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps-\/6]\ */}}
+\DoxyCodeLine{01018\ \ \ \ \ \ \ acc6\ +=\ x6\ *\ c0;}
+\DoxyCodeLine{01019\ }
+\DoxyCodeLine{01020\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc3\ +=\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps-\/7]\ */}}
+\DoxyCodeLine{01021\ \ \ \ \ \ \ acc7\ +=\ x7\ *\ c0;}
+\DoxyCodeLine{01022\ }
+\DoxyCodeLine{01023\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ b[numTaps-\/2]\ coefficient\ */}}
+\DoxyCodeLine{01024\ \ \ \ \ \ \ c0\ =\ *(pb++);}
+\DoxyCodeLine{01025\ }
+\DoxyCodeLine{01026\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ x[n-\/numTaps-\/4]\ sample\ */}}
+\DoxyCodeLine{01027\ \ \ \ \ \ \ x0\ =\ *(px++);}
+\DoxyCodeLine{01028\ }
+\DoxyCodeLine{01029\ \ \ \ \ \ \ \textcolor{comment}{/*\ Perform\ the\ multiply-\/accumulate\ */}}
+\DoxyCodeLine{01030\ \ \ \ \ \ \ acc0\ +=\ x1\ *\ c0;}
+\DoxyCodeLine{01031\ \ \ \ \ \ \ acc1\ +=\ x2\ *\ c0;}
+\DoxyCodeLine{01032\ \ \ \ \ \ \ acc2\ +=\ x3\ *\ c0;}
+\DoxyCodeLine{01033\ \ \ \ \ \ \ acc3\ +=\ x4\ *\ c0;}
+\DoxyCodeLine{01034\ \ \ \ \ \ \ acc4\ +=\ x5\ *\ c0;}
+\DoxyCodeLine{01035\ \ \ \ \ \ \ acc5\ +=\ x6\ *\ c0;}
+\DoxyCodeLine{01036\ \ \ \ \ \ \ acc6\ +=\ x7\ *\ c0;}
+\DoxyCodeLine{01037\ \ \ \ \ \ \ acc7\ +=\ x0\ *\ c0;}
+\DoxyCodeLine{01038\ }
+\DoxyCodeLine{01039\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ b[numTaps-\/3]\ coefficient\ */}}
+\DoxyCodeLine{01040\ \ \ \ \ \ \ c0\ =\ *(pb++);}
+\DoxyCodeLine{01041\ }
+\DoxyCodeLine{01042\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ x[n-\/numTaps-\/5]\ sample\ */}}
+\DoxyCodeLine{01043\ \ \ \ \ \ \ x1\ =\ *(px++);}
+\DoxyCodeLine{01044\ }
+\DoxyCodeLine{01045\ \ \ \ \ \ \ \textcolor{comment}{/*\ Perform\ the\ multiply-\/accumulates\ */}}
+\DoxyCodeLine{01046\ \ \ \ \ \ \ acc0\ +=\ x2\ *\ c0;}
+\DoxyCodeLine{01047\ \ \ \ \ \ \ acc1\ +=\ x3\ *\ c0;}
+\DoxyCodeLine{01048\ \ \ \ \ \ \ acc2\ +=\ x4\ *\ c0;}
+\DoxyCodeLine{01049\ \ \ \ \ \ \ acc3\ +=\ x5\ *\ c0;}
+\DoxyCodeLine{01050\ \ \ \ \ \ \ acc4\ +=\ x6\ *\ c0;}
+\DoxyCodeLine{01051\ \ \ \ \ \ \ acc5\ +=\ x7\ *\ c0;}
+\DoxyCodeLine{01052\ \ \ \ \ \ \ acc6\ +=\ x0\ *\ c0;}
+\DoxyCodeLine{01053\ \ \ \ \ \ \ acc7\ +=\ x1\ *\ c0;}
+\DoxyCodeLine{01054\ }
+\DoxyCodeLine{01055\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ b[numTaps-\/4]\ coefficient\ */}}
+\DoxyCodeLine{01056\ \ \ \ \ \ \ c0\ =\ *(pb++);}
+\DoxyCodeLine{01057\ }
+\DoxyCodeLine{01058\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ x[n-\/numTaps-\/6]\ sample\ */}}
+\DoxyCodeLine{01059\ \ \ \ \ \ \ x2\ =\ *(px++);}
+\DoxyCodeLine{01060\ }
+\DoxyCodeLine{01061\ \ \ \ \ \ \ \textcolor{comment}{/*\ Perform\ the\ multiply-\/accumulates\ */}}
+\DoxyCodeLine{01062\ \ \ \ \ \ \ acc0\ +=\ x3\ *\ c0;}
+\DoxyCodeLine{01063\ \ \ \ \ \ \ acc1\ +=\ x4\ *\ c0;}
+\DoxyCodeLine{01064\ \ \ \ \ \ \ acc2\ +=\ x5\ *\ c0;}
+\DoxyCodeLine{01065\ \ \ \ \ \ \ acc3\ +=\ x6\ *\ c0;}
+\DoxyCodeLine{01066\ \ \ \ \ \ \ acc4\ +=\ x7\ *\ c0;}
+\DoxyCodeLine{01067\ \ \ \ \ \ \ acc5\ +=\ x0\ *\ c0;}
+\DoxyCodeLine{01068\ \ \ \ \ \ \ acc6\ +=\ x1\ *\ c0;}
+\DoxyCodeLine{01069\ \ \ \ \ \ \ acc7\ +=\ x2\ *\ c0;}
+\DoxyCodeLine{01070\ }
+\DoxyCodeLine{01071\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ b[numTaps-\/4]\ coefficient\ */}}
+\DoxyCodeLine{01072\ \ \ \ \ \ \ c0\ =\ *(pb++);}
+\DoxyCodeLine{01073\ }
+\DoxyCodeLine{01074\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ x[n-\/numTaps-\/6]\ sample\ */}}
+\DoxyCodeLine{01075\ \ \ \ \ \ \ x3\ =\ *(px++);}
+\DoxyCodeLine{01076\ \ \ \ \ \ \ \textcolor{comment}{/*\ Perform\ the\ multiply-\/accumulates\ */}}
+\DoxyCodeLine{01077\ \ \ \ \ \ \ acc0\ +=\ x4\ *\ c0;}
+\DoxyCodeLine{01078\ \ \ \ \ \ \ acc1\ +=\ x5\ *\ c0;}
+\DoxyCodeLine{01079\ \ \ \ \ \ \ acc2\ +=\ x6\ *\ c0;}
+\DoxyCodeLine{01080\ \ \ \ \ \ \ acc3\ +=\ x7\ *\ c0;}
+\DoxyCodeLine{01081\ \ \ \ \ \ \ acc4\ +=\ x0\ *\ c0;}
+\DoxyCodeLine{01082\ \ \ \ \ \ \ acc5\ +=\ x1\ *\ c0;}
+\DoxyCodeLine{01083\ \ \ \ \ \ \ acc6\ +=\ x2\ *\ c0;}
+\DoxyCodeLine{01084\ \ \ \ \ \ \ acc7\ +=\ x3\ *\ c0;}
+\DoxyCodeLine{01085\ }
+\DoxyCodeLine{01086\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ b[numTaps-\/4]\ coefficient\ */}}
+\DoxyCodeLine{01087\ \ \ \ \ \ \ c0\ =\ *(pb++);}
+\DoxyCodeLine{01088\ }
+\DoxyCodeLine{01089\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ x[n-\/numTaps-\/6]\ sample\ */}}
+\DoxyCodeLine{01090\ \ \ \ \ \ \ x4\ =\ *(px++);}
+\DoxyCodeLine{01091\ }
+\DoxyCodeLine{01092\ \ \ \ \ \ \ \textcolor{comment}{/*\ Perform\ the\ multiply-\/accumulates\ */}}
+\DoxyCodeLine{01093\ \ \ \ \ \ \ acc0\ +=\ x5\ *\ c0;}
+\DoxyCodeLine{01094\ \ \ \ \ \ \ acc1\ +=\ x6\ *\ c0;}
+\DoxyCodeLine{01095\ \ \ \ \ \ \ acc2\ +=\ x7\ *\ c0;}
+\DoxyCodeLine{01096\ \ \ \ \ \ \ acc3\ +=\ x0\ *\ c0;}
+\DoxyCodeLine{01097\ \ \ \ \ \ \ acc4\ +=\ x1\ *\ c0;}
+\DoxyCodeLine{01098\ \ \ \ \ \ \ acc5\ +=\ x2\ *\ c0;}
+\DoxyCodeLine{01099\ \ \ \ \ \ \ acc6\ +=\ x3\ *\ c0;}
+\DoxyCodeLine{01100\ \ \ \ \ \ \ acc7\ +=\ x4\ *\ c0;}
+\DoxyCodeLine{01101\ }
+\DoxyCodeLine{01102\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ b[numTaps-\/4]\ coefficient\ */}}
+\DoxyCodeLine{01103\ \ \ \ \ \ \ c0\ =\ *(pb++);}
+\DoxyCodeLine{01104\ }
+\DoxyCodeLine{01105\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ x[n-\/numTaps-\/6]\ sample\ */}}
+\DoxyCodeLine{01106\ \ \ \ \ \ \ x5\ =\ *(px++);}
+\DoxyCodeLine{01107\ }
+\DoxyCodeLine{01108\ \ \ \ \ \ \ \textcolor{comment}{/*\ Perform\ the\ multiply-\/accumulates\ */}}
+\DoxyCodeLine{01109\ \ \ \ \ \ \ acc0\ +=\ x6\ *\ c0;}
+\DoxyCodeLine{01110\ \ \ \ \ \ \ acc1\ +=\ x7\ *\ c0;}
+\DoxyCodeLine{01111\ \ \ \ \ \ \ acc2\ +=\ x0\ *\ c0;}
+\DoxyCodeLine{01112\ \ \ \ \ \ \ acc3\ +=\ x1\ *\ c0;}
+\DoxyCodeLine{01113\ \ \ \ \ \ \ acc4\ +=\ x2\ *\ c0;}
+\DoxyCodeLine{01114\ \ \ \ \ \ \ acc5\ +=\ x3\ *\ c0;}
+\DoxyCodeLine{01115\ \ \ \ \ \ \ acc6\ +=\ x4\ *\ c0;}
+\DoxyCodeLine{01116\ \ \ \ \ \ \ acc7\ +=\ x5\ *\ c0;}
+\DoxyCodeLine{01117\ }
+\DoxyCodeLine{01118\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ b[numTaps-\/4]\ coefficient\ */}}
+\DoxyCodeLine{01119\ \ \ \ \ \ \ c0\ =\ *(pb++);}
+\DoxyCodeLine{01120\ }
+\DoxyCodeLine{01121\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ x[n-\/numTaps-\/6]\ sample\ */}}
+\DoxyCodeLine{01122\ \ \ \ \ \ \ x6\ =\ *(px++);}
+\DoxyCodeLine{01123\ }
+\DoxyCodeLine{01124\ \ \ \ \ \ \ \textcolor{comment}{/*\ Perform\ the\ multiply-\/accumulates\ */}}
+\DoxyCodeLine{01125\ \ \ \ \ \ \ acc0\ +=\ x7\ *\ c0;}
+\DoxyCodeLine{01126\ \ \ \ \ \ \ acc1\ +=\ x0\ *\ c0;}
+\DoxyCodeLine{01127\ \ \ \ \ \ \ acc2\ +=\ x1\ *\ c0;}
+\DoxyCodeLine{01128\ \ \ \ \ \ \ acc3\ +=\ x2\ *\ c0;}
+\DoxyCodeLine{01129\ \ \ \ \ \ \ acc4\ +=\ x3\ *\ c0;}
+\DoxyCodeLine{01130\ \ \ \ \ \ \ acc5\ +=\ x4\ *\ c0;}
+\DoxyCodeLine{01131\ \ \ \ \ \ \ acc6\ +=\ x5\ *\ c0;}
+\DoxyCodeLine{01132\ \ \ \ \ \ \ acc7\ +=\ x6\ *\ c0;}
+\DoxyCodeLine{01133\ }
+\DoxyCodeLine{01134\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{01135\ \ \ \ \ \ \ tapCnt-\/-\/;}
+\DoxyCodeLine{01136\ \ \ \ \ \}}
+\DoxyCodeLine{01137\ }
+\DoxyCodeLine{01138\ \ \ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ remaining\ outputs\ */}}
+\DoxyCodeLine{01139\ \ \ \ \ tapCnt\ =\ numTaps\ \%\ 0x8U;}
+\DoxyCodeLine{01140\ }
+\DoxyCodeLine{01141\ \ \ \ \ \textcolor{keywordflow}{while}\ (tapCnt\ >\ 0U)}
+\DoxyCodeLine{01142\ \ \ \ \ \{}
+\DoxyCodeLine{01143\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ coefficients\ */}}
+\DoxyCodeLine{01144\ \ \ \ \ \ \ c0\ =\ *(pb++);}
+\DoxyCodeLine{01145\ }
+\DoxyCodeLine{01146\ \ \ \ \ \ \ \textcolor{comment}{/*\ Fetch\ 1\ state\ variable\ */}}
+\DoxyCodeLine{01147\ \ \ \ \ \ \ x7\ =\ *(px++);}
+\DoxyCodeLine{01148\ }
+\DoxyCodeLine{01149\ \ \ \ \ \ \ \textcolor{comment}{/*\ Perform\ the\ multiply-\/accumulates\ */}}
+\DoxyCodeLine{01150\ \ \ \ \ \ \ acc0\ +=\ x0\ *\ c0;}
+\DoxyCodeLine{01151\ \ \ \ \ \ \ acc1\ +=\ x1\ *\ c0;}
+\DoxyCodeLine{01152\ \ \ \ \ \ \ acc2\ +=\ x2\ *\ c0;}
+\DoxyCodeLine{01153\ \ \ \ \ \ \ acc3\ +=\ x3\ *\ c0;}
+\DoxyCodeLine{01154\ \ \ \ \ \ \ acc4\ +=\ x4\ *\ c0;}
+\DoxyCodeLine{01155\ \ \ \ \ \ \ acc5\ +=\ x5\ *\ c0;}
+\DoxyCodeLine{01156\ \ \ \ \ \ \ acc6\ +=\ x6\ *\ c0;}
+\DoxyCodeLine{01157\ \ \ \ \ \ \ acc7\ +=\ x7\ *\ c0;}
+\DoxyCodeLine{01158\ }
+\DoxyCodeLine{01159\ \ \ \ \ \ \ \textcolor{comment}{/*\ Reuse\ the\ present\ sample\ states\ for\ next\ sample\ */}}
+\DoxyCodeLine{01160\ \ \ \ \ \ \ x0\ =\ x1;}
+\DoxyCodeLine{01161\ \ \ \ \ \ \ x1\ =\ x2;}
+\DoxyCodeLine{01162\ \ \ \ \ \ \ x2\ =\ x3;}
+\DoxyCodeLine{01163\ \ \ \ \ \ \ x3\ =\ x4;}
+\DoxyCodeLine{01164\ \ \ \ \ \ \ x4\ =\ x5;}
+\DoxyCodeLine{01165\ \ \ \ \ \ \ x5\ =\ x6;}
+\DoxyCodeLine{01166\ \ \ \ \ \ \ x6\ =\ x7;}
+\DoxyCodeLine{01167\ }
+\DoxyCodeLine{01168\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{01169\ \ \ \ \ \ \ tapCnt-\/-\/;}
+\DoxyCodeLine{01170\ \ \ \ \ \}}
+\DoxyCodeLine{01171\ }
+\DoxyCodeLine{01172\ \ \ \ \ \textcolor{comment}{/*\ Advance\ the\ state\ pointer\ by\ 8\ to\ process\ the\ next\ group\ of\ 8\ samples\ */}}
+\DoxyCodeLine{01173\ \ \ \ \ pState\ =\ pState\ +\ 8;}
+\DoxyCodeLine{01174\ }
+\DoxyCodeLine{01175\ \ \ \ \ \textcolor{comment}{/*\ The\ results\ in\ the\ 8\ accumulators,\ store\ in\ the\ destination\ buffer.\ */}}
+\DoxyCodeLine{01176\ \ \ \ \ *pDst++\ =\ acc0;}
+\DoxyCodeLine{01177\ \ \ \ \ *pDst++\ =\ acc1;}
+\DoxyCodeLine{01178\ \ \ \ \ *pDst++\ =\ acc2;}
+\DoxyCodeLine{01179\ \ \ \ \ *pDst++\ =\ acc3;}
+\DoxyCodeLine{01180\ \ \ \ \ *pDst++\ =\ acc4;}
+\DoxyCodeLine{01181\ \ \ \ \ *pDst++\ =\ acc5;}
+\DoxyCodeLine{01182\ \ \ \ \ *pDst++\ =\ acc6;}
+\DoxyCodeLine{01183\ \ \ \ \ *pDst++\ =\ acc7;}
+\DoxyCodeLine{01184\ }
+\DoxyCodeLine{01185\ }
+\DoxyCodeLine{01186\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{01187\ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{01188\ \ \ \}}
+\DoxyCodeLine{01189\ }
+\DoxyCodeLine{01190\ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ remaining\ output\ samples\ */}}
+\DoxyCodeLine{01191\ \ \ blkCnt\ =\ blockSize\ \%\ 0x8U;}
+\DoxyCodeLine{01192\ }
+\DoxyCodeLine{01193\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01194\ }
+\DoxyCodeLine{01195\ \ \ \textcolor{comment}{/*\ Initialize\ blkCnt\ with\ number\ of\ taps\ */}}
+\DoxyCodeLine{01196\ \ \ blkCnt\ =\ blockSize;}
+\DoxyCodeLine{01197\ }
+\DoxyCodeLine{01198\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_LOOPUNROLL)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01199\ }
+\DoxyCodeLine{01200\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{01201\ \ \ \{}
+\DoxyCodeLine{01202\ \ \ \ \ \textcolor{comment}{/*\ Copy\ one\ sample\ at\ a\ time\ into\ state\ buffer\ */}}
+\DoxyCodeLine{01203\ \ \ \ \ *pStateCurnt++\ =\ *pSrc++;}
+\DoxyCodeLine{01204\ }
+\DoxyCodeLine{01205\ \ \ \ \ \textcolor{comment}{/*\ Set\ the\ accumulator\ to\ zero\ */}}
+\DoxyCodeLine{01206\ \ \ \ \ acc0\ =\ 0.0f;}
+\DoxyCodeLine{01207\ }
+\DoxyCodeLine{01208\ \ \ \ \ \textcolor{comment}{/*\ Initialize\ state\ pointer\ */}}
+\DoxyCodeLine{01209\ \ \ \ \ px\ =\ pState;}
+\DoxyCodeLine{01210\ }
+\DoxyCodeLine{01211\ \ \ \ \ \textcolor{comment}{/*\ Initialize\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{01212\ \ \ \ \ pb\ =\ pCoeffs;}
+\DoxyCodeLine{01213\ }
+\DoxyCodeLine{01214\ \ \ \ \ i\ =\ numTaps;}
+\DoxyCodeLine{01215\ }
+\DoxyCodeLine{01216\ \ \ \ \ \textcolor{comment}{/*\ Perform\ the\ multiply-\/accumulates\ */}}
+\DoxyCodeLine{01217\ \ \ \ \ \textcolor{keywordflow}{while}\ (i\ >\ 0U)}
+\DoxyCodeLine{01218\ \ \ \ \ \{}
+\DoxyCodeLine{01219\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc\ =\ \ b[numTaps-\/1]\ *\ x[n-\/numTaps-\/1]\ +\ b[numTaps-\/2]\ *\ x[n-\/numTaps-\/2]\ +\ b[numTaps-\/3]\ *\ x[n-\/numTaps-\/3]\ +...+\ b[0]\ *\ x[0]\ */}}
+\DoxyCodeLine{01220\ \ \ \ \ \ \ acc0\ +=\ *px++\ *\ *pb++;}
+\DoxyCodeLine{01221\ }
+\DoxyCodeLine{01222\ \ \ \ \ \ \ i-\/-\/;}
+\DoxyCodeLine{01223\ \ \ \ \ \}}
+\DoxyCodeLine{01224\ }
+\DoxyCodeLine{01225\ \ \ \ \ \textcolor{comment}{/*\ Store\ result\ in\ destination\ buffer.\ */}}
+\DoxyCodeLine{01226\ \ \ \ \ *pDst++\ =\ acc0;}
+\DoxyCodeLine{01227\ }
+\DoxyCodeLine{01228\ \ \ \ \ \textcolor{comment}{/*\ Advance\ state\ pointer\ by\ 1\ for\ the\ next\ sample\ */}}
+\DoxyCodeLine{01229\ \ \ \ \ pState\ =\ pState\ +\ 1U;}
+\DoxyCodeLine{01230\ }
+\DoxyCodeLine{01231\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{01232\ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{01233\ \ \ \}}
+\DoxyCodeLine{01234\ }
+\DoxyCodeLine{01235\ \ \ \textcolor{comment}{/*\ Processing\ is\ complete.}}
+\DoxyCodeLine{01236\ \textcolor{comment}{\ \ \ \ \ Now\ copy\ the\ last\ numTaps\ -\/\ 1\ samples\ to\ the\ start\ of\ the\ state\ buffer.}}
+\DoxyCodeLine{01237\ \textcolor{comment}{\ \ \ \ \ This\ prepares\ the\ state\ buffer\ for\ the\ next\ function\ call.\ */}}
+\DoxyCodeLine{01238\ }
+\DoxyCodeLine{01239\ \ \ \textcolor{comment}{/*\ Points\ to\ the\ start\ of\ the\ state\ buffer\ */}}
+\DoxyCodeLine{01240\ \ \ pStateCurnt\ =\ S-\/>pState;}
+\DoxyCodeLine{01241\ }
+\DoxyCodeLine{01242\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)}}
+\DoxyCodeLine{01243\ }
+\DoxyCodeLine{01244\ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ 4\ taps\ at\ a\ time\ */}}
+\DoxyCodeLine{01245\ \ \ tapCnt\ =\ (numTaps\ -\/\ 1U)\ >>\ 2U;}
+\DoxyCodeLine{01246\ }
+\DoxyCodeLine{01247\ \ \ \textcolor{comment}{/*\ Copy\ data\ */}}
+\DoxyCodeLine{01248\ \ \ \textcolor{keywordflow}{while}\ (tapCnt\ >\ 0U)}
+\DoxyCodeLine{01249\ \ \ \{}
+\DoxyCodeLine{01250\ \ \ \ \ *pStateCurnt++\ =\ *pState++;}
+\DoxyCodeLine{01251\ \ \ \ \ *pStateCurnt++\ =\ *pState++;}
+\DoxyCodeLine{01252\ \ \ \ \ *pStateCurnt++\ =\ *pState++;}
+\DoxyCodeLine{01253\ \ \ \ \ *pStateCurnt++\ =\ *pState++;}
+\DoxyCodeLine{01254\ }
+\DoxyCodeLine{01255\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{01256\ \ \ \ \ tapCnt-\/-\/;}
+\DoxyCodeLine{01257\ \ \ \}}
+\DoxyCodeLine{01258\ }
+\DoxyCodeLine{01259\ \ \ \textcolor{comment}{/*\ Calculate\ remaining\ number\ of\ copies\ */}}
+\DoxyCodeLine{01260\ \ \ tapCnt\ =\ (numTaps\ -\/\ 1U)\ \%\ 0x4U;}
+\DoxyCodeLine{01261\ }
+\DoxyCodeLine{01262\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{01263\ }
+\DoxyCodeLine{01264\ \ \ \textcolor{comment}{/*\ Initialize\ tapCnt\ with\ number\ of\ taps\ */}}
+\DoxyCodeLine{01265\ \ \ tapCnt\ =\ (numTaps\ -\/\ 1U);}
+\DoxyCodeLine{01266\ }
+\DoxyCodeLine{01267\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_LOOPUNROLL)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01268\ }
+\DoxyCodeLine{01269\ \ \ \textcolor{comment}{/*\ Copy\ remaining\ data\ */}}
+\DoxyCodeLine{01270\ \ \ \textcolor{keywordflow}{while}\ (tapCnt\ >\ 0U)}
+\DoxyCodeLine{01271\ \ \ \{}
+\DoxyCodeLine{01272\ \ \ \ \ *pStateCurnt++\ =\ *pState++;}
+\DoxyCodeLine{01273\ }
+\DoxyCodeLine{01274\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{01275\ \ \ \ \ tapCnt-\/-\/;}
+\DoxyCodeLine{01276\ \ \ \}}
+\DoxyCodeLine{01277\ }
+\DoxyCodeLine{01278\ \}}
+\DoxyCodeLine{01279\ }
+\DoxyCodeLine{01280\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined(ARM\_MATH\_NEON)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01281\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{01282\ }
+
+\end{DoxyCode}

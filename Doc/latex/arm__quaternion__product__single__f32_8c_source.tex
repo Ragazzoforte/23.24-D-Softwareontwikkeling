@@ -1,0 +1,87 @@
+\doxysection{arm\+\_\+quaternion\+\_\+product\+\_\+single\+\_\+f32.\+c}
+\hypertarget{arm__quaternion__product__single__f32_8c_source}{}\label{arm__quaternion__product__single__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/QuaternionMathFunctions/arm\_quaternion\_product\_single\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/QuaternionMathFunctions/arm\_quaternion\_product\_single\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_quaternion\_product\_single\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Floating-\/point\ quaternion\ product}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/quaternion\_math\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <math.h>}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00059\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___quat_prod_single_ga93269654e1b26482c90d89c7904b3039}{arm\_quaternion\_product\_single\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *qa,\ }
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *qb,\ }
+\DoxyCodeLine{00061\ \ \ \ \ float32\_t\ *qr)}
+\DoxyCodeLine{00062\ \{}
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keyword}{static}\ uint32\_t\ patternA[4]\ =\ \{\ 0,\ 1,\ 0,\ 1\ \};}
+\DoxyCodeLine{00064\ \ \ \ \ \textcolor{keyword}{static}\ uint32\_t\ patternB[4]\ =\ \{\ 3,\ 2,\ 3,\ 2\ \};}
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keyword}{static}\ uint32\_t\ patternC[4]\ =\ \{\ 3,\ 2,\ 1,\ 0\ \};}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keyword}{static}\ float32\_t\ signA[4]\ =\ \{\ -\/1,\ -\/1,\ 1,\ 1\ \};}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ \ \ uint32x4\_t\ vecA\ =\ vld1q\_u32(patternA);}
+\DoxyCodeLine{00069\ \ \ \ \ uint32x4\_t\ vecB\ =\ vld1q\_u32(patternB);}
+\DoxyCodeLine{00070\ \ \ \ \ uint32x4\_t\ vecC\ =\ vld1q\_u32(patternC);}
+\DoxyCodeLine{00071\ \ \ \ \ f32x4\_t\ vecSignA\ =\ vld1q\_f32(signA);}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \ \ \ \ f32x4\_t\ vecTmpA,\ vecTmpB,\ vecAcc;}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \ \ \ \ vecTmpA\ =\ vldrwq\_gather\_shifted\_offset\_f32(qa,\ vecA);}
+\DoxyCodeLine{00077\ \ \ \ \ vecTmpB\ =\ vld1q\_f32(qb);}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \ \ \ \ vecAcc\ =\ vcmulq\_f32(vecTmpA,\ vecTmpB);}
+\DoxyCodeLine{00080\ \ \ \ \ vecAcc\ =\ vcmlaq\_rot90\_f32(vecAcc,\ vecTmpA,\ vecTmpB);}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \ \ \ \ vecTmpA\ =\ vldrwq\_gather\_shifted\_offset\_f32(qa,\ vecB);}
+\DoxyCodeLine{00083\ \ \ \ \ vecTmpB\ =\ vldrwq\_gather\_shifted\_offset\_f32(qb,\ vecC);}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \ \ vecTmpB\ =\ vecTmpB\ *\ vecSignA;}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ vecAcc\ =\ vcmlaq\_rot270\_f32(vecAcc,\ vecTmpA,\ vecTmpB);}
+\DoxyCodeLine{00088\ \ \ \ \ vecAcc\ =\ vcmlaq\_f32(vecAcc,\ vecTmpA,\ vecTmpB);}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ vst1q\_f32(qr,\ vecAcc);}
+\DoxyCodeLine{00091\ \}}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00094\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___quat_prod_single_ga93269654e1b26482c90d89c7904b3039}{arm\_quaternion\_product\_single\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *qa,\ }
+\DoxyCodeLine{00095\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *qb,\ }
+\DoxyCodeLine{00096\ \ \ \ \ float32\_t\ *qr)}
+\DoxyCodeLine{00097\ \{}
+\DoxyCodeLine{00098\ \ \ \ \ qr[0]\ =\ qa[0]\ *\ qb[0]\ -\/\ qa[1]\ *\ qb[1]\ -\/\ qa[2]\ *\ qb[2]\ -\/\ qa[3]\ *\ qb[3];}
+\DoxyCodeLine{00099\ \ \ \ \ qr[1]\ =\ qa[0]\ *\ qb[1]\ +\ qa[1]\ *\ qb[0]\ +\ qa[2]\ *\ qb[3]\ -\/\ qa[3]\ *\ qb[2];}
+\DoxyCodeLine{00100\ \ \ \ \ qr[2]\ =\ qa[0]\ *\ qb[2]\ +\ qa[2]\ *\ qb[0]\ +\ qa[3]\ *\ qb[1]\ -\/\ qa[1]\ *\ qb[3];}
+\DoxyCodeLine{00101\ \ \ \ \ qr[3]\ =\ qa[0]\ *\ qb[3]\ +\ qa[3]\ *\ qb[0]\ +\ qa[1]\ *\ qb[2]\ -\/\ qa[2]\ *\ qb[1];}
+\DoxyCodeLine{00102\ \}}
+\DoxyCodeLine{00103\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00104\ }
+
+\end{DoxyCode}

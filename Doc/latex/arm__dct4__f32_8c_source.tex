@@ -1,0 +1,355 @@
+\doxysection{arm\+\_\+dct4\+\_\+f32.\+c}
+\hypertarget{arm__dct4__f32_8c_source}{}\label{arm__dct4__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_dct4\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_dct4\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_dct4\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Processing\ function\ of\ DCT4\ \&\ IDCT4\ F32}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/transform\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00127\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___d_c_t4___i_d_c_t4_gafd538d68886848bc090ec2b0d364cc81}{arm\_dct4\_f32}}(}
+\DoxyCodeLine{00128\ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__dct4__instance__f32}{arm\_dct4\_instance\_f32}}\ *\ S,}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ float32\_t\ *\ pState,}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ float32\_t\ *\ pInlineBuffer)}
+\DoxyCodeLine{00131\ \{}
+\DoxyCodeLine{00132\ \ \ \textcolor{keyword}{const}\ float32\_t\ *weights\ =\ S-\/>pTwiddle;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Pointer\ to\ the\ Weights\ table\ */}}
+\DoxyCodeLine{00133\ \ \ \textcolor{keyword}{const}\ float32\_t\ *cosFact\ =\ S-\/>pCosFactor;\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Pointer\ to\ the\ cos\ factors\ table\ */}}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ float32\_t\ *pS1,\ *pS2,\ *pbuff;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ pointers\ for\ input\ buffer\ and\ pState\ buffer\ */}}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ float32\_t\ in;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ variable\ */}}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ uint32\_t\ i;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ counter\ */}}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00139\ \ \ \textcolor{comment}{/*\ DCT4\ computation\ involves\ DCT2\ (which\ is\ calculated\ using\ RFFT)}}
+\DoxyCodeLine{00140\ \textcolor{comment}{\ \ \ *\ along\ with\ some\ pre-\/processing\ and\ post-\/processing.}}
+\DoxyCodeLine{00141\ \textcolor{comment}{\ \ \ *\ Computational\ procedure\ is\ explained\ as\ follows:}}
+\DoxyCodeLine{00142\ \textcolor{comment}{\ \ \ *\ (a)\ Pre-\/processing\ involves\ multiplying\ input\ with\ cos\ factor,}}
+\DoxyCodeLine{00143\ \textcolor{comment}{\ \ \ *\ \ \ \ \ r(n)\ =\ 2\ *\ u(n)\ *\ cos(pi*(2*n+1)/(4*n))}}
+\DoxyCodeLine{00144\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ \ \ \ \ \ \ \ where,}}
+\DoxyCodeLine{00145\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ r(n)\ -\/-\/\ output\ of\ preprocessing}}
+\DoxyCodeLine{00146\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ u(n)\ -\/-\/\ input\ to\ preprocessing(actual\ Source\ buffer)}}
+\DoxyCodeLine{00147\ \textcolor{comment}{\ \ \ *\ (b)\ Calculation\ of\ DCT2\ using\ FFT\ is\ divided\ into\ three\ steps:}}
+\DoxyCodeLine{00148\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Step1:\ Re-\/ordering\ of\ even\ and\ odd\ elements\ of\ input.}}
+\DoxyCodeLine{00149\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Step2:\ Calculating\ FFT\ of\ the\ re-\/ordered\ input.}}
+\DoxyCodeLine{00150\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Step3:\ Taking\ the\ real\ part\ of\ the\ product\ of\ FFT\ output\ and\ weights.}}
+\DoxyCodeLine{00151\ \textcolor{comment}{\ \ \ *\ (c)\ Post-\/processing\ -\/\ DCT4\ can\ be\ obtained\ from\ DCT2\ output\ using\ the\ following\ equation:}}
+\DoxyCodeLine{00152\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Y4(k)\ =\ Y2(k)\ -\/\ Y4(k-\/1)\ and\ Y4(-\/1)\ =\ Y4(0)}}
+\DoxyCodeLine{00153\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where,}}
+\DoxyCodeLine{00154\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Y4\ -\/-\/\ DCT4\ output,\ \ \ Y2\ -\/-\/\ DCT2\ output}}
+\DoxyCodeLine{00155\ \textcolor{comment}{\ \ \ *\ (d)\ Multiplying\ the\ output\ with\ the\ normalizing\ factor\ sqrt(2/N).}}
+\DoxyCodeLine{00156\ \textcolor{comment}{\ \ \ */}}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \ \ \textcolor{comment}{/*-\/-\/-\/-\/-\/-\/-\/-\/\ Pre-\/processing\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00159\ \ \ \textcolor{comment}{/*\ Multiplying\ input\ with\ cos\ factor\ i.e.\ r(n)\ =\ 2\ *\ x(n)\ *\ cos(pi*(2*n+1)/(4*n))\ */}}
+\DoxyCodeLine{00160\ \ \ \mbox{\hyperlink{group___basic_scale_ga5e769c8e22da173674c6abca7291e713}{arm\_scale\_f32}}(pInlineBuffer,\ 2.0f,\ pInlineBuffer,\ S-\/>N);}
+\DoxyCodeLine{00161\ \ \ \mbox{\hyperlink{group___basic_mult_gacf950935141cad927bea886e88fd9e9b}{arm\_mult\_f32}}(pInlineBuffer,\ cosFact,\ pInlineBuffer,\ S-\/>N);}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \ \ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00164\ \textcolor{comment}{\ \ \ *\ Step1:\ Re-\/ordering\ of\ even\ and\ odd\ elements\ as}}
+\DoxyCodeLine{00165\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ \ \ \ \ \ \ pState[i]\ =\ \ pInlineBuffer[2*i]\ and}}
+\DoxyCodeLine{00166\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ \ \ \ \ \ \ pState[N-\/i-\/1]\ =\ pInlineBuffer[2*i+1]\ where\ i\ =\ 0\ to\ N/2}}
+\DoxyCodeLine{00167\ \textcolor{comment}{\ \ \ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \ \ \textcolor{comment}{/*\ pS1\ initialized\ to\ pState\ */}}
+\DoxyCodeLine{00170\ \ \ pS1\ =\ pState;}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \ \ \textcolor{comment}{/*\ pS2\ initialized\ to\ pState+N-\/1,\ so\ that\ it\ points\ to\ the\ end\ of\ the\ state\ buffer\ */}}
+\DoxyCodeLine{00173\ \ \ pS2\ =\ pState\ +\ (S-\/>N\ -\/\ 1U);}
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00175\ \ \ \textcolor{comment}{/*\ pbuff\ initialized\ to\ input\ buffer\ */}}
+\DoxyCodeLine{00176\ \ \ pbuff\ =\ pInlineBuffer;}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00179\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)}}
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00181\ \ \ \textcolor{comment}{/*\ Initializing\ the\ loop\ counter\ to\ N/2\ >>\ 2\ for\ loop\ unrolling\ by\ 4\ */}}
+\DoxyCodeLine{00182\ \ \ i\ =\ S-\/>Nby2\ >>\ 2U;}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \ \ \textcolor{comment}{/*\ First\ part\ of\ the\ processing\ with\ loop\ unrolling.\ \ Compute\ 4\ outputs\ at\ a\ time.}}
+\DoxyCodeLine{00185\ \textcolor{comment}{\ \ \ **\ a\ second\ loop\ below\ computes\ the\ remaining\ 1\ to\ 3\ samples.\ */}}
+\DoxyCodeLine{00186\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00187\ \ \ \{}
+\DoxyCodeLine{00188\ \ \ \ \ \textcolor{comment}{/*\ Re-\/ordering\ of\ even\ and\ odd\ elements\ */}}
+\DoxyCodeLine{00189\ \ \ \ \ \textcolor{comment}{/*\ pState[i]\ =\ \ pInlineBuffer[2*i]\ */}}
+\DoxyCodeLine{00190\ \ \ \ \ *pS1++\ =\ *pbuff++;}
+\DoxyCodeLine{00191\ \ \ \ \ \textcolor{comment}{/*\ pState[N-\/i-\/1]\ =\ pInlineBuffer[2*i+1]\ */}}
+\DoxyCodeLine{00192\ \ \ \ \ *pS2-\/-\/\ =\ *pbuff++;}
+\DoxyCodeLine{00193\ }
+\DoxyCodeLine{00194\ \ \ \ \ *pS1++\ =\ *pbuff++;}
+\DoxyCodeLine{00195\ \ \ \ \ *pS2-\/-\/\ =\ *pbuff++;}
+\DoxyCodeLine{00196\ }
+\DoxyCodeLine{00197\ \ \ \ \ *pS1++\ =\ *pbuff++;}
+\DoxyCodeLine{00198\ \ \ \ \ *pS2-\/-\/\ =\ *pbuff++;}
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00200\ \ \ \ \ *pS1++\ =\ *pbuff++;}
+\DoxyCodeLine{00201\ \ \ \ \ *pS2-\/-\/\ =\ *pbuff++;}
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00203\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00204\ \ \ \ \ i-\/-\/;}
+\DoxyCodeLine{00205\ \ \ \}\ \textcolor{keywordflow}{while}\ (i\ >\ 0U);}
+\DoxyCodeLine{00206\ }
+\DoxyCodeLine{00207\ \ \ \textcolor{comment}{/*\ pbuff\ initialized\ to\ input\ buffer\ */}}
+\DoxyCodeLine{00208\ \ \ pbuff\ =\ pInlineBuffer;}
+\DoxyCodeLine{00209\ }
+\DoxyCodeLine{00210\ \ \ \textcolor{comment}{/*\ pS1\ initialized\ to\ pState\ */}}
+\DoxyCodeLine{00211\ \ \ pS1\ =\ pState;}
+\DoxyCodeLine{00212\ }
+\DoxyCodeLine{00213\ \ \ \textcolor{comment}{/*\ Initializing\ the\ loop\ counter\ to\ N/4\ instead\ of\ N\ for\ loop\ unrolling\ */}}
+\DoxyCodeLine{00214\ \ \ i\ =\ S-\/>N\ >>\ 2U;}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00216\ \ \ \textcolor{comment}{/*\ Processing\ with\ loop\ unrolling\ 4\ times\ as\ N\ is\ always\ multiple\ of\ 4.}}
+\DoxyCodeLine{00217\ \textcolor{comment}{\ \ \ *\ Compute\ 4\ outputs\ at\ a\ time\ */}}
+\DoxyCodeLine{00218\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00219\ \ \ \{}
+\DoxyCodeLine{00220\ \ \ \ \ \textcolor{comment}{/*\ Writing\ the\ re-\/ordered\ output\ back\ to\ inplace\ input\ buffer\ */}}
+\DoxyCodeLine{00221\ \ \ \ \ *pbuff++\ =\ *pS1++;}
+\DoxyCodeLine{00222\ \ \ \ \ *pbuff++\ =\ *pS1++;}
+\DoxyCodeLine{00223\ \ \ \ \ *pbuff++\ =\ *pS1++;}
+\DoxyCodeLine{00224\ \ \ \ \ *pbuff++\ =\ *pS1++;}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ the\ loop\ counter\ */}}
+\DoxyCodeLine{00227\ \ \ \ \ i-\/-\/;}
+\DoxyCodeLine{00228\ \ \ \}\ \textcolor{keywordflow}{while}\ (i\ >\ 0U);}
+\DoxyCodeLine{00229\ }
+\DoxyCodeLine{00230\ }
+\DoxyCodeLine{00231\ \ \ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00232\ \textcolor{comment}{\ \ \ *\ \ \ \ \ Step2:\ Calculate\ RFFT\ for\ N-\/point\ input}}
+\DoxyCodeLine{00233\ \textcolor{comment}{\ \ \ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00234\ \ \ \textcolor{comment}{/*\ pInlineBuffer\ is\ real\ input\ of\ length\ N\ ,\ pState\ is\ the\ complex\ output\ of\ length\ 2N\ */}}
+\DoxyCodeLine{00235\ \ \ \mbox{\hyperlink{group___real_f_f_t_ga3df1766d230532bc068fc4ed69d0fcdc}{arm\_rfft\_f32}}\ (S-\/>pRfft,\ pInlineBuffer,\ pState);}
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00237\ \ \ \textcolor{comment}{/*-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00238\ \textcolor{comment}{\ \ \ *\ \ Step3:\ Multiply\ the\ FFT\ output\ with\ the\ weights.}}
+\DoxyCodeLine{00239\ \textcolor{comment}{\ \ \ *-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00240\ \ \ \mbox{\hyperlink{group___cmplx_by_cmplx_mult_gae221504b01e4abfe5f335eafd801b4ed}{arm\_cmplx\_mult\_cmplx\_f32}}\ (pState,\ weights,\ pState,\ S-\/>N);}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \ \ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ Post-\/processing\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00243\ \ \ \textcolor{comment}{/*\ DCT-\/IV\ can\ be\ obtained\ from\ DCT-\/II\ by\ the\ equation,}}
+\DoxyCodeLine{00244\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ Y4(k)\ =\ Y2(k)\ -\/\ Y4(k-\/1)\ and\ Y4(-\/1)\ =\ Y4(0)}}
+\DoxyCodeLine{00245\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ Hence,\ Y4(0)\ =\ Y2(0)/2\ \ */}}
+\DoxyCodeLine{00246\ \ \ \textcolor{comment}{/*\ Getting\ only\ real\ part\ from\ the\ output\ and\ Converting\ to\ DCT-\/IV\ */}}
+\DoxyCodeLine{00247\ }
+\DoxyCodeLine{00248\ \ \ \textcolor{comment}{/*\ Initializing\ the\ loop\ counter\ to\ N\ >>\ 2\ for\ loop\ unrolling\ by\ 4\ */}}
+\DoxyCodeLine{00249\ \ \ i\ =\ (S-\/>N\ -\/\ 1U)\ >>\ 2U;}
+\DoxyCodeLine{00250\ }
+\DoxyCodeLine{00251\ \ \ \textcolor{comment}{/*\ pbuff\ initialized\ to\ input\ buffer.\ */}}
+\DoxyCodeLine{00252\ \ \ pbuff\ =\ pInlineBuffer;}
+\DoxyCodeLine{00253\ }
+\DoxyCodeLine{00254\ \ \ \textcolor{comment}{/*\ pS1\ initialized\ to\ pState\ */}}
+\DoxyCodeLine{00255\ \ \ pS1\ =\ pState;}
+\DoxyCodeLine{00256\ }
+\DoxyCodeLine{00257\ \ \ \textcolor{comment}{/*\ Calculating\ Y4(0)\ from\ Y2(0)\ using\ Y4(0)\ =\ Y2(0)/2\ */}}
+\DoxyCodeLine{00258\ \ \ in\ =\ *pS1++\ *\ (float32\_t)\ 0.5;}
+\DoxyCodeLine{00259\ \ \ \textcolor{comment}{/*\ input\ buffer\ acts\ as\ inplace,\ so\ output\ values\ are\ stored\ in\ the\ input\ itself.\ */}}
+\DoxyCodeLine{00260\ \ \ *pbuff++\ =\ in;}
+\DoxyCodeLine{00261\ }
+\DoxyCodeLine{00262\ \ \ \textcolor{comment}{/*\ pState\ pointer\ is\ incremented\ twice\ as\ the\ real\ values\ are\ located\ alternatively\ in\ the\ array\ */}}
+\DoxyCodeLine{00263\ \ \ pS1++;}
+\DoxyCodeLine{00264\ }
+\DoxyCodeLine{00265\ \ \ \textcolor{comment}{/*\ First\ part\ of\ the\ processing\ with\ loop\ unrolling.\ \ Compute\ 4\ outputs\ at\ a\ time.}}
+\DoxyCodeLine{00266\ \textcolor{comment}{\ \ \ **\ a\ second\ loop\ below\ computes\ the\ remaining\ 1\ to\ 3\ samples.\ */}}
+\DoxyCodeLine{00267\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00268\ \ \ \{}
+\DoxyCodeLine{00269\ \ \ \ \ \textcolor{comment}{/*\ Calculating\ Y4(1)\ to\ Y4(N-\/1)\ from\ Y2\ using\ equation\ Y4(k)\ =\ Y2(k)\ -\/\ Y4(k-\/1)\ */}}
+\DoxyCodeLine{00270\ \ \ \ \ \textcolor{comment}{/*\ pState\ pointer\ (pS1)\ is\ incremented\ twice\ as\ the\ real\ values\ are\ located\ alternatively\ in\ the\ array\ */}}
+\DoxyCodeLine{00271\ \ \ \ \ in\ =\ *pS1++\ -\/\ in;}
+\DoxyCodeLine{00272\ \ \ \ \ *pbuff++\ =\ in;}
+\DoxyCodeLine{00273\ \ \ \ \ \textcolor{comment}{/*\ points\ to\ the\ next\ real\ value\ */}}
+\DoxyCodeLine{00274\ \ \ \ \ pS1++;}
+\DoxyCodeLine{00275\ }
+\DoxyCodeLine{00276\ \ \ \ \ in\ =\ *pS1++\ -\/\ in;}
+\DoxyCodeLine{00277\ \ \ \ \ *pbuff++\ =\ in;}
+\DoxyCodeLine{00278\ \ \ \ \ pS1++;}
+\DoxyCodeLine{00279\ }
+\DoxyCodeLine{00280\ \ \ \ \ in\ =\ *pS1++\ -\/\ in;}
+\DoxyCodeLine{00281\ \ \ \ \ *pbuff++\ =\ in;}
+\DoxyCodeLine{00282\ \ \ \ \ pS1++;}
+\DoxyCodeLine{00283\ }
+\DoxyCodeLine{00284\ \ \ \ \ in\ =\ *pS1++\ -\/\ in;}
+\DoxyCodeLine{00285\ \ \ \ \ *pbuff++\ =\ in;}
+\DoxyCodeLine{00286\ \ \ \ \ pS1++;}
+\DoxyCodeLine{00287\ }
+\DoxyCodeLine{00288\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ the\ loop\ counter\ */}}
+\DoxyCodeLine{00289\ \ \ \ \ i-\/-\/;}
+\DoxyCodeLine{00290\ \ \ \}\ \textcolor{keywordflow}{while}\ (i\ >\ 0U);}
+\DoxyCodeLine{00291\ }
+\DoxyCodeLine{00292\ \ \ \textcolor{comment}{/*\ If\ the\ blockSize\ is\ not\ a\ multiple\ of\ 4,\ compute\ any\ remaining\ output\ samples\ here.}}
+\DoxyCodeLine{00293\ \textcolor{comment}{\ \ \ **\ No\ loop\ unrolling\ is\ used.\ */}}
+\DoxyCodeLine{00294\ \ \ i\ =\ (S-\/>N\ -\/\ 1U)\ \%\ 0x4U;}
+\DoxyCodeLine{00295\ }
+\DoxyCodeLine{00296\ \ \ \textcolor{keywordflow}{while}\ (i\ >\ 0U)}
+\DoxyCodeLine{00297\ \ \ \{}
+\DoxyCodeLine{00298\ \ \ \ \ \textcolor{comment}{/*\ Calculating\ Y4(1)\ to\ Y4(N-\/1)\ from\ Y2\ using\ equation\ Y4(k)\ =\ Y2(k)\ -\/\ Y4(k-\/1)\ */}}
+\DoxyCodeLine{00299\ \ \ \ \ \textcolor{comment}{/*\ pState\ pointer\ (pS1)\ is\ incremented\ twice\ as\ the\ real\ values\ are\ located\ alternatively\ in\ the\ array\ */}}
+\DoxyCodeLine{00300\ \ \ \ \ in\ =\ *pS1++\ -\/\ in;}
+\DoxyCodeLine{00301\ \ \ \ \ *pbuff++\ =\ in;}
+\DoxyCodeLine{00302\ }
+\DoxyCodeLine{00303\ \ \ \ \ \textcolor{comment}{/*\ points\ to\ the\ next\ real\ value\ */}}
+\DoxyCodeLine{00304\ \ \ \ \ pS1++;}
+\DoxyCodeLine{00305\ }
+\DoxyCodeLine{00306\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ the\ loop\ counter\ */}}
+\DoxyCodeLine{00307\ \ \ \ \ i-\/-\/;}
+\DoxyCodeLine{00308\ \ \ \}}
+\DoxyCodeLine{00309\ }
+\DoxyCodeLine{00310\ }
+\DoxyCodeLine{00311\ \ \ \textcolor{comment}{/*-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ Normalizing\ the\ output\ by\ multiplying\ with\ the\ normalizing\ factor\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00312\ }
+\DoxyCodeLine{00313\ \ \ \textcolor{comment}{/*\ Initializing\ the\ loop\ counter\ to\ N/4\ instead\ of\ N\ for\ loop\ unrolling\ */}}
+\DoxyCodeLine{00314\ \ \ i\ =\ S-\/>N\ >>\ 2U;}
+\DoxyCodeLine{00315\ }
+\DoxyCodeLine{00316\ \ \ \textcolor{comment}{/*\ pbuff\ initialized\ to\ the\ pInlineBuffer(now\ contains\ the\ output\ values)\ */}}
+\DoxyCodeLine{00317\ \ \ pbuff\ =\ pInlineBuffer;}
+\DoxyCodeLine{00318\ }
+\DoxyCodeLine{00319\ \ \ \textcolor{comment}{/*\ Processing\ with\ loop\ unrolling\ 4\ times\ as\ N\ is\ always\ multiple\ of\ 4.\ \ Compute\ 4\ outputs\ at\ a\ time\ */}}
+\DoxyCodeLine{00320\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00321\ \ \ \{}
+\DoxyCodeLine{00322\ \ \ \ \ \textcolor{comment}{/*\ Multiplying\ pInlineBuffer\ with\ the\ normalizing\ factor\ sqrt(2/N)\ */}}
+\DoxyCodeLine{00323\ \ \ \ \ in\ =\ *pbuff;}
+\DoxyCodeLine{00324\ \ \ \ \ *pbuff++\ =\ in\ *\ S-\/>normalize;}
+\DoxyCodeLine{00325\ }
+\DoxyCodeLine{00326\ \ \ \ \ in\ =\ *pbuff;}
+\DoxyCodeLine{00327\ \ \ \ \ *pbuff++\ =\ in\ *\ S-\/>normalize;}
+\DoxyCodeLine{00328\ }
+\DoxyCodeLine{00329\ \ \ \ \ in\ =\ *pbuff;}
+\DoxyCodeLine{00330\ \ \ \ \ *pbuff++\ =\ in\ *\ S-\/>normalize;}
+\DoxyCodeLine{00331\ }
+\DoxyCodeLine{00332\ \ \ \ \ in\ =\ *pbuff;}
+\DoxyCodeLine{00333\ \ \ \ \ *pbuff++\ =\ in\ *\ S-\/>normalize;}
+\DoxyCodeLine{00334\ }
+\DoxyCodeLine{00335\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ the\ loop\ counter\ */}}
+\DoxyCodeLine{00336\ \ \ \ \ i-\/-\/;}
+\DoxyCodeLine{00337\ \ \ \}\ \textcolor{keywordflow}{while}\ (i\ >\ 0U);}
+\DoxyCodeLine{00338\ }
+\DoxyCodeLine{00339\ }
+\DoxyCodeLine{00340\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00341\ }
+\DoxyCodeLine{00342\ \ \ \textcolor{comment}{/*\ Initializing\ the\ loop\ counter\ to\ N/2\ */}}
+\DoxyCodeLine{00343\ \ \ i\ =\ S-\/>Nby2;}
+\DoxyCodeLine{00344\ }
+\DoxyCodeLine{00345\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00346\ \ \ \{}
+\DoxyCodeLine{00347\ \ \ \ \ \textcolor{comment}{/*\ Re-\/ordering\ of\ even\ and\ odd\ elements\ */}}
+\DoxyCodeLine{00348\ \ \ \ \ \textcolor{comment}{/*\ pState[i]\ =\ \ pInlineBuffer[2*i]\ */}}
+\DoxyCodeLine{00349\ \ \ \ \ *pS1++\ =\ *pbuff++;}
+\DoxyCodeLine{00350\ \ \ \ \ \textcolor{comment}{/*\ pState[N-\/i-\/1]\ =\ pInlineBuffer[2*i+1]\ */}}
+\DoxyCodeLine{00351\ \ \ \ \ *pS2-\/-\/\ =\ *pbuff++;}
+\DoxyCodeLine{00352\ }
+\DoxyCodeLine{00353\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ the\ loop\ counter\ */}}
+\DoxyCodeLine{00354\ \ \ \ \ i-\/-\/;}
+\DoxyCodeLine{00355\ \ \ \}\ \textcolor{keywordflow}{while}\ (i\ >\ 0U);}
+\DoxyCodeLine{00356\ }
+\DoxyCodeLine{00357\ \ \ \textcolor{comment}{/*\ pbuff\ initialized\ to\ input\ buffer\ */}}
+\DoxyCodeLine{00358\ \ \ pbuff\ =\ pInlineBuffer;}
+\DoxyCodeLine{00359\ }
+\DoxyCodeLine{00360\ \ \ \textcolor{comment}{/*\ pS1\ initialized\ to\ pState\ */}}
+\DoxyCodeLine{00361\ \ \ pS1\ =\ pState;}
+\DoxyCodeLine{00362\ }
+\DoxyCodeLine{00363\ \ \ \textcolor{comment}{/*\ Initializing\ the\ loop\ counter\ */}}
+\DoxyCodeLine{00364\ \ \ i\ =\ S-\/>N;}
+\DoxyCodeLine{00365\ }
+\DoxyCodeLine{00366\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00367\ \ \ \{}
+\DoxyCodeLine{00368\ \ \ \ \ \textcolor{comment}{/*\ Writing\ the\ re-\/ordered\ output\ back\ to\ inplace\ input\ buffer\ */}}
+\DoxyCodeLine{00369\ \ \ \ \ *pbuff++\ =\ *pS1++;}
+\DoxyCodeLine{00370\ }
+\DoxyCodeLine{00371\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ the\ loop\ counter\ */}}
+\DoxyCodeLine{00372\ \ \ \ \ i-\/-\/;}
+\DoxyCodeLine{00373\ \ \ \}\ \textcolor{keywordflow}{while}\ (i\ >\ 0U);}
+\DoxyCodeLine{00374\ }
+\DoxyCodeLine{00375\ }
+\DoxyCodeLine{00376\ \ \ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00377\ \textcolor{comment}{\ \ \ *\ \ \ \ \ Step2:\ Calculate\ RFFT\ for\ N-\/point\ input}}
+\DoxyCodeLine{00378\ \textcolor{comment}{\ \ \ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00379\ \ \ \textcolor{comment}{/*\ pInlineBuffer\ is\ real\ input\ of\ length\ N\ ,\ pState\ is\ the\ complex\ output\ of\ length\ 2N\ */}}
+\DoxyCodeLine{00380\ \ \ \mbox{\hyperlink{group___real_f_f_t_ga3df1766d230532bc068fc4ed69d0fcdc}{arm\_rfft\_f32}}\ (S-\/>pRfft,\ pInlineBuffer,\ pState);}
+\DoxyCodeLine{00381\ }
+\DoxyCodeLine{00382\ \ \ \textcolor{comment}{/*-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00383\ \textcolor{comment}{\ \ \ *\ \ Step3:\ Multiply\ the\ FFT\ output\ with\ the\ weights.}}
+\DoxyCodeLine{00384\ \textcolor{comment}{\ \ \ *-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00385\ \ \ \mbox{\hyperlink{group___cmplx_by_cmplx_mult_gae221504b01e4abfe5f335eafd801b4ed}{arm\_cmplx\_mult\_cmplx\_f32}}\ (pState,\ weights,\ pState,\ S-\/>N);}
+\DoxyCodeLine{00386\ }
+\DoxyCodeLine{00387\ \ \ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ Post-\/processing\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00388\ \ \ \textcolor{comment}{/*\ DCT-\/IV\ can\ be\ obtained\ from\ DCT-\/II\ by\ the\ equation,}}
+\DoxyCodeLine{00389\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ Y4(k)\ =\ Y2(k)\ -\/\ Y4(k-\/1)\ and\ Y4(-\/1)\ =\ Y4(0)}}
+\DoxyCodeLine{00390\ \textcolor{comment}{\ \ \ *\ \ \ \ \ \ \ Hence,\ Y4(0)\ =\ Y2(0)/2\ \ */}}
+\DoxyCodeLine{00391\ \ \ \textcolor{comment}{/*\ Getting\ only\ real\ part\ from\ the\ output\ and\ Converting\ to\ DCT-\/IV\ */}}
+\DoxyCodeLine{00392\ }
+\DoxyCodeLine{00393\ \ \ \textcolor{comment}{/*\ pbuff\ initialized\ to\ input\ buffer.\ */}}
+\DoxyCodeLine{00394\ \ \ pbuff\ =\ pInlineBuffer;}
+\DoxyCodeLine{00395\ }
+\DoxyCodeLine{00396\ \ \ \textcolor{comment}{/*\ pS1\ initialized\ to\ pState\ */}}
+\DoxyCodeLine{00397\ \ \ pS1\ =\ pState;}
+\DoxyCodeLine{00398\ }
+\DoxyCodeLine{00399\ \ \ \textcolor{comment}{/*\ Calculating\ Y4(0)\ from\ Y2(0)\ using\ Y4(0)\ =\ Y2(0)/2\ */}}
+\DoxyCodeLine{00400\ \ \ in\ =\ *pS1++\ *\ (float32\_t)\ 0.5;}
+\DoxyCodeLine{00401\ \ \ \textcolor{comment}{/*\ input\ buffer\ acts\ as\ inplace,\ so\ output\ values\ are\ stored\ in\ the\ input\ itself.\ */}}
+\DoxyCodeLine{00402\ \ \ *pbuff++\ =\ in;}
+\DoxyCodeLine{00403\ }
+\DoxyCodeLine{00404\ \ \ \textcolor{comment}{/*\ pState\ pointer\ is\ incremented\ twice\ as\ the\ real\ values\ are\ located\ alternatively\ in\ the\ array\ */}}
+\DoxyCodeLine{00405\ \ \ pS1++;}
+\DoxyCodeLine{00406\ }
+\DoxyCodeLine{00407\ \ \ \textcolor{comment}{/*\ Initializing\ the\ loop\ counter\ */}}
+\DoxyCodeLine{00408\ \ \ i\ =\ (S-\/>N\ -\/\ 1U);}
+\DoxyCodeLine{00409\ }
+\DoxyCodeLine{00410\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00411\ \ \ \{}
+\DoxyCodeLine{00412\ \ \ \ \ \textcolor{comment}{/*\ Calculating\ Y4(1)\ to\ Y4(N-\/1)\ from\ Y2\ using\ equation\ Y4(k)\ =\ Y2(k)\ -\/\ Y4(k-\/1)\ */}}
+\DoxyCodeLine{00413\ \ \ \ \ \textcolor{comment}{/*\ pState\ pointer\ (pS1)\ is\ incremented\ twice\ as\ the\ real\ values\ are\ located\ alternatively\ in\ the\ array\ */}}
+\DoxyCodeLine{00414\ \ \ \ \ in\ =\ *pS1++\ -\/\ in;}
+\DoxyCodeLine{00415\ \ \ \ \ *pbuff++\ =\ in;}
+\DoxyCodeLine{00416\ }
+\DoxyCodeLine{00417\ \ \ \ \ \textcolor{comment}{/*\ points\ to\ the\ next\ real\ value\ */}}
+\DoxyCodeLine{00418\ \ \ \ \ pS1++;}
+\DoxyCodeLine{00419\ }
+\DoxyCodeLine{00420\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00421\ \ \ \ \ i-\/-\/;}
+\DoxyCodeLine{00422\ \ \ \}\ \textcolor{keywordflow}{while}\ (i\ >\ 0U);}
+\DoxyCodeLine{00423\ }
+\DoxyCodeLine{00424\ \ \ \textcolor{comment}{/*-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ Normalizing\ the\ output\ by\ multiplying\ with\ the\ normalizing\ factor\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/*/}}
+\DoxyCodeLine{00425\ }
+\DoxyCodeLine{00426\ \ \ \textcolor{comment}{/*\ Initializing\ loop\ counter\ */}}
+\DoxyCodeLine{00427\ \ \ i\ =\ S-\/>N;}
+\DoxyCodeLine{00428\ }
+\DoxyCodeLine{00429\ \ \ \textcolor{comment}{/*\ pbuff\ initialized\ to\ the\ pInlineBuffer\ (now\ contains\ the\ output\ values)\ */}}
+\DoxyCodeLine{00430\ \ \ pbuff\ =\ pInlineBuffer;}
+\DoxyCodeLine{00431\ }
+\DoxyCodeLine{00432\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00433\ \ \ \{}
+\DoxyCodeLine{00434\ \ \ \ \ \textcolor{comment}{/*\ Multiplying\ pInlineBuffer\ with\ the\ normalizing\ factor\ sqrt(2/N)\ */}}
+\DoxyCodeLine{00435\ \ \ \ \ in\ =\ *pbuff;}
+\DoxyCodeLine{00436\ \ \ \ \ *pbuff++\ =\ in\ *\ S-\/>normalize;}
+\DoxyCodeLine{00437\ }
+\DoxyCodeLine{00438\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00439\ \ \ \ \ i-\/-\/;}
+\DoxyCodeLine{00440\ \ \ \}\ \textcolor{keywordflow}{while}\ (i\ >\ 0U);}
+\DoxyCodeLine{00441\ }
+\DoxyCodeLine{00442\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_LOOPUNROLL)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00443\ }
+\DoxyCodeLine{00444\ \}}
+\DoxyCodeLine{00445\ }
+
+\end{DoxyCode}

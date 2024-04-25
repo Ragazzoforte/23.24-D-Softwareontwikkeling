@@ -1,0 +1,173 @@
+\doxysection{arm\+\_\+weighted\+\_\+sum\+\_\+f32.\+c}
+\hypertarget{arm__weighted__sum__f32_8c_source}{}\label{arm__weighted__sum__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/SupportFunctions/arm\_weighted\_sum\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/SupportFunctions/arm\_weighted\_sum\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_weighted\_sum\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Weighted\ Sum}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ <limits.h>}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <math.h>}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ "{}dsp/support\_functions.h"{}}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ float32\_t\ \mbox{\hyperlink{group__weightedsum_gaffef5e0e3e1d0289e419c23853e20850}{arm\_weighted\_sum\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *in,\textcolor{keyword}{const}\ float32\_t\ *weigths,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00056\ \{}
+\DoxyCodeLine{00057\ \ \ \ \ float32\_t\ \ \ \ \ \ \ accum1,\ accum2;}
+\DoxyCodeLine{00058\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ accum1V,\ accum2V;}
+\DoxyCodeLine{00059\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ inV,\ wV;}
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pIn,\ *pW;}
+\DoxyCodeLine{00061\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ blkCnt;}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \ \ \ \ pIn\ =\ in;}
+\DoxyCodeLine{00065\ \ \ \ \ pW\ =\ weigths;}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ \ \ accum1V\ =\ vdupq\_n\_f32(0.0);}
+\DoxyCodeLine{00069\ \ \ \ \ accum2V\ =\ vdupq\_n\_f32(0.0);}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0)\ }
+\DoxyCodeLine{00073\ \ \ \ \ \{}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ inV\ =\ vld1q(pIn);}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ wV\ =\ vld1q(pW);}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ pIn\ +=\ 4;}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ pW\ +=\ 4;}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ accum1V\ =\ vfmaq(accum1V,\ inV,\ wV);}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ accum2V\ =\ vaddq(accum2V,\ wV);}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00083\ \ \ \ \ \}}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \ \ accum1\ =\ vecAddAcrossF32Mve(accum1V);}
+\DoxyCodeLine{00086\ \ \ \ \ accum2\ =\ vecAddAcrossF32Mve(accum2V);}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ \ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00090\ \ \ \ \ \{}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ accum1\ +=\ *pIn++\ *\ *pW;}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ accum2\ +=\ *pW++;}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00094\ \ \ \ \ \}}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{keywordflow}{return}\ (accum1\ /\ accum2);}
+\DoxyCodeLine{00098\ \}}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00101\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_NEON)}}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \textcolor{preprocessor}{\#include\ "{}NEMath.h"{}}}
+\DoxyCodeLine{00104\ float32\_t\ \mbox{\hyperlink{group__weightedsum_gaffef5e0e3e1d0289e419c23853e20850}{arm\_weighted\_sum\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *in,\textcolor{keyword}{const}\ float32\_t\ *weigths,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00105\ \{}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \ \ \ \ float32\_t\ accum1,\ accum2;}
+\DoxyCodeLine{00108\ \ \ \ \ float32x4\_t\ accum1V,\ accum2V;}
+\DoxyCodeLine{00109\ \ \ \ \ float32x2\_t\ tempV;}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \ \ \ \ float32x4\_t\ inV,wV;}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pIn,\ *pW;}
+\DoxyCodeLine{00114\ \ \ \ \ uint32\_t\ blkCnt;}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ \ pIn\ =\ in;}
+\DoxyCodeLine{00118\ \ \ \ \ pW\ =\ weigths;}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ accum1=0.0f;}
+\DoxyCodeLine{00121\ \ \ \ \ accum2=0.0f;}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ \ \ \ \ accum1V\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00124\ \ \ \ \ accum2V\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00128\ \ \ \ \ \{}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ inV\ =\ vld1q\_f32(pIn);}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ wV\ =\ vld1q\_f32(pW);}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ pIn\ +=\ 4;\ }
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ pW\ +=\ 4;}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ accum1V\ =\ vmlaq\_f32(accum1V,inV,wV);}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ accum2V\ =\ vaddq\_f32(accum2V,wV);}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00138\ \ \ \ \ \}}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \ \ tempV\ =\ vpadd\_f32(vget\_low\_f32(accum1V),vget\_high\_f32(accum1V));}
+\DoxyCodeLine{00141\ \ \ \ \ accum1\ =\ vget\_lane\_f32(tempV,\ 0)\ +\ vget\_lane\_f32(tempV,\ 1);}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \ \ tempV\ =\ vpadd\_f32(vget\_low\_f32(accum2V),vget\_high\_f32(accum2V));}
+\DoxyCodeLine{00144\ \ \ \ \ accum2\ =\ vget\_lane\_f32(tempV,\ 0)\ +\ vget\_lane\_f32(tempV,\ 1);}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00147\ \ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00148\ \ \ \ \ \{}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ accum1\ +=\ *pIn++\ *\ *pW;}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ accum2\ +=\ *pW++;}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00152\ \ \ \ \ \}}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \ \ \ \ \textcolor{keywordflow}{return}(accum1\ /\ accum2);}
+\DoxyCodeLine{00156\ \}}
+\DoxyCodeLine{00157\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00158\ float32\_t\ \mbox{\hyperlink{group__weightedsum_gaffef5e0e3e1d0289e419c23853e20850}{arm\_weighted\_sum\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *in,\ \textcolor{keyword}{const}\ float32\_t\ *weigths,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00159\ \{}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ float32\_t\ accum1,\ accum2;}
+\DoxyCodeLine{00162\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pIn,\ *pW;}
+\DoxyCodeLine{00163\ \ \ \ \ uint32\_t\ blkCnt;}
+\DoxyCodeLine{00164\ }
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ pIn\ =\ in;}
+\DoxyCodeLine{00167\ \ \ \ \ pW\ =\ weigths;}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \ \ \ \ accum1=0.0f;}
+\DoxyCodeLine{00170\ \ \ \ \ accum2=0.0f;}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \ \ \ \ blkCnt\ =\ blockSize;}
+\DoxyCodeLine{00173\ \ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00174\ \ \ \ \ \{}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ accum1\ +=\ *pIn++\ *\ *pW;}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ accum2\ +=\ *pW++;}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00178\ \ \ \ \ \}}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ \ \ \ \ \textcolor{keywordflow}{return}(accum1\ /\ accum2);}
+\DoxyCodeLine{00181\ \}}
+\DoxyCodeLine{00182\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00183\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00184\ }
+
+\end{DoxyCode}

@@ -1,0 +1,93 @@
+\doxysection{arm\+\_\+bilinear\+\_\+interp\+\_\+f32.\+c}
+\hypertarget{arm__bilinear__interp__f32_8c_source}{}\label{arm__bilinear__interp__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/InterpolationFunctions/arm\_bilinear\_interp\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/InterpolationFunctions/arm\_bilinear\_interp\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_bilinear\_interp\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Floating-\/point\ bilinear\ interpolation}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/interpolation\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00101\ \ \ float32\_t\ \mbox{\hyperlink{group___bilinear_interpolate_gac70e169d2444a76f0385df2d34a1e176}{arm\_bilinear\_interp\_f32}}(}
+\DoxyCodeLine{00102\ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__bilinear__interp__instance__f32}{arm\_bilinear\_interp\_instance\_f32}}\ *\ S,}
+\DoxyCodeLine{00103\ \ \ float32\_t\ X,}
+\DoxyCodeLine{00104\ \ \ float32\_t\ Y)}
+\DoxyCodeLine{00105\ \ \ \{}
+\DoxyCodeLine{00106\ \ \ \ \ float32\_t\ out;}
+\DoxyCodeLine{00107\ \ \ \ \ float32\_t\ f00,\ f01,\ f10,\ f11;}
+\DoxyCodeLine{00108\ \ \ \ \ float32\_t\ *pData\ =\ S-\/>pData;}
+\DoxyCodeLine{00109\ \ \ \ \ int32\_t\ xIndex,\ yIndex,\ index;}
+\DoxyCodeLine{00110\ \ \ \ \ float32\_t\ xdiff,\ ydiff;}
+\DoxyCodeLine{00111\ \ \ \ \ float32\_t\ b1,\ b2,\ b3,\ b4;}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \ \ \ \ xIndex\ =\ (int32\_t)\ X;}
+\DoxyCodeLine{00114\ \ \ \ \ yIndex\ =\ (int32\_t)\ Y;}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{comment}{/*\ Care\ taken\ for\ table\ outside\ boundary\ */}}
+\DoxyCodeLine{00117\ \ \ \ \ \textcolor{comment}{/*\ Returns\ zero\ output\ when\ values\ are\ outside\ table\ boundary\ */}}
+\DoxyCodeLine{00118\ \ \ \ \ \textcolor{keywordflow}{if}\ (xIndex\ <\ 0\ ||\ xIndex\ >\ (S-\/>numCols\ -\/\ 2)\ ||\ yIndex\ <\ 0\ ||\ yIndex\ >\ (S-\/>numRows\ -\/\ 2))}
+\DoxyCodeLine{00119\ \ \ \ \ \{}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (0);}
+\DoxyCodeLine{00121\ \ \ \ \ \}}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ index\ for\ two\ nearest\ points\ in\ X-\/direction\ */}}
+\DoxyCodeLine{00124\ \ \ \ \ index\ =\ (xIndex\ )\ +\ (yIndex\ )\ *\ S-\/>numCols;}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \ \ \textcolor{comment}{/*\ Read\ two\ nearest\ points\ in\ X-\/direction\ */}}
+\DoxyCodeLine{00128\ \ \ \ \ f00\ =\ pData[index];}
+\DoxyCodeLine{00129\ \ \ \ \ f01\ =\ pData[index\ +\ 1];}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ index\ for\ two\ nearest\ points\ in\ Y-\/direction\ */}}
+\DoxyCodeLine{00132\ \ \ \ \ index\ =\ (xIndex\ )\ +\ (yIndex+1)\ *\ S-\/>numCols;}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \ \ \textcolor{comment}{/*\ Read\ two\ nearest\ points\ in\ Y-\/direction\ */}}
+\DoxyCodeLine{00136\ \ \ \ \ f10\ =\ pData[index];}
+\DoxyCodeLine{00137\ \ \ \ \ f11\ =\ pData[index\ +\ 1];}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00139\ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ intermediate\ values\ */}}
+\DoxyCodeLine{00140\ \ \ \ \ b1\ =\ f00;}
+\DoxyCodeLine{00141\ \ \ \ \ b2\ =\ f01\ -\/\ f00;}
+\DoxyCodeLine{00142\ \ \ \ \ b3\ =\ f10\ -\/\ f00;}
+\DoxyCodeLine{00143\ \ \ \ \ b4\ =\ f00\ -\/\ f01\ -\/\ f10\ +\ f11;}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00145\ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ fractional\ part\ in\ X\ */}}
+\DoxyCodeLine{00146\ \ \ \ \ xdiff\ =\ X\ -\/\ xIndex;}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ fractional\ part\ in\ Y\ */}}
+\DoxyCodeLine{00149\ \ \ \ \ ydiff\ =\ Y\ -\/\ yIndex;}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ bi-\/linear\ interpolated\ output\ */}}
+\DoxyCodeLine{00152\ \ \ \ \ out\ =\ b1\ +\ b2\ *\ xdiff\ +\ b3\ *\ ydiff\ +\ b4\ *\ xdiff\ *\ ydiff;}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ \ \ \ \ \textcolor{comment}{/*\ return\ to\ application\ */}}
+\DoxyCodeLine{00155\ \ \ \ \ \textcolor{keywordflow}{return}\ (out);}
+\DoxyCodeLine{00156\ \ \ \}}
+\DoxyCodeLine{00157\ }
+
+\end{DoxyCode}

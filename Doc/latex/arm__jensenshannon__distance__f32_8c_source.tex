@@ -1,0 +1,202 @@
+\doxysection{arm\+\_\+jensenshannon\+\_\+distance\+\_\+f32.\+c}
+\hypertarget{arm__jensenshannon__distance__f32_8c_source}{}\label{arm__jensenshannon__distance__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/DistanceFunctions/arm\_jensenshannon\_distance\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/DistanceFunctions/arm\_jensenshannon\_distance\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_jensenshannon\_distance\_f32.c}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ Description:\ \ Jensen-\/Shannon\ distance\ between\ two\ vectors}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00012\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}dsp/distance\_functions.h"{}}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <limits.h>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <math.h>}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#if\ !defined(ARM\_MATH\_MVEF)\ ||\ defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00042\ \_\_STATIC\_INLINE\ float32\_t\ rel\_entr(float32\_t\ x,\ float32\_t\ y)}
+\DoxyCodeLine{00043\ \{}
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keywordflow}{return}\ (x\ *\ logf(x\ /\ y));}
+\DoxyCodeLine{00045\ \}}
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ }
+\DoxyCodeLine{00049\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#include\ "{}arm\_vec\_math.h"{}}}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ float32\_t\ \mbox{\hyperlink{group___jensen_shannon_ga6965b12ce3ee265d3759dfec38b77524}{arm\_jensenshannon\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00055\ \{}
+\DoxyCodeLine{00056\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ blkCnt;}
+\DoxyCodeLine{00057\ \ \ \ \ float32\_t\ \ \ \ \ \ \ tmp;}
+\DoxyCodeLine{00058\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ a,\ b,\ t,\ tmpV,\ accumV;}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \ \ \ \ accumV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ a\ =\ vld1q(pA);}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ b\ =\ vld1q(pB);}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ t\ =\ vaddq(a,\ b);}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ t\ =\ vmulq(t,\ 0.5f);}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ tmpV\ =\ vmulq(a,\ vrecip\_medprec\_f32(t));}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ tmpV\ =\ vlogq\_f32(tmpV);}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ accumV\ =\ vfmaq(accumV,\ a,\ tmpV);}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ tmpV\ =\ vmulq\_f32(b,\ vrecip\_medprec\_f32(t));}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ tmpV\ =\ vlogq\_f32(tmpV);}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ accumV\ =\ vfmaq(accumV,\ b,\ tmpV);}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ pA\ +=\ 4;}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ pB\ +=\ 4;}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00081\ \ \ \ \ \}}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00084\ \textcolor{comment}{\ \ \ \ \ *\ tail}}
+\DoxyCodeLine{00085\ \textcolor{comment}{\ \ \ \ \ *\ (will\ be\ merged\ thru\ tail\ predication)}}
+\DoxyCodeLine{00086\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00087\ \ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00088\ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p0\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ a\ =\ vldrwq\_z\_f32(pA,\ p0);}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ b\ =\ vldrwq\_z\_f32(pB,\ p0);}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ t\ =\ vaddq(a,\ b);}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ t\ =\ vmulq(t,\ 0.5f);}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ tmpV\ =\ vmulq\_f32(a,\ vrecip\_medprec\_f32(t));}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ tmpV\ =\ vlogq\_f32(tmpV);}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ accumV\ =\ vfmaq\_m\_f32(accumV,\ a,\ tmpV,\ p0);}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ tmpV\ =\ vmulq\_f32(b,\ vrecip\_medprec\_f32(t));}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ tmpV\ =\ vlogq\_f32(tmpV);}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ accumV\ =\ vfmaq\_m\_f32(accumV,\ b,\ tmpV,\ p0);}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \ \}}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ \ \ \ \ \mbox{\hyperlink{group___s_q_r_t_gaa37d8b017ef0c8d356dc98fd78e2d96b}{arm\_sqrt\_f32}}(vecAddAcrossF32Mve(accumV)\ /\ 2.0f,\ \&tmp);}
+\DoxyCodeLine{00108\ \ \ \ \ \textcolor{keywordflow}{return}\ (tmp);}
+\DoxyCodeLine{00109\ \}}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_NEON)}}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \textcolor{preprocessor}{\#include\ "{}NEMath.h"{}}}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00139\ float32\_t\ \mbox{\hyperlink{group___jensen_shannon_ga6965b12ce3ee265d3759dfec38b77524}{arm\_jensenshannon\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00140\ \{}
+\DoxyCodeLine{00141\ \ \ \ \ float32\_t\ accum,\ result,\ tmp,a,b;}
+\DoxyCodeLine{00142\ \ \ \ \ uint32\_t\ blkCnt;}
+\DoxyCodeLine{00143\ \ \ \ \ float32x4\_t\ aV,bV,t,\ tmpV,\ accumV;}
+\DoxyCodeLine{00144\ \ \ \ \ float32x2\_t\ accumV2;}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \ \ \ \ accum\ =\ 0.0f;\ }
+\DoxyCodeLine{00147\ \ \ \ \ accumV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00150\ \ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00151\ \ \ \ \ \{}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ aV\ =\ vld1q\_f32(pA);}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ bV\ =\ vld1q\_f32(pB);}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ t\ =\ vaddq\_f32(aV,bV);}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ t\ =\ vmulq\_n\_f32(t,\ 0.5f);}
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00157\ \ \ \ \ \ \ tmpV\ =\ vmulq\_f32(aV,\ vinvq\_f32(t));}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ tmpV\ =\ vlogq\_f32(tmpV);}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ accumV\ =\ vmlaq\_f32(accumV,\ aV,\ tmpV);}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00162\ \ \ \ \ \ \ tmpV\ =\ vmulq\_f32(bV,\ vinvq\_f32(t));}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ tmpV\ =\ vlogq\_f32(tmpV);}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ accumV\ =\ vmlaq\_f32(accumV,\ bV,\ tmpV);}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ \ \ pA\ +=\ 4;}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ pB\ +=\ 4;}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \ \ \ \ \ \ blkCnt\ -\/-\/;}
+\DoxyCodeLine{00171\ \ \ \ \ \}}
+\DoxyCodeLine{00172\ }
+\DoxyCodeLine{00173\ \ \ \ \ accumV2\ =\ vpadd\_f32(vget\_low\_f32(accumV),vget\_high\_f32(accumV));}
+\DoxyCodeLine{00174\ \ \ \ \ accum\ =\ vget\_lane\_f32(accumV2,\ 0)\ +\ vget\_lane\_f32(accumV2,\ 1);}
+\DoxyCodeLine{00175\ }
+\DoxyCodeLine{00176\ \ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00177\ \ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00178\ \ \ \ \ \{}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ a\ =\ *pA;}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ b\ =\ *pB;}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ tmp\ =\ (a\ +\ b)\ /\ 2.0f;}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ accum\ +=\ rel\_entr(a,\ tmp);}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ accum\ +=\ rel\_entr(b,\ tmp);}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00185\ \ \ \ \ \ \ pA++;}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ pB++;}
+\DoxyCodeLine{00187\ }
+\DoxyCodeLine{00188\ \ \ \ \ \ \ blkCnt\ -\/-\/;}
+\DoxyCodeLine{00189\ \ \ \ \ \}}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ }
+\DoxyCodeLine{00192\ \ \ \ \ \mbox{\hyperlink{group___s_q_r_t_gaa37d8b017ef0c8d356dc98fd78e2d96b}{arm\_sqrt\_f32}}(accum/2.0f,\ \&result);}
+\DoxyCodeLine{00193\ \ \ \ \ \textcolor{keywordflow}{return}(result);}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ \}}
+\DoxyCodeLine{00196\ }
+\DoxyCodeLine{00197\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00221\ float32\_t\ \mbox{\hyperlink{group___jensen_shannon_ga6965b12ce3ee265d3759dfec38b77524}{arm\_jensenshannon\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00222\ \{}
+\DoxyCodeLine{00223\ \ \ \ \ float32\_t\ left,\ right,sum,\ result,\ tmp;}
+\DoxyCodeLine{00224\ \ \ \ \ uint32\_t\ i;}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ \ \ \ \ left\ =\ 0.0f;\ }
+\DoxyCodeLine{00227\ \ \ \ \ right\ =\ 0.0f;}
+\DoxyCodeLine{00228\ \ \ \ \ \textcolor{keywordflow}{for}(i=0;\ i\ <\ blockSize;\ i++)}
+\DoxyCodeLine{00229\ \ \ \ \ \{}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ tmp\ =\ (pA[i]\ +\ pB[i])\ /\ 2.0f;}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ left\ \ +=\ rel\_entr(pA[i],\ tmp);}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ right\ +=\ rel\_entr(pB[i],\ tmp);}
+\DoxyCodeLine{00233\ \ \ \ \ \}}
+\DoxyCodeLine{00234\ }
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ \ \ \ \ sum\ =\ left\ +\ right;}
+\DoxyCodeLine{00237\ \ \ \ \ \mbox{\hyperlink{group___s_q_r_t_gaa37d8b017ef0c8d356dc98fd78e2d96b}{arm\_sqrt\_f32}}(sum/2.0f,\ \&result);}
+\DoxyCodeLine{00238\ \ \ \ \ \textcolor{keywordflow}{return}(result);}
+\DoxyCodeLine{00239\ }
+\DoxyCodeLine{00240\ \}}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00243\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00244\ }
+
+\end{DoxyCode}

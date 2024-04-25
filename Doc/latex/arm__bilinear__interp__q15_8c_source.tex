@@ -1,0 +1,107 @@
+\doxysection{arm\+\_\+bilinear\+\_\+interp\+\_\+q15.\+c}
+\hypertarget{arm__bilinear__interp__q15_8c_source}{}\label{arm__bilinear__interp__q15_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/InterpolationFunctions/arm\_bilinear\_interp\_q15.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/InterpolationFunctions/arm\_bilinear\_interp\_q15.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_linear\_interp\_q15.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Q15\ linear\ interpolation}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/interpolation\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00047\ \ \ q15\_t\ \mbox{\hyperlink{group___bilinear_interpolate_gaf4fc756c7a8e781c911fddddb2bfe187}{arm\_bilinear\_interp\_q15}}(}
+\DoxyCodeLine{00048\ \ \ \mbox{\hyperlink{structarm__bilinear__interp__instance__q15}{arm\_bilinear\_interp\_instance\_q15}}\ *\ S,}
+\DoxyCodeLine{00049\ \ \ q31\_t\ X,}
+\DoxyCodeLine{00050\ \ \ q31\_t\ Y)}
+\DoxyCodeLine{00051\ \ \ \{}
+\DoxyCodeLine{00052\ \ \ \ \ q63\_t\ acc\ =\ 0;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ output\ */}}
+\DoxyCodeLine{00053\ \ \ \ \ q31\_t\ out;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ output\ */}}
+\DoxyCodeLine{00054\ \ \ \ \ q15\_t\ x1,\ x2,\ y1,\ y2;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Nearest\ output\ values\ */}}
+\DoxyCodeLine{00055\ \ \ \ \ q31\_t\ xfract,\ yfract;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ X,\ Y\ fractional\ parts\ */}}
+\DoxyCodeLine{00056\ \ \ \ \ int32\_t\ rI,\ cI;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Row\ and\ column\ indices\ */}}
+\DoxyCodeLine{00057\ \ \ \ \ q15\_t\ *pYData\ =\ S-\/>pData;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ pointer\ to\ output\ table\ values\ */}}
+\DoxyCodeLine{00058\ \ \ \ \ uint32\_t\ nCols\ =\ S-\/>numCols;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ num\ of\ rows\ */}}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{comment}{/*\ Input\ is\ in\ 12.20\ format\ */}}
+\DoxyCodeLine{00061\ \ \ \ \ \textcolor{comment}{/*\ 12\ bits\ for\ the\ table\ index\ */}}
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{comment}{/*\ Index\ value\ calculation\ */}}
+\DoxyCodeLine{00063\ \ \ \ \ rI\ =\ ((X\ \&\ (q31\_t)0xFFF00000)\ >>\ 20);}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{comment}{/*\ Input\ is\ in\ 12.20\ format\ */}}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{comment}{/*\ 12\ bits\ for\ the\ table\ index\ */}}
+\DoxyCodeLine{00067\ \ \ \ \ \textcolor{comment}{/*\ Index\ value\ calculation\ */}}
+\DoxyCodeLine{00068\ \ \ \ \ cI\ =\ ((Y\ \&\ (q31\_t)0xFFF00000)\ >>\ 20);}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{comment}{/*\ Care\ taken\ for\ table\ outside\ boundary\ */}}
+\DoxyCodeLine{00071\ \ \ \ \ \textcolor{comment}{/*\ Returns\ zero\ output\ when\ values\ are\ outside\ table\ boundary\ */}}
+\DoxyCodeLine{00072\ \ \ \ \ \textcolor{keywordflow}{if}\ (rI\ <\ 0\ ||\ rI\ >\ (S-\/>numCols\ -\/\ 2)\ ||\ cI\ <\ 0\ ||\ cI\ >\ (S-\/>numRows\ -\/\ 2))}
+\DoxyCodeLine{00073\ \ \ \ \ \{}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ (0);}
+\DoxyCodeLine{00075\ \ \ \ \ \}}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{comment}{/*\ 20\ bits\ for\ the\ fractional\ part\ */}}
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{comment}{/*\ xfract\ should\ be\ in\ 12.20\ format\ */}}
+\DoxyCodeLine{00079\ \ \ \ \ xfract\ =\ (X\ \&\ 0x000FFFFF);}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{comment}{/*\ Read\ two\ nearest\ output\ values\ from\ the\ index\ */}}
+\DoxyCodeLine{00082\ \ \ \ \ x1\ =\ pYData[((uint32\_t)rI)\ +\ nCols\ *\ ((uint32\_t)cI)\ \ \ \ ];}
+\DoxyCodeLine{00083\ \ \ \ \ x2\ =\ pYData[((uint32\_t)rI)\ +\ nCols\ *\ ((uint32\_t)cI)\ +\ 1];}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \ \ \textcolor{comment}{/*\ 20\ bits\ for\ the\ fractional\ part\ */}}
+\DoxyCodeLine{00086\ \ \ \ \ \textcolor{comment}{/*\ yfract\ should\ be\ in\ 12.20\ format\ */}}
+\DoxyCodeLine{00087\ \ \ \ \ yfract\ =\ (Y\ \&\ 0x000FFFFF);}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{comment}{/*\ Read\ two\ nearest\ output\ values\ from\ the\ index\ */}}
+\DoxyCodeLine{00090\ \ \ \ \ y1\ =\ pYData[((uint32\_t)rI)\ +\ nCols\ *\ ((uint32\_t)cI\ +\ 1)\ \ \ \ ];}
+\DoxyCodeLine{00091\ \ \ \ \ y2\ =\ pYData[((uint32\_t)rI)\ +\ nCols\ *\ ((uint32\_t)cI\ +\ 1)\ +\ 1];}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ x1\ *\ (1-\/xfract\ )\ *\ (1-\/yfract)\ and\ acc\ is\ in\ 13.51\ format\ */}}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \ \ \textcolor{comment}{/*\ x1\ is\ in\ 1.15(q15),\ xfract\ in\ 12.20\ format\ and\ out\ is\ in\ 13.35\ format\ */}}
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{comment}{/*\ convert\ 13.35\ to\ 13.31\ by\ right\ shifting\ \ and\ out\ is\ in\ 1.31\ */}}
+\DoxyCodeLine{00097\ \ \ \ \ out\ =\ (q31\_t)\ (((q63\_t)\ x1\ *\ (0x0FFFFF\ -\/\ xfract))\ >>\ 4U);}
+\DoxyCodeLine{00098\ \ \ \ \ acc\ =\ ((q63\_t)\ out\ *\ (0x0FFFFF\ -\/\ yfract));}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ \textcolor{comment}{/*\ x2\ *\ (xfract)\ *\ (1-\/yfract)\ \ in\ 1.51\ and\ adding\ to\ acc\ */}}
+\DoxyCodeLine{00101\ \ \ \ \ out\ =\ (q31\_t)\ (((q63\_t)\ x2\ *\ (0x0FFFFF\ -\/\ yfract))\ >>\ 4U);}
+\DoxyCodeLine{00102\ \ \ \ \ acc\ +=\ ((q63\_t)\ out\ *\ (xfract));}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ \textcolor{comment}{/*\ y1\ *\ (1\ -\/\ xfract)\ *\ (yfract)\ \ in\ 1.51\ and\ adding\ to\ acc\ */}}
+\DoxyCodeLine{00105\ \ \ \ \ out\ =\ (q31\_t)\ (((q63\_t)\ y1\ *\ (0x0FFFFF\ -\/\ xfract))\ >>\ 4U);}
+\DoxyCodeLine{00106\ \ \ \ \ acc\ +=\ ((q63\_t)\ out\ *\ (yfract));}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \textcolor{comment}{/*\ y2\ *\ (xfract)\ *\ (yfract)\ \ in\ 1.51\ and\ adding\ to\ acc\ */}}
+\DoxyCodeLine{00109\ \ \ \ \ out\ =\ (q31\_t)\ (((q63\_t)\ y2\ *\ (xfract))\ >>\ 4U);}
+\DoxyCodeLine{00110\ \ \ \ \ acc\ +=\ ((q63\_t)\ out\ *\ (yfract));}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{comment}{/*\ acc\ is\ in\ 13.51\ format\ and\ down\ shift\ acc\ by\ 36\ times\ */}}
+\DoxyCodeLine{00113\ \ \ \ \ \textcolor{comment}{/*\ Convert\ out\ to\ 1.15\ format\ */}}
+\DoxyCodeLine{00114\ \ \ \ \ \textcolor{keywordflow}{return}\ ((q15\_t)(acc\ >>\ 36));}
+\DoxyCodeLine{00115\ \ \ \}}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ }
+
+\end{DoxyCode}

@@ -1,0 +1,141 @@
+\doxysection{arm\+\_\+euclidean\+\_\+distance\+\_\+f32.\+c}
+\hypertarget{arm__euclidean__distance__f32_8c_source}{}\label{arm__euclidean__distance__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/DistanceFunctions/arm\_euclidean\_distance\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/DistanceFunctions/arm\_euclidean\_distance\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_euclidean\_distance\_f32.c}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ Description:\ \ Euclidean\ distance\ between\ two\ vectors}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00012\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}dsp/distance\_functions.h"{}}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <limits.h>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <math.h>}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00053\ \textcolor{preprocessor}{\#include\ "{}arm\_vec\_math.h"{}}}
+\DoxyCodeLine{00054\ float32\_t\ \mbox{\hyperlink{group___euclidean_ga838f0a157454dfd95996691309c3828e}{arm\_euclidean\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00055\ \{}
+\DoxyCodeLine{00056\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ blkCnt;}
+\DoxyCodeLine{00057\ \ \ \ \ float32\_t\ \ \ \ \ \ \ tmp;}
+\DoxyCodeLine{00058\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ a,\ b,\ accumV,\ tempV;}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \ \ \ \ accumV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ a\ =\ vld1q(pA);}
+\DoxyCodeLine{00065\ \ \ \ \ \ \ \ \ b\ =\ vld1q(pB);}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ tempV\ =\ vsubq(a,\ b);}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ accumV\ =\ vfmaq(accumV,\ tempV,\ tempV);}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ pA\ +=\ 4;}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ pB\ +=\ 4;}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00073\ \ \ \ \ \}}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00076\ \textcolor{comment}{\ \ \ \ \ *\ tail}}
+\DoxyCodeLine{00077\ \textcolor{comment}{\ \ \ \ \ *\ (will\ be\ merged\ thru\ tail\ predication)}}
+\DoxyCodeLine{00078\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00079\ \ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00080\ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p0\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ a\ =\ vldrwq\_z\_f32(pA,\ p0);}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ b\ =\ vldrwq\_z\_f32(pB,\ p0);}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ tempV\ =\ vsubq(a,\ b);}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ accumV\ =\ vfmaq\_m(accumV,\ tempV,\ tempV,\ p0);}
+\DoxyCodeLine{00088\ \ \ \ \ \}}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ \mbox{\hyperlink{group___s_q_r_t_gaa37d8b017ef0c8d356dc98fd78e2d96b}{arm\_sqrt\_f32}}(vecAddAcrossF32Mve(accumV),\ \&tmp);}
+\DoxyCodeLine{00091\ \ \ \ \ \textcolor{keywordflow}{return}\ (tmp);}
+\DoxyCodeLine{00092\ \}}
+\DoxyCodeLine{00093\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00094\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_NEON)}}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \textcolor{preprocessor}{\#include\ "{}NEMath.h"{}}}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ float32\_t\ \mbox{\hyperlink{group___euclidean_ga838f0a157454dfd95996691309c3828e}{arm\_euclidean\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00099\ \{}
+\DoxyCodeLine{00100\ \ \ \ float32\_t\ accum=0.0f,tmp;}
+\DoxyCodeLine{00101\ \ \ \ uint32\_t\ blkCnt;}
+\DoxyCodeLine{00102\ \ \ \ float32x4\_t\ a,b,accumV;}
+\DoxyCodeLine{00103\ \ \ \ float32x2\_t\ accumV2;}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ accumV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00106\ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00107\ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00108\ \ \ \ \{}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ a\ =\ vld1q\_f32(pA);}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ b\ =\ vld1q\_f32(pB);}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ a\ =\ vsubq\_f32(a,b);}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ accumV\ =\ vmlaq\_f32(accumV,a,a);}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ pA\ +=\ 4;}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ pB\ +=\ 4;}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ blkCnt\ -\/-\/;}
+\DoxyCodeLine{00117\ \ \ \ \}}
+\DoxyCodeLine{00118\ \ \ \ accumV2\ =\ vpadd\_f32(vget\_low\_f32(accumV),vget\_high\_f32(accumV));}
+\DoxyCodeLine{00119\ \ \ \ accum\ =\ vget\_lane\_f32(accumV2,\ 0)\ +\ vget\_lane\_f32(accumV2,\ 1);}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00122\ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00123\ \ \ \ \{}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ tmp\ =\ *pA++\ -\/\ *pB++;}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ accum\ +=\ SQ(tmp);}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ blkCnt\ -\/-\/;}
+\DoxyCodeLine{00127\ \ \ \ \}}
+\DoxyCodeLine{00128\ \ \ \ \mbox{\hyperlink{group___s_q_r_t_gaa37d8b017ef0c8d356dc98fd78e2d96b}{arm\_sqrt\_f32}}(accum,\&tmp);}
+\DoxyCodeLine{00129\ \ \ \ \textcolor{keywordflow}{return}(tmp);}
+\DoxyCodeLine{00130\ \}}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00133\ float32\_t\ \mbox{\hyperlink{group___euclidean_ga838f0a157454dfd95996691309c3828e}{arm\_euclidean\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00134\ \{}
+\DoxyCodeLine{00135\ \ \ \ float32\_t\ accum=0.0f,tmp;}
+\DoxyCodeLine{00136\ }
+\DoxyCodeLine{00137\ \ \ \ \textcolor{keywordflow}{while}(blockSize\ >\ 0)}
+\DoxyCodeLine{00138\ \ \ \ \{}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ tmp\ =\ *pA++\ -\/\ *pB++;}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ accum\ +=\ SQ(tmp);}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ blockSize\ -\/-\/;}
+\DoxyCodeLine{00142\ \ \ \ \}}
+\DoxyCodeLine{00143\ \ \ \ \mbox{\hyperlink{group___s_q_r_t_gaa37d8b017ef0c8d356dc98fd78e2d96b}{arm\_sqrt\_f32}}(accum,\&tmp);}
+\DoxyCodeLine{00144\ \ \ \ \textcolor{keywordflow}{return}(tmp);}
+\DoxyCodeLine{00145\ \}}
+\DoxyCodeLine{00146\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00147\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ }
+
+\end{DoxyCode}

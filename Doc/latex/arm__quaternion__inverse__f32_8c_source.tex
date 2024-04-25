@@ -1,0 +1,93 @@
+\doxysection{arm\+\_\+quaternion\+\_\+inverse\+\_\+f32.\+c}
+\hypertarget{arm__quaternion__inverse__f32_8c_source}{}\label{arm__quaternion__inverse__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/QuaternionMathFunctions/arm\_quaternion\_inverse\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/QuaternionMathFunctions/arm\_quaternion\_inverse\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_quaternion\_inverse\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Floating-\/point\ quaternion\ inverse}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/quaternion\_math\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <math.h>}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___quat_inverse_ga31e853884e1a3e8ca4482f65ff818032}{arm\_quaternion\_inverse\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pInputQuaternions,\ }
+\DoxyCodeLine{00061\ \ \ float32\_t\ *pInverseQuaternions,}
+\DoxyCodeLine{00062\ \ \ uint32\_t\ nbQuaternions)}
+\DoxyCodeLine{00063\ \{}
+\DoxyCodeLine{00064\ \ \ \ f32x4\_t\ vec1,vec2;}
+\DoxyCodeLine{00065\ \ \ \ float32\_t\ squaredSum;}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ \ \ \ \textcolor{keywordflow}{for}(uint32\_t\ i=0;\ i\ <\ nbQuaternions;\ i++)}
+\DoxyCodeLine{00068\ \ \ \ \{}
+\DoxyCodeLine{00069\ \ \ \ \ \ }
+\DoxyCodeLine{00070\ \ \ \ \ \ \ vec1\ =\ vld1q(pInputQuaternions);}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ vec2\ =\ vmulq(vec1,vec1);}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ squaredSum\ =\ vecAddAcrossF32Mve(vec2);}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ }
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \ \ \ \ \ \ vec1\ =\ vmulq\_n\_f32(vec1,\ 1.0f\ /\ squaredSum);}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ vec1\ =\ vsetq\_lane\_f32(-\/vgetq\_lane(vec1,\ 0),vec1,0);}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ vec1\ =\ vnegq\_f32(vec1);}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \ \ \ \ \ \ vst1q(pInverseQuaternions,\ vec1);}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \ \ \ \ \ \ pInputQuaternions\ \ \ +=\ 4;}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ pInverseQuaternions\ +=\ 4;}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \ \}}
+\DoxyCodeLine{00086\ \}}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00089\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___quat_inverse_ga31e853884e1a3e8ca4482f65ff818032}{arm\_quaternion\_inverse\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pInputQuaternions,\ }
+\DoxyCodeLine{00090\ \ \ float32\_t\ *pInverseQuaternions,}
+\DoxyCodeLine{00091\ \ \ uint32\_t\ nbQuaternions)}
+\DoxyCodeLine{00092\ \{}
+\DoxyCodeLine{00093\ \ \ \ float32\_t\ temp;}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \ uint32\_t\ i;}
+\DoxyCodeLine{00096\ \ \ \ \textcolor{keywordflow}{for}(i=0;\ i\ <\ nbQuaternions;\ i++)}
+\DoxyCodeLine{00097\ \ \ \ \{}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \ \ \ \ temp\ =\ SQ(pInputQuaternions[4\ *\ i\ +\ 0])\ +}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ \ \ \ \ SQ(pInputQuaternions[4\ *\ i\ +\ 1])\ +}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ \ \ \ \ SQ(pInputQuaternions[4\ *\ i\ +\ 2])\ +}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ \ \ \ \ SQ(pInputQuaternions[4\ *\ i\ +\ 3]);}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ \ \ pInverseQuaternions[4\ *\ i\ +\ 0]\ =\ pInputQuaternions[4\ *\ i\ +\ 0]\ /\ temp;}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ pInverseQuaternions[4\ *\ i\ +\ 1]\ =\ -\/pInputQuaternions[4\ *\ i\ +\ 1]\ /\ temp;}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ pInverseQuaternions[4\ *\ i\ +\ 2]\ =\ -\/pInputQuaternions[4\ *\ i\ +\ 2]\ /\ temp;}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ pInverseQuaternions[4\ *\ i\ +\ 3]\ =\ -\/pInputQuaternions[4\ *\ i\ +\ 3]\ /\ temp;}
+\DoxyCodeLine{00108\ \ \ \ \}}
+\DoxyCodeLine{00109\ \}}
+\DoxyCodeLine{00110\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00111\ }
+
+\end{DoxyCode}

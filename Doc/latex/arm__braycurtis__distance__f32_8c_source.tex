@@ -1,0 +1,175 @@
+\doxysection{arm\+\_\+braycurtis\+\_\+distance\+\_\+f32.\+c}
+\hypertarget{arm__braycurtis__distance__f32_8c_source}{}\label{arm__braycurtis__distance__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/DistanceFunctions/arm\_braycurtis\_distance\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/DistanceFunctions/arm\_braycurtis\_distance\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_braycurtis\_distance\_f32.c}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ Description:\ \ Bray-\/Curtis\ distance\ between\ two\ vectors}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00012\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}dsp/distance\_functions.h"{}}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <limits.h>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <math.h>}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ float32\_t\ \mbox{\hyperlink{group__braycurtis_ga6e3bec4b346efa100c4f2ca26ed7a142}{arm\_braycurtis\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00055\ \{}
+\DoxyCodeLine{00056\ \ \ \ \ float32\_t\ \ \ \ \ \ \ accumDiff\ =\ 0.0f,\ accumSum\ =\ 0.0f;}
+\DoxyCodeLine{00057\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ blkCnt;}
+\DoxyCodeLine{00058\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ a,\ b,\ c,\ accumDiffV,\ accumSumV;}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \ \ \ \ accumDiffV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00062\ \ \ \ \ accumSumV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00065\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0)\ \{}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ a\ =\ vld1q(pA);}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ b\ =\ vld1q(pB);}
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ \ \ \ \ \ \ \ \ c\ =\ vabdq(a,\ b);}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ accumDiffV\ =\ vaddq(accumDiffV,\ c);}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ c\ =\ vaddq\_f32(a,\ b);}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ c\ =\ vabsq\_f32(c);}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ accumSumV\ =\ vaddq(accumSumV,\ c);}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ pA\ +=\ 4;}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ pB\ +=\ 4;}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00079\ \ \ \ \ \}}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00082\ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p0\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ a\ =\ vldrwq\_z\_f32(pA,\ p0);}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ b\ =\ vldrwq\_z\_f32(pB,\ p0);}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ c\ =\ vabdq(a,\ b);}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ accumDiffV\ =\ vaddq\_m(accumDiffV,\ accumDiffV,\ c,\ p0);}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ c\ =\ vaddq\_f32(a,\ b);}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ c\ =\ vabsq\_f32(c);}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ accumSumV\ =\ vaddq\_m(accumSumV,\ accumSumV,\ c,\ p0);}
+\DoxyCodeLine{00094\ \ \ \ \ \}}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ accumDiff\ =\ vecAddAcrossF32Mve(accumDiffV);}
+\DoxyCodeLine{00097\ \ \ \ \ accumSum\ =\ vecAddAcrossF32Mve(accumSumV);}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00100\ \textcolor{comment}{\ \ \ \ \ \ \ It\ is\ assumed\ that\ accumSum\ is\ not\ zero.\ Since\ it\ is\ the\ sum\ of\ several\ absolute}}
+\DoxyCodeLine{00101\ \textcolor{comment}{\ \ \ \ \ \ \ values\ it\ would\ imply\ that\ all\ of\ them\ are\ zero.\ It\ is\ very\ unlikely\ for\ long\ vectors.}}
+\DoxyCodeLine{00102\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00103\ \ \ \ \ \textcolor{keywordflow}{return}\ (accumDiff\ /\ accumSum);}
+\DoxyCodeLine{00104\ \}}
+\DoxyCodeLine{00105\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00106\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_NEON)}}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \textcolor{preprocessor}{\#include\ "{}NEMath.h"{}}}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ float32\_t\ \mbox{\hyperlink{group__braycurtis_ga6e3bec4b346efa100c4f2ca26ed7a142}{arm\_braycurtis\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00111\ \{}
+\DoxyCodeLine{00112\ \ \ \ float32\_t\ accumDiff=0.0f,\ accumSum=0.0f;}
+\DoxyCodeLine{00113\ \ \ \ uint32\_t\ blkCnt;}
+\DoxyCodeLine{00114\ \ \ \ float32x4\_t\ a,b,c,accumDiffV,\ accumSumV;}
+\DoxyCodeLine{00115\ \ \ \ float32x2\_t\ accumV2;}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ \ \ \ accumDiffV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00118\ \ \ \ accumSumV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00121\ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00122\ \ \ \ \{}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ a\ =\ vld1q\_f32(pA);}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ b\ =\ vld1q\_f32(pB);}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ c\ =\ vabdq\_f32(a,b);}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ accumDiffV\ =\ vaddq\_f32(accumDiffV,c);}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ c\ =\ vaddq\_f32(a,b);}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ c\ =\ vabsq\_f32(c);}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ accumSumV\ =\ vaddq\_f32(accumSumV,c);}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ pA\ +=\ 4;}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ pB\ +=\ 4;}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ blkCnt\ -\/-\/;}
+\DoxyCodeLine{00136\ \ \ \ \}}
+\DoxyCodeLine{00137\ \ \ \ accumV2\ =\ vpadd\_f32(vget\_low\_f32(accumDiffV),vget\_high\_f32(accumDiffV));}
+\DoxyCodeLine{00138\ \ \ \ accumDiff\ =\ vget\_lane\_f32(accumV2,\ 0)\ +\ vget\_lane\_f32(accumV2,\ 1);}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \ accumV2\ =\ vpadd\_f32(vget\_low\_f32(accumSumV),vget\_high\_f32(accumSumV));}
+\DoxyCodeLine{00141\ \ \ \ accumSum\ =\ vget\_lane\_f32(accumV2,\ 0)\ +\ vget\_lane\_f32(accumV2,\ 1);}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00144\ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00145\ \ \ \ \{}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ accumDiff\ +=\ fabsf(*pA\ -\/\ *pB);}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ accumSum\ +=\ fabsf(*pA++\ +\ *pB++);}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ blkCnt\ -\/-\/;}
+\DoxyCodeLine{00149\ \ \ \ \}}
+\DoxyCodeLine{00150\ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00151\ \textcolor{comment}{}}
+\DoxyCodeLine{00152\ \textcolor{comment}{\ \ \ It\ is\ assumed\ that\ accumSum\ is\ not\ zero.\ Since\ it\ is\ the\ sum\ of\ several\ absolute}}
+\DoxyCodeLine{00153\ \textcolor{comment}{\ \ \ values\ it\ would\ imply\ that\ all\ of\ them\ are\ zero.\ It\ is\ very\ unlikely\ for\ long\ vectors.}}
+\DoxyCodeLine{00154\ \textcolor{comment}{}}
+\DoxyCodeLine{00155\ \textcolor{comment}{\ \ \ */}}
+\DoxyCodeLine{00156\ \ \ \ \textcolor{keywordflow}{return}(accumDiff\ /\ accumSum);}
+\DoxyCodeLine{00157\ \}}
+\DoxyCodeLine{00158\ }
+\DoxyCodeLine{00159\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00160\ float32\_t\ \mbox{\hyperlink{group__braycurtis_ga6e3bec4b346efa100c4f2ca26ed7a142}{arm\_braycurtis\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00161\ \{}
+\DoxyCodeLine{00162\ \ \ \ float32\_t\ accumDiff=0.0f,\ accumSum=0.0f,\ tmpA,\ tmpB;}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \ \ \ \textcolor{keywordflow}{while}(blockSize\ >\ 0)}
+\DoxyCodeLine{00165\ \ \ \ \{}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ tmpA\ =\ *pA++;}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ tmpB\ =\ *pB++;}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ accumDiff\ +=\ fabsf(tmpA\ -\/\ tmpB);}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ accumSum\ +=\ fabsf(tmpA\ +\ tmpB);}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ blockSize\ -\/-\/;}
+\DoxyCodeLine{00171\ \ \ \ \}}
+\DoxyCodeLine{00172\ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00173\ \textcolor{comment}{}}
+\DoxyCodeLine{00174\ \textcolor{comment}{\ \ \ It\ is\ assumed\ that\ accumSum\ is\ not\ zero.\ Since\ it\ is\ the\ sum\ of\ several\ absolute}}
+\DoxyCodeLine{00175\ \textcolor{comment}{\ \ \ values\ it\ would\ imply\ that\ all\ of\ them\ are\ zero.\ It\ is\ very\ unlikely\ for\ long\ vectors.}}
+\DoxyCodeLine{00176\ \textcolor{comment}{}}
+\DoxyCodeLine{00177\ \textcolor{comment}{\ \ \ */}}
+\DoxyCodeLine{00178\ \ \ \ \textcolor{keywordflow}{return}(accumDiff\ /\ accumSum);}
+\DoxyCodeLine{00179\ \}}
+\DoxyCodeLine{00180\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00181\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ }
+
+\end{DoxyCode}

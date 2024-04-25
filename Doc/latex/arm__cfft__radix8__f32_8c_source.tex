@@ -1,0 +1,282 @@
+\doxysection{arm\+\_\+cfft\+\_\+radix8\+\_\+f32.\+c}
+\hypertarget{arm__cfft__radix8__f32_8c_source}{}\label{arm__cfft__radix8__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_cfft\_radix8\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_cfft\_radix8\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_cfft\_radix8\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Radix-\/8\ Decimation\ in\ Frequency\ CFFT\ \&\ CIFFT\ Floating\ point\ processing\ function}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/transform\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00033\ \textcolor{comment}{\ *\ Internal\ helper\ function\ used\ by\ the\ FFTs}}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00035\ }
+\DoxyCodeLine{00045\ \textcolor{keywordtype}{void}\ arm\_radix8\_butterfly\_f32(}
+\DoxyCodeLine{00046\ \ \ float32\_t\ *\ pSrc,}
+\DoxyCodeLine{00047\ \ \ uint16\_t\ fftLen,}
+\DoxyCodeLine{00048\ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ pCoef,}
+\DoxyCodeLine{00049\ \ \ uint16\_t\ twidCoefModifier)}
+\DoxyCodeLine{00050\ \{}
+\DoxyCodeLine{00051\ \ \ \ uint32\_t\ ia1,\ ia2,\ ia3,\ ia4,\ ia5,\ ia6,\ ia7;}
+\DoxyCodeLine{00052\ \ \ \ uint32\_t\ i1,\ i2,\ i3,\ i4,\ i5,\ i6,\ i7,\ i8;}
+\DoxyCodeLine{00053\ \ \ \ uint32\_t\ id;}
+\DoxyCodeLine{00054\ \ \ \ uint32\_t\ n1,\ n2,\ j;}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \ \ \ float32\_t\ r1,\ r2,\ r3,\ r4,\ r5,\ r6,\ r7,\ r8;}
+\DoxyCodeLine{00057\ \ \ \ float32\_t\ t1,\ t2;}
+\DoxyCodeLine{00058\ \ \ \ float32\_t\ s1,\ s2,\ s3,\ s4,\ s5,\ s6,\ s7,\ s8;}
+\DoxyCodeLine{00059\ \ \ \ float32\_t\ p1,\ p2,\ p3,\ p4;}
+\DoxyCodeLine{00060\ \ \ \ float32\_t\ co2,\ co3,\ co4,\ co5,\ co6,\ co7,\ co8;}
+\DoxyCodeLine{00061\ \ \ \ float32\_t\ si2,\ si3,\ si4,\ si5,\ si6,\ si7,\ si8;}
+\DoxyCodeLine{00062\ \ \ \ \textcolor{keyword}{const}\ float32\_t\ C81\ =\ 0.70710678118f;}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \ \ \ n2\ =\ fftLen;}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00067\ \ \ \ \{}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ n1\ =\ n2;}
+\DoxyCodeLine{00069\ \ \ \ \ \ \ n2\ =\ n2\ >>\ 3;}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ i1\ =\ 0;}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ \ i2\ =\ i1\ +\ n2;}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \ i3\ =\ i2\ +\ n2;}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ \ i4\ =\ i3\ +\ n2;}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ \ i5\ =\ i4\ +\ n2;}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ \ i6\ =\ i5\ +\ n2;}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ \ i7\ =\ i6\ +\ n2;}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \ i8\ =\ i7\ +\ n2;}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \ r1\ =\ pSrc[2\ *\ i1]\ +\ pSrc[2\ *\ i5];}
+\DoxyCodeLine{00082\ \ \ \ \ \ \ \ \ \ r5\ =\ pSrc[2\ *\ i1]\ -\/\ pSrc[2\ *\ i5];}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ \ r2\ =\ pSrc[2\ *\ i2]\ +\ pSrc[2\ *\ i6];}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ \ r6\ =\ pSrc[2\ *\ i2]\ -\/\ pSrc[2\ *\ i6];}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ \ r3\ =\ pSrc[2\ *\ i3]\ +\ pSrc[2\ *\ i7];}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ \ r7\ =\ pSrc[2\ *\ i3]\ -\/\ pSrc[2\ *\ i7];}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \ r4\ =\ pSrc[2\ *\ i4]\ +\ pSrc[2\ *\ i8];}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ \ r8\ =\ pSrc[2\ *\ i4]\ -\/\ pSrc[2\ *\ i8];}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ \ t1\ =\ r1\ -\/\ r3;}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ \ r1\ =\ r1\ +\ r3;}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \ r3\ =\ r2\ -\/\ r4;}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ \ r2\ =\ r2\ +\ r4;}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i1]\ =\ r1\ +\ r2;}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i5]\ =\ r1\ -\/\ r2;}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ \ r1\ =\ pSrc[2\ *\ i1\ +\ 1]\ +\ pSrc[2\ *\ i5\ +\ 1];}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ s5\ =\ pSrc[2\ *\ i1\ +\ 1]\ -\/\ pSrc[2\ *\ i5\ +\ 1];}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ r2\ =\ pSrc[2\ *\ i2\ +\ 1]\ +\ pSrc[2\ *\ i6\ +\ 1];}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ s6\ =\ pSrc[2\ *\ i2\ +\ 1]\ -\/\ pSrc[2\ *\ i6\ +\ 1];}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ s3\ =\ pSrc[2\ *\ i3\ +\ 1]\ +\ pSrc[2\ *\ i7\ +\ 1];}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ \ s7\ =\ pSrc[2\ *\ i3\ +\ 1]\ -\/\ pSrc[2\ *\ i7\ +\ 1];}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ \ r4\ =\ pSrc[2\ *\ i4\ +\ 1]\ +\ pSrc[2\ *\ i8\ +\ 1];}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ \ s8\ =\ pSrc[2\ *\ i4\ +\ 1]\ -\/\ pSrc[2\ *\ i8\ +\ 1];}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ t2\ =\ r1\ -\/\ s3;}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ r1\ =\ r1\ +\ s3;}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \ s3\ =\ r2\ -\/\ r4;}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ r2\ =\ r2\ +\ r4;}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i1\ +\ 1]\ =\ r1\ +\ r2;}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i5\ +\ 1]\ =\ r1\ -\/\ r2;}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i3]\ \ \ \ \ =\ t1\ +\ s3;}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i7]\ \ \ \ \ =\ t1\ -\/\ s3;}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i3\ +\ 1]\ =\ t2\ -\/\ r3;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i7\ +\ 1]\ =\ t2\ +\ r3;}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ r1\ =\ (r6\ -\/\ r8)\ *\ C81;}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ r6\ =\ (r6\ +\ r8)\ *\ C81;}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ r2\ =\ (s6\ -\/\ s8)\ *\ C81;}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ s6\ =\ (s6\ +\ s8)\ *\ C81;}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ t1\ =\ r5\ -\/\ r1;}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ r5\ =\ r5\ +\ r1;}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ r8\ =\ r7\ -\/\ r6;}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ r7\ =\ r7\ +\ r6;}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ t2\ =\ s5\ -\/\ r2;}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ s5\ =\ s5\ +\ r2;}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ s8\ =\ s7\ -\/\ s6;}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ s7\ =\ s7\ +\ s6;}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i2]\ \ \ \ \ =\ r5\ +\ s7;}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i8]\ \ \ \ \ =\ r5\ -\/\ s7;}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i6]\ \ \ \ \ =\ t1\ +\ s8;}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i4]\ \ \ \ \ =\ t1\ -\/\ s8;}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i2\ +\ 1]\ =\ s5\ -\/\ r7;}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i8\ +\ 1]\ =\ s5\ +\ r7;}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i6\ +\ 1]\ =\ t2\ -\/\ r8;}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i4\ +\ 1]\ =\ t2\ +\ r8;}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ i1\ +=\ n1;}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (i1\ <\ fftLen);}
+\DoxyCodeLine{00136\ }
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (n2\ <\ 8)}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \ \ \ \ ia1\ =\ 0;}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ j\ =\ 1;}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ index\ calculation\ for\ the\ coefficients\ */}}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{id}\ \ =\ ia1\ +\ twidCoefModifier;}
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ ia1\ =\ id;}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ ia2\ =\ ia1\ +\ id;}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ ia3\ =\ ia2\ +\ id;}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ \ ia4\ =\ ia3\ +\ id;}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ ia5\ =\ ia4\ +\ id;}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ ia6\ =\ ia5\ +\ id;}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \ ia7\ =\ ia6\ +\ id;}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ \ co2\ =\ pCoef[2\ *\ ia1];}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ co3\ =\ pCoef[2\ *\ ia2];}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ co4\ =\ pCoef[2\ *\ ia3];}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ co5\ =\ pCoef[2\ *\ ia4];}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ \ co6\ =\ pCoef[2\ *\ ia5];}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \ co7\ =\ pCoef[2\ *\ ia6];}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ \ co8\ =\ pCoef[2\ *\ ia7];}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \ \ si2\ =\ pCoef[2\ *\ ia1\ +\ 1];}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \ si3\ =\ pCoef[2\ *\ ia2\ +\ 1];}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ \ si4\ =\ pCoef[2\ *\ ia3\ +\ 1];}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \ \ \ si5\ =\ pCoef[2\ *\ ia4\ +\ 1];}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ \ si6\ =\ pCoef[2\ *\ ia5\ +\ 1];}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ \ si7\ =\ pCoef[2\ *\ ia6\ +\ 1];}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ \ si8\ =\ pCoef[2\ *\ ia7\ +\ 1];}
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \ i1\ =\ j;}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ \ index\ calculation\ for\ the\ input\ */}}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \ \ \ \ i2\ =\ i1\ +\ n2;}
+\DoxyCodeLine{00176\ \ \ \ \ \ \ \ \ \ \ \ \ i3\ =\ i2\ +\ n2;}
+\DoxyCodeLine{00177\ \ \ \ \ \ \ \ \ \ \ \ \ i4\ =\ i3\ +\ n2;}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ \ \ \ \ i5\ =\ i4\ +\ n2;}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \ \ \ \ i6\ =\ i5\ +\ n2;}
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \ \ \ \ \ \ i7\ =\ i6\ +\ n2;}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \ \ \ \ \ \ i8\ =\ i7\ +\ n2;}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ \ \ \ \ r1\ =\ pSrc[2\ *\ i1]\ +\ pSrc[2\ *\ i5];}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ \ \ \ \ r5\ =\ pSrc[2\ *\ i1]\ -\/\ pSrc[2\ *\ i5];}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ \ \ \ \ r2\ =\ pSrc[2\ *\ i2]\ +\ pSrc[2\ *\ i6];}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ \ \ \ \ r6\ =\ pSrc[2\ *\ i2]\ -\/\ pSrc[2\ *\ i6];}
+\DoxyCodeLine{00186\ \ \ \ \ \ \ \ \ \ \ \ \ r3\ =\ pSrc[2\ *\ i3]\ +\ pSrc[2\ *\ i7];}
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ \ \ \ \ r7\ =\ pSrc[2\ *\ i3]\ -\/\ pSrc[2\ *\ i7];}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \ \ \ \ r4\ =\ pSrc[2\ *\ i4]\ +\ pSrc[2\ *\ i8];}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \ \ \ \ r8\ =\ pSrc[2\ *\ i4]\ -\/\ pSrc[2\ *\ i8];}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \ \ \ \ \ \ t1\ =\ r1\ -\/\ r3;}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ r1\ =\ r1\ +\ r3;}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ r3\ =\ r2\ -\/\ r4;}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \ \ \ r2\ =\ r2\ +\ r4;}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i1]\ =\ r1\ +\ r2;}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \ r2\ =\ r1\ -\/\ r2;}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ s1\ =\ pSrc[2\ *\ i1\ +\ 1]\ +\ pSrc[2\ *\ i5\ +\ 1];}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ s5\ =\ pSrc[2\ *\ i1\ +\ 1]\ -\/\ pSrc[2\ *\ i5\ +\ 1];}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ s2\ =\ pSrc[2\ *\ i2\ +\ 1]\ +\ pSrc[2\ *\ i6\ +\ 1];}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ \ \ \ \ s6\ =\ pSrc[2\ *\ i2\ +\ 1]\ -\/\ pSrc[2\ *\ i6\ +\ 1];}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ \ s3\ =\ pSrc[2\ *\ i3\ +\ 1]\ +\ pSrc[2\ *\ i7\ +\ 1];}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \ \ \ \ s7\ =\ pSrc[2\ *\ i3\ +\ 1]\ -\/\ pSrc[2\ *\ i7\ +\ 1];}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \ \ \ \ s4\ =\ pSrc[2\ *\ i4\ +\ 1]\ +\ pSrc[2\ *\ i8\ +\ 1];}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ \ \ \ \ s8\ =\ pSrc[2\ *\ i4\ +\ 1]\ -\/\ pSrc[2\ *\ i8\ +\ 1];}
+\DoxyCodeLine{00204\ \ \ \ \ \ \ \ \ \ \ \ \ t2\ =\ s1\ -\/\ s3;}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ \ \ \ \ s1\ =\ s1\ +\ s3;}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ \ \ \ \ s3\ =\ s2\ -\/\ s4;}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \ \ \ \ s2\ =\ s2\ +\ s4;}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ r1\ =\ t1\ +\ s3;}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \ t1\ =\ t1\ -\/\ s3;}
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i1\ +\ 1]\ =\ s1\ +\ s2;}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ s2\ =\ s1\ -\/\ s2;}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ \ \ s1\ =\ t2\ -\/\ r3;}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ t2\ =\ t2\ +\ r3;}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ \ p1\ =\ co5\ *\ r2;}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ \ p2\ =\ si5\ *\ s2;}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \ \ \ \ p3\ =\ co5\ *\ s2;}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \ \ \ \ p4\ =\ si5\ *\ r2;}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i5]\ \ \ \ \ =\ p1\ +\ p2;}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i5\ +\ 1]\ =\ p3\ -\/\ p4;}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ \ \ \ \ p1\ =\ co3\ *\ r1;}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \ \ \ \ p2\ =\ si3\ *\ s1;}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \ \ p3\ =\ co3\ *\ s1;}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ p4\ =\ si3\ *\ r1;}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i3]\ \ \ \ \ =\ p1\ +\ p2;}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i3\ +\ 1]\ =\ p3\ -\/\ p4;}
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ \ \ \ \ p1\ =\ co7\ *\ t1;}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ \ \ \ \ p2\ =\ si7\ *\ t2;}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \ \ \ \ \ p3\ =\ co7\ *\ t2;}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \ \ \ p4\ =\ si7\ *\ t1;}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i7]\ \ \ \ \ =\ p1\ +\ p2;}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i7\ +\ 1]\ =\ p3\ -\/\ p4;}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ \ \ \ \ r1\ =\ (r6\ -\/\ r8)\ *\ C81;}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ \ \ \ \ r6\ =\ (r6\ +\ r8)\ *\ C81;}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \ \ \ \ s1\ =\ (s6\ -\/\ s8)\ *\ C81;}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ \ \ \ \ \ s6\ =\ (s6\ +\ s8)\ *\ C81;}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \ \ \ \ \ t1\ =\ r5\ -\/\ r1;}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ \ \ \ \ r5\ =\ r5\ +\ r1;}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ \ \ \ r8\ =\ r7\ -\/\ r6;}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \ \ \ \ \ r7\ =\ r7\ +\ r6;}
+\DoxyCodeLine{00240\ \ \ \ \ \ \ \ \ \ \ \ \ t2\ =\ s5\ -\/\ s1;}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ \ \ \ \ s5\ =\ s5\ +\ s1;}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \ \ \ \ s8\ =\ s7\ -\/\ s6;}
+\DoxyCodeLine{00243\ \ \ \ \ \ \ \ \ \ \ \ \ s7\ =\ s7\ +\ s6;}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ \ \ \ \ \ \ r1\ =\ r5\ +\ s7;}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ \ \ \ \ r5\ =\ r5\ -\/\ s7;}
+\DoxyCodeLine{00246\ \ \ \ \ \ \ \ \ \ \ \ \ r6\ =\ t1\ +\ s8;}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ \ \ \ \ t1\ =\ t1\ -\/\ s8;}
+\DoxyCodeLine{00248\ \ \ \ \ \ \ \ \ \ \ \ \ s1\ =\ s5\ -\/\ r7;}
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ \ \ \ \ s5\ =\ s5\ +\ r7;}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \ \ \ \ s6\ =\ t2\ -\/\ r8;}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \ \ \ \ t2\ =\ t2\ +\ r8;}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ \ \ \ \ \ \ p1\ =\ co2\ *\ r1;}
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ \ \ \ \ p2\ =\ si2\ *\ s1;}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ \ \ \ \ p3\ =\ co2\ *\ s1;}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \ \ \ \ p4\ =\ si2\ *\ r1;}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i2]\ \ \ \ \ =\ p1\ +\ p2;}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i2\ +\ 1]\ =\ p3\ -\/\ p4;}
+\DoxyCodeLine{00258\ \ \ \ \ \ \ \ \ \ \ \ \ p1\ =\ co8\ *\ r5;}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \ \ \ \ p2\ =\ si8\ *\ s5;}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \ \ \ \ p3\ =\ co8\ *\ s5;}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \ \ \ \ p4\ =\ si8\ *\ r5;}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i8]\ \ \ \ \ =\ p1\ +\ p2;}
+\DoxyCodeLine{00263\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i8\ +\ 1]\ =\ p3\ -\/\ p4;}
+\DoxyCodeLine{00264\ \ \ \ \ \ \ \ \ \ \ \ \ p1\ =\ co6\ *\ r6;}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ \ \ \ \ p2\ =\ si6\ *\ s6;}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \ \ \ \ p3\ =\ co6\ *\ s6;}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \ \ \ \ p4\ =\ si6\ *\ r6;}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i6]\ \ \ \ \ =\ p1\ +\ p2;}
+\DoxyCodeLine{00269\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i6\ +\ 1]\ =\ p3\ -\/\ p4;}
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \ \ \ \ p1\ =\ co4\ *\ t1;}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \ \ p2\ =\ si4\ *\ t2;}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \ \ \ \ p3\ =\ co4\ *\ t2;}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \ \ \ \ p4\ =\ si4\ *\ t1;}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i4]\ \ \ \ \ =\ p1\ +\ p2;}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ \ \ \ \ \ \ pSrc[2\ *\ i4\ +\ 1]\ =\ p3\ -\/\ p4;}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ \ \ \ \ i1\ +=\ n1;}
+\DoxyCodeLine{00278\ \ \ \ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (i1\ <\ fftLen);}
+\DoxyCodeLine{00279\ }
+\DoxyCodeLine{00280\ \ \ \ \ \ \ \ \ \ j++;}
+\DoxyCodeLine{00281\ \ \ \ \ \ \ \}\ \textcolor{keywordflow}{while}\ (j\ <\ n2);}
+\DoxyCodeLine{00282\ }
+\DoxyCodeLine{00283\ \ \ \ \ \ \ twidCoefModifier\ <<=\ 3;}
+\DoxyCodeLine{00284\ \ \ \ \}\ \textcolor{keywordflow}{while}\ (n2\ >\ 7);}
+\DoxyCodeLine{00285\ \}}
+
+\end{DoxyCode}

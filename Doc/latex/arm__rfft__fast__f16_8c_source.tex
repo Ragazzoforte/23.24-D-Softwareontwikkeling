@@ -1,0 +1,500 @@
+\doxysection{arm\+\_\+rfft\+\_\+fast\+\_\+f16.\+c}
+\hypertarget{arm__rfft__fast__f16_8c_source}{}\label{arm__rfft__fast__f16_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_rfft\_fast\_f16.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_rfft\_fast\_f16.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_rfft\_fast\_f16.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ RFFT\ \&\ RIFFT\ Floating\ point\ process\ function}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/transform\_functions\_f16.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}arm\_common\_tables\_f16.h"{}}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#if\ defined(ARM\_FLOAT16\_SUPPORTED)}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVE\_FLOAT16)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{keywordtype}{void}\ stage\_rfft\_f16(}
+\DoxyCodeLine{00038\ \ \ \textcolor{keyword}{const}\ arm\_rfft\_fast\_instance\_f16\ *\ S,}
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ float16\_t\ *\ p,}
+\DoxyCodeLine{00040\ \ \ \ \ \ \ \ \ float16\_t\ *\ pOut)}
+\DoxyCodeLine{00041\ \{}
+\DoxyCodeLine{00042\ \ \ \ \ \ \ \ \ int32\_t\ \ k;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ Counter\ */}}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ float16\_t\ twR,\ twI;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ RFFT\ Twiddle\ coefficients\ */}}
+\DoxyCodeLine{00044\ \ \ \textcolor{keyword}{const}\ float16\_t\ *\ pCoeff\ =\ S-\/>pTwiddleRFFT;\ \ \ \ \ \ \ \textcolor{comment}{/*\ Points\ to\ RFFT\ Twiddle\ factors\ */}}
+\DoxyCodeLine{00045\ \ \ \ \ \ \ \ \ float16\_t\ *pA\ =\ p;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ increasing\ pointer\ */}}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ float16\_t\ *pB\ =\ p;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ decreasing\ pointer\ */}}
+\DoxyCodeLine{00047\ \ \ \ \ \ \ \ \ float16\_t\ xAR,\ xAI,\ xBR,\ xBI;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ temporary\ variables\ */}}
+\DoxyCodeLine{00048\ \ \ \ \ \ \ \ \ float16\_t\ t1a,\ t1b;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ temporary\ variables\ */}}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ float16\_t\ p0,\ p1,\ p2,\ p3;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ temporary\ variables\ */}}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ float16x8x2\_t\ tw,xA,xB;}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ float16x8x2\_t\ tmp1,\ tmp2,\ res;}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ uint16x8\_t\ \ \ \ \ vecStridesBkwd;}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \ \ \ \ \ \ \ \ vecStridesBkwd\ =\ vddupq\_u16((uint16\_t)14,\ 2);}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ blockCnt;}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \ \ \ k\ =\ (S-\/>Sint).fftLen\ -\/\ 1;}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \ \ \ \textcolor{comment}{/*\ Pack\ first\ and\ last\ sample\ of\ the\ frequency\ domain\ together\ */}}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \ xBR\ =\ pB[0];}
+\DoxyCodeLine{00067\ \ \ \ xBI\ =\ pB[1];}
+\DoxyCodeLine{00068\ \ \ \ xAR\ =\ pA[0];}
+\DoxyCodeLine{00069\ \ \ \ xAI\ =\ pA[1];}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ \ twR\ =\ *pCoeff++\ ;}
+\DoxyCodeLine{00072\ \ \ \ twI\ =\ *pCoeff++\ ;}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \ \ \ \textcolor{comment}{//\ U1\ =\ XA(1)\ +\ XB(1);\ \%\ It\ is\ real}}
+\DoxyCodeLine{00075\ \ \ \ t1a\ =\ (\_Float16)xBR\ +\ (\_Float16)xAR\ \ ;}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \ \textcolor{comment}{//\ U2\ =\ XB(1)\ -\/\ XA(1);\ \%\ It\ is\ imaginary}}
+\DoxyCodeLine{00078\ \ \ \ t1b\ =\ (\_Float16)xBI\ +\ (\_Float16)xAI\ \ ;}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \ \textcolor{comment}{//\ real(tw\ *\ (xB\ -\/\ xA))\ =\ twR\ *\ (xBR\ -\/\ xAR)\ -\/\ twI\ *\ (xBI\ -\/\ xAI);}}
+\DoxyCodeLine{00081\ \ \ \ \textcolor{comment}{//\ imag(tw\ *\ (xB\ -\/\ xA))\ =\ twI\ *\ (xBR\ -\/\ xAR)\ +\ twR\ *\ (xBI\ -\/\ xAI);}}
+\DoxyCodeLine{00082\ \ \ \ *pOut++\ =\ 0.5f16\ *\ (\ (\_Float16)t1a\ +\ (\_Float16)t1b\ );}
+\DoxyCodeLine{00083\ \ \ \ *pOut++\ =\ 0.5f16\ *\ (\ (\_Float16)t1a\ -\/\ (\_Float16)t1b\ );}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ \ \ \ \textcolor{comment}{//\ XA(1)\ =\ 1/2*(\ U1\ -\/\ imag(U2)\ +\ \ i*(\ U1\ +imag(U2)\ ));}}
+\DoxyCodeLine{00086\ \ \ \ pB\ \ =\ p\ +\ 2*k\ -\/\ 14;}
+\DoxyCodeLine{00087\ \ \ \ pA\ +=\ 2;}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ blockCnt\ =\ k\ >>\ 3;}
+\DoxyCodeLine{00090\ \ \ \ \textcolor{keywordflow}{while}\ (blockCnt\ >\ 0)}
+\DoxyCodeLine{00091\ \ \ \ \{}
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00093\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ function\ X\ =\ my\_split\_rfft(X,\ ifftFlag)}}
+\DoxyCodeLine{00094\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \%\ X\ is\ a\ series\ of\ real\ numbers}}
+\DoxyCodeLine{00095\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ L\ \ =\ length(X);}}
+\DoxyCodeLine{00096\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ XC\ =\ X(1:2:end)\ +i*X(2:2:end);}}
+\DoxyCodeLine{00097\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ XA\ =\ fft(XC);}}
+\DoxyCodeLine{00098\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ XB\ =\ conj(XA([1\ end:-\/1:2]));}}
+\DoxyCodeLine{00099\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ TW\ =\ i*exp(-\/2*pi*i*[0:L/2-\/1]/L).';}}
+\DoxyCodeLine{00100\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ for\ l\ =\ 2:L/2}}
+\DoxyCodeLine{00101\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ XA(l)\ =\ 1/2\ *\ (XA(l)\ +\ XB(l)\ +\ TW(l)\ *\ (XB(l)\ -\/\ XA(l)));}}
+\DoxyCodeLine{00102\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ end}}
+\DoxyCodeLine{00103\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ XA(1)\ =\ 1/2*\ (XA(1)\ +\ XB(1)\ +\ TW(1)\ *\ (XB(1)\ -\/\ XA(1)))\ +\ i*(\ 1/2*(\ XA(1)\ +\ XB(1)\ +\ i*(\ XA(1)\ -\/\ XB(1))));}}
+\DoxyCodeLine{00104\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ X\ =\ XA;}}
+\DoxyCodeLine{00105\ \textcolor{comment}{\ \ \ \ \ \ */}}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \ \ xA\ =\ vld2q\_f16(pA);}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ pA\ +=\ 16;}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \ \ \ \ \ \ xB\ =\ vld2q\_f16(pB);}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \ \ \ \ \ \ xB.val[0]\ =\ vldrhq\_gather\_shifted\_offset\_f16(pB,\ vecStridesBkwd);}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ xB.val[1]\ =\ vldrhq\_gather\_shifted\_offset\_f16(\&pB[1],\ vecStridesBkwd);}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \ \ xB.val[1]\ =\ vnegq\_f16(xB.val[1]);}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ pB\ -\/=\ 16;}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ \ \ tw\ =\ vld2q\_f16(pCoeff);}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ pCoeff\ +=\ 16;}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ \ \ tmp1.val[0]\ =\ vaddq\_f16(xA.val[0],xB.val[0]);}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ tmp1.val[1]\ =\ vaddq\_f16(xA.val[1],xB.val[1]);}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \ \ \ \ tmp2.val[0]\ =\ vsubq\_f16(xB.val[0],xA.val[0]);}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ tmp2.val[1]\ =\ vsubq\_f16(xB.val[1],xA.val[1]);}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00130\ \ \ \ \ \ \ res.val[0]\ =\ vmulq(tw.val[0],\ tmp2.val[0]);}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ res.val[0]\ =\ vfmsq(res.val[0],tw.val[1],\ tmp2.val[1]);}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \ \ \ \ \ \ res.val[1]\ =\ vmulq(tw.val[0],\ tmp2.val[1]);}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ res.val[1]\ =\ vfmaq(res.val[1],\ tw.val[1],\ tmp2.val[0]);}
+\DoxyCodeLine{00135\ }
+\DoxyCodeLine{00136\ \ \ \ \ \ \ res.val[0]\ =\ vaddq\_f16(res.val[0],tmp1.val[0]\ );}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ res.val[1]\ =\ vaddq\_f16(res.val[1],tmp1.val[1]\ );}
+\DoxyCodeLine{00138\ }
+\DoxyCodeLine{00139\ \ \ \ \ \ \ res.val[0]\ =\ vmulq\_n\_f16(res.val[0],\ 0.5f);}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ res.val[1]\ =\ vmulq\_n\_f16(res.val[1],\ 0.5f);}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \ \ \ \ vst2q\_f16(pOut,\ res);}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ pOut\ +=\ 16;}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \ \ \ \ }
+\DoxyCodeLine{00147\ \ \ \ \ \ \ blockCnt-\/-\/;}
+\DoxyCodeLine{00148\ \ \ \ \}\ }
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \ \ \ pB\ +=\ 14;}
+\DoxyCodeLine{00151\ \ \ \ blockCnt\ =\ k\ \&\ 7;}
+\DoxyCodeLine{00152\ \ \ \ \textcolor{keywordflow}{while}\ (blockCnt\ >\ 0)}
+\DoxyCodeLine{00153\ \ \ \ \{}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00155\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ function\ X\ =\ my\_split\_rfft(X,\ ifftFlag)}}
+\DoxyCodeLine{00156\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \%\ X\ is\ a\ series\ of\ real\ numbers}}
+\DoxyCodeLine{00157\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ L\ \ =\ length(X);}}
+\DoxyCodeLine{00158\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ XC\ =\ X(1:2:end)\ +i*X(2:2:end);}}
+\DoxyCodeLine{00159\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ XA\ =\ fft(XC);}}
+\DoxyCodeLine{00160\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ XB\ =\ conj(XA([1\ end:-\/1:2]));}}
+\DoxyCodeLine{00161\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ TW\ =\ i*exp(-\/2*pi*i*[0:L/2-\/1]/L).';}}
+\DoxyCodeLine{00162\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ for\ l\ =\ 2:L/2}}
+\DoxyCodeLine{00163\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ XA(l)\ =\ 1/2\ *\ (XA(l)\ +\ XB(l)\ +\ TW(l)\ *\ (XB(l)\ -\/\ XA(l)));}}
+\DoxyCodeLine{00164\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ end}}
+\DoxyCodeLine{00165\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ XA(1)\ =\ 1/2*\ (XA(1)\ +\ XB(1)\ +\ TW(1)\ *\ (XB(1)\ -\/\ XA(1)))\ +\ i*(\ 1/2*(\ XA(1)\ +\ XB(1)\ +\ i*(\ XA(1)\ -\/\ XB(1))));}}
+\DoxyCodeLine{00166\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ X\ =\ XA;}}
+\DoxyCodeLine{00167\ \textcolor{comment}{\ \ \ \ \ \ */}}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \ \ \ \ \ \ xBI\ =\ pB[1];}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ xBR\ =\ pB[0];}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ xAR\ =\ pA[0];}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ xAI\ =\ pA[1];}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \ \ \ \ \ \ twR\ =\ *pCoeff++;}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ twI\ =\ *pCoeff++;}
+\DoxyCodeLine{00176\ }
+\DoxyCodeLine{00177\ \ \ \ \ \ \ t1a\ =\ (\_Float16)xBR\ -\/\ (\_Float16)xAR\ ;}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ t1b\ =\ (\_Float16)xBI\ +\ (\_Float16)xAI\ ;}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00180\ \ \ \ \ \ \ \textcolor{comment}{//\ real(tw\ *\ (xB\ -\/\ xA))\ =\ twR\ *\ (xBR\ -\/\ xAR)\ -\/\ twI\ *\ (xBI\ -\/\ xAI);}}
+\DoxyCodeLine{00181\ \ \ \ \ \ \ \textcolor{comment}{//\ imag(tw\ *\ (xB\ -\/\ xA))\ =\ twI\ *\ (xBR\ -\/\ xAR)\ +\ twR\ *\ (xBI\ -\/\ xAI);}}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ p0\ =\ (\_Float16)twR\ *\ (\_Float16)t1a;}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ p1\ =\ (\_Float16)twI\ *\ (\_Float16)t1a;}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ p2\ =\ (\_Float16)twR\ *\ (\_Float16)t1b;}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ p3\ =\ (\_Float16)twI\ *\ (\_Float16)t1b;}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \ \ \ \ \ \ *pOut++\ =\ 0.5f16\ *\ ((\_Float16)xAR\ +\ (\_Float16)xBR\ +\ (\_Float16)p0\ +\ (\_Float16)p3\ );\ \textcolor{comment}{//xAR}}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ *pOut++\ =\ 0.5f16\ *\ ((\_Float16)xAI\ -\/\ (\_Float16)xBI\ +\ (\_Float16)p1\ -\/\ (\_Float16)p2\ );\ \textcolor{comment}{//xAI}}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00190\ \ \ \ \ \ \ pA\ +=\ 2;}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ pB\ -\/=\ 2;}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ blockCnt-\/-\/;}
+\DoxyCodeLine{00193\ \ \ \ \}}
+\DoxyCodeLine{00194\ \}}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \textcolor{comment}{/*\ Prepares\ data\ for\ inverse\ cfft\ */}}
+\DoxyCodeLine{00197\ \textcolor{keywordtype}{void}\ merge\_rfft\_f16(}
+\DoxyCodeLine{00198\ \ \ \textcolor{keyword}{const}\ arm\_rfft\_fast\_instance\_f16\ *\ S,}
+\DoxyCodeLine{00199\ \ \ \ \ \ \ \ \ float16\_t\ *\ p,}
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ float16\_t\ *\ pOut)}
+\DoxyCodeLine{00201\ \{}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ int32\_t\ \ k;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ Counter\ */}}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ \ \ float16\_t\ twR,\ twI;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ RFFT\ Twiddle\ coefficients\ */}}
+\DoxyCodeLine{00204\ \ \ \textcolor{keyword}{const}\ float16\_t\ *pCoeff\ =\ S-\/>pTwiddleRFFT;\ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Points\ to\ RFFT\ Twiddle\ factors\ */}}
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \ \ float16\_t\ *pA\ =\ p;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ increasing\ pointer\ */}}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ float16\_t\ *pB\ =\ p;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ decreasing\ pointer\ */}}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ float16\_t\ xAR,\ xAI,\ xBR,\ xBI;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ temporary\ variables\ */}}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ float16\_t\ t1a,\ t1b,\ r,\ s,\ t,\ u;\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ temporary\ variables\ */}}
+\DoxyCodeLine{00209\ }
+\DoxyCodeLine{00210\ \ \ \ \ \ \ \ \ float16x8x2\_t\ tw,xA,xB;}
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ float16x8x2\_t\ tmp1,\ tmp2,\ res;}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ uint16x8\_t\ \ \ \ \ vecStridesBkwd;}
+\DoxyCodeLine{00213\ }
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ vecStridesBkwd\ =\ vddupq\_u16((uint16\_t)14,\ 2);}
+\DoxyCodeLine{00215\ }
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{int}\ blockCnt;}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00218\ }
+\DoxyCodeLine{00219\ \ \ \ k\ =\ (S-\/>Sint).fftLen\ -\/\ 1;}
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00221\ \ \ \ xAR\ =\ pA[0];}
+\DoxyCodeLine{00222\ \ \ \ xAI\ =\ pA[1];}
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00224\ \ \ \ pCoeff\ +=\ 2\ ;}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ \ \ \ *pOut++\ =\ 0.5f16\ *\ (\ (\_Float16)xAR\ +\ (\_Float16)xAI\ );}
+\DoxyCodeLine{00227\ \ \ \ *pOut++\ =\ 0.5f16\ *\ (\ (\_Float16)xAR\ -\/\ (\_Float16)xAI\ );}
+\DoxyCodeLine{00228\ }
+\DoxyCodeLine{00229\ \ \ \ pB\ \ =\ \ p\ +\ 2*k\ -\/\ 14;}
+\DoxyCodeLine{00230\ \ \ \ pA\ +=\ \ 2\ \ \ \ ;}
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00232\ \ \ \ blockCnt\ =\ k\ >>\ 3;}
+\DoxyCodeLine{00233\ \ \ \ \textcolor{keywordflow}{while}\ (blockCnt\ >\ 0)}
+\DoxyCodeLine{00234\ \ \ \ \{}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \textcolor{comment}{/*\ G\ is\ half\ of\ the\ frequency\ complex\ spectrum\ */}}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \textcolor{comment}{//for\ k\ =\ 2:N}}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ Xk(k)\ =\ 1/2\ *\ (G(k)\ +\ conj(G(N-\/k+2))\ +\ Tw(k)*(\ G(k)\ -\/\ conj(G(N-\/k+2))));}}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ xA\ =\ vld2q\_f16(pA);}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ pA\ +=\ 16;}
+\DoxyCodeLine{00240\ }
+\DoxyCodeLine{00241\ \ \ \ \ \ \ xB\ =\ vld2q\_f16(pB);}
+\DoxyCodeLine{00242\ }
+\DoxyCodeLine{00243\ \ \ \ \ \ \ xB.val[0]\ =\ vldrhq\_gather\_shifted\_offset\_f16(pB,\ vecStridesBkwd);}
+\DoxyCodeLine{00244\ \ \ \ \ \ \ xB.val[1]\ =\ vldrhq\_gather\_shifted\_offset\_f16(\&pB[1],\ vecStridesBkwd);}
+\DoxyCodeLine{00245\ }
+\DoxyCodeLine{00246\ \ \ \ \ \ \ xB.val[1]\ =\ vnegq\_f16(xB.val[1]);}
+\DoxyCodeLine{00247\ \ \ \ \ \ \ pB\ -\/=\ 16;}
+\DoxyCodeLine{00248\ }
+\DoxyCodeLine{00249\ }
+\DoxyCodeLine{00250\ \ \ \ \ \ \ tw\ =\ vld2q\_f16(pCoeff);}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ tw.val[1]\ =\ vnegq\_f16(tw.val[1]);}
+\DoxyCodeLine{00252\ \ \ \ \ \ \ pCoeff\ +=\ 16;}
+\DoxyCodeLine{00253\ }
+\DoxyCodeLine{00254\ }
+\DoxyCodeLine{00255\ \ \ \ \ \ \ tmp1.val[0]\ =\ vaddq\_f16(xA.val[0],xB.val[0]);}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ tmp1.val[1]\ =\ vaddq\_f16(xA.val[1],xB.val[1]);}
+\DoxyCodeLine{00257\ }
+\DoxyCodeLine{00258\ \ \ \ \ \ \ tmp2.val[0]\ =\ vsubq\_f16(xB.val[0],xA.val[0]);}
+\DoxyCodeLine{00259\ \ \ \ \ \ \ tmp2.val[1]\ =\ vsubq\_f16(xB.val[1],xA.val[1]);}
+\DoxyCodeLine{00260\ }
+\DoxyCodeLine{00261\ \ \ \ \ \ \ res.val[0]\ =\ vmulq(tw.val[0],\ tmp2.val[0]);}
+\DoxyCodeLine{00262\ \ \ \ \ \ \ res.val[0]\ =\ vfmsq(res.val[0],tw.val[1],\ tmp2.val[1]);}
+\DoxyCodeLine{00263\ }
+\DoxyCodeLine{00264\ \ \ \ \ \ \ res.val[1]\ =\ vmulq(tw.val[0],\ tmp2.val[1]);}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ res.val[1]\ =\ vfmaq(res.val[1],\ tw.val[1],\ tmp2.val[0]);}
+\DoxyCodeLine{00266\ }
+\DoxyCodeLine{00267\ \ \ \ \ \ \ res.val[0]\ =\ vaddq\_f16(res.val[0],tmp1.val[0]\ );}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ res.val[1]\ =\ vaddq\_f16(res.val[1],tmp1.val[1]\ );}
+\DoxyCodeLine{00269\ }
+\DoxyCodeLine{00270\ \ \ \ \ \ \ res.val[0]\ =\ vmulq\_n\_f16(res.val[0],\ 0.5f);}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ res.val[1]\ =\ vmulq\_n\_f16(res.val[1],\ 0.5f);}
+\DoxyCodeLine{00272\ }
+\DoxyCodeLine{00273\ }
+\DoxyCodeLine{00274\ \ \ \ \ \ \ vst2q\_f16(pOut,\ res);}
+\DoxyCodeLine{00275\ \ \ \ \ \ \ pOut\ +=\ 16;}
+\DoxyCodeLine{00276\ }
+\DoxyCodeLine{00277\ \ \ \ \ }
+\DoxyCodeLine{00278\ \ \ \ \ \ \ blockCnt-\/-\/;}
+\DoxyCodeLine{00279\ \ \ \ \}}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00281\ \ \ \ pB\ +=\ 14;}
+\DoxyCodeLine{00282\ \ \ \ blockCnt\ =\ k\ \&\ 7;}
+\DoxyCodeLine{00283\ \ \ \ \textcolor{keywordflow}{while}\ (blockCnt\ >\ 0)}
+\DoxyCodeLine{00284\ \ \ \ \{}
+\DoxyCodeLine{00285\ \ \ \ \ \ \ \textcolor{comment}{/*\ G\ is\ half\ of\ the\ frequency\ complex\ spectrum\ */}}
+\DoxyCodeLine{00286\ \ \ \ \ \ \ \textcolor{comment}{//for\ k\ =\ 2:N}}
+\DoxyCodeLine{00287\ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ Xk(k)\ =\ 1/2\ *\ (G(k)\ +\ conj(G(N-\/k+2))\ +\ Tw(k)*(\ G(k)\ -\/\ conj(G(N-\/k+2))));}}
+\DoxyCodeLine{00288\ \ \ \ \ \ \ xBI\ =\ \ \ pB[1]\ \ \ \ ;}
+\DoxyCodeLine{00289\ \ \ \ \ \ \ xBR\ =\ \ \ pB[0]\ \ \ \ ;}
+\DoxyCodeLine{00290\ \ \ \ \ \ \ xAR\ =\ \ pA[0];}
+\DoxyCodeLine{00291\ \ \ \ \ \ \ xAI\ =\ \ pA[1];}
+\DoxyCodeLine{00292\ }
+\DoxyCodeLine{00293\ \ \ \ \ \ \ twR\ =\ *pCoeff++;}
+\DoxyCodeLine{00294\ \ \ \ \ \ \ twI\ =\ *pCoeff++;}
+\DoxyCodeLine{00295\ }
+\DoxyCodeLine{00296\ \ \ \ \ \ \ t1a\ =\ (\_Float16)xAR\ -\/\ (\_Float16)xBR\ ;}
+\DoxyCodeLine{00297\ \ \ \ \ \ \ t1b\ =\ (\_Float16)xAI\ +\ (\_Float16)xBI\ ;}
+\DoxyCodeLine{00298\ }
+\DoxyCodeLine{00299\ \ \ \ \ \ \ r\ =\ (\_Float16)twR\ *\ (\_Float16)t1a;}
+\DoxyCodeLine{00300\ \ \ \ \ \ \ s\ =\ (\_Float16)twI\ *\ (\_Float16)t1b;}
+\DoxyCodeLine{00301\ \ \ \ \ \ \ t\ =\ (\_Float16)twI\ *\ (\_Float16)t1a;}
+\DoxyCodeLine{00302\ \ \ \ \ \ \ u\ =\ (\_Float16)twR\ *\ (\_Float16)t1b;}
+\DoxyCodeLine{00303\ }
+\DoxyCodeLine{00304\ \ \ \ \ \ \ \textcolor{comment}{//\ real(tw\ *\ (xA\ -\/\ xB))\ =\ twR\ *\ (xAR\ -\/\ xBR)\ -\/\ twI\ *\ (xAI\ -\/\ xBI);}}
+\DoxyCodeLine{00305\ \ \ \ \ \ \ \textcolor{comment}{//\ imag(tw\ *\ (xA\ -\/\ xB))\ =\ twI\ *\ (xAR\ -\/\ xBR)\ +\ twR\ *\ (xAI\ -\/\ xBI);}}
+\DoxyCodeLine{00306\ \ \ \ \ \ \ *pOut++\ =\ 0.5f16\ *\ ((\_Float16)xAR\ +\ (\_Float16)xBR\ -\/\ (\_Float16)r\ -\/\ (\_Float16)s\ );\ \textcolor{comment}{//xAR}}
+\DoxyCodeLine{00307\ \ \ \ \ \ \ *pOut++\ =\ 0.5f16\ *\ ((\_Float16)xAI\ -\/\ (\_Float16)xBI\ +\ (\_Float16)t\ -\/\ (\_Float16)u\ );\ \textcolor{comment}{//xAI}}
+\DoxyCodeLine{00308\ }
+\DoxyCodeLine{00309\ \ \ \ \ \ \ pA\ +=\ 2;}
+\DoxyCodeLine{00310\ \ \ \ \ \ \ pB\ -\/=\ 2;}
+\DoxyCodeLine{00311\ \ \ \ \ \ \ blockCnt-\/-\/;}
+\DoxyCodeLine{00312\ \ \ \ \}}
+\DoxyCodeLine{00313\ }
+\DoxyCodeLine{00314\ \}}
+\DoxyCodeLine{00315\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00316\ \textcolor{keywordtype}{void}\ stage\_rfft\_f16(}
+\DoxyCodeLine{00317\ \ \ \textcolor{keyword}{const}\ arm\_rfft\_fast\_instance\_f16\ *\ S,}
+\DoxyCodeLine{00318\ \ \ \ \ \ \ \ \ float16\_t\ *\ p,}
+\DoxyCodeLine{00319\ \ \ \ \ \ \ \ \ float16\_t\ *\ pOut)}
+\DoxyCodeLine{00320\ \{}
+\DoxyCodeLine{00321\ \ \ \ \ \ \ \ \ int32\_t\ \ k;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ Counter\ */}}
+\DoxyCodeLine{00322\ \ \ \ \ \ \ \ \ float16\_t\ twR,\ twI;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ RFFT\ Twiddle\ coefficients\ */}}
+\DoxyCodeLine{00323\ \ \ \textcolor{keyword}{const}\ float16\_t\ *\ pCoeff\ =\ S-\/>pTwiddleRFFT;\ \ \ \ \ \ \ \textcolor{comment}{/*\ Points\ to\ RFFT\ Twiddle\ factors\ */}}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ float16\_t\ *pA\ =\ p;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ increasing\ pointer\ */}}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ float16\_t\ *pB\ =\ p;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ decreasing\ pointer\ */}}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ float16\_t\ xAR,\ xAI,\ xBR,\ xBI;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ temporary\ variables\ */}}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ float16\_t\ t1a,\ t1b;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ temporary\ variables\ */}}
+\DoxyCodeLine{00328\ \ \ \ \ \ \ \ \ float16\_t\ p0,\ p1,\ p2,\ p3;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ temporary\ variables\ */}}
+\DoxyCodeLine{00329\ }
+\DoxyCodeLine{00330\ }
+\DoxyCodeLine{00331\ \ \ \ k\ =\ (S-\/>Sint).fftLen\ -\/\ 1;}
+\DoxyCodeLine{00332\ }
+\DoxyCodeLine{00333\ \ \ \ \textcolor{comment}{/*\ Pack\ first\ and\ last\ sample\ of\ the\ frequency\ domain\ together\ */}}
+\DoxyCodeLine{00334\ }
+\DoxyCodeLine{00335\ \ \ \ xBR\ =\ pB[0];}
+\DoxyCodeLine{00336\ \ \ \ xBI\ =\ pB[1];}
+\DoxyCodeLine{00337\ \ \ \ xAR\ =\ pA[0];}
+\DoxyCodeLine{00338\ \ \ \ xAI\ =\ pA[1];}
+\DoxyCodeLine{00339\ }
+\DoxyCodeLine{00340\ \ \ \ twR\ =\ *pCoeff++\ ;}
+\DoxyCodeLine{00341\ \ \ \ twI\ =\ *pCoeff++\ ;}
+\DoxyCodeLine{00342\ }
+\DoxyCodeLine{00343\ }
+\DoxyCodeLine{00344\ \ \ \ \textcolor{comment}{//\ U1\ =\ XA(1)\ +\ XB(1);\ \%\ It\ is\ real}}
+\DoxyCodeLine{00345\ \ \ \ t1a\ =\ (\_Float16)xBR\ +\ (\_Float16)xAR\ \ ;}
+\DoxyCodeLine{00346\ }
+\DoxyCodeLine{00347\ \ \ \ \textcolor{comment}{//\ U2\ =\ XB(1)\ -\/\ XA(1);\ \%\ It\ is\ imaginary}}
+\DoxyCodeLine{00348\ \ \ \ t1b\ =\ (\_Float16)xBI\ +\ (\_Float16)xAI\ \ ;}
+\DoxyCodeLine{00349\ }
+\DoxyCodeLine{00350\ \ \ \ \textcolor{comment}{//\ real(tw\ *\ (xB\ -\/\ xA))\ =\ twR\ *\ (xBR\ -\/\ xAR)\ -\/\ twI\ *\ (xBI\ -\/\ xAI);}}
+\DoxyCodeLine{00351\ \ \ \ \textcolor{comment}{//\ imag(tw\ *\ (xB\ -\/\ xA))\ =\ twI\ *\ (xBR\ -\/\ xAR)\ +\ twR\ *\ (xBI\ -\/\ xAI);}}
+\DoxyCodeLine{00352\ \ \ \ *pOut++\ =\ 0.5f16\ *\ (\ (\_Float16)t1a\ +\ (\_Float16)t1b\ );}
+\DoxyCodeLine{00353\ \ \ \ *pOut++\ =\ 0.5f16\ *\ (\ (\_Float16)t1a\ -\/\ (\_Float16)t1b\ );}
+\DoxyCodeLine{00354\ }
+\DoxyCodeLine{00355\ \ \ \ \textcolor{comment}{//\ XA(1)\ =\ 1/2*(\ U1\ -\/\ imag(U2)\ +\ \ i*(\ U1\ +imag(U2)\ ));}}
+\DoxyCodeLine{00356\ \ \ \ pB\ \ =\ p\ +\ 2*k;}
+\DoxyCodeLine{00357\ \ \ \ pA\ +=\ 2;}
+\DoxyCodeLine{00358\ }
+\DoxyCodeLine{00359\ \ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00360\ \ \ \ \{}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00362\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ function\ X\ =\ my\_split\_rfft(X,\ ifftFlag)}}
+\DoxyCodeLine{00363\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \%\ X\ is\ a\ series\ of\ real\ numbers}}
+\DoxyCodeLine{00364\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ L\ \ =\ length(X);}}
+\DoxyCodeLine{00365\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ XC\ =\ X(1:2:end)\ +i*X(2:2:end);}}
+\DoxyCodeLine{00366\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ XA\ =\ fft(XC);}}
+\DoxyCodeLine{00367\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ XB\ =\ conj(XA([1\ end:-\/1:2]));}}
+\DoxyCodeLine{00368\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ TW\ =\ i*exp(-\/2*pi*i*[0:L/2-\/1]/L).';}}
+\DoxyCodeLine{00369\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ for\ l\ =\ 2:L/2}}
+\DoxyCodeLine{00370\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ \ \ \ XA(l)\ =\ 1/2\ *\ (XA(l)\ +\ XB(l)\ +\ TW(l)\ *\ (XB(l)\ -\/\ XA(l)));}}
+\DoxyCodeLine{00371\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ end}}
+\DoxyCodeLine{00372\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ XA(1)\ =\ 1/2*\ (XA(1)\ +\ XB(1)\ +\ TW(1)\ *\ (XB(1)\ -\/\ XA(1)))\ +\ i*(\ 1/2*(\ XA(1)\ +\ XB(1)\ +\ i*(\ XA(1)\ -\/\ XB(1))));}}
+\DoxyCodeLine{00373\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ X\ =\ XA;}}
+\DoxyCodeLine{00374\ \textcolor{comment}{\ \ \ \ \ \ */}}
+\DoxyCodeLine{00375\ }
+\DoxyCodeLine{00376\ \ \ \ \ \ \ xBI\ =\ pB[1];}
+\DoxyCodeLine{00377\ \ \ \ \ \ \ xBR\ =\ pB[0];}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ xAR\ =\ pA[0];}
+\DoxyCodeLine{00379\ \ \ \ \ \ \ xAI\ =\ pA[1];}
+\DoxyCodeLine{00380\ }
+\DoxyCodeLine{00381\ \ \ \ \ \ \ twR\ =\ *pCoeff++;}
+\DoxyCodeLine{00382\ \ \ \ \ \ \ twI\ =\ *pCoeff++;}
+\DoxyCodeLine{00383\ }
+\DoxyCodeLine{00384\ \ \ \ \ \ \ t1a\ =\ (\_Float16)xBR\ -\/\ (\_Float16)xAR\ ;}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ t1b\ =\ (\_Float16)xBI\ +\ (\_Float16)xAI\ ;}
+\DoxyCodeLine{00386\ }
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \textcolor{comment}{//\ real(tw\ *\ (xB\ -\/\ xA))\ =\ twR\ *\ (xBR\ -\/\ xAR)\ -\/\ twI\ *\ (xBI\ -\/\ xAI);}}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \textcolor{comment}{//\ imag(tw\ *\ (xB\ -\/\ xA))\ =\ twI\ *\ (xBR\ -\/\ xAR)\ +\ twR\ *\ (xBI\ -\/\ xAI);}}
+\DoxyCodeLine{00389\ \ \ \ \ \ \ p0\ =\ (\_Float16)twR\ *\ (\_Float16)t1a;}
+\DoxyCodeLine{00390\ \ \ \ \ \ \ p1\ =\ (\_Float16)twI\ *\ (\_Float16)t1a;}
+\DoxyCodeLine{00391\ \ \ \ \ \ \ p2\ =\ (\_Float16)twR\ *\ (\_Float16)t1b;}
+\DoxyCodeLine{00392\ \ \ \ \ \ \ p3\ =\ (\_Float16)twI\ *\ (\_Float16)t1b;}
+\DoxyCodeLine{00393\ }
+\DoxyCodeLine{00394\ \ \ \ \ \ \ *pOut++\ =\ 0.5f16\ *\ ((\_Float16)xAR\ +\ (\_Float16)xBR\ +\ (\_Float16)p0\ +\ (\_Float16)p3\ );\ \textcolor{comment}{//xAR}}
+\DoxyCodeLine{00395\ \ \ \ \ \ \ *pOut++\ =\ 0.5f16\ *\ ((\_Float16)xAI\ -\/\ (\_Float16)xBI\ +\ (\_Float16)p1\ -\/\ (\_Float16)p2\ );\ \textcolor{comment}{//xAI}}
+\DoxyCodeLine{00396\ }
+\DoxyCodeLine{00397\ }
+\DoxyCodeLine{00398\ \ \ \ \ \ \ pA\ +=\ 2;}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ pB\ -\/=\ 2;}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ k-\/-\/;}
+\DoxyCodeLine{00401\ \ \ \ \}\ \textcolor{keywordflow}{while}\ (k\ >\ 0);}
+\DoxyCodeLine{00402\ \}}
+\DoxyCodeLine{00403\ }
+\DoxyCodeLine{00404\ \textcolor{comment}{/*\ Prepares\ data\ for\ inverse\ cfft\ */}}
+\DoxyCodeLine{00405\ \textcolor{keywordtype}{void}\ merge\_rfft\_f16(}
+\DoxyCodeLine{00406\ \ \ \textcolor{keyword}{const}\ arm\_rfft\_fast\_instance\_f16\ *\ S,}
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \ \ float16\_t\ *\ p,}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \ \ float16\_t\ *\ pOut)}
+\DoxyCodeLine{00409\ \{}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ int32\_t\ \ k;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ Counter\ */}}
+\DoxyCodeLine{00411\ \ \ \ \ \ \ \ \ float16\_t\ twR,\ twI;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ RFFT\ Twiddle\ coefficients\ */}}
+\DoxyCodeLine{00412\ \ \ \textcolor{keyword}{const}\ float16\_t\ *pCoeff\ =\ S-\/>pTwiddleRFFT;\ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Points\ to\ RFFT\ Twiddle\ factors\ */}}
+\DoxyCodeLine{00413\ \ \ \ \ \ \ \ \ float16\_t\ *pA\ =\ p;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ increasing\ pointer\ */}}
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \ \ float16\_t\ *pB\ =\ p;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ decreasing\ pointer\ */}}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \ \ float16\_t\ xAR,\ xAI,\ xBR,\ xBI;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ temporary\ variables\ */}}
+\DoxyCodeLine{00416\ \ \ \ \ \ \ \ \ float16\_t\ t1a,\ t1b,\ r,\ s,\ t,\ u;\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ temporary\ variables\ */}}
+\DoxyCodeLine{00417\ }
+\DoxyCodeLine{00418\ \ \ \ k\ =\ (S-\/>Sint).fftLen\ -\/\ 1;}
+\DoxyCodeLine{00419\ }
+\DoxyCodeLine{00420\ \ \ \ xAR\ =\ pA[0];}
+\DoxyCodeLine{00421\ \ \ \ xAI\ =\ pA[1];}
+\DoxyCodeLine{00422\ }
+\DoxyCodeLine{00423\ \ \ \ pCoeff\ +=\ 2\ ;}
+\DoxyCodeLine{00424\ }
+\DoxyCodeLine{00425\ \ \ \ *pOut++\ =\ 0.5f16\ *\ (\ (\_Float16)xAR\ +\ (\_Float16)xAI\ );}
+\DoxyCodeLine{00426\ \ \ \ *pOut++\ =\ 0.5f16\ *\ (\ (\_Float16)xAR\ -\/\ (\_Float16)xAI\ );}
+\DoxyCodeLine{00427\ }
+\DoxyCodeLine{00428\ \ \ \ pB\ \ =\ \ p\ +\ 2*k\ ;}
+\DoxyCodeLine{00429\ \ \ \ pA\ +=\ \ 2\ \ \ \ ;}
+\DoxyCodeLine{00430\ }
+\DoxyCodeLine{00431\ \ \ \ \textcolor{keywordflow}{while}\ (k\ >\ 0)}
+\DoxyCodeLine{00432\ \ \ \ \{}
+\DoxyCodeLine{00433\ \ \ \ \ \ \ \textcolor{comment}{/*\ G\ is\ half\ of\ the\ frequency\ complex\ spectrum\ */}}
+\DoxyCodeLine{00434\ \ \ \ \ \ \ \textcolor{comment}{//for\ k\ =\ 2:N}}
+\DoxyCodeLine{00435\ \ \ \ \ \ \ \textcolor{comment}{//\ \ \ \ Xk(k)\ =\ 1/2\ *\ (G(k)\ +\ conj(G(N-\/k+2))\ +\ Tw(k)*(\ G(k)\ -\/\ conj(G(N-\/k+2))));}}
+\DoxyCodeLine{00436\ \ \ \ \ \ \ xBI\ =\ \ \ pB[1]\ \ \ \ ;}
+\DoxyCodeLine{00437\ \ \ \ \ \ \ xBR\ =\ \ \ pB[0]\ \ \ \ ;}
+\DoxyCodeLine{00438\ \ \ \ \ \ \ xAR\ =\ \ pA[0];}
+\DoxyCodeLine{00439\ \ \ \ \ \ \ xAI\ =\ \ pA[1];}
+\DoxyCodeLine{00440\ }
+\DoxyCodeLine{00441\ \ \ \ \ \ \ twR\ =\ *pCoeff++;}
+\DoxyCodeLine{00442\ \ \ \ \ \ \ twI\ =\ *pCoeff++;}
+\DoxyCodeLine{00443\ }
+\DoxyCodeLine{00444\ \ \ \ \ \ \ t1a\ =\ (\_Float16)xAR\ -\/\ (\_Float16)xBR\ ;}
+\DoxyCodeLine{00445\ \ \ \ \ \ \ t1b\ =\ (\_Float16)xAI\ +\ (\_Float16)xBI\ ;}
+\DoxyCodeLine{00446\ }
+\DoxyCodeLine{00447\ \ \ \ \ \ \ r\ =\ (\_Float16)twR\ *\ (\_Float16)t1a;}
+\DoxyCodeLine{00448\ \ \ \ \ \ \ s\ =\ (\_Float16)twI\ *\ (\_Float16)t1b;}
+\DoxyCodeLine{00449\ \ \ \ \ \ \ t\ =\ (\_Float16)twI\ *\ (\_Float16)t1a;}
+\DoxyCodeLine{00450\ \ \ \ \ \ \ u\ =\ (\_Float16)twR\ *\ (\_Float16)t1b;}
+\DoxyCodeLine{00451\ }
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \textcolor{comment}{//\ real(tw\ *\ (xA\ -\/\ xB))\ =\ twR\ *\ (xAR\ -\/\ xBR)\ -\/\ twI\ *\ (xAI\ -\/\ xBI);}}
+\DoxyCodeLine{00453\ \ \ \ \ \ \ \textcolor{comment}{//\ imag(tw\ *\ (xA\ -\/\ xB))\ =\ twI\ *\ (xAR\ -\/\ xBR)\ +\ twR\ *\ (xAI\ -\/\ xBI);}}
+\DoxyCodeLine{00454\ \ \ \ \ \ \ *pOut++\ =\ 0.5f16\ *\ ((\_Float16)xAR\ +\ (\_Float16)xBR\ -\/\ (\_Float16)r\ -\/\ (\_Float16)s\ );\ \textcolor{comment}{//xAR}}
+\DoxyCodeLine{00455\ \ \ \ \ \ \ *pOut++\ =\ 0.5f16\ *\ ((\_Float16)xAI\ -\/\ (\_Float16)xBI\ +\ (\_Float16)t\ -\/\ (\_Float16)u\ );\ \textcolor{comment}{//xAI}}
+\DoxyCodeLine{00456\ }
+\DoxyCodeLine{00457\ \ \ \ \ \ \ pA\ +=\ 2;}
+\DoxyCodeLine{00458\ \ \ \ \ \ \ pB\ -\/=\ 2;}
+\DoxyCodeLine{00459\ \ \ \ \ \ \ k-\/-\/;}
+\DoxyCodeLine{00460\ \ \ \ \}}
+\DoxyCodeLine{00461\ }
+\DoxyCodeLine{00462\ \}}
+\DoxyCodeLine{00463\ }
+\DoxyCodeLine{00464\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00465\ }
+\DoxyCodeLine{00580\ \textcolor{keywordtype}{void}\ arm\_rfft\_fast\_f16(}
+\DoxyCodeLine{00581\ \ \ \textcolor{keyword}{const}\ arm\_rfft\_fast\_instance\_f16\ *\ S,}
+\DoxyCodeLine{00582\ \ \ float16\_t\ *\ p,}
+\DoxyCodeLine{00583\ \ \ float16\_t\ *\ pOut,}
+\DoxyCodeLine{00584\ \ \ uint8\_t\ ifftFlag)}
+\DoxyCodeLine{00585\ \{}
+\DoxyCodeLine{00586\ \ \ \ \textcolor{keyword}{const}\ arm\_cfft\_instance\_f16\ *\ Sint\ =\ \&(S-\/>Sint);}
+\DoxyCodeLine{00587\ }
+\DoxyCodeLine{00588\ }
+\DoxyCodeLine{00589\ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ Real\ FFT\ */}}
+\DoxyCodeLine{00590\ \ \ \ \textcolor{keywordflow}{if}\ (ifftFlag)}
+\DoxyCodeLine{00591\ \ \ \ \{}
+\DoxyCodeLine{00592\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Real\ FFT\ compression\ */}}
+\DoxyCodeLine{00593\ \ \ \ \ \ \ merge\_rfft\_f16(S,\ p,\ pOut);}
+\DoxyCodeLine{00594\ \ \ \ \ \ \ \textcolor{comment}{/*\ Complex\ radix-\/4\ IFFT\ process\ */}}
+\DoxyCodeLine{00595\ \ \ \ \ \ \ arm\_cfft\_f16(\ Sint,\ pOut,\ ifftFlag,\ 1);}
+\DoxyCodeLine{00596\ \ \ \ \}}
+\DoxyCodeLine{00597\ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00598\ \ \ \ \{}
+\DoxyCodeLine{00599\ }
+\DoxyCodeLine{00600\ \ \ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ RFFT\ of\ input\ */}}
+\DoxyCodeLine{00601\ \ \ \ \ \ \ arm\_cfft\_f16(\ Sint,\ p,\ ifftFlag,\ 1);}
+\DoxyCodeLine{00602\ }
+\DoxyCodeLine{00603\ \ \ \ \ \ \ \textcolor{comment}{/*\ \ Real\ FFT\ extraction\ */}}
+\DoxyCodeLine{00604\ \ \ \ \ \ \ stage\_rfft\_f16(S,\ p,\ pOut);}
+\DoxyCodeLine{00605\ \ \ \ \}}
+\DoxyCodeLine{00606\ \}}
+\DoxyCodeLine{00607\ }
+\DoxyCodeLine{00612\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \ \#if\ defined(ARM\_FLOAT16\_SUPPORTED)\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

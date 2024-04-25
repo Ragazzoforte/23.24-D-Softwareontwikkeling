@@ -107,6 +107,10 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  /**
+   * @brief hier gaat hij blinken
+   * 
+   */
   while (1)
   {
     /* USER CODE END WHILE */

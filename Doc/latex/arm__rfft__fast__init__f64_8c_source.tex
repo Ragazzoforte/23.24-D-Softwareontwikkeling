@@ -1,0 +1,260 @@
+\doxysection{arm\+\_\+rfft\+\_\+fast\+\_\+init\+\_\+f64.\+c}
+\hypertarget{arm__rfft__fast__init__f64_8c_source}{}\label{arm__rfft__fast__init__f64_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_rfft\_fast\_init\_f64.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_rfft\_fast\_init\_f64.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_rfft\_fast\_init\_f64.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Split\ Radix\ Decimation\ in\ Frequency\ CFFT\ Double\ Precision\ Floating\ point\ processing\ function}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/transform\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}arm\_common\_tables.h"{}}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_16)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_16)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_16)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_32))}}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00051\ \textcolor{keyword}{static}\ arm\_status\ arm\_rfft\_32\_fast\_init\_f64(\ \mbox{\hyperlink{structarm__rfft__fast__instance__f64}{arm\_rfft\_fast\_instance\_f64}}\ *\ S\ )\ \{}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ \ \ \mbox{\hyperlink{structarm__cfft__instance__f64}{arm\_cfft\_instance\_f64}}\ *\ Sint;}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00055\ \ \ \textcolor{keywordflow}{if}(\ !S\ )\ \textcolor{keywordflow}{return}\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \ \ Sint\ =\ \&(S-\/>Sint);}
+\DoxyCodeLine{00058\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_ab8db3bbe7c61e6bb8ca2a55e3446e11a}{fftLen}}\ =\ 16U;}
+\DoxyCodeLine{00059\ \ \ S-\/>fftLenRFFT\ =\ 32U;}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a65e1b3e327b8fab9404287ed8f347cc8}{bitRevLength}}\ =\ ARMBITREVINDEXTABLEF64\_16\_TABLE\_LENGTH;}
+\DoxyCodeLine{00062\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a3b229432d381b0a511a9cdbe3aa74e78}{pBitRevTable}}\ =\ (uint16\_t\ *)armBitRevIndexTableF64\_16;}
+\DoxyCodeLine{00063\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a8a6eddea3385b1fca85ccb9b956ec1a3}{pTwiddle}}\ \ \ \ \ =\ (float64\_t\ *)\ \mbox{\hyperlink{group___c_f_f_t___c_i_f_f_t_gabeb418730eacdce077316477b7f1e960}{twiddleCoefF64\_16}};}
+\DoxyCodeLine{00064\ \ \ S-\/>pTwiddleRFFT\ \ \ \ =\ (float64\_t\ *)\ twiddleCoefF64\_rfft\_32;}
+\DoxyCodeLine{00065\ }
+\DoxyCodeLine{00066\ \ \ \textcolor{keywordflow}{return}\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00067\ \}}
+\DoxyCodeLine{00068\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_32)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_32)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_32)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_64))}}
+\DoxyCodeLine{00071\ }
+\DoxyCodeLine{00080\ \textcolor{keyword}{static}\ arm\_status\ arm\_rfft\_64\_fast\_init\_f64(\ \mbox{\hyperlink{structarm__rfft__fast__instance__f64}{arm\_rfft\_fast\_instance\_f64}}\ *\ S\ )\ \{}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \ \ \mbox{\hyperlink{structarm__cfft__instance__f64}{arm\_cfft\_instance\_f64}}\ *\ Sint;}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \ \ \textcolor{keywordflow}{if}(\ !S\ )\ \textcolor{keywordflow}{return}\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \ \ Sint\ =\ \&(S-\/>Sint);}
+\DoxyCodeLine{00087\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_ab8db3bbe7c61e6bb8ca2a55e3446e11a}{fftLen}}\ =\ 32U;}
+\DoxyCodeLine{00088\ \ \ S-\/>fftLenRFFT\ =\ 64U;}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a65e1b3e327b8fab9404287ed8f347cc8}{bitRevLength}}\ =\ ARMBITREVINDEXTABLEF64\_32\_TABLE\_LENGTH;}
+\DoxyCodeLine{00091\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a3b229432d381b0a511a9cdbe3aa74e78}{pBitRevTable}}\ =\ (uint16\_t\ *)armBitRevIndexTableF64\_32;}
+\DoxyCodeLine{00092\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a8a6eddea3385b1fca85ccb9b956ec1a3}{pTwiddle}}\ \ \ \ \ =\ (float64\_t\ *)\ \mbox{\hyperlink{group___c_f_f_t___c_i_f_f_t_ga3f7d1eaff3c6910ee7d85ae1c9015fe5}{twiddleCoefF64\_32}};}
+\DoxyCodeLine{00093\ \ \ S-\/>pTwiddleRFFT\ \ \ \ =\ (float64\_t\ *)\ twiddleCoefF64\_rfft\_64;}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \textcolor{keywordflow}{return}\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00096\ \}}
+\DoxyCodeLine{00097\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_64)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_64)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_64)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_128))}}
+\DoxyCodeLine{00100\ }
+\DoxyCodeLine{00109\ \textcolor{keyword}{static}\ arm\_status\ arm\_rfft\_128\_fast\_init\_f64(\ \mbox{\hyperlink{structarm__rfft__fast__instance__f64}{arm\_rfft\_fast\_instance\_f64}}\ *\ S\ )\ \{}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \ \ \mbox{\hyperlink{structarm__cfft__instance__f64}{arm\_cfft\_instance\_f64}}\ *\ Sint;}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \ \ \textcolor{keywordflow}{if}(\ !S\ )\ \textcolor{keywordflow}{return}\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ Sint\ =\ \&(S-\/>Sint);}
+\DoxyCodeLine{00116\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_ab8db3bbe7c61e6bb8ca2a55e3446e11a}{fftLen}}\ =\ 64U;}
+\DoxyCodeLine{00117\ \ \ S-\/>fftLenRFFT\ =\ 128U;}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a65e1b3e327b8fab9404287ed8f347cc8}{bitRevLength}}\ =\ ARMBITREVINDEXTABLEF64\_64\_TABLE\_LENGTH;}
+\DoxyCodeLine{00120\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a3b229432d381b0a511a9cdbe3aa74e78}{pBitRevTable}}\ =\ (uint16\_t\ *)armBitRevIndexTableF64\_64;}
+\DoxyCodeLine{00121\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a8a6eddea3385b1fca85ccb9b956ec1a3}{pTwiddle}}\ \ \ \ \ =\ (float64\_t\ *)\ \mbox{\hyperlink{group___c_f_f_t___c_i_f_f_t_ga6fe9e2b9200445a2313d7542c586639b}{twiddleCoefF64\_64}};}
+\DoxyCodeLine{00122\ \ \ S-\/>pTwiddleRFFT\ \ \ \ =\ (float64\_t\ *)\ twiddleCoefF64\_rfft\_128;}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \textcolor{keywordflow}{return}\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00125\ \}}
+\DoxyCodeLine{00126\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_128)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_128)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_128)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_256))}}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00138\ \textcolor{keyword}{static}\ arm\_status\ arm\_rfft\_256\_fast\_init\_f64(\ \mbox{\hyperlink{structarm__rfft__fast__instance__f64}{arm\_rfft\_fast\_instance\_f64}}\ *\ S\ )\ \{}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \mbox{\hyperlink{structarm__cfft__instance__f64}{arm\_cfft\_instance\_f64}}\ *\ Sint;}
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ \ \ \textcolor{keywordflow}{if}(\ !S\ )\ \textcolor{keywordflow}{return}\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \ \ Sint\ =\ \&(S-\/>Sint);}
+\DoxyCodeLine{00145\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_ab8db3bbe7c61e6bb8ca2a55e3446e11a}{fftLen}}\ =\ 128U;}
+\DoxyCodeLine{00146\ \ \ S-\/>fftLenRFFT\ =\ 256U;}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a65e1b3e327b8fab9404287ed8f347cc8}{bitRevLength}}\ =\ ARMBITREVINDEXTABLEF64\_128\_TABLE\_LENGTH;}
+\DoxyCodeLine{00149\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a3b229432d381b0a511a9cdbe3aa74e78}{pBitRevTable}}\ =\ (uint16\_t\ *)armBitRevIndexTableF64\_128;}
+\DoxyCodeLine{00150\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a8a6eddea3385b1fca85ccb9b956ec1a3}{pTwiddle}}\ \ \ \ \ =\ (float64\_t\ *)\ \mbox{\hyperlink{group___c_f_f_t___c_i_f_f_t_ga252036ff16d9125ae72f547f4565f36f}{twiddleCoefF64\_128}};}
+\DoxyCodeLine{00151\ \ \ S-\/>pTwiddleRFFT\ \ \ \ =\ (float64\_t\ *)\ twiddleCoefF64\_rfft\_256;}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \ \ \textcolor{keywordflow}{return}\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00154\ \}}
+\DoxyCodeLine{00155\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00156\ }
+\DoxyCodeLine{00157\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_256)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_256)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_256)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_512))}}
+\DoxyCodeLine{00158\ }
+\DoxyCodeLine{00167\ \textcolor{keyword}{static}\ arm\_status\ arm\_rfft\_512\_fast\_init\_f64(\ \mbox{\hyperlink{structarm__rfft__fast__instance__f64}{arm\_rfft\_fast\_instance\_f64}}\ *\ S\ )\ \{}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \ \ \mbox{\hyperlink{structarm__cfft__instance__f64}{arm\_cfft\_instance\_f64}}\ *\ Sint;}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \ \ \textcolor{keywordflow}{if}(\ !S\ )\ \textcolor{keywordflow}{return}\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00172\ }
+\DoxyCodeLine{00173\ \ \ Sint\ =\ \&(S-\/>Sint);}
+\DoxyCodeLine{00174\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_ab8db3bbe7c61e6bb8ca2a55e3446e11a}{fftLen}}\ =\ 256U;}
+\DoxyCodeLine{00175\ \ \ S-\/>fftLenRFFT\ =\ 512U;}
+\DoxyCodeLine{00176\ }
+\DoxyCodeLine{00177\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a65e1b3e327b8fab9404287ed8f347cc8}{bitRevLength}}\ =\ ARMBITREVINDEXTABLEF64\_256\_TABLE\_LENGTH;}
+\DoxyCodeLine{00178\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a3b229432d381b0a511a9cdbe3aa74e78}{pBitRevTable}}\ =\ (uint16\_t\ *)armBitRevIndexTableF64\_256;}
+\DoxyCodeLine{00179\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a8a6eddea3385b1fca85ccb9b956ec1a3}{pTwiddle}}\ \ \ \ \ =\ (float64\_t\ *)\ \mbox{\hyperlink{group___c_f_f_t___c_i_f_f_t_ga10e83806d2c02cc4f5f07ce46851a673}{twiddleCoefF64\_256}};}
+\DoxyCodeLine{00180\ \ \ S-\/>pTwiddleRFFT\ \ \ \ =\ (float64\_t\ *)\ twiddleCoefF64\_rfft\_512;}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00182\ \ \ \textcolor{keywordflow}{return}\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00183\ \}}
+\DoxyCodeLine{00184\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_512)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_512)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_512)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_1024))}}
+\DoxyCodeLine{00195\ \textcolor{keyword}{static}\ arm\_status\ arm\_rfft\_1024\_fast\_init\_f64(\ \mbox{\hyperlink{structarm__rfft__fast__instance__f64}{arm\_rfft\_fast\_instance\_f64}}\ *\ S\ )\ \{}
+\DoxyCodeLine{00196\ }
+\DoxyCodeLine{00197\ \ \ \mbox{\hyperlink{structarm__cfft__instance__f64}{arm\_cfft\_instance\_f64}}\ *\ Sint;}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00199\ \ \ \textcolor{keywordflow}{if}(\ !S\ )\ \textcolor{keywordflow}{return}\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00200\ }
+\DoxyCodeLine{00201\ \ \ Sint\ =\ \&(S-\/>Sint);}
+\DoxyCodeLine{00202\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_ab8db3bbe7c61e6bb8ca2a55e3446e11a}{fftLen}}\ =\ 512U;}
+\DoxyCodeLine{00203\ \ \ S-\/>fftLenRFFT\ =\ 1024U;}
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00205\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a65e1b3e327b8fab9404287ed8f347cc8}{bitRevLength}}\ =\ ARMBITREVINDEXTABLEF64\_512\_TABLE\_LENGTH;}
+\DoxyCodeLine{00206\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a3b229432d381b0a511a9cdbe3aa74e78}{pBitRevTable}}\ =\ (uint16\_t\ *)armBitRevIndexTableF64\_512;}
+\DoxyCodeLine{00207\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a8a6eddea3385b1fca85ccb9b956ec1a3}{pTwiddle}}\ \ \ \ \ =\ (float64\_t\ *)\ \mbox{\hyperlink{group___c_f_f_t___c_i_f_f_t_gadf57a6c3f49246e356cc72615c5dc8ba}{twiddleCoefF64\_512}};}
+\DoxyCodeLine{00208\ \ \ S-\/>pTwiddleRFFT\ \ \ \ =\ (float64\_t\ *)\ twiddleCoefF64\_rfft\_1024;}
+\DoxyCodeLine{00209\ }
+\DoxyCodeLine{00210\ \ \ \textcolor{keywordflow}{return}\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00211\ \}}
+\DoxyCodeLine{00212\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00213\ }
+\DoxyCodeLine{00214\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_1024)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_1024)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_1024)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_2048))}}
+\DoxyCodeLine{00222\ \textcolor{keyword}{static}\ arm\_status\ arm\_rfft\_2048\_fast\_init\_f64(\ \mbox{\hyperlink{structarm__rfft__fast__instance__f64}{arm\_rfft\_fast\_instance\_f64}}\ *\ S\ )\ \{}
+\DoxyCodeLine{00223\ }
+\DoxyCodeLine{00224\ \ \ \mbox{\hyperlink{structarm__cfft__instance__f64}{arm\_cfft\_instance\_f64}}\ *\ Sint;}
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ \ \ \textcolor{keywordflow}{if}(\ !S\ )\ \textcolor{keywordflow}{return}\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00227\ }
+\DoxyCodeLine{00228\ \ \ Sint\ =\ \&(S-\/>Sint);}
+\DoxyCodeLine{00229\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_ab8db3bbe7c61e6bb8ca2a55e3446e11a}{fftLen}}\ =\ 1024U;}
+\DoxyCodeLine{00230\ \ \ S-\/>fftLenRFFT\ =\ 2048U;}
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00232\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a65e1b3e327b8fab9404287ed8f347cc8}{bitRevLength}}\ =\ ARMBITREVINDEXTABLEF64\_1024\_TABLE\_LENGTH;}
+\DoxyCodeLine{00233\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a3b229432d381b0a511a9cdbe3aa74e78}{pBitRevTable}}\ =\ (uint16\_t\ *)armBitRevIndexTableF64\_1024;}
+\DoxyCodeLine{00234\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a8a6eddea3385b1fca85ccb9b956ec1a3}{pTwiddle}}\ \ \ \ \ =\ (float64\_t\ *)\ \mbox{\hyperlink{group___c_f_f_t___c_i_f_f_t_ga6626143034266d76fafe4195cd59e9ef}{twiddleCoefF64\_1024}};}
+\DoxyCodeLine{00235\ \ \ S-\/>pTwiddleRFFT\ \ \ \ =\ (float64\_t\ *)\ twiddleCoefF64\_rfft\_2048;}
+\DoxyCodeLine{00236\ }
+\DoxyCodeLine{00237\ \ \ \textcolor{keywordflow}{return}\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00238\ \}}
+\DoxyCodeLine{00239\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00240\ }
+\DoxyCodeLine{00241\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_2048)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_2048)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_2048)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_4096))}}
+\DoxyCodeLine{00250\ \textcolor{keyword}{static}\ arm\_status\ arm\_rfft\_4096\_fast\_init\_f64(\ \mbox{\hyperlink{structarm__rfft__fast__instance__f64}{arm\_rfft\_fast\_instance\_f64}}\ *\ S\ )\ \{}
+\DoxyCodeLine{00251\ }
+\DoxyCodeLine{00252\ \ \ \mbox{\hyperlink{structarm__cfft__instance__f64}{arm\_cfft\_instance\_f64}}\ *\ Sint;}
+\DoxyCodeLine{00253\ }
+\DoxyCodeLine{00254\ \ \ \textcolor{keywordflow}{if}(\ !S\ )\ \textcolor{keywordflow}{return}\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00255\ }
+\DoxyCodeLine{00256\ \ \ Sint\ =\ \&(S-\/>Sint);}
+\DoxyCodeLine{00257\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_ab8db3bbe7c61e6bb8ca2a55e3446e11a}{fftLen}}\ =\ 2048U;}
+\DoxyCodeLine{00258\ \ \ S-\/>fftLenRFFT\ =\ 4096U;}
+\DoxyCodeLine{00259\ }
+\DoxyCodeLine{00260\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a65e1b3e327b8fab9404287ed8f347cc8}{bitRevLength}}\ =\ ARMBITREVINDEXTABLEF64\_2048\_TABLE\_LENGTH;}
+\DoxyCodeLine{00261\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a3b229432d381b0a511a9cdbe3aa74e78}{pBitRevTable}}\ =\ (uint16\_t\ *)armBitRevIndexTableF64\_2048;}
+\DoxyCodeLine{00262\ \ \ Sint-\/>\mbox{\hyperlink{structarm__cfft__instance__f64_a8a6eddea3385b1fca85ccb9b956ec1a3}{pTwiddle}}\ \ \ \ \ =\ (float64\_t\ *)\ \mbox{\hyperlink{group___c_f_f_t___c_i_f_f_t_ga0d6a794c1315cceaa884e3bdc736e576}{twiddleCoefF64\_2048}};}
+\DoxyCodeLine{00263\ \ \ S-\/>pTwiddleRFFT\ \ \ \ =\ (float64\_t\ *)\ twiddleCoefF64\_rfft\_4096;}
+\DoxyCodeLine{00264\ }
+\DoxyCodeLine{00265\ \ \ \textcolor{keywordflow}{return}\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00266\ \}}
+\DoxyCodeLine{00267\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00268\ }
+\DoxyCodeLine{00284\ arm\_status\ \mbox{\hyperlink{group___real_f_f_t_ga51ca806ce1aa56a231684add8d2820bb}{arm\_rfft\_fast\_init\_f64}}(}
+\DoxyCodeLine{00285\ \ \ \mbox{\hyperlink{structarm__rfft__fast__instance__f64}{arm\_rfft\_fast\_instance\_f64}}\ *\ S,}
+\DoxyCodeLine{00286\ \ \ uint16\_t\ fftLen)}
+\DoxyCodeLine{00287\ \{}
+\DoxyCodeLine{00288\ \ \ \textcolor{keyword}{typedef}\ arm\_status(*fft\_init\_ptr)(\ \mbox{\hyperlink{structarm__rfft__fast__instance__f64}{arm\_rfft\_fast\_instance\_f64}}\ *);}
+\DoxyCodeLine{00289\ \ \ fft\_init\_ptr\ fptr\ =\ 0x0;}
+\DoxyCodeLine{00290\ }
+\DoxyCodeLine{00291\ \ \ \textcolor{keywordflow}{switch}\ (fftLen)}
+\DoxyCodeLine{00292\ \ \ \{}
+\DoxyCodeLine{00293\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_2048)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_2048)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_2048)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_4096))}}
+\DoxyCodeLine{00294\ \ \ \textcolor{keywordflow}{case}\ 4096U:}
+\DoxyCodeLine{00295\ \ \ \ \ fptr\ =\ arm\_rfft\_4096\_fast\_init\_f64;}
+\DoxyCodeLine{00296\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00297\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00298\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_1024)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_1024)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_1024)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_2048))}}
+\DoxyCodeLine{00299\ \ \ \textcolor{keywordflow}{case}\ 2048U:}
+\DoxyCodeLine{00300\ \ \ \ \ fptr\ =\ arm\_rfft\_2048\_fast\_init\_f64;}
+\DoxyCodeLine{00301\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00302\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00303\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_512)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_512)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_512)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_1024))}}
+\DoxyCodeLine{00304\ \ \ \textcolor{keywordflow}{case}\ 1024U:}
+\DoxyCodeLine{00305\ \ \ \ \ fptr\ =\ arm\_rfft\_1024\_fast\_init\_f64;}
+\DoxyCodeLine{00306\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00307\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00308\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_256)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_256)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_256)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_512))}}
+\DoxyCodeLine{00309\ \ \ \textcolor{keywordflow}{case}\ 512U:}
+\DoxyCodeLine{00310\ \ \ \ \ fptr\ =\ arm\_rfft\_512\_fast\_init\_f64;}
+\DoxyCodeLine{00311\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00312\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00313\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_128)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_128)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_128)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_256))}}
+\DoxyCodeLine{00314\ \ \ \textcolor{keywordflow}{case}\ 256U:}
+\DoxyCodeLine{00315\ \ \ \ \ fptr\ =\ arm\_rfft\_256\_fast\_init\_f64;}
+\DoxyCodeLine{00316\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00317\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00318\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_64)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_64)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_64)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_128))}}
+\DoxyCodeLine{00319\ \ \ \textcolor{keywordflow}{case}\ 128U:}
+\DoxyCodeLine{00320\ \ \ \ \ fptr\ =\ arm\_rfft\_128\_fast\_init\_f64;}
+\DoxyCodeLine{00321\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00322\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00323\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_32)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_32)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_32)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_64))}}
+\DoxyCodeLine{00324\ \ \ \textcolor{keywordflow}{case}\ 64U:}
+\DoxyCodeLine{00325\ \ \ \ \ fptr\ =\ arm\_rfft\_64\_fast\_init\_f64;}
+\DoxyCodeLine{00326\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00327\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00328\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ (defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_16)\ \&\&\ defined(ARM\_TABLE\_BITREVIDX\_FLT64\_16)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_F64\_16)\ \&\&\ defined(ARM\_TABLE\_TWIDDLECOEF\_RFFT\_F64\_32))}}
+\DoxyCodeLine{00329\ \ \ \textcolor{keywordflow}{case}\ 32U:}
+\DoxyCodeLine{00330\ \ \ \ \ fptr\ =\ arm\_rfft\_32\_fast\_init\_f64;}
+\DoxyCodeLine{00331\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00332\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00333\ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00334\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00335\ \ \ \}}
+\DoxyCodeLine{00336\ }
+\DoxyCodeLine{00337\ \ \ \textcolor{keywordflow}{if}(\ !\ fptr\ )\ \textcolor{keywordflow}{return}\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00338\ \ \ \textcolor{keywordflow}{return}\ fptr(\ S\ );}
+\DoxyCodeLine{00339\ }
+\DoxyCodeLine{00340\ \}}
+\DoxyCodeLine{00341\ }
+
+\end{DoxyCode}

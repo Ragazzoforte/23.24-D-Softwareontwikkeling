@@ -1,0 +1,104 @@
+\doxysection{arm\+\_\+dct4\+\_\+init\+\_\+q31.\+c}
+\hypertarget{arm__dct4__init__q31_8c_source}{}\label{arm__dct4__init__q31_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_dct4\_init\_q31.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_dct4\_init\_q31.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_dct4\_init\_q31.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Initialization\ function\ of\ DCT-\/4\ \&\ IDCT4\ Q31}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/transform\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}arm\_common\_tables.h"{}}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00060\ arm\_status\ \mbox{\hyperlink{group___d_c_t4___i_d_c_t4_ga631bb59c7c97c814ff7147ecba6a716a}{arm\_dct4\_init\_q31}}(}
+\DoxyCodeLine{00061\ \ \ \mbox{\hyperlink{structarm__dct4__instance__q31}{arm\_dct4\_instance\_q31}}\ *\ S,}
+\DoxyCodeLine{00062\ \ \ \mbox{\hyperlink{structarm__rfft__instance__q31}{arm\_rfft\_instance\_q31}}\ *\ S\_RFFT,}
+\DoxyCodeLine{00063\ \ \ \mbox{\hyperlink{structarm__cfft__radix4__instance__q31}{arm\_cfft\_radix4\_instance\_q31}}\ *\ S\_CFFT,}
+\DoxyCodeLine{00064\ \ \ uint16\_t\ N,}
+\DoxyCodeLine{00065\ \ \ uint16\_t\ Nby2,}
+\DoxyCodeLine{00066\ \ \ q31\_t\ normalize)}
+\DoxyCodeLine{00067\ \{}
+\DoxyCodeLine{00068\ \ \ \textcolor{comment}{/*\ Initialize\ the\ default\ arm\ status\ */}}
+\DoxyCodeLine{00069\ \ \ arm\_status\ status\ =\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ \textcolor{comment}{/*\ Initialize\ the\ DCT4\ length\ */}}
+\DoxyCodeLine{00072\ \ \ S-\/>N\ =\ N;}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ \ \ \textcolor{comment}{/*\ Initialize\ the\ half\ of\ DCT4\ length\ */}}
+\DoxyCodeLine{00075\ \ \ S-\/>Nby2\ =\ Nby2;}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \ \ \textcolor{comment}{/*\ Initialize\ the\ DCT4\ Normalizing\ factor\ */}}
+\DoxyCodeLine{00078\ \ \ S-\/>normalize\ =\ normalize;}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \textcolor{comment}{/*\ Initialize\ Real\ FFT\ Instance\ */}}
+\DoxyCodeLine{00081\ \ \ S-\/>pRfft\ =\ S\_RFFT;}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \textcolor{comment}{/*\ Initialize\ Complex\ FFT\ Instance\ */}}
+\DoxyCodeLine{00084\ \ \ S-\/>pCfft\ =\ S\_CFFT;}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \ \ \textcolor{keywordflow}{switch}\ (N)}
+\DoxyCodeLine{00087\ \ \ \{}
+\DoxyCodeLine{00088\ \textcolor{preprocessor}{\ \ \#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ defined(ARM\_TABLE\_DCT4\_Q31\_8192)}}
+\DoxyCodeLine{00089\ \ \ \ \ \textcolor{comment}{/*\ Initialize\ the\ table\ modifier\ values\ */}}
+\DoxyCodeLine{00090\ \ \ \textcolor{keywordflow}{case}\ 8192U:}
+\DoxyCodeLine{00091\ \ \ \ \ S-\/>pTwiddle\ =\ WeightsQ31\_8192;}
+\DoxyCodeLine{00092\ \ \ \ \ S-\/>pCosFactor\ =\ cos\_factorsQ31\_8192;}
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00094\ \textcolor{preprocessor}{\ \ \#endif}}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \textcolor{preprocessor}{\ \ \#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ defined(ARM\_TABLE\_DCT4\_Q31\_2048)}}
+\DoxyCodeLine{00097\ \ \ \textcolor{keywordflow}{case}\ 2048U:}
+\DoxyCodeLine{00098\ \ \ \ \ S-\/>pTwiddle\ =\ WeightsQ31\_2048;}
+\DoxyCodeLine{00099\ \ \ \ \ S-\/>pCosFactor\ =\ cos\_factorsQ31\_2048;}
+\DoxyCodeLine{00100\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00101\ \textcolor{preprocessor}{\ \ \#endif\ }}
+\DoxyCodeLine{00102\ }
+\DoxyCodeLine{00103\ \textcolor{preprocessor}{\ \ \#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ defined(ARM\_TABLE\_DCT4\_Q31\_512)}}
+\DoxyCodeLine{00104\ \ \ \textcolor{keywordflow}{case}\ 512U:}
+\DoxyCodeLine{00105\ \ \ \ \ S-\/>pTwiddle\ =\ WeightsQ31\_512;}
+\DoxyCodeLine{00106\ \ \ \ \ S-\/>pCosFactor\ =\ cos\_factorsQ31\_512;}
+\DoxyCodeLine{00107\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00108\ \textcolor{preprocessor}{\ \ \#endif\ }}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \textcolor{preprocessor}{\ \ \#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ defined(ARM\_TABLE\_DCT4\_Q31\_128)}}
+\DoxyCodeLine{00111\ \ \ \textcolor{keywordflow}{case}\ 128U:}
+\DoxyCodeLine{00112\ \ \ \ \ S-\/>pTwiddle\ =\ \mbox{\hyperlink{group___d_c_t4___i_d_c_t4___table_ga02d7024538a87214296b01d83ba36b02}{WeightsQ31\_128}};}
+\DoxyCodeLine{00113\ \ \ \ \ S-\/>pCosFactor\ =\ cos\_factorsQ31\_128;}
+\DoxyCodeLine{00114\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00115\ \textcolor{preprocessor}{\ \ \#endif}}
+\DoxyCodeLine{00116\ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00117\ \ \ \ \ status\ =\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00118\ \ \ \}}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \textcolor{comment}{/*\ Initialize\ the\ RFFT/RIFFT\ Function\ */}}
+\DoxyCodeLine{00121\ \ \ \mbox{\hyperlink{group___real_f_f_t_ga5abde938abbe72e95c5bab080eb33c45}{arm\_rfft\_init\_q31}}(S-\/>pRfft,\ \ S-\/>N,\ 0U,\ 1U);}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ \ \ \textcolor{comment}{/*\ return\ the\ status\ of\ DCT4\ Init\ function\ */}}
+\DoxyCodeLine{00124\ \ \ \textcolor{keywordflow}{return}\ (status);}
+\DoxyCodeLine{00125\ \}}
+\DoxyCodeLine{00126\ }
+
+\end{DoxyCode}

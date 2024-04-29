@@ -1,0 +1,143 @@
+\doxysection{arm\+\_\+spline\+\_\+interp\+\_\+init\+\_\+f32.\+c}
+\hypertarget{arm__spline__interp__init__f32_8c_source}{}\label{arm__spline__interp__init__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/InterpolationFunctions/arm\_spline\_interp\_init\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/InterpolationFunctions/arm\_spline\_interp\_init\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_spline\_interp\_init\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Floating-\/point\ cubic\ spline\ initialization\ function}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/interpolation\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00065\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___spline_interpolate_ga5370a3c4a213e15bf57726406ec52ae0}{arm\_spline\_init\_f32}}(}
+\DoxyCodeLine{00066\ \ \ \ \ \ \ \ \ \mbox{\hyperlink{structarm__spline__instance__f32}{arm\_spline\_instance\_f32}}\ *\ S,}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ arm\_spline\_type\ type,}
+\DoxyCodeLine{00068\ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ x,}
+\DoxyCodeLine{00069\ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ y,}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ uint32\_t\ n,\ }
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ float32\_t\ *\ coeffs,}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ float32\_t\ *\ tempBuffer)}
+\DoxyCodeLine{00073\ \{}
+\DoxyCodeLine{00074\ \textcolor{comment}{\ \ \ \ /***\ COEFFICIENTS\ COMPUTATION\ ***/}}
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{comment}{/*\ Type\ (boundary\ conditions):}}
+\DoxyCodeLine{00076\ \textcolor{comment}{\ \ \ \ \ \ \ \ -\/\ Natural\ spline\ \ \ \ \ \ \ \ \ \ (\ S1''(x1)\ =\ 0\ ;\ Sn''(xn)\ =\ 0\ )}}
+\DoxyCodeLine{00077\ \textcolor{comment}{\ \ \ \ \ \ \ \ -\/\ Parabolic\ runout\ spline\ (\ S1''(x1)\ =\ S2''(x2)\ ;\ Sn-\/1''(xn-\/1)\ =\ Sn''(xn)\ )\ */}}
+\DoxyCodeLine{00078\ \ \ \ \ }
+\DoxyCodeLine{00079\ \ \ \ \ \textcolor{comment}{/*\ (n-\/1)-\/long\ buffers\ for\ b,\ c,\ and\ d\ coefficients\ */}}
+\DoxyCodeLine{00080\ \ \ \ \ float32\_t\ *\ b\ =\ coeffs;}
+\DoxyCodeLine{00081\ \ \ \ \ float32\_t\ *\ c\ =\ coeffs+(n-\/1);}
+\DoxyCodeLine{00082\ \ \ \ \ float32\_t\ *\ d\ =\ coeffs+(2*(n-\/1));\ \ \ \ }
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \ \ \ \ float32\_t\ *\ u\ =\ tempBuffer;\ \ \ \textcolor{comment}{/*\ (n-\/1)-\/long\ scratch\ buffer\ for\ u\ elements\ */}}
+\DoxyCodeLine{00085\ \ \ \ \ float32\_t\ *\ z\ =\ tempBuffer+(n-\/1);\ \textcolor{comment}{/*\ n-\/long\ scratch\ buffer\ for\ z\ elements\ */}}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ float32\_t\ hi,\ hm1;\ \textcolor{comment}{/*\ h(i)\ and\ h(i-\/1)\ */}}
+\DoxyCodeLine{00088\ \ \ \ \ float32\_t\ Bi;\ \textcolor{comment}{/*\ B(i),\ i-\/th\ element\ of\ matrix\ B=LZ\ */}}
+\DoxyCodeLine{00089\ \ \ \ \ float32\_t\ li;\ \textcolor{comment}{/*\ l(i),\ i-\/th\ element\ of\ matrix\ L\ \ \ \ */}}
+\DoxyCodeLine{00090\ \ \ \ \ float32\_t\ cp1;\ \textcolor{comment}{/*\ Temporary\ value\ for\ c(i+1)\ */}}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ int32\_t\ i;\ \textcolor{comment}{/*\ Loop\ counter\ */}}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \ \ \ \ S-\/>x\ =\ x;}
+\DoxyCodeLine{00095\ \ \ \ \ S-\/>y\ =\ y;}
+\DoxyCodeLine{00096\ \ \ \ \ S-\/>n\_x\ =\ n;}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{comment}{/*\ ==\ Solve\ LZ=B\ to\ obtain\ z(i)\ and\ u(i)\ ==\ */}}
+\DoxyCodeLine{00099\ }
+\DoxyCodeLine{00100\ \ \ \ \ \textcolor{comment}{/*\ -\/-\/\ Row\ 1\ -\/-\/\ */}}
+\DoxyCodeLine{00101\ \ \ \ \ \textcolor{comment}{/*\ B(0)\ =\ 0,\ not\ computed\ */}}
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{comment}{/*\ u(1,2)\ =\ a(1,2)/a(1,1)\ =\ a(1,2)\ */}}
+\DoxyCodeLine{00103\ \ \ \ \ \textcolor{keywordflow}{if}(type\ ==\ ARM\_SPLINE\_NATURAL)}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ u[0]\ =\ 0;\ \ \textcolor{comment}{/*\ a(1,2)\ =\ 0\ */}}
+\DoxyCodeLine{00105\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(type\ ==\ ARM\_SPLINE\_PARABOLIC\_RUNOUT)}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ u[0]\ =\ -\/1;\ \textcolor{comment}{/*\ a(1,2)\ =\ -\/1\ */}}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ z[0]\ =\ 0;\ \ \textcolor{comment}{/*\ z(1)\ =\ B(1)/a(1,1)\ =\ 0\ always\ */}}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \ \textcolor{comment}{/*\ -\/-\/\ Rows\ 2\ to\ N-\/1\ (N=n+1)\ -\/-\/\ */}}
+\DoxyCodeLine{00111\ \ \ \ \ hm1\ =\ x[1]\ -\/\ x[0];\ \textcolor{comment}{/*\ Initialize\ h(i-\/1)\ =\ h(1)\ =\ x(2)-\/x(1)\ */}}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \ \ \ \ \textcolor{keywordflow}{for}\ (i=1;\ i<(int32\_t)n-\/1;\ i++)}
+\DoxyCodeLine{00114\ \ \ \ \ \{}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Compute\ B(i)\ */}}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ hi\ =\ x[i+1]-\/x[i];}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ Bi\ =\ 3*(y[i+1]-\/y[i])/hi\ -\/\ 3*(y[i]-\/y[i-\/1])/hm1;}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ l(i)\ =\ a(i)-\/a(i,i-\/1)*u(i-\/1)\ =\ 2[h(i-\/1)+h(i)]-\/h(i-\/1)*u(i-\/1)\ */}}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ li\ =\ 2*(hi+hm1)\ -\/\ hm1*u[i-\/1];}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ u(i)\ =\ a(i,i+1)/l(i)\ =\ h(i)/l(i)\ */}}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ u[i]\ =\ hi/li;}
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ z(i)\ =\ [B(i)-\/h(i-\/1)*z(i-\/1)]/l(i)\ */}}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ z[i]\ =\ (Bi-\/hm1*z[i-\/1])/li;}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Update\ h(i-\/1)\ for\ next\ iteration\ */}}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ hm1\ =\ hi;}
+\DoxyCodeLine{00130\ \ \ \ \ \}}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ \textcolor{comment}{/*\ -\/-\/\ Row\ N\ -\/-\/\ */}}
+\DoxyCodeLine{00133\ \ \ \ \ \textcolor{comment}{/*\ l(N)\ =\ a(N,N)-\/a(N,N-\/1)u(N-\/1)\ */}}
+\DoxyCodeLine{00134\ \ \ \ \ \textcolor{comment}{/*\ z(N)\ =\ [-\/a(N,N-\/1)z(N-\/1)]/l(N)\ */}}
+\DoxyCodeLine{00135\ \ \ \ \ \textcolor{keywordflow}{if}(type\ ==\ ARM\_SPLINE\_NATURAL)}
+\DoxyCodeLine{00136\ \ \ \ \ \{}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ li\ =\ 1;\ \ \ \ \ a(N,N)\ =\ 1;\ a(N,N-\/1)\ =\ 0\ */}}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ z[n-\/1]\ =\ 0;\ \textcolor{comment}{/*\ a(N,N-\/1)\ =\ 0\ */}}
+\DoxyCodeLine{00139\ \ \ \ \ \}}
+\DoxyCodeLine{00140\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}(type\ ==\ ARM\_SPLINE\_PARABOLIC\_RUNOUT)}
+\DoxyCodeLine{00141\ \ \ \ \ \{}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ li\ =\ 1+u[n-\/2];\ \ \ \ \ \ \textcolor{comment}{/*\ a(N,N)\ =\ 1;\ a(N,N-\/1)\ =\ -\/1\ */}}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ z[n-\/1]\ =\ z[n-\/2]/li;\ \textcolor{comment}{/*\ a(N,N-\/1)\ =\ -\/1\ */}}
+\DoxyCodeLine{00144\ \ \ \ \ \}}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \ \ \ \ \textcolor{comment}{/*\ ==\ Solve\ UX\ =\ Z\ to\ obtain\ c(i)\ and\ \ \ \ */}}
+\DoxyCodeLine{00147\ \ \ \ \ \textcolor{comment}{/*\ \ \ \ compute\ b(i)\ and\ d(i)\ from\ c(i)\ ==\ */}}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ \ \ cp1\ =\ z[n-\/1];\ \textcolor{comment}{/*\ Initialize\ c(i+1)\ =\ c(N)\ =\ z(N)\ */}}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \ \ \ \ \textcolor{keywordflow}{for}\ (i=n-\/2;\ i>=0;\ i-\/-\/)\ }
+\DoxyCodeLine{00152\ \ \ \ \ \{}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ c(i)\ =\ z(i)-\/u(i+1)c(i+1)\ */}}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ c[i]\ =\ z[i]-\/u[i]*cp1;}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ hi\ =\ x[i+1]-\/x[i];}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ b(i)\ =\ [y(i+1)-\/y(i)]/h(i)-\/h(i)*[c(i+1)+2*c(i)]/3\ */}}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ b[i]\ =\ (y[i+1]-\/y[i])/hi-\/hi*(cp1+2*c[i])/3;}
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ d(i)\ =\ [c(i+1)-\/c(i)]/[3*h(i)]\ */}}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \ d[i]\ =\ (cp1-\/c[i])/(3*hi);}
+\DoxyCodeLine{00162\ }
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Update\ c(i+1)\ for\ next\ iteration\ */}}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \ cp1\ =\ c[i];}
+\DoxyCodeLine{00165\ \ \ \ \ \}}
+\DoxyCodeLine{00166\ }
+\DoxyCodeLine{00167\ \ \ \ \ \textcolor{comment}{/*\ ==\ Finally,\ store\ the\ coefficients\ in\ the\ instance\ ==\ */}}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ \ \ \ \ S-\/>coeffs\ =\ coeffs;}
+\DoxyCodeLine{00170\ \}}
+\DoxyCodeLine{00171\ }
+
+\end{DoxyCode}

@@ -1,0 +1,175 @@
+\doxysection{arm\+\_\+minkowski\+\_\+distance\+\_\+f32.\+c}
+\hypertarget{arm__minkowski__distance__f32_8c_source}{}\label{arm__minkowski__distance__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/DistanceFunctions/arm\_minkowski\_distance\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/DistanceFunctions/arm\_minkowski\_distance\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_minkowski\_distance\_f32.c}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *\ Description:\ \ Minkowski\ distance\ between\ two\ vectors}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00011\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00012\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00028\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}dsp/distance\_functions.h"{}}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <limits.h>}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#include\ <math.h>}}
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00040\ \textcolor{comment}{/*\ 6.14\ bug\ */}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#if\ defined\ (\_\_ARMCC\_VERSION)\ \&\&\ (\_\_ARMCC\_VERSION\ >=\ 6100100)\ \&\&\ (\_\_ARMCC\_VERSION\ <\ 6150001)}}
+\DoxyCodeLine{00042\ \ }
+\DoxyCodeLine{00043\ \_\_attribute\_\_((weak))\ \textcolor{keywordtype}{float}\ \_\_powisf2(\textcolor{keywordtype}{float}\ a,\ \textcolor{keywordtype}{int}\ b)}
+\DoxyCodeLine{00044\ \{\ }
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keyword}{const}\ \textcolor{keywordtype}{int}\ recip\ =\ b\ <\ 0;}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keywordtype}{float}\ r\ =\ 1;}
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keywordflow}{while}\ (1)}
+\DoxyCodeLine{00048\ \ \ \ \ \{}
+\DoxyCodeLine{00049\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b\ \&\ 1)}
+\DoxyCodeLine{00050\ \ \ \ \ \ \ \ \ \ \ \ \ r\ *=\ a;}
+\DoxyCodeLine{00051\ \ \ \ \ \ \ \ \ b\ /=\ 2;}
+\DoxyCodeLine{00052\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (b\ ==\ 0)}
+\DoxyCodeLine{00053\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ a\ *=\ a;}
+\DoxyCodeLine{00055\ \ \ \ \ \}}
+\DoxyCodeLine{00056\ \ \ \ \ \textcolor{keywordflow}{return}\ recip\ ?\ 1/r\ :\ r;}
+\DoxyCodeLine{00057\ \}}
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\#endif\ }}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00071\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00073\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00074\ \textcolor{preprocessor}{\#include\ "{}arm\_vec\_math.h"{}}}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ float32\_t\ \mbox{\hyperlink{group___minkowski_gadee2e217acf8a2e28f6cc0d1668e4902}{arm\_minkowski\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ int32\_t\ order,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00077\ \{}
+\DoxyCodeLine{00078\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ blkCnt;}
+\DoxyCodeLine{00079\ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ a,\ b,\ tmpV,\ sumV;}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \ \ sumV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ a\ =\ vld1q(pA);}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ b\ =\ vld1q(pB);}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ tmpV\ =\ vabdq(a,\ b);}
+\DoxyCodeLine{00089\ \ \ \ \ \ \ \ \ tmpV\ =\ vpowq\_f32(tmpV,\ vdupq\_n\_f32(order));}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ sumV\ =\ vaddq(sumV,\ tmpV);}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \ \ \ \ \ \ pA\ +=\ 4;}
+\DoxyCodeLine{00093\ \ \ \ \ \ \ \ \ pB\ +=\ 4;}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00095\ \ \ \ \ \}}
+\DoxyCodeLine{00096\ }
+\DoxyCodeLine{00097\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00098\ \textcolor{comment}{\ \ \ \ \ *\ tail}}
+\DoxyCodeLine{00099\ \textcolor{comment}{\ \ \ \ \ *\ (will\ be\ merged\ thru\ tail\ predication)}}
+\DoxyCodeLine{00100\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00101\ \ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p0\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ a\ =\ vldrwq\_z\_f32(pA,\ p0);}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ b\ =\ vldrwq\_z\_f32(pB,\ p0);}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ tmpV\ =\ vabdq(a,\ b);}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ tmpV\ =\ vpowq\_f32(tmpV,\ vdupq\_n\_f32(order));}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ sumV\ =\ vaddq\_m(sumV,\ sumV,\ tmpV,\ p0);}
+\DoxyCodeLine{00111\ \ \ \ \ \}}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \ \ \ \ \textcolor{keywordflow}{return}\ (powf(vecAddAcrossF32Mve(sumV),\ (1.0f\ /\ (float32\_t)\ order)));}
+\DoxyCodeLine{00114\ \}}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00117\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_NEON)}}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \textcolor{preprocessor}{\#include\ "{}NEMath.h"{}}}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ float32\_t\ \mbox{\hyperlink{group___minkowski_gadee2e217acf8a2e28f6cc0d1668e4902}{arm\_minkowski\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ int32\_t\ order,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00122\ \{}
+\DoxyCodeLine{00123\ \ \ \ \ float32\_t\ sum;}
+\DoxyCodeLine{00124\ \ \ \ \ uint32\_t\ blkCnt;}
+\DoxyCodeLine{00125\ \ \ \ \ float32x4\_t\ sumV,aV,bV,\ tmpV,\ n;}
+\DoxyCodeLine{00126\ \ \ \ \ float32x2\_t\ sumV2;}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00128\ \ \ \ \ sum\ =\ 0.0f;\ }
+\DoxyCodeLine{00129\ \ \ \ \ sumV\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00130\ \ \ \ \ n\ =\ vdupq\_n\_f32(order);}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00133\ \ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00134\ \ \ \ \ \{}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ aV\ =\ vld1q\_f32(pA);}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ bV\ =\ vld1q\_f32(pB);}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ pA\ +=\ 4;}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ pB\ +=\ 4;}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ tmpV\ =\ vabdq\_f32(aV,bV);}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ tmpV\ =\ vpowq\_f32(tmpV,n);}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ sumV\ =\ vaddq\_f32(sumV,\ tmpV);}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ blkCnt\ -\/-\/;}
+\DoxyCodeLine{00146\ \ \ \ \ \}}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ \ \ \ \ sumV2\ =\ vpadd\_f32(vget\_low\_f32(sumV),vget\_high\_f32(sumV));}
+\DoxyCodeLine{00149\ \ \ \ \ sum\ =\ vget\_lane\_f32(sumV2,\ 0)\ +\ vget\_lane\_f32(sumV2,\ 1);}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \ \ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00152\ \ \ \ \ \textcolor{keywordflow}{while}(blkCnt\ >\ 0)}
+\DoxyCodeLine{00153\ \ \ \ \ \{}
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ sum\ +=\ powf(fabsf(*pA++\ -\/\ *pB++),order);}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ blkCnt\ -\/-\/;}
+\DoxyCodeLine{00157\ \ \ \ \ \}}
+\DoxyCodeLine{00158\ }
+\DoxyCodeLine{00159\ }
+\DoxyCodeLine{00160\ \ \ \ \ \textcolor{keywordflow}{return}(powf(sum,(1.0f/order)));}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00162\ \}}
+\DoxyCodeLine{00163\ }
+\DoxyCodeLine{00164\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ }
+\DoxyCodeLine{00167\ float32\_t\ \mbox{\hyperlink{group___minkowski_gadee2e217acf8a2e28f6cc0d1668e4902}{arm\_minkowski\_distance\_f32}}(\textcolor{keyword}{const}\ float32\_t\ *pA,\textcolor{keyword}{const}\ float32\_t\ *pB,\ int32\_t\ order,\ uint32\_t\ blockSize)}
+\DoxyCodeLine{00168\ \{}
+\DoxyCodeLine{00169\ \ \ \ \ float32\_t\ sum;}
+\DoxyCodeLine{00170\ \ \ \ \ uint32\_t\ i;}
+\DoxyCodeLine{00171\ }
+\DoxyCodeLine{00172\ \ \ \ \ sum\ =\ 0.0f;\ }
+\DoxyCodeLine{00173\ \ \ \ \ \textcolor{keywordflow}{for}(i=0;\ i\ <\ blockSize;\ i++)}
+\DoxyCodeLine{00174\ \ \ \ \ \{}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ sum\ +=\ powf(fabsf(pA[i]\ -\/\ pB[i]),order);}
+\DoxyCodeLine{00176\ \ \ \ \ \}}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00179\ \ \ \ \ \textcolor{keywordflow}{return}(powf(sum,(1.0f/order)));}
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00181\ \}}
+\DoxyCodeLine{00182\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00183\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00184\ }
+\DoxyCodeLine{00185\ }
+
+\end{DoxyCode}

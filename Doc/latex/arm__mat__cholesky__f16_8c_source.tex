@@ -1,0 +1,236 @@
+\doxysection{arm\+\_\+mat\+\_\+cholesky\+\_\+f16.\+c}
+\hypertarget{arm__mat__cholesky__f16_8c_source}{}\label{arm__mat__cholesky__f16_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/MatrixFunctions/arm\_mat\_cholesky\_f16.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/MatrixFunctions/arm\_mat\_cholesky\_f16.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_mat\_cholesky\_f16.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Floating-\/point\ Cholesky\ decomposition}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/matrix\_functions\_f16.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#if\ defined(ARM\_FLOAT16\_SUPPORTED)}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00056\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVE\_FLOAT16)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ arm\_status\ arm\_mat\_cholesky\_f16(}
+\DoxyCodeLine{00061\ \ \ \textcolor{keyword}{const}\ arm\_matrix\_instance\_f16\ *\ pSrc,}
+\DoxyCodeLine{00062\ \ \ \ \ \ \ \ \ arm\_matrix\_instance\_f16\ *\ pDst)}
+\DoxyCodeLine{00063\ \{}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \ \ arm\_status\ status;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ status\ of\ matrix\ inverse\ */}}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \textcolor{preprocessor}{\#ifdef\ ARM\_MATH\_MATRIX\_CHECK}}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \textcolor{comment}{/*\ Check\ for\ matrix\ mismatch\ condition\ */}}
+\DoxyCodeLine{00071\ \ \ \textcolor{keywordflow}{if}\ ((pSrc-\/>numRows\ !=\ pSrc-\/>numCols)\ ||}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ (pDst-\/>numRows\ !=\ pDst-\/>numCols)\ ||}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ (pSrc-\/>numRows\ !=\ pDst-\/>numRows)\ \ \ )}
+\DoxyCodeLine{00074\ \ \ \{}
+\DoxyCodeLine{00075\ \ \ \ \ \textcolor{comment}{/*\ Set\ status\ as\ ARM\_MATH\_SIZE\_MISMATCH\ */}}
+\DoxyCodeLine{00076\ \ \ \ \ status\ =\ ARM\_MATH\_SIZE\_MISMATCH;}
+\DoxyCodeLine{00077\ \ \ \}}
+\DoxyCodeLine{00078\ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifdef\ ARM\_MATH\_MATRIX\_CHECK\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00082\ \ \ \{}
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{keywordtype}{int}\ i,j,k;}
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keywordtype}{int}\ n\ =\ pSrc-\/>numRows;}
+\DoxyCodeLine{00085\ \ \ \ \ \_Float16\ invSqrtVj;}
+\DoxyCodeLine{00086\ \ \ \ \ float16\_t\ *pA,*pG;}
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{keywordtype}{int}\ kCnt;}
+\DoxyCodeLine{00088\ }
+\DoxyCodeLine{00089\ \ \ \ \ mve\_pred16\_t\ p0;}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \ \ \ \ f16x8\_t\ acc,\ acc0,\ acc1,\ acc2,\ acc3;}
+\DoxyCodeLine{00092\ \ \ \ \ f16x8\_t\ vecGi;}
+\DoxyCodeLine{00093\ \ \ \ \ f16x8\_t\ vecGj,vecGj0,vecGj1,vecGj2,vecGj3;}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ pA\ =\ pSrc-\/>pData;}
+\DoxyCodeLine{00097\ \ \ \ \ pG\ =\ pDst-\/>pData;}
+\DoxyCodeLine{00098\ \ \ \ \ }
+\DoxyCodeLine{00099\ \ \ \ \ \textcolor{keywordflow}{for}(i=0\ ;i\ <\ n\ ;\ i++)}
+\DoxyCodeLine{00100\ \ \ \ \ \{}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(j=i\ ;\ j+3\ <\ n\ ;\ j+=4)}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \ \ \ \ acc0\ =\ vdupq\_n\_f16(0.0f16);}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ \ \ acc0[0]=pA[(j\ +\ 0)\ *\ n\ +\ i];}
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ acc1\ =\ vdupq\_n\_f16(0.0f16);}
+\DoxyCodeLine{00107\ \ \ \ \ \ \ \ \ \ \ acc1[0]=pA[(j\ +\ 1)\ *\ n\ +\ i];}
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ acc2\ =\ vdupq\_n\_f16(0.0f16);}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ acc2[0]=pA[(j\ +\ 2)\ *\ n\ +\ i];}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ acc3\ =\ vdupq\_n\_f16(0.0f16);}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ acc3[0]=pA[(j\ +\ 3)\ *\ n\ +\ i];}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ kCnt\ =\ i;}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(k=0;\ k\ <\ i\ ;\ k+=8)}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ \ p0\ =\ vctp16q(kCnt);}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ \ vecGi=vldrhq\_z\_f16(\&pG[i\ *\ n\ +\ k],p0);}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00122\ \ \ \ \ \ \ \ \ \ \ \ \ \ vecGj0=vldrhq\_z\_f16(\&pG[(j\ +\ 0)\ *\ n\ +\ k],p0);}
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ \ vecGj1=vldrhq\_z\_f16(\&pG[(j\ +\ 1)\ *\ n\ +\ k],p0);}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \ \ \ \ \ vecGj2=vldrhq\_z\_f16(\&pG[(j\ +\ 2)\ *\ n\ +\ k],p0);}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \ \ \ \ \ vecGj3=vldrhq\_z\_f16(\&pG[(j\ +\ 3)\ *\ n\ +\ k],p0);}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ vfmsq\_m(acc0,\ vecGi,\ vecGj0,\ p0);}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ \ \ \ \ \ acc1\ =\ vfmsq\_m(acc1,\ vecGi,\ vecGj1,\ p0);}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ \ \ \ \ \ acc2\ =\ vfmsq\_m(acc2,\ vecGi,\ vecGj2,\ p0);}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \ \ \ \ \ acc3\ =\ vfmsq\_m(acc3,\ vecGi,\ vecGj3,\ p0);}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ \ kCnt\ -\/=\ 8;}
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ pG[(j\ +\ 0)\ *\ n\ +\ i]\ =\ vecAddAcrossF16Mve(acc0);}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ pG[(j\ +\ 1)\ *\ n\ +\ i]\ =\ vecAddAcrossF16Mve(acc1);}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ pG[(j\ +\ 2)\ *\ n\ +\ i]\ =\ vecAddAcrossF16Mve(acc2);}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ pG[(j\ +\ 3)\ *\ n\ +\ i]\ =\ vecAddAcrossF16Mve(acc3);}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(;\ j\ <\ n\ ;\ j++)}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \ \ kCnt\ =\ i;}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \ \ acc\ =\ vdupq\_n\_f16(0.0f16);}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \ \ \ \ acc[0]\ =\ pA[j\ *\ n\ +\ i];}
+\DoxyCodeLine{00146\ }
+\DoxyCodeLine{00147\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(k=0;\ k\ <\ i\ ;\ k+=8)}
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ \ \ \ \ \ p0\ =\ vctp16q(kCnt);}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ \ \ \ \ \ vecGi=vldrhq\_z\_f16(\&pG[i\ *\ n\ +\ k],p0);}
+\DoxyCodeLine{00152\ \ \ \ \ \ \ \ \ \ \ \ \ \ vecGj=vldrhq\_z\_f16(\&pG[j\ *\ n\ +\ k],p0);}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ \ \ \ \ \ \ \ \ \ \ \ \ \ acc\ =\ vfmsq\_m(acc,\ vecGi,\ vecGj,p0);}
+\DoxyCodeLine{00155\ }
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \ \ \ \ \ kCnt\ -\/=\ 8;}
+\DoxyCodeLine{00157\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \ \ \ \ pG[j\ *\ n\ +\ i]\ =\ vecAddAcrossF16Mve(acc);}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((\_Float16)pG[i\ *\ n\ +\ i]\ <=\ 0.0f16)}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(ARM\_MATH\_DECOMPOSITION\_FAILURE);}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00165\ }
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ invSqrtVj\ =\ 1.0f16/(\_Float16)sqrtf((float32\_t)pG[i\ *\ n\ +\ i]);}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(j=i;\ j\ <\ n\ ;\ j++)}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00169\ \ \ \ \ \ \ \ \ \ pG[j\ *\ n\ +\ i]\ =\ (\_Float16)pG[j\ *\ n\ +\ i]\ *\ (\_Float16)invSqrtVj\ ;}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00171\ \ \ \ \ \}}
+\DoxyCodeLine{00172\ }
+\DoxyCodeLine{00173\ \ \ \ \ status\ =\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00175\ \ \ \}}
+\DoxyCodeLine{00176\ }
+\DoxyCodeLine{00177\ \ \ }
+\DoxyCodeLine{00178\ \ \ \textcolor{comment}{/*\ Return\ to\ application\ */}}
+\DoxyCodeLine{00179\ \ \ \textcolor{keywordflow}{return}\ (status);}
+\DoxyCodeLine{00180\ \}}
+\DoxyCodeLine{00181\ }
+\DoxyCodeLine{00182\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00183\ arm\_status\ arm\_mat\_cholesky\_f16(}
+\DoxyCodeLine{00184\ \ \ \textcolor{keyword}{const}\ arm\_matrix\_instance\_f16\ *\ pSrc,}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ arm\_matrix\_instance\_f16\ *\ pDst)}
+\DoxyCodeLine{00186\ \{}
+\DoxyCodeLine{00187\ }
+\DoxyCodeLine{00188\ \ \ arm\_status\ status;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ status\ of\ matrix\ inverse\ */}}
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \textcolor{preprocessor}{\#ifdef\ ARM\_MATH\_MATRIX\_CHECK}}
+\DoxyCodeLine{00192\ }
+\DoxyCodeLine{00193\ \ \ \textcolor{comment}{/*\ Check\ for\ matrix\ mismatch\ condition\ */}}
+\DoxyCodeLine{00194\ \ \ \textcolor{keywordflow}{if}\ ((pSrc-\/>numRows\ !=\ pSrc-\/>numCols)\ ||}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ (pDst-\/>numRows\ !=\ pDst-\/>numCols)\ ||}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ (pSrc-\/>numRows\ !=\ pDst-\/>numRows)\ \ \ )}
+\DoxyCodeLine{00197\ \ \ \{}
+\DoxyCodeLine{00198\ \ \ \ \ \textcolor{comment}{/*\ Set\ status\ as\ ARM\_MATH\_SIZE\_MISMATCH\ */}}
+\DoxyCodeLine{00199\ \ \ \ \ status\ =\ ARM\_MATH\_SIZE\_MISMATCH;}
+\DoxyCodeLine{00200\ \ \ \}}
+\DoxyCodeLine{00201\ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00203\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifdef\ ARM\_MATH\_MATRIX\_CHECK\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00205\ \ \ \{}
+\DoxyCodeLine{00206\ \ \ \ \ \textcolor{keywordtype}{int}\ i,j,k;}
+\DoxyCodeLine{00207\ \ \ \ \ \textcolor{keywordtype}{int}\ n\ =\ pSrc-\/>numRows;}
+\DoxyCodeLine{00208\ \ \ \ \ float16\_t\ invSqrtVj;}
+\DoxyCodeLine{00209\ \ \ \ \ float16\_t\ *pA,*pG;}
+\DoxyCodeLine{00210\ }
+\DoxyCodeLine{00211\ \ \ \ \ pA\ =\ pSrc-\/>pData;}
+\DoxyCodeLine{00212\ \ \ \ \ pG\ =\ pDst-\/>pData;}
+\DoxyCodeLine{00213\ \ \ \ \ }
+\DoxyCodeLine{00214\ }
+\DoxyCodeLine{00215\ \ \ \ \ \textcolor{keywordflow}{for}(i=0\ ;\ i\ <\ n\ ;\ i++)}
+\DoxyCodeLine{00216\ \ \ \ \ \{}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(j=i\ ;\ j\ <\ n\ ;\ j++)}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ \ \ pG[j\ *\ n\ +\ i]\ =\ pA[j\ *\ n\ +\ i];}
+\DoxyCodeLine{00220\ }
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(k=0;\ k\ <\ i\ ;\ k++)}
+\DoxyCodeLine{00222\ \ \ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ \ \ \ \ \ pG[j\ *\ n\ +\ i]\ =\ (\_Float16)pG[j\ *\ n\ +\ i]\ -\/\ (\_Float16)pG[i\ *\ n\ +\ k]\ *\ (\_Float16)pG[j\ *\ n\ +\ k];}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00225\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ ((\_Float16)pG[i\ *\ n\ +\ i]\ <=\ 0.0f16)}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00229\ \ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}(ARM\_MATH\_DECOMPOSITION\_FAILURE);}
+\DoxyCodeLine{00230\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00231\ }
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \textcolor{comment}{/*\ The\ division\ is\ done\ in\ float32\ for\ accuracy\ reason\ and}}
+\DoxyCodeLine{00233\ \textcolor{comment}{\ \ \ \ \ \ \ because\ doing\ it\ in\ f16\ would\ not\ have\ any\ impact\ on\ the\ performances.}}
+\DoxyCodeLine{00234\ \textcolor{comment}{\ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00235\ \ \ \ \ \ \ \ invSqrtVj\ =\ 1.0f/sqrtf((float32\_t)pG[i\ *\ n\ +\ i]);}
+\DoxyCodeLine{00236\ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(j=i\ ;\ j\ <\ n\ ;\ j++)}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \ pG[j\ *\ n\ +\ i]\ =\ (\_Float16)pG[j\ *\ n\ +\ i]\ *\ (\_Float16)invSqrtVj\ ;}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00240\ \ \ \ \ \}}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \ \ \ \ status\ =\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00243\ }
+\DoxyCodeLine{00244\ \ \ \}}
+\DoxyCodeLine{00245\ }
+\DoxyCodeLine{00246\ \ \ }
+\DoxyCodeLine{00247\ \ \ \textcolor{comment}{/*\ Return\ to\ application\ */}}
+\DoxyCodeLine{00248\ \ \ \textcolor{keywordflow}{return}\ (status);}
+\DoxyCodeLine{00249\ \}}
+\DoxyCodeLine{00250\ }
+\DoxyCodeLine{00251\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00252\ }
+\DoxyCodeLine{00256\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined(ARM\_FLOAT16\_SUPPORTED)\ */}\textcolor{preprocessor}{\ }}
+
+\end{DoxyCode}

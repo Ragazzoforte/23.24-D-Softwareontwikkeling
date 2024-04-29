@@ -1,0 +1,85 @@
+\doxysection{arm\+\_\+linear\+\_\+interp\+\_\+f16.\+c}
+\hypertarget{arm__linear__interp__f16_8c_source}{}\label{arm__linear__interp__f16_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/InterpolationFunctions/arm\_linear\_interp\_f16.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/InterpolationFunctions/arm\_linear\_interp\_f16.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_linear\_interp\_f16.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Floating-\/point\ linear\ interpolation}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/interpolation\_functions\_f16.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#if\ defined(ARM\_FLOAT16\_SUPPORTED)}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00082\ \ \ float16\_t\ arm\_linear\_interp\_f16(}
+\DoxyCodeLine{00083\ \ \ arm\_linear\_interp\_instance\_f16\ *\ S,}
+\DoxyCodeLine{00084\ \ \ float16\_t\ x)}
+\DoxyCodeLine{00085\ \ \ \{}
+\DoxyCodeLine{00086\ \ \ \ \ float16\_t\ y;}
+\DoxyCodeLine{00087\ \ \ \ \ float16\_t\ x0,\ x1;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Nearest\ input\ values\ */}}
+\DoxyCodeLine{00088\ \ \ \ \ float16\_t\ y0,\ y1;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Nearest\ output\ values\ */}}
+\DoxyCodeLine{00089\ \ \ \ \ float16\_t\ xSpacing\ =\ S-\/>xSpacing;\ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ spacing\ between\ input\ values\ */}}
+\DoxyCodeLine{00090\ \ \ \ \ int32\_t\ i;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Index\ variable\ */}}
+\DoxyCodeLine{00091\ \ \ \ \ float16\_t\ *pYData\ =\ S-\/>pYData;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ pointer\ to\ output\ table\ */}}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ index\ */}}
+\DoxyCodeLine{00094\ \ \ \ \ i\ =\ (int32\_t)\ (((\_Float16)x\ -\/\ (\_Float16)S-\/>x1)\ /\ (\_Float16)xSpacing);}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ \textcolor{keywordflow}{if}\ (i\ <\ 0)}
+\DoxyCodeLine{00097\ \ \ \ \ \{}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \textcolor{comment}{/*\ Iniatilize\ output\ for\ below\ specified\ range\ as\ least\ output\ value\ of\ table\ */}}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ y\ =\ pYData[0];}
+\DoxyCodeLine{00100\ \ \ \ \ \}}
+\DoxyCodeLine{00101\ \ \ \ \ \textcolor{keywordflow}{else}\ \textcolor{keywordflow}{if}\ ((uint32\_t)i\ >=\ (S-\/>nValues\ -\/\ 1))}
+\DoxyCodeLine{00102\ \ \ \ \ \{}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ \textcolor{comment}{/*\ Iniatilize\ output\ for\ above\ specified\ range\ as\ last\ output\ value\ of\ table\ */}}
+\DoxyCodeLine{00104\ \ \ \ \ \ \ y\ =\ pYData[S-\/>nValues\ -\/\ 1];}
+\DoxyCodeLine{00105\ \ \ \ \ \}}
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00107\ \ \ \ \ \{}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ nearest\ input\ values\ */}}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ x0\ =\ (\_Float16)S-\/>x1\ +\ \ (\_Float16)i\ \ \ \ \ \ *\ (\_Float16)xSpacing;}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ x1\ =\ (\_Float16)S-\/>x1\ +\ (\_Float16)(i\ +\ 1)\ *\ (\_Float16)xSpacing;}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ of\ nearest\ output\ values\ */}}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ y0\ =\ pYData[i];}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ y1\ =\ pYData[i\ +\ 1];}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \textcolor{comment}{/*\ Calculation\ of\ output\ */}}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ y\ =\ (\_Float16)y0\ +\ ((\_Float16)x\ -\/\ (\_Float16)x0)\ *\ }
+\DoxyCodeLine{00118\ \ \ \ \ \ \ (((\_Float16)y1\ -\/\ (\_Float16)y0)\ /\ ((\_Float16)x1\ -\/\ (\_Float16)x0));}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00120\ \ \ \ \ \}}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00122\ \ \ \ \ \textcolor{comment}{/*\ returns\ output\ value\ */}}
+\DoxyCodeLine{00123\ \ \ \ \ \textcolor{keywordflow}{return}\ (y);}
+\DoxyCodeLine{00124\ \ \ \}}
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00131\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined(ARM\_FLOAT16\_SUPPORTED)\ */}\textcolor{preprocessor}{\ }}
+\DoxyCodeLine{00132\ }
+
+\end{DoxyCode}

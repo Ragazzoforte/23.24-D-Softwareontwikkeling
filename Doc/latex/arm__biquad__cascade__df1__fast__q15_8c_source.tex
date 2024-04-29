@@ -1,0 +1,224 @@
+\doxysection{arm\+\_\+biquad\+\_\+cascade\+\_\+df1\+\_\+fast\+\_\+q15.\+c}
+\hypertarget{arm__biquad__cascade__df1__fast__q15_8c_source}{}\label{arm__biquad__cascade__df1__fast__q15_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/FilteringFunctions/arm\_biquad\_cascade\_df1\_fast\_q15.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/FilteringFunctions/arm\_biquad\_cascade\_df1\_fast\_q15.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_biquad\_cascade\_df1\_fast\_q15.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Fast\ processing\ function\ for\ the\ Q15\ Biquad\ cascade\ filter}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/filtering\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00060\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___biquad_cascade_d_f1_ga5008df017b9ce4046f35b61482009cbc}{arm\_biquad\_cascade\_df1\_fast\_q15}}(}
+\DoxyCodeLine{00061\ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__biquad__casd__df1__inst__q15}{arm\_biquad\_casd\_df1\_inst\_q15}}\ *\ S,}
+\DoxyCodeLine{00062\ \ \ \textcolor{keyword}{const}\ q15\_t\ *\ pSrc,}
+\DoxyCodeLine{00063\ \ \ \ \ \ \ \ \ q15\_t\ *\ pDst,}
+\DoxyCodeLine{00064\ \ \ \ \ \ \ \ \ uint32\_t\ blockSize)}
+\DoxyCodeLine{00065\ \{}
+\DoxyCodeLine{00066\ \ \ \textcolor{keyword}{const}\ q15\_t\ *pIn\ =\ pSrc;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Source\ pointer\ */}}
+\DoxyCodeLine{00067\ \ \ \ \ \ \ \ \ q15\_t\ *pOut\ =\ pDst;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Destination\ pointer\ */}}
+\DoxyCodeLine{00068\ \ \ \ \ \ \ \ \ q15\_t\ *pState\ =\ S-\/>pState;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ State\ pointer\ */}}
+\DoxyCodeLine{00069\ \ \ \textcolor{keyword}{const}\ q15\_t\ *pCoeffs\ =\ S-\/>pCoeffs;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Coefficient\ pointer\ */}}
+\DoxyCodeLine{00070\ \ \ \ \ \ \ \ \ q31\_t\ acc;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Accumulator\ */}}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ q31\_t\ in;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ variable\ to\ hold\ input\ value\ */}}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ q31\_t\ out;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ variable\ to\ hold\ output\ value\ */}}
+\DoxyCodeLine{00073\ \ \ \ \ \ \ \ \ q31\_t\ b0;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ variable\ to\ hold\ bo\ value\ */}}
+\DoxyCodeLine{00074\ \ \ \ \ \ \ \ \ q31\_t\ b1,\ a1;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Filter\ coefficients\ */}}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ q31\_t\ state\_in,\ state\_out;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Filter\ state\ variables\ */}}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ int32\_t\ shift\ =\ (int32\_t)\ (15\ -\/\ S-\/>postShift);\ \textcolor{comment}{/*\ Post\ shift\ */}}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ uint32\_t\ sample,\ stage\ =\ S-\/>numStages;\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ counters\ */}}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \ \ \textcolor{keywordflow}{do}}
+\DoxyCodeLine{00080\ \ \ \{}
+\DoxyCodeLine{00081\ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ b0\ and\ 0\ coefficients\ using\ SIMD\ \ */}}
+\DoxyCodeLine{00082\ \ \ \ \ b0\ =\ read\_q15x2\_ia\ (\&pCoeffs);}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ b1\ and\ b2\ coefficients\ using\ SIMD\ */}}
+\DoxyCodeLine{00085\ \ \ \ \ b1\ =\ read\_q15x2\_ia\ (\&pCoeffs);}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ a1\ and\ a2\ coefficients\ using\ SIMD\ */}}
+\DoxyCodeLine{00088\ \ \ \ \ a1\ =\ read\_q15x2\_ia\ (\&pCoeffs);}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ input\ state\ values\ from\ the\ state\ buffer:\ \ x[n-\/1],\ x[n-\/2]\ */}}
+\DoxyCodeLine{00091\ \ \ \ \ state\_in\ =\ read\_q15x2\_ia\ (\&pState);}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ output\ state\ values\ from\ the\ state\ buffer:\ \ y[n-\/1],\ y[n-\/2]\ */}}
+\DoxyCodeLine{00094\ \ \ \ \ state\_out\ =\ read\_q15x2\_da\ (\&pState);}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)}}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \ \ \ \ \textcolor{comment}{/*\ Apply\ loop\ unrolling\ and\ compute\ 2\ output\ values\ simultaneously.\ */}}
+\DoxyCodeLine{00099\ \ \ \ \ \textcolor{comment}{/*\ Variable\ acc\ hold\ output\ values\ that\ are\ being\ computed:}}
+\DoxyCodeLine{00100\ \textcolor{comment}{\ \ \ \ \ *}}
+\DoxyCodeLine{00101\ \textcolor{comment}{\ \ \ \ \ *\ acc\ =\ \ b0\ *\ x[n]\ +\ b1\ *\ x[n-\/1]\ +\ b2\ *\ x[n-\/2]\ +\ a1\ *\ y[n-\/1]\ +\ a2\ *\ y[n-\/2]}}
+\DoxyCodeLine{00102\ \textcolor{comment}{\ \ \ \ \ *\ acc\ =\ \ b0\ *\ x[n]\ +\ b1\ *\ x[n-\/1]\ +\ b2\ *\ x[n-\/2]\ +\ a1\ *\ y[n-\/1]\ +\ a2\ *\ y[n-\/2]}}
+\DoxyCodeLine{00103\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ 2\ outputs\ at\ a\ time\ */}}
+\DoxyCodeLine{00106\ \ \ \ \ sample\ =\ blockSize\ >>\ 1U;}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \textcolor{keywordflow}{while}\ (sample\ >\ 0U)}
+\DoxyCodeLine{00109\ \ \ \ \ \{}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ input\ */}}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ in\ =\ read\_q15x2\_ia\ (\&pIn);}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \textcolor{comment}{/*\ out\ =\ \ b0\ *\ x[n]\ +\ 0\ *\ 0\ */}}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ out\ =\ \_\_SMUAD(b0,\ in);}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc\ =\ \ b1\ *\ x[n-\/1]\ +\ acc\ +=\ \ b2\ *\ x[n-\/2]\ +\ out\ */}}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ acc\ =\ \_\_SMLAD(b1,\ state\_in,\ out);}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc\ +=\ \ a1\ *\ y[n-\/1]\ +\ acc\ +=\ \ a2\ *\ y[n-\/2]\ */}}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ acc\ =\ \_\_SMLAD(a1,\ state\_out,\ acc);}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \textcolor{comment}{/*\ The\ result\ is\ converted\ from\ 3.29\ to\ 1.31\ and\ then\ saturation\ is\ applied\ */}}
+\DoxyCodeLine{00122\ \ \ \ \ \ \ out\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}((acc\ >>\ shift),\ 16);}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \textcolor{comment}{/*\ Every\ time\ after\ the\ output\ is\ computed\ state\ should\ be\ updated.\ */}}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \textcolor{comment}{/*\ The\ states\ should\ be\ updated\ as:\ \ */}}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \textcolor{comment}{/*\ Xn2\ =\ Xn1\ */}}
+\DoxyCodeLine{00127\ \ \ \ \ \ \ \textcolor{comment}{/*\ Xn1\ =\ Xn\ \ */}}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \textcolor{comment}{/*\ Yn2\ =\ Yn1\ */}}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \textcolor{comment}{/*\ Yn1\ =\ acc\ */}}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \textcolor{comment}{/*\ x[n-\/N],\ x[n-\/N-\/1]\ are\ packed\ together\ to\ make\ state\_in\ of\ type\ q31\ */}}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \textcolor{comment}{/*\ y[n-\/N],\ y[n-\/N-\/1]\ are\ packed\ together\ to\ make\ state\_out\ of\ type\ q31\ */}}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \textcolor{preprocessor}{\#ifndef\ \ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00134\ \ \ \ \ \ \ state\_in\ \ =\ \_\_PKHBT(in,\ state\_in,\ 16);}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ state\_out\ =\ \_\_PKHBT(out,\ state\_out,\ 16);}
+\DoxyCodeLine{00136\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ state\_in\ \ =\ \_\_PKHBT(state\_in\ >>\ 16,\ (in\ >>\ 16),\ 16);}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ state\_out\ =\ \_\_PKHBT(state\_out\ >>\ 16,\ (out),\ 16);}
+\DoxyCodeLine{00139\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ \ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \textcolor{comment}{/*\ out\ =\ \ b0\ *\ x[n]\ +\ 0\ *\ 0\ */}}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ out\ =\ \_\_SMUADX(b0,\ in);}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc0\ =\ \ b1\ *\ x[n-\/1]\ ,\ acc0\ +=\ \ b2\ *\ x[n-\/2]\ +\ out\ */}}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ acc\ =\ \_\_SMLAD(b1,\ state\_in,\ out);}
+\DoxyCodeLine{00145\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc\ +=\ \ a1\ *\ y[n-\/1]\ +\ acc\ +=\ \ a2\ *\ y[n-\/2]\ */}}
+\DoxyCodeLine{00146\ \ \ \ \ \ \ acc\ =\ \_\_SMLAD(a1,\ state\_out,\ acc);}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \textcolor{comment}{/*\ The\ result\ is\ converted\ from\ 3.29\ to\ 1.31\ and\ then\ saturation\ is\ applied\ */}}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ out\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}((acc\ >>\ shift),\ 16);}
+\DoxyCodeLine{00150\ }
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \textcolor{comment}{/*\ Store\ the\ output\ in\ the\ destination\ buffer.\ */}}
+\DoxyCodeLine{00152\ \textcolor{preprocessor}{\#ifndef\ \ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00153\ \ \ \ \ \ \ write\_q15x2\_ia\ (\&pOut,\ \_\_PKHBT(state\_out,\ out,\ 16));}
+\DoxyCodeLine{00154\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00155\ \ \ \ \ \ \ write\_q15x2\_ia\ (\&pOut,\ \_\_PKHBT(out,\ state\_out\ >>\ 16,\ 16));}
+\DoxyCodeLine{00156\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ \ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ \ \ \ \ \ \ \textcolor{comment}{/*\ Every\ time\ after\ the\ output\ is\ computed\ state\ should\ be\ updated.\ */}}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \textcolor{comment}{/*\ The\ states\ should\ be\ updated\ as:\ \ */}}
+\DoxyCodeLine{00160\ \ \ \ \ \ \ \textcolor{comment}{/*\ Xn2\ =\ Xn1\ */}}
+\DoxyCodeLine{00161\ \ \ \ \ \ \ \textcolor{comment}{/*\ Xn1\ =\ Xn\ \ */}}
+\DoxyCodeLine{00162\ \ \ \ \ \ \ \textcolor{comment}{/*\ Yn2\ =\ Yn1\ */}}
+\DoxyCodeLine{00163\ \ \ \ \ \ \ \textcolor{comment}{/*\ Yn1\ =\ acc\ */}}
+\DoxyCodeLine{00164\ \ \ \ \ \ \ \textcolor{comment}{/*\ x[n-\/N],\ x[n-\/N-\/1]\ are\ packed\ together\ to\ make\ state\_in\ of\ type\ q31\ */}}
+\DoxyCodeLine{00165\ \ \ \ \ \ \ \textcolor{comment}{/*\ y[n-\/N],\ y[n-\/N-\/1]\ are\ packed\ together\ to\ make\ state\_out\ of\ type\ q31\ */}}
+\DoxyCodeLine{00166\ \textcolor{preprocessor}{\#ifndef\ \ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ state\_in\ \ =\ \_\_PKHBT(in\ >>\ 16,\ state\_in,\ 16);}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ state\_out\ =\ \_\_PKHBT(out,\ state\_out,\ 16);}
+\DoxyCodeLine{00169\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00170\ \ \ \ \ \ \ state\_in\ \ =\ \_\_PKHBT(state\_in\ >>\ 16,\ in,\ 16);}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ state\_out\ =\ \_\_PKHBT(state\_out\ >>\ 16,\ out,\ 16);}
+\DoxyCodeLine{00172\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ \ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ sample-\/-\/;}
+\DoxyCodeLine{00176\ \ \ \ \ \}}
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ \ \ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ remaining\ outputs\ */}}
+\DoxyCodeLine{00179\ \ \ \ \ sample\ =\ (blockSize\ \&\ 0x1U);}
+\DoxyCodeLine{00180\ }
+\DoxyCodeLine{00181\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00182\ }
+\DoxyCodeLine{00183\ \ \ \ \ \textcolor{comment}{/*\ Initialize\ blkCnt\ with\ number\ of\ samples\ */}}
+\DoxyCodeLine{00184\ \ \ \ \ sample\ =\ blockSize;}
+\DoxyCodeLine{00185\ }
+\DoxyCodeLine{00186\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_LOOPUNROLL)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00187\ }
+\DoxyCodeLine{00188\ \ \ \ \ \textcolor{keywordflow}{while}\ (sample\ >\ 0U)}
+\DoxyCodeLine{00189\ \ \ \ \ \{}
+\DoxyCodeLine{00190\ \ \ \ \ \ \ \textcolor{comment}{/*\ Read\ the\ input\ */}}
+\DoxyCodeLine{00191\ \ \ \ \ \ \ in\ =\ *pIn++;}
+\DoxyCodeLine{00192\ }
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \textcolor{comment}{/*\ out\ =\ \ b0\ *\ x[n]\ +\ 0\ *\ 0\ */}}
+\DoxyCodeLine{00194\ \textcolor{preprocessor}{\#ifndef\ \ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ out\ =\ \_\_SMUAD(b0,\ in);}
+\DoxyCodeLine{00196\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ out\ =\ \_\_SMUADX(b0,\ in);}
+\DoxyCodeLine{00198\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ \ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc\ =\ \ b1\ *\ x[n-\/1],\ acc\ +=\ \ b2\ *\ x[n-\/2]\ +\ out\ */}}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ acc\ =\ \_\_SMLAD(b1,\ state\_in,\ out);}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \textcolor{comment}{/*\ acc\ +=\ \ a1\ *\ y[n-\/1]\ +\ acc\ +=\ \ a2\ *\ y[n-\/2]\ */}}
+\DoxyCodeLine{00203\ \ \ \ \ \ \ acc\ =\ \_\_SMLAD(a1,\ state\_out,\ acc);}
+\DoxyCodeLine{00204\ }
+\DoxyCodeLine{00205\ \ \ \ \ \ \ \textcolor{comment}{/*\ The\ result\ is\ converted\ from\ 3.29\ to\ 1.31\ and\ then\ saturation\ is\ applied\ */}}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ out\ =\ \mbox{\hyperlink{_core___a_2_include_2cmsis__armcc_8h_a3c013c2ed76ebc48c283c8bae17b9ab8}{\_\_SSAT}}((acc\ >>\ shift),\ 16);}
+\DoxyCodeLine{00207\ }
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \textcolor{comment}{/*\ Store\ the\ output\ in\ the\ destination\ buffer.\ */}}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ *pOut++\ =\ (q15\_t)\ out;}
+\DoxyCodeLine{00210\ }
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \textcolor{comment}{/*\ Every\ time\ after\ the\ output\ is\ computed\ state\ should\ be\ updated.\ */}}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \textcolor{comment}{/*\ The\ states\ should\ be\ updated\ as:\ \ */}}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \textcolor{comment}{/*\ Xn2\ =\ Xn1\ */}}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \textcolor{comment}{/*\ Xn1\ =\ Xn\ \ */}}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \textcolor{comment}{/*\ Yn2\ =\ Yn1\ */}}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \textcolor{comment}{/*\ Yn1\ =\ acc\ */}}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \textcolor{comment}{/*\ x[n-\/N],\ x[n-\/N-\/1]\ are\ packed\ together\ to\ make\ state\_in\ of\ type\ q31\ */}}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \textcolor{comment}{/*\ y[n-\/N],\ y[n-\/N-\/1]\ are\ packed\ together\ to\ make\ state\_out\ of\ type\ q31\ */}}
+\DoxyCodeLine{00219\ \textcolor{preprocessor}{\#ifndef\ \ ARM\_MATH\_BIG\_ENDIAN}}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ state\_in\ =\ \_\_PKHBT(in,\ state\_in,\ 16);}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ state\_out\ =\ \_\_PKHBT(out,\ state\_out,\ 16);}
+\DoxyCodeLine{00222\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00223\ \ \ \ \ \ \ state\_in\ =\ \_\_PKHBT(state\_in\ >>\ 16,\ in,\ 16);}
+\DoxyCodeLine{00224\ \ \ \ \ \ \ state\_out\ =\ \_\_PKHBT(state\_out\ >>\ 16,\ out,\ 16);}
+\DoxyCodeLine{00225\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#ifndef\ \ ARM\_MATH\_BIG\_ENDIAN\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00226\ }
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \textcolor{comment}{/*\ decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00228\ \ \ \ \ \ \ sample-\/-\/;}
+\DoxyCodeLine{00229\ \ \ \ \ \}}
+\DoxyCodeLine{00230\ }
+\DoxyCodeLine{00231\ \ \ \ \ \textcolor{comment}{/*\ The\ first\ stage\ goes\ from\ the\ input\ buffer\ to\ the\ output\ buffer.\ */}}
+\DoxyCodeLine{00232\ \ \ \ \ \textcolor{comment}{/*\ Subsequent\ (numStages\ -\/\ 1)\ occur\ in-\/place\ in\ the\ output\ buffer\ */}}
+\DoxyCodeLine{00233\ \ \ \ \ pIn\ =\ pDst;}
+\DoxyCodeLine{00234\ }
+\DoxyCodeLine{00235\ \ \ \ \ \textcolor{comment}{/*\ Reset\ the\ output\ pointer\ */}}
+\DoxyCodeLine{00236\ \ \ \ \ pOut\ =\ pDst;}
+\DoxyCodeLine{00237\ }
+\DoxyCodeLine{00238\ \ \ \ \ \textcolor{comment}{/*\ Store\ the\ updated\ state\ variables\ back\ into\ the\ state\ array\ */}}
+\DoxyCodeLine{00239\ \ \ \ \ write\_q15x2\_ia(\&pState,\ state\_in);}
+\DoxyCodeLine{00240\ \ \ \ \ write\_q15x2\_ia(\&pState,\ state\_out);}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00243\ \ \ \ \ stage-\/-\/;}
+\DoxyCodeLine{00244\ }
+\DoxyCodeLine{00245\ \ \ \}\ \textcolor{keywordflow}{while}\ (stage\ >\ 0U);}
+\DoxyCodeLine{00246\ \}}
+\DoxyCodeLine{00247\ }
+
+\end{DoxyCode}

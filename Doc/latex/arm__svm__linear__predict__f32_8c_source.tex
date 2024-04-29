@@ -1,0 +1,450 @@
+\doxysection{arm\+\_\+svm\+\_\+linear\+\_\+predict\+\_\+f32.\+c}
+\hypertarget{arm__svm__linear__predict__f32_8c_source}{}\label{arm__svm__linear__predict__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/SVMFunctions/arm\_svm\_linear\_predict\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/SVMFunctions/arm\_svm\_linear\_predict\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_svm\_linear\_predict\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ SVM\ Linear\ Classifier}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/svm\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ <limits.h>}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#include\ <math.h>}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00048\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00050\ \textcolor{preprocessor}{\#include\ "{}arm\_helium\_utils.h"{}}}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group__linearsvm_gae6a74ebedc47b59915c308fa88fe339b}{arm\_svm\_linear\_predict\_f32}}(}
+\DoxyCodeLine{00053\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__svm__linear__instance__f32}{arm\_svm\_linear\_instance\_f32}}\ *S,}
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ in,}
+\DoxyCodeLine{00055\ \ \ \ \ int32\_t\ *\ pResult)}
+\DoxyCodeLine{00056\ \{}
+\DoxyCodeLine{00057\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ inlined\ Matrix\ x\ Vector\ function\ interleaved\ with\ dot\ prod\ */}}
+\DoxyCodeLine{00058\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ numRows\ =\ S-\/>nbOfSupportVectors;}
+\DoxyCodeLine{00059\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ numCols\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};}
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSupport\ =\ S-\/>supportVectors;}
+\DoxyCodeLine{00061\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSrcA\ =\ pSupport;}
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pInA0;}
+\DoxyCodeLine{00063\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pInA1;}
+\DoxyCodeLine{00064\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ \ row;}
+\DoxyCodeLine{00065\ \ \ \ \ uint32\_t\ \ \ \ \ \ \ \ \ blkCnt;\ \ \ \ \ \textcolor{comment}{/*\ loop\ counters\ */}}
+\DoxyCodeLine{00066\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pDualCoef\ =\ S-\/>dualCoefficients;}
+\DoxyCodeLine{00067\ \ \ \ \ float32\_t\ \ \ \ \ \ \ sum\ =\ S-\/>intercept;}
+\DoxyCodeLine{00068\ \ \ \ \ row\ =\ numRows;}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00071\ \textcolor{comment}{\ \ \ \ \ *\ compute\ 4\ rows\ in\ parrallel}}
+\DoxyCodeLine{00072\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00073\ \ \ \ \ \textcolor{keywordflow}{while}\ (row\ >=\ 4)\ }
+\DoxyCodeLine{00074\ \ \ \ \ \{}
+\DoxyCodeLine{00075\ \ \ \ \ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pInA2,\ *pInA3;}
+\DoxyCodeLine{00076\ \ \ \ \ \ \ \ \ float32\_t\ \textcolor{keyword}{const}\ *pSrcA0Vec,\ *pSrcA1Vec,\ *pSrcA2Vec,\ *pSrcA3Vec,\ *pInVec;}
+\DoxyCodeLine{00077\ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecIn,\ acc0,\ acc1,\ acc2,\ acc3;}
+\DoxyCodeLine{00078\ \ \ \ \ \ \ \ \ float32\_t\ \textcolor{keyword}{const}\ *pSrcVecPtr\ =\ in;}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00081\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Initialize\ the\ pointers\ to\ 4\ consecutive\ MatrixA\ rows}}
+\DoxyCodeLine{00082\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00083\ \ \ \ \ \ \ \ \ pInA0\ =\ pSrcA;}
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ pInA1\ =\ pInA0\ +\ numCols;}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ pInA2\ =\ pInA1\ +\ numCols;}
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ pInA3\ =\ pInA2\ +\ numCols;}
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00088\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Initialize\ the\ vector\ pointer}}
+\DoxyCodeLine{00089\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00090\ \ \ \ \ \ \ \ \ pInVec\ =\ pSrcVecPtr;}
+\DoxyCodeLine{00091\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00092\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ reset\ accumulators}}
+\DoxyCodeLine{00093\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ \ \ acc0\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \ \ acc1\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ acc2\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ acc3\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ pSrcA0Vec\ =\ pInA0;}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ pSrcA1Vec\ =\ pInA1;}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ \ \ pSrcA2Vec\ =\ pInA2;}
+\DoxyCodeLine{00102\ \ \ \ \ \ \ \ \ pSrcA3Vec\ =\ pInA3;}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ blkCnt\ =\ numCols\ >>\ 2;}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecA;}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn\ =\ vld1q(pInVec);}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ \ \ \ \ \ \ pInVec\ +=\ 4;}
+\DoxyCodeLine{00110\ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcA0Vec);}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ \ \ \ \ pSrcA0Vec\ +=\ 4;}
+\DoxyCodeLine{00112\ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ vfmaq(acc0,\ vecIn,\ vecA);}
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcA1Vec);}
+\DoxyCodeLine{00114\ \ \ \ \ \ \ \ \ \ \ \ \ pSrcA1Vec\ +=\ 4;}
+\DoxyCodeLine{00115\ \ \ \ \ \ \ \ \ \ \ \ \ acc1\ =\ vfmaq(acc1,\ vecIn,\ vecA);}
+\DoxyCodeLine{00116\ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcA2Vec);}
+\DoxyCodeLine{00117\ \ \ \ \ \ \ \ \ \ \ \ \ pSrcA2Vec\ +=\ 4;}
+\DoxyCodeLine{00118\ \ \ \ \ \ \ \ \ \ \ \ \ acc2\ =\ vfmaq(acc2,\ vecIn,\ vecA);}
+\DoxyCodeLine{00119\ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcA3Vec);}
+\DoxyCodeLine{00120\ \ \ \ \ \ \ \ \ \ \ \ \ pSrcA3Vec\ +=\ 4;}
+\DoxyCodeLine{00121\ \ \ \ \ \ \ \ \ \ \ \ \ acc3\ =\ vfmaq(acc3,\ vecIn,\ vecA);}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00124\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00126\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ tail}}
+\DoxyCodeLine{00127\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ (will\ be\ merged\ thru\ tail\ predication)}}
+\DoxyCodeLine{00128\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ blkCnt\ =\ numCols\ \&\ 3;}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p0\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecA;}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn\ =\ vldrwq\_z\_f32(pInVec,\ p0);}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vldrwq\_z\_f32(pSrcA0Vec,\ p0);}
+\DoxyCodeLine{00136\ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ vfmaq(acc0,\ vecIn,\ vecA);}
+\DoxyCodeLine{00137\ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vldrwq\_z\_f32(pSrcA1Vec,\ p0);}
+\DoxyCodeLine{00138\ \ \ \ \ \ \ \ \ \ \ \ \ acc1\ =\ vfmaq(acc1,\ vecIn,\ vecA);}
+\DoxyCodeLine{00139\ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vldrwq\_z\_f32(pSrcA2Vec,\ p0);}
+\DoxyCodeLine{00140\ \ \ \ \ \ \ \ \ \ \ \ \ acc2\ =\ vfmaq(acc2,\ vecIn,\ vecA);}
+\DoxyCodeLine{00141\ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vldrwq\_z\_f32(pSrcA3Vec,\ p0);}
+\DoxyCodeLine{00142\ \ \ \ \ \ \ \ \ \ \ \ \ acc3\ =\ vfmaq(acc3,\ vecIn,\ vecA);}
+\DoxyCodeLine{00143\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00144\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00145\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Sum\ the\ partial\ parts}}
+\DoxyCodeLine{00146\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ \ \ \ \ \ \ \ \ acc0\ =\ vmulq\_n\_f32(acc0,*pDualCoef++);}
+\DoxyCodeLine{00149\ \ \ \ \ \ \ \ \ acc0\ =\ vfmaq\_n\_f32(acc0,acc1,*pDualCoef++);}
+\DoxyCodeLine{00150\ \ \ \ \ \ \ \ \ acc0\ =\ vfmaq\_n\_f32(acc0,acc2,*pDualCoef++);}
+\DoxyCodeLine{00151\ \ \ \ \ \ \ \ \ acc0\ =\ vfmaq\_n\_f32(acc0,acc3,*pDualCoef++);}
+\DoxyCodeLine{00152\ }
+\DoxyCodeLine{00153\ \ \ \ \ \ \ \ \ sum\ +=\ vecAddAcrossF32Mve(acc0);}
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \ \ \ \ \ \ \ \ pSrcA\ +=\ numCols\ *\ 4;}
+\DoxyCodeLine{00156\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00157\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Decrement\ the\ row\ loop\ counter}}
+\DoxyCodeLine{00158\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00159\ \ \ \ \ \ \ \ \ row\ -\/=\ 4;}
+\DoxyCodeLine{00160\ \ \ \ \ \}}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00162\ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00163\ \textcolor{comment}{\ \ \ \ \ *\ compute\ 2\ rows\ in\ parallel}}
+\DoxyCodeLine{00164\ \textcolor{comment}{\ \ \ \ \ */}}
+\DoxyCodeLine{00165\ \ \ \ \ \textcolor{keywordflow}{if}\ (row\ >=\ 2)\ \{}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ \ \ float32\_t\ \textcolor{keyword}{const}\ *pSrcA0Vec,\ *pSrcA1Vec,\ *pInVec;}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecIn,\ acc0,\ acc1;}
+\DoxyCodeLine{00168\ \ \ \ \ \ \ \ \ float32\_t\ \textcolor{keyword}{const}\ *pSrcVecPtr\ =\ in;}
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00171\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Initialize\ the\ pointers\ to\ 2\ consecutive\ MatrixA\ rows}}
+\DoxyCodeLine{00172\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00173\ \ \ \ \ \ \ \ \ pInA0\ =\ pSrcA;}
+\DoxyCodeLine{00174\ \ \ \ \ \ \ \ \ pInA1\ =\ pInA0\ +\ numCols;}
+\DoxyCodeLine{00175\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00176\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Initialize\ the\ vector\ pointer}}
+\DoxyCodeLine{00177\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00178\ \ \ \ \ \ \ \ \ pInVec\ =\ pSrcVecPtr;}
+\DoxyCodeLine{00179\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00180\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ reset\ accumulators}}
+\DoxyCodeLine{00181\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00182\ \ \ \ \ \ \ \ \ acc0\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00183\ \ \ \ \ \ \ \ \ acc1\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00184\ \ \ \ \ \ \ \ \ pSrcA0Vec\ =\ pInA0;}
+\DoxyCodeLine{00185\ \ \ \ \ \ \ \ \ pSrcA1Vec\ =\ pInA1;}
+\DoxyCodeLine{00186\ }
+\DoxyCodeLine{00187\ \ \ \ \ \ \ \ \ blkCnt\ =\ numCols\ >>\ 2;}
+\DoxyCodeLine{00188\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00189\ \ \ \ \ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecA;}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn\ =\ vld1q(pInVec);}
+\DoxyCodeLine{00192\ \ \ \ \ \ \ \ \ \ \ \ \ pInVec\ +=\ 4;}
+\DoxyCodeLine{00193\ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcA0Vec);}
+\DoxyCodeLine{00194\ \ \ \ \ \ \ \ \ \ \ \ \ pSrcA0Vec\ +=\ 4;}
+\DoxyCodeLine{00195\ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ vfmaq(acc0,\ vecIn,\ vecA);}
+\DoxyCodeLine{00196\ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcA1Vec);}
+\DoxyCodeLine{00197\ \ \ \ \ \ \ \ \ \ \ \ \ pSrcA1Vec\ +=\ 4;}
+\DoxyCodeLine{00198\ \ \ \ \ \ \ \ \ \ \ \ \ acc1\ =\ vfmaq(acc1,\ vecIn,\ vecA);}
+\DoxyCodeLine{00199\ }
+\DoxyCodeLine{00200\ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00201\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00202\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00203\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ tail}}
+\DoxyCodeLine{00204\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ (will\ be\ merged\ thru\ tail\ predication)}}
+\DoxyCodeLine{00205\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00206\ \ \ \ \ \ \ \ \ blkCnt\ =\ numCols\ \&\ 3;}
+\DoxyCodeLine{00207\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00208\ \ \ \ \ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p0\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00209\ \ \ \ \ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecA;}
+\DoxyCodeLine{00210\ }
+\DoxyCodeLine{00211\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn\ =\ vldrwq\_z\_f32(pInVec,\ p0);}
+\DoxyCodeLine{00212\ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vldrwq\_z\_f32(pSrcA0Vec,\ p0);}
+\DoxyCodeLine{00213\ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ vfmaq(acc0,\ vecIn,\ vecA);}
+\DoxyCodeLine{00214\ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vldrwq\_z\_f32(pSrcA1Vec,\ p0);}
+\DoxyCodeLine{00215\ \ \ \ \ \ \ \ \ \ \ \ \ acc1\ =\ vfmaq(acc1,\ vecIn,\ vecA);}
+\DoxyCodeLine{00216\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00217\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00218\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Sum\ the\ partial\ parts}}
+\DoxyCodeLine{00219\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00220\ \ \ \ \ \ \ \ \ acc0\ =\ vmulq\_n\_f32(acc0,*pDualCoef++);}
+\DoxyCodeLine{00221\ \ \ \ \ \ \ \ \ acc0\ =\ vfmaq\_n\_f32(acc0,acc1,*pDualCoef++);}
+\DoxyCodeLine{00222\ }
+\DoxyCodeLine{00223\ \ \ \ \ \ \ \ \ sum\ +=\ vecAddAcrossF32Mve(acc0);}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00225\ }
+\DoxyCodeLine{00226\ \ \ \ \ \ \ \ \ pSrcA\ +=\ numCols\ *\ 2;}
+\DoxyCodeLine{00227\ \ \ \ \ \ \ \ \ row\ -\/=\ 2;}
+\DoxyCodeLine{00228\ \ \ \ \ \}}
+\DoxyCodeLine{00229\ }
+\DoxyCodeLine{00230\ \ \ \ \ \textcolor{keywordflow}{if}\ (row\ >=\ 1)\ \{}
+\DoxyCodeLine{00231\ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecIn,\ acc0;}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ \ \ float32\_t\ \textcolor{keyword}{const}\ *pSrcA0Vec,\ *pInVec;}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ \ \ float32\_t\ \textcolor{keyword}{const}\ *pSrcVecPtr\ =\ in;}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00235\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Initialize\ the\ pointers\ to\ last\ MatrixA\ row}}
+\DoxyCodeLine{00236\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ \ \ pInA0\ =\ pSrcA;}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00239\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Initialize\ the\ vector\ pointer}}
+\DoxyCodeLine{00240\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00241\ \ \ \ \ \ \ \ \ pInVec\ =\ pSrcVecPtr;}
+\DoxyCodeLine{00242\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00243\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ reset\ accumulators}}
+\DoxyCodeLine{00244\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00245\ \ \ \ \ \ \ \ \ acc0\ =\ vdupq\_n\_f32(0.0f);}
+\DoxyCodeLine{00246\ }
+\DoxyCodeLine{00247\ \ \ \ \ \ \ \ \ pSrcA0Vec\ =\ pInA0;}
+\DoxyCodeLine{00248\ }
+\DoxyCodeLine{00249\ \ \ \ \ \ \ \ \ blkCnt\ =\ numCols\ >>\ 2;}
+\DoxyCodeLine{00250\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00251\ \ \ \ \ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecA;}
+\DoxyCodeLine{00252\ }
+\DoxyCodeLine{00253\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn\ =\ vld1q(pInVec);}
+\DoxyCodeLine{00254\ \ \ \ \ \ \ \ \ \ \ \ \ pInVec\ +=\ 4;}
+\DoxyCodeLine{00255\ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vld1q(pSrcA0Vec);}
+\DoxyCodeLine{00256\ \ \ \ \ \ \ \ \ \ \ \ \ pSrcA0Vec\ +=\ 4;}
+\DoxyCodeLine{00257\ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ vfmaq(acc0,\ vecIn,\ vecA);}
+\DoxyCodeLine{00258\ }
+\DoxyCodeLine{00259\ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00260\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00261\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00262\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ tail}}
+\DoxyCodeLine{00263\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ (will\ be\ merged\ thru\ tail\ predication)}}
+\DoxyCodeLine{00264\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00265\ \ \ \ \ \ \ \ \ blkCnt\ =\ numCols\ \&\ 3;}
+\DoxyCodeLine{00266\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (blkCnt\ >\ 0U)\ \{}
+\DoxyCodeLine{00267\ \ \ \ \ \ \ \ \ \ \ \ \ mve\_pred16\_t\ \ \ \ p0\ =\ vctp32q(blkCnt);}
+\DoxyCodeLine{00268\ \ \ \ \ \ \ \ \ \ \ \ \ f32x4\_t\ \ \ \ \ \ \ \ \ vecA;}
+\DoxyCodeLine{00269\ }
+\DoxyCodeLine{00270\ \ \ \ \ \ \ \ \ \ \ \ \ vecIn\ =\ vldrwq\_z\_f32(pInVec,\ p0);}
+\DoxyCodeLine{00271\ \ \ \ \ \ \ \ \ \ \ \ \ vecA\ =\ vldrwq\_z\_f32(pSrcA0Vec,\ p0);}
+\DoxyCodeLine{00272\ \ \ \ \ \ \ \ \ \ \ \ \ acc0\ =\ vfmaq(acc0,\ vecIn,\ vecA);}
+\DoxyCodeLine{00273\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00274\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00275\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ Sum\ the\ partial\ parts}}
+\DoxyCodeLine{00276\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ */}}
+\DoxyCodeLine{00277\ \ \ \ \ \ \ \ \ sum\ +=\ *pDualCoef++\ *\ vecAddAcrossF32Mve(acc0);}
+\DoxyCodeLine{00278\ }
+\DoxyCodeLine{00279\ \ \ \ \ \}}
+\DoxyCodeLine{00280\ }
+\DoxyCodeLine{00281\ \ \ \ \ *pResult\ =\ S-\/>classes[STEP(sum)];}
+\DoxyCodeLine{00282\ \}}
+\DoxyCodeLine{00283\ }
+\DoxyCodeLine{00284\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00285\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_NEON)}}
+\DoxyCodeLine{00286\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group__linearsvm_gae6a74ebedc47b59915c308fa88fe339b}{arm\_svm\_linear\_predict\_f32}}(}
+\DoxyCodeLine{00287\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__svm__linear__instance__f32}{arm\_svm\_linear\_instance\_f32}}\ *S,}
+\DoxyCodeLine{00288\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ in,}
+\DoxyCodeLine{00289\ \ \ \ \ int32\_t\ *\ pResult)}
+\DoxyCodeLine{00290\ \{}
+\DoxyCodeLine{00291\ \ \ \ \ float32\_t\ sum\ =\ S-\/>intercept;}
+\DoxyCodeLine{00292\ \ \ \ }
+\DoxyCodeLine{00293\ \ \ \ \ float32\_t\ dot;}
+\DoxyCodeLine{00294\ \ \ \ \ float32x4\_t\ dotV;\ }
+\DoxyCodeLine{00295\ }
+\DoxyCodeLine{00296\ \ \ \ \ float32x4\_t\ accuma,accumb,accumc,accumd,accum;}
+\DoxyCodeLine{00297\ \ \ \ \ float32x2\_t\ accum2;}
+\DoxyCodeLine{00298\ \ \ \ \ float32x4\_t\ vec1;}
+\DoxyCodeLine{00299\ }
+\DoxyCodeLine{00300\ \ \ \ \ float32x4\_t\ vec2,vec2a,vec2b,vec2c,vec2d;}
+\DoxyCodeLine{00301\ }
+\DoxyCodeLine{00302\ \ \ \ \ uint32\_t\ blkCnt;\ \ \ }
+\DoxyCodeLine{00303\ \ \ \ \ uint32\_t\ vectorBlkCnt;\ \ \ }
+\DoxyCodeLine{00304\ }
+\DoxyCodeLine{00305\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pIn\ =\ in;}
+\DoxyCodeLine{00306\ }
+\DoxyCodeLine{00307\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSupport\ =\ S-\/>supportVectors;}
+\DoxyCodeLine{00308\ }
+\DoxyCodeLine{00309\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSupporta\ =\ S-\/>supportVectors;}
+\DoxyCodeLine{00310\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSupportb;}
+\DoxyCodeLine{00311\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSupportc;}
+\DoxyCodeLine{00312\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSupportd;}
+\DoxyCodeLine{00313\ }
+\DoxyCodeLine{00314\ \ \ \ \ pSupportb\ =\ pSupporta\ +\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};}
+\DoxyCodeLine{00315\ \ \ \ \ pSupportc\ =\ pSupportb\ +\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};}
+\DoxyCodeLine{00316\ \ \ \ \ pSupportd\ =\ pSupportc\ +\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};}
+\DoxyCodeLine{00317\ }
+\DoxyCodeLine{00318\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pDualCoefs\ =\ S-\/>dualCoefficients;}
+\DoxyCodeLine{00319\ }
+\DoxyCodeLine{00320\ \ \ \ \ vectorBlkCnt\ =\ S-\/>nbOfSupportVectors\ >>\ 2;}
+\DoxyCodeLine{00321\ }
+\DoxyCodeLine{00322\ \ \ \ \ \textcolor{keywordflow}{while}\ (vectorBlkCnt\ >\ 0U)}
+\DoxyCodeLine{00323\ \ \ \ \ \{}
+\DoxyCodeLine{00324\ \ \ \ \ \ \ \ \ accuma\ =\ vdupq\_n\_f32(0);}
+\DoxyCodeLine{00325\ \ \ \ \ \ \ \ \ accumb\ =\ vdupq\_n\_f32(0);}
+\DoxyCodeLine{00326\ \ \ \ \ \ \ \ \ accumc\ =\ vdupq\_n\_f32(0);}
+\DoxyCodeLine{00327\ \ \ \ \ \ \ \ \ accumd\ =\ vdupq\_n\_f32(0);}
+\DoxyCodeLine{00328\ }
+\DoxyCodeLine{00329\ \ \ \ \ \ \ \ \ pIn\ =\ in;}
+\DoxyCodeLine{00330\ }
+\DoxyCodeLine{00331\ \ \ \ \ \ \ \ \ blkCnt\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}}\ >>\ 2;}
+\DoxyCodeLine{00332\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00333\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00334\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00335\ \ \ \ \ \ \ \ \ \ \ \ \ vec1\ =\ vld1q\_f32(pIn);}
+\DoxyCodeLine{00336\ \ \ \ \ \ \ \ \ \ \ \ \ vec2a\ =\ vld1q\_f32(pSupporta);}
+\DoxyCodeLine{00337\ \ \ \ \ \ \ \ \ \ \ \ \ vec2b\ =\ vld1q\_f32(pSupportb);}
+\DoxyCodeLine{00338\ \ \ \ \ \ \ \ \ \ \ \ \ vec2c\ =\ vld1q\_f32(pSupportc);}
+\DoxyCodeLine{00339\ \ \ \ \ \ \ \ \ \ \ \ \ vec2d\ =\ vld1q\_f32(pSupportd);}
+\DoxyCodeLine{00340\ }
+\DoxyCodeLine{00341\ \ \ \ \ \ \ \ \ \ \ \ \ pIn\ +=\ 4;}
+\DoxyCodeLine{00342\ \ \ \ \ \ \ \ \ \ \ \ \ pSupporta\ +=\ 4;}
+\DoxyCodeLine{00343\ \ \ \ \ \ \ \ \ \ \ \ \ pSupportb\ +=\ 4;}
+\DoxyCodeLine{00344\ \ \ \ \ \ \ \ \ \ \ \ \ pSupportc\ +=\ 4;}
+\DoxyCodeLine{00345\ \ \ \ \ \ \ \ \ \ \ \ \ pSupportd\ +=\ 4;}
+\DoxyCodeLine{00346\ }
+\DoxyCodeLine{00347\ \ \ \ \ \ \ \ \ \ \ \ \ accuma\ =\ vmlaq\_f32(accuma,\ vec1,vec2a);}
+\DoxyCodeLine{00348\ \ \ \ \ \ \ \ \ \ \ \ \ accumb\ =\ vmlaq\_f32(accumb,\ vec1,vec2b);}
+\DoxyCodeLine{00349\ \ \ \ \ \ \ \ \ \ \ \ \ accumc\ =\ vmlaq\_f32(accumc,\ vec1,vec2c);}
+\DoxyCodeLine{00350\ \ \ \ \ \ \ \ \ \ \ \ \ accumd\ =\ vmlaq\_f32(accumd,\ vec1,vec2d);}
+\DoxyCodeLine{00351\ }
+\DoxyCodeLine{00352\ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt\ -\/-\/\ ;}
+\DoxyCodeLine{00353\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00354\ \ \ \ \ \ \ \ \ accum2\ =\ vpadd\_f32(vget\_low\_f32(accuma),vget\_high\_f32(accuma));}
+\DoxyCodeLine{00355\ \ \ \ \ \ \ \ \ dotV\ =\ vsetq\_lane\_f32(vget\_lane\_f32(accum2,\ 0)\ +\ vget\_lane\_f32(accum2,\ 1),dotV,0);}
+\DoxyCodeLine{00356\ }
+\DoxyCodeLine{00357\ \ \ \ \ \ \ \ \ accum2\ =\ vpadd\_f32(vget\_low\_f32(accumb),vget\_high\_f32(accumb));}
+\DoxyCodeLine{00358\ \ \ \ \ \ \ \ \ dotV\ =\ vsetq\_lane\_f32(vget\_lane\_f32(accum2,\ 0)\ +\ vget\_lane\_f32(accum2,\ 1),dotV,1);}
+\DoxyCodeLine{00359\ }
+\DoxyCodeLine{00360\ \ \ \ \ \ \ \ \ accum2\ =\ vpadd\_f32(vget\_low\_f32(accumc),vget\_high\_f32(accumc));}
+\DoxyCodeLine{00361\ \ \ \ \ \ \ \ \ dotV\ =\ vsetq\_lane\_f32(vget\_lane\_f32(accum2,\ 0)\ +\ vget\_lane\_f32(accum2,\ 1),dotV,2);}
+\DoxyCodeLine{00362\ }
+\DoxyCodeLine{00363\ \ \ \ \ \ \ \ \ accum2\ =\ vpadd\_f32(vget\_low\_f32(accumd),vget\_high\_f32(accumd));}
+\DoxyCodeLine{00364\ \ \ \ \ \ \ \ \ dotV\ =\ vsetq\_lane\_f32(vget\_lane\_f32(accum2,\ 0)\ +\ vget\_lane\_f32(accum2,\ 1),dotV,3);}
+\DoxyCodeLine{00365\ }
+\DoxyCodeLine{00366\ }
+\DoxyCodeLine{00367\ \ \ \ \ \ \ \ \ blkCnt\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}}\ \&\ 3;}
+\DoxyCodeLine{00368\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00369\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00370\ \ \ \ \ \ \ \ \ \ \ \ \ dotV\ =\ vsetq\_lane\_f32(vgetq\_lane\_f32(dotV,0)\ +\ *pIn\ *\ *pSupporta++,\ dotV,0);}
+\DoxyCodeLine{00371\ \ \ \ \ \ \ \ \ \ \ \ \ dotV\ =\ vsetq\_lane\_f32(vgetq\_lane\_f32(dotV,1)\ +\ *pIn\ *\ *pSupportb++,\ dotV,1);}
+\DoxyCodeLine{00372\ \ \ \ \ \ \ \ \ \ \ \ \ dotV\ =\ vsetq\_lane\_f32(vgetq\_lane\_f32(dotV,2)\ +\ *pIn\ *\ *pSupportc++,\ dotV,2);}
+\DoxyCodeLine{00373\ \ \ \ \ \ \ \ \ \ \ \ \ dotV\ =\ vsetq\_lane\_f32(vgetq\_lane\_f32(dotV,3)\ +\ *pIn\ *\ *pSupportd++,\ dotV,3);}
+\DoxyCodeLine{00374\ }
+\DoxyCodeLine{00375\ \ \ \ \ \ \ \ \ \ \ \ \ pIn++;}
+\DoxyCodeLine{00376\ }
+\DoxyCodeLine{00377\ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt\ -\/-\/\ ;}
+\DoxyCodeLine{00378\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00379\ }
+\DoxyCodeLine{00380\ \ \ \ \ \ \ \ \ vec1\ =\ vld1q\_f32(pDualCoefs);}
+\DoxyCodeLine{00381\ \ \ \ \ \ \ \ \ pDualCoefs\ +=\ 4;\ }
+\DoxyCodeLine{00382\ }
+\DoxyCodeLine{00383\ \ \ \ \ \ \ \ \ accum\ =\ vmulq\_f32(vec1,dotV);}
+\DoxyCodeLine{00384\ \ \ \ \ \ \ \ \ accum2\ =\ vpadd\_f32(vget\_low\_f32(accum),vget\_high\_f32(accum));}
+\DoxyCodeLine{00385\ \ \ \ \ \ \ \ \ sum\ +=\ vget\_lane\_f32(accum2,\ 0)\ +\ vget\_lane\_f32(accum2,\ 1);}
+\DoxyCodeLine{00386\ }
+\DoxyCodeLine{00387\ \ \ \ \ \ \ \ \ pSupporta\ +=\ 3*S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};}
+\DoxyCodeLine{00388\ \ \ \ \ \ \ \ \ pSupportb\ +=\ 3*S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};}
+\DoxyCodeLine{00389\ \ \ \ \ \ \ \ \ pSupportc\ +=\ 3*S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};}
+\DoxyCodeLine{00390\ \ \ \ \ \ \ \ \ pSupportd\ +=\ 3*S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};}
+\DoxyCodeLine{00391\ }
+\DoxyCodeLine{00392\ \ \ \ \ \ \ \ \ vectorBlkCnt\ -\/-\/\ ;}
+\DoxyCodeLine{00393\ \ \ \ \ \}}
+\DoxyCodeLine{00394\ }
+\DoxyCodeLine{00395\ \ \ \ \ pSupport\ =\ pSupporta;}
+\DoxyCodeLine{00396\ \ \ \ \ vectorBlkCnt\ =\ S-\/>nbOfSupportVectors\ \&\ 3;}
+\DoxyCodeLine{00397\ \ \ \ \ \textcolor{keywordflow}{while}\ (vectorBlkCnt\ >\ 0U)}
+\DoxyCodeLine{00398\ \ \ \ \ \{}
+\DoxyCodeLine{00399\ \ \ \ \ \ \ \ \ accum\ =\ vdupq\_n\_f32(0);}
+\DoxyCodeLine{00400\ \ \ \ \ \ \ \ \ dot\ =\ 0.0f;}
+\DoxyCodeLine{00401\ \ \ \ \ \ \ \ \ pIn\ =\ in;}
+\DoxyCodeLine{00402\ }
+\DoxyCodeLine{00403\ \ \ \ \ \ \ \ \ blkCnt\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}}\ >>\ 2;}
+\DoxyCodeLine{00404\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00405\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00406\ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00407\ \ \ \ \ \ \ \ \ \ \ \ \ vec1\ =\ vld1q\_f32(pIn);}
+\DoxyCodeLine{00408\ \ \ \ \ \ \ \ \ \ \ \ \ vec2\ =\ vld1q\_f32(pSupport);}
+\DoxyCodeLine{00409\ \ \ \ \ \ \ \ \ \ \ \ \ pIn\ +=\ 4;}
+\DoxyCodeLine{00410\ \ \ \ \ \ \ \ \ \ \ \ \ pSupport\ +=\ 4;}
+\DoxyCodeLine{00411\ }
+\DoxyCodeLine{00412\ \ \ \ \ \ \ \ \ \ \ \ \ accum\ =\ vmlaq\_f32(accum,\ vec1,vec2);}
+\DoxyCodeLine{00413\ }
+\DoxyCodeLine{00414\ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt\ -\/-\/\ ;}
+\DoxyCodeLine{00415\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00416\ \ \ \ \ \ \ \ \ accum2\ =\ vpadd\_f32(vget\_low\_f32(accum),vget\_high\_f32(accum));}
+\DoxyCodeLine{00417\ \ \ \ \ \ \ \ \ dot\ =\ vget\_lane\_f32(accum2,\ 0)\ +\ vget\_lane\_f32(accum2,\ 1);}
+\DoxyCodeLine{00418\ }
+\DoxyCodeLine{00419\ }
+\DoxyCodeLine{00420\ \ \ \ \ \ \ \ \ blkCnt\ =\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}}\ \&\ 3;}
+\DoxyCodeLine{00421\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00422\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00423\ \ \ \ \ \ \ \ \ \ \ \ \ dot\ =\ dot\ +\ *pIn++\ *\ *pSupport++;}
+\DoxyCodeLine{00424\ }
+\DoxyCodeLine{00425\ \ \ \ \ \ \ \ \ \ \ \ \ blkCnt\ -\/-\/\ ;}
+\DoxyCodeLine{00426\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00427\ }
+\DoxyCodeLine{00428\ \ \ \ \ \ \ \ \ sum\ +=\ *pDualCoefs++\ *\ dot;}
+\DoxyCodeLine{00429\ \ \ \ \ \ \ \ \ vectorBlkCnt\ -\/-\/\ ;}
+\DoxyCodeLine{00430\ \ \ \ \ \}}
+\DoxyCodeLine{00431\ }
+\DoxyCodeLine{00432\ \ \ \ \ *pResult=S-\/>classes[STEP(sum)];}
+\DoxyCodeLine{00433\ \}}
+\DoxyCodeLine{00434\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00435\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group__linearsvm_gae6a74ebedc47b59915c308fa88fe339b}{arm\_svm\_linear\_predict\_f32}}(}
+\DoxyCodeLine{00436\ \ \ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__svm__linear__instance__f32}{arm\_svm\_linear\_instance\_f32}}\ *S,}
+\DoxyCodeLine{00437\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *\ in,}
+\DoxyCodeLine{00438\ \ \ \ \ int32\_t\ *\ pResult)}
+\DoxyCodeLine{00439\ \{}
+\DoxyCodeLine{00440\ \ \ \ \ float32\_t\ sum=S-\/>intercept;}
+\DoxyCodeLine{00441\ \ \ \ \ float32\_t\ dot=0;}
+\DoxyCodeLine{00442\ \ \ \ \ uint32\_t\ i,j;}
+\DoxyCodeLine{00443\ \ \ \ \ \textcolor{keyword}{const}\ float32\_t\ *pSupport\ =\ S-\/>supportVectors;}
+\DoxyCodeLine{00444\ }
+\DoxyCodeLine{00445\ \ \ \ \ \textcolor{keywordflow}{for}(i=0;\ i\ <\ S-\/>nbOfSupportVectors;\ i++)}
+\DoxyCodeLine{00446\ \ \ \ \ \{}
+\DoxyCodeLine{00447\ \ \ \ \ \ \ \ \ dot=0;}
+\DoxyCodeLine{00448\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{for}(j=0;\ j\ <\ S-\/>\mbox{\hyperlink{structarm__gaussian__naive__bayes__instance__f32_ac0020a4e04df9d200969b1ba84799d88}{vectorDimension}};\ j++)}
+\DoxyCodeLine{00449\ \ \ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00450\ \ \ \ \ \ \ \ \ \ \ \ \ dot\ =\ dot\ +\ in[j]*\ *pSupport++;}
+\DoxyCodeLine{00451\ \ \ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00452\ \ \ \ \ \ \ \ \ sum\ +=\ S-\/>dualCoefficients[i]\ *\ dot;}
+\DoxyCodeLine{00453\ \ \ \ \ \}}
+\DoxyCodeLine{00454\ \ \ \ \ *pResult=S-\/>classes[STEP(sum)];}
+\DoxyCodeLine{00455\ \}}
+\DoxyCodeLine{00456\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00457\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEF)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00458\ }
+
+\end{DoxyCode}

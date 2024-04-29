@@ -1,0 +1,244 @@
+\doxysection{arm\+\_\+vlog\+\_\+q31.\+c}
+\hypertarget{arm__vlog__q31_8c_source}{}\label{arm__vlog__q31_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/FastMathFunctions/arm\_vlog\_q31.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/FastMathFunctions/arm\_vlog\_q31.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_vlog\_q31}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Q31\ vector\ log}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 19\ July\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.10.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/fast\_math\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#define\ LOG\_Q31\_ACCURACY\ 31}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{comment}{/*\ Bit\ to\ represent\ the\ normalization\ factor}}
+\DoxyCodeLine{00034\ \textcolor{comment}{\ \ \ It\ is\ Ceiling[Log2[LOG\_Q31\_ACCURACY]]\ of\ the\ previous\ value.}}
+\DoxyCodeLine{00035\ \textcolor{comment}{\ \ \ The\ Log2\ algorithm\ is\ assuming\ that\ the\ value\ x\ is}}
+\DoxyCodeLine{00036\ \textcolor{comment}{\ \ \ 1\ <=\ x\ <\ 2.}}
+\DoxyCodeLine{00037\ \textcolor{comment}{}}
+\DoxyCodeLine{00038\ \textcolor{comment}{\ \ \ But\ input\ value\ could\ be\ as\ small\ a\ 2\string^-\/LOG\_Q31\_ACCURACY}}
+\DoxyCodeLine{00039\ \textcolor{comment}{\ \ \ which\ would\ give\ an\ integer\ part\ of\ -\/31.}}
+\DoxyCodeLine{00040\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#define\ LOG\_Q31\_INTEGER\_PART\ 5}}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ \textcolor{comment}{/*\ 2.0\ in\ Q30\ */}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#define\ LOQ\_Q31\_THRESHOLD\ (1u\ <<\ LOG\_Q31\_ACCURACY)}}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ \textcolor{comment}{/*\ HALF\ */}}
+\DoxyCodeLine{00047\ \textcolor{preprocessor}{\#define\ LOQ\_Q31\_Q32\_HALF\ LOQ\_Q31\_THRESHOLD}}
+\DoxyCodeLine{00048\ \textcolor{preprocessor}{\#define\ LOQ\_Q31\_Q30\_HALF\ (LOQ\_Q31\_Q32\_HALF\ >>\ 2)}}
+\DoxyCodeLine{00049\ }
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00051\ \textcolor{comment}{/*\ 1.0\ /\ Log2[Exp[1]]\ in\ Q31\ */}}
+\DoxyCodeLine{00052\ \textcolor{preprocessor}{\#define\ LOG\_Q31\_INVLOG2EXP\ 0x58b90bfbuL}}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \textcolor{comment}{/*\ Clay\ Turner\ algorithm\ */}}
+\DoxyCodeLine{00055\ \textcolor{keyword}{static}\ uint32\_t\ arm\_scalar\_log\_q31(uint32\_t\ src)}
+\DoxyCodeLine{00056\ \{}
+\DoxyCodeLine{00057\ \ \ \ int32\_t\ i;}
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \ \ \ int32\_t\ c\ =\ \mbox{\hyperlink{group___c_m_s_i_s___core___instruction_interface_ga5d5bb1527e042be4a9fa5a33f65cc248}{\_\_CLZ}}(src);}
+\DoxyCodeLine{00060\ \ \ \ int32\_t\ normalization=0;}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00062\ \ \ \ \textcolor{comment}{/*\ 0.5\ in\ q26\ */}}
+\DoxyCodeLine{00063\ \ \ \ uint32\_t\ inc\ =\ LOQ\_Q31\_Q32\_HALF\ >>\ (LOG\_Q31\_INTEGER\_PART\ +\ 1);}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00065\ \ \ \ \textcolor{comment}{/*\ Will\ compute\ y\ =\ log2(x)\ for\ 1\ <=\ x\ <\ 2.0\ */}}
+\DoxyCodeLine{00066\ \ \ \ uint32\_t\ x;}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \ \ \ \textcolor{comment}{/*\ q26\ */}}
+\DoxyCodeLine{00069\ \ \ \ uint32\_t\ y=0;}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00071\ \ \ \ \textcolor{comment}{/*\ q26\ */}}
+\DoxyCodeLine{00072\ \ \ \ int32\_t\ tmp;}
+\DoxyCodeLine{00073\ }
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ \ \ \ \textcolor{comment}{/*\ Normalize\ and\ convert\ to\ q30\ format\ */}}
+\DoxyCodeLine{00076\ \ \ \ x\ =\ src;}
+\DoxyCodeLine{00077\ \ \ \ \textcolor{keywordflow}{if}\ ((c-\/1)\ <\ 0)}
+\DoxyCodeLine{00078\ \ \ \ \{}
+\DoxyCodeLine{00079\ \ \ \ \ \ x\ =\ x\ >>\ (1-\/c);}
+\DoxyCodeLine{00080\ \ \ \ \}}
+\DoxyCodeLine{00081\ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00082\ \ \ \ \{}
+\DoxyCodeLine{00083\ \ \ \ \ \ x\ =\ x\ <<\ (c-\/1);}
+\DoxyCodeLine{00084\ \ \ \ \}}
+\DoxyCodeLine{00085\ \ \ \ normalization\ =\ c;}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \textcolor{comment}{/*\ Compute\ the\ Log2.\ Result\ is\ in\ q26}}
+\DoxyCodeLine{00088\ \textcolor{comment}{\ \ \ \ \ \ because\ we\ know\ 0\ <=\ y\ <\ 1.0\ but}}
+\DoxyCodeLine{00089\ \textcolor{comment}{\ \ \ \ \ \ do\ not\ want\ to\ use\ q32\ to\ allow}}
+\DoxyCodeLine{00090\ \textcolor{comment}{\ \ \ \ \ \ following\ computation\ with\ less\ instructions.}}
+\DoxyCodeLine{00091\ \textcolor{comment}{\ \ \ */}}
+\DoxyCodeLine{00092\ \ \ \ \textcolor{keywordflow}{for}(i\ =\ 0;\ i\ <\ LOG\_Q31\_ACCURACY\ ;\ i++)}
+\DoxyCodeLine{00093\ \ \ \ \{}
+\DoxyCodeLine{00094\ \ \ \ \ \ \ x\ =\ ((int64\_t)x*x)\ \ >>\ (LOG\_Q31\_ACCURACY\ -\/\ 1);}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \textcolor{keywordflow}{if}\ (x\ >=\ LOQ\_Q31\_THRESHOLD)}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \{}
+\DoxyCodeLine{00098\ \ \ \ \ \ \ \ \ \ y\ +=\ inc\ ;}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \ \ \ x\ =\ x\ >>\ 1;}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \}}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ inc\ =\ inc\ >>\ 1;}
+\DoxyCodeLine{00102\ \ \ \ \}}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00105\ \textcolor{comment}{\ \ \ \ \ \ Convert\ the\ Log2\ to\ Log\ and\ apply\ normalization.}}
+\DoxyCodeLine{00106\ \textcolor{comment}{\ \ \ \ \ \ We\ compute\ (y\ -\/\ normalisation)\ *\ (1\ /\ Log2[e]).}}
+\DoxyCodeLine{00107\ \textcolor{comment}{}}
+\DoxyCodeLine{00108\ \textcolor{comment}{\ \ \ */}}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00110\ \ \ \ \textcolor{comment}{/*\ q26\ */}}
+\DoxyCodeLine{00111\ \ \ \ tmp\ =\ (int32\_t)y\ -\/\ (normalization\ <<\ (LOG\_Q31\_ACCURACY\ -\/\ LOG\_Q31\_INTEGER\_PART));}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \ \textcolor{comment}{/*\ q5.26\ */}}
+\DoxyCodeLine{00115\ \ \ \ y\ =\ ((int64\_t)tmp\ *\ LOG\_Q31\_INVLOG2EXP)\ >>\ 31;}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00117\ }
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ \ \textcolor{keywordflow}{return}(y);}
+\DoxyCodeLine{00120\ }
+\DoxyCodeLine{00121\ \}}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00123\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00125\ }
+\DoxyCodeLine{00126\ q31x4\_t\ vlogq\_q31(q31x4\_t\ src)}
+\DoxyCodeLine{00127\ \{}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ \ \ \ int32\_t\ i;}
+\DoxyCodeLine{00130\ }
+\DoxyCodeLine{00131\ \ \ \ int32x4\_t\ c\ =\ vclzq\_s32(src);}
+\DoxyCodeLine{00132\ \ \ \ int32x4\_t\ normalization\ =\ c;}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \ \ \ \textcolor{comment}{/*\ 0.5\ in\ q11\ */}}
+\DoxyCodeLine{00136\ \ \ \ uint32\_t\ inc\ \ =\ LOQ\_Q31\_Q32\_HALF\ >>\ (LOG\_Q31\_INTEGER\_PART\ +\ 1);}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \ \ \ \textcolor{comment}{/*\ Will\ compute\ y\ =\ log2(x)\ for\ 1\ <=\ x\ <\ 2.0\ */}}
+\DoxyCodeLine{00139\ \ \ \ uint32x4\_t\ x;}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00142\ \ \ \ \textcolor{comment}{/*\ q11\ */}}
+\DoxyCodeLine{00143\ \ \ \ uint32x4\_t\ y\ =\ vdupq\_n\_u32(0);}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \ \ \ \textcolor{comment}{/*\ q11\ */}}
+\DoxyCodeLine{00147\ \ \ \ int32x4\_t\ vtmp;}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ }
+\DoxyCodeLine{00150\ \ \ \ mve\_pred16\_t\ p;}
+\DoxyCodeLine{00151\ }
+\DoxyCodeLine{00152\ \ \ \ \textcolor{comment}{/*\ Normalize\ and\ convert\ to\ q14\ format\ */}}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ }
+\DoxyCodeLine{00155\ \ \ \ vtmp\ =\ vsubq\_n\_s32(c,1);}
+\DoxyCodeLine{00156\ \ \ \ x\ =\ vshlq\_u32((uint32x4\_t)src,vtmp);}
+\DoxyCodeLine{00157\ }
+\DoxyCodeLine{00158\ }
+\DoxyCodeLine{00159\ \ \ \ \ \textcolor{comment}{/*\ Compute\ the\ Log2.\ Result\ is\ in\ Q26}}
+\DoxyCodeLine{00160\ \textcolor{comment}{\ \ \ \ \ \ because\ we\ know\ 0\ <=\ y\ <\ 1.0\ but}}
+\DoxyCodeLine{00161\ \textcolor{comment}{\ \ \ \ \ \ do\ not\ want\ to\ use\ Q32\ to\ allow}}
+\DoxyCodeLine{00162\ \textcolor{comment}{\ \ \ \ \ \ following\ computation\ with\ less\ instructions.}}
+\DoxyCodeLine{00163\ \textcolor{comment}{\ \ \ */}}
+\DoxyCodeLine{00164\ \ \ \ \textcolor{keywordflow}{for}(i\ =\ 0;\ i\ <\ LOG\_Q31\_ACCURACY\ ;\ i++)}
+\DoxyCodeLine{00165\ \ \ \ \{}
+\DoxyCodeLine{00166\ \ \ \ \ \ \ x\ =\ vmulhq\_u32(x,x);}
+\DoxyCodeLine{00167\ \ \ \ \ \ \ x\ =\ vshlq\_n\_u32(x,2);}
+\DoxyCodeLine{00168\ }
+\DoxyCodeLine{00169\ }
+\DoxyCodeLine{00170\ \ \ \ \ \ \ p\ =\ vcmphiq\_u32(x,vdupq\_n\_u32(LOQ\_Q31\_THRESHOLD));}
+\DoxyCodeLine{00171\ \ \ \ \ \ \ y\ =\ vaddq\_m\_n\_u32(y,\ y,inc,p);}
+\DoxyCodeLine{00172\ \ \ \ \ \ \ x\ =\ vshrq\_m\_n\_u32(x,x,1,p);}
+\DoxyCodeLine{00173\ }
+\DoxyCodeLine{00174\ \ \ \ \ \ \ inc\ =\ inc\ >>\ 1;}
+\DoxyCodeLine{00175\ \ \ \ \}}
+\DoxyCodeLine{00176\ }
+\DoxyCodeLine{00177\ }
+\DoxyCodeLine{00178\ \ \ \ \textcolor{comment}{/*}}
+\DoxyCodeLine{00179\ \textcolor{comment}{\ \ \ \ \ \ Convert\ the\ Log2\ to\ Log\ and\ apply\ normalization.}}
+\DoxyCodeLine{00180\ \textcolor{comment}{\ \ \ \ \ \ We\ compute\ (y\ -\/\ normalisation)\ *\ (1\ /\ Log2[e]).}}
+\DoxyCodeLine{00181\ \textcolor{comment}{}}
+\DoxyCodeLine{00182\ \textcolor{comment}{\ \ \ */}}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \ \ \ \textcolor{comment}{/*\ q11\ */}}
+\DoxyCodeLine{00185\ \ \ \ \textcolor{comment}{//\ tmp\ =\ (int16\_t)y\ -\/\ (normalization\ <<\ (LOG\_Q15\_ACCURACY\ -\/\ LOG\_Q15\_INTEGER\_PART));}}
+\DoxyCodeLine{00186\ \ \ \ vtmp\ =\ vshlq\_n\_s32(normalization,LOG\_Q31\_ACCURACY\ -\/\ LOG\_Q31\_INTEGER\_PART);}
+\DoxyCodeLine{00187\ \ \ \ vtmp\ =\ vsubq\_s32((int32x4\_t)y,vtmp);}
+\DoxyCodeLine{00188\ }
+\DoxyCodeLine{00189\ }
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \ \ \ \textcolor{comment}{/*\ q4.11\ */}}
+\DoxyCodeLine{00192\ \ \ \ \textcolor{comment}{//\ y\ =\ ((int32\_t)tmp\ *\ LOG\_Q15\_INVLOG2EXP)\ >>\ 15;}}
+\DoxyCodeLine{00193\ \ \ \ vtmp\ =\ vqdmulhq\_n\_s32(vtmp,LOG\_Q31\_INVLOG2EXP);}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00195\ \ \ \ \textcolor{keywordflow}{return}(vtmp);}
+\DoxyCodeLine{00196\ \}}
+\DoxyCodeLine{00197\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00198\ }
+\DoxyCodeLine{00216\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group__vlog_ga35aac80d9cfc0b7b08382da2117772d1}{arm\_vlog\_q31}}(}
+\DoxyCodeLine{00217\ \ \ \textcolor{keyword}{const}\ q31\_t\ *\ pSrc,}
+\DoxyCodeLine{00218\ \ \ \ \ \ \ \ \ q31\_t\ *\ pDst,}
+\DoxyCodeLine{00219\ \ \ \ \ \ \ \ \ uint32\_t\ blockSize)}
+\DoxyCodeLine{00220\ \{}
+\DoxyCodeLine{00221\ \ \ uint32\_t\ \ blkCnt;\ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ loop\ counters\ */}}
+\DoxyCodeLine{00222\ }
+\DoxyCodeLine{00223\ \textcolor{preprocessor}{\ \ \#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00224\ }
+\DoxyCodeLine{00225\ \ \ q31x4\_t\ src;}
+\DoxyCodeLine{00226\ \ \ q31x4\_t\ dst;}
+\DoxyCodeLine{00227\ }
+\DoxyCodeLine{00228\ \ \ blkCnt\ =\ blockSize\ >>\ 2;}
+\DoxyCodeLine{00229\ }
+\DoxyCodeLine{00230\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00231\ \ \ \{}
+\DoxyCodeLine{00232\ \ \ \ \ \ \ src\ =\ vld1q(pSrc);}
+\DoxyCodeLine{00233\ \ \ \ \ \ \ dst\ =\ vlogq\_q31(src);}
+\DoxyCodeLine{00234\ \ \ \ \ \ \ vst1q(pDst,\ dst);}
+\DoxyCodeLine{00235\ }
+\DoxyCodeLine{00236\ \ \ \ \ \ \ pSrc\ +=\ 4;}
+\DoxyCodeLine{00237\ \ \ \ \ \ \ pDst\ +=\ 4;}
+\DoxyCodeLine{00238\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00239\ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00240\ \ \ \}}
+\DoxyCodeLine{00241\ }
+\DoxyCodeLine{00242\ \ \ blkCnt\ =\ blockSize\ \&\ 3;}
+\DoxyCodeLine{00243\ \textcolor{preprocessor}{\ \ \#else}}
+\DoxyCodeLine{00244\ \ \ blkCnt\ =\ blockSize;}
+\DoxyCodeLine{00245\ \textcolor{preprocessor}{\ \ \#endif}}
+\DoxyCodeLine{00246\ }
+\DoxyCodeLine{00247\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00248\ \ \ \{}
+\DoxyCodeLine{00249\ \ \ \ \ \ *pDst++=arm\_scalar\_log\_q31(*pSrc++);}
+\DoxyCodeLine{00250\ }
+\DoxyCodeLine{00251\ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00252\ \ \ \}}
+\DoxyCodeLine{00253\ }
+\DoxyCodeLine{00254\ \}}
+\DoxyCodeLine{00255\ }
+
+\end{DoxyCode}

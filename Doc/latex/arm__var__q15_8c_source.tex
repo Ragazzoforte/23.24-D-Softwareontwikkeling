@@ -1,0 +1,207 @@
+\doxysection{arm\+\_\+var\+\_\+q15.\+c}
+\hypertarget{arm__var__q15_8c_source}{}\label{arm__var__q15_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/StatisticsFunctions/arm\_var\_q15.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/StatisticsFunctions/arm\_var\_q15.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_var\_q15.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Variance\ of\ an\ array\ of\ Q15\ type}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/statistics\_functions.h"{}}}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00057\ \textcolor{preprocessor}{\#if\ defined(ARM\_MATH\_MVEI)\ \&\&\ !defined(ARM\_MATH\_AUTOVECTORIZE)}}
+\DoxyCodeLine{00058\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group__variance_gaef3ebc6401209c3f93749e08d341ab48}{arm\_var\_q15}}(}
+\DoxyCodeLine{00059\ \ \ \textcolor{keyword}{const}\ q15\_t\ *\ pSrc,}
+\DoxyCodeLine{00060\ \ \ \ \ \ \ \ \ uint32\_t\ blockSize,}
+\DoxyCodeLine{00061\ \ \ \ \ \ \ \ \ q15\_t\ *\ pResult)}
+\DoxyCodeLine{00062\ \{}
+\DoxyCodeLine{00063\ \ \ \ \ uint32\_t\ \ blkCnt;\ \ \ \ \ \textcolor{comment}{/*\ loop\ counters\ */}}
+\DoxyCodeLine{00064\ \ \ \ \ q15x8\_t\ \ \ \ \ \ \ \ \ vecSrc;}
+\DoxyCodeLine{00065\ \ \ \ \ q63\_t\ \ \ \ \ \ \ \ \ \ \ sumOfSquares\ =\ 0LL;}
+\DoxyCodeLine{00066\ \ \ \ \ q63\_t\ \ \ \ \ \ \ \ \ \ \ meanOfSquares,\ squareOfMean;\ \ \ \ \ \ \ \ \textcolor{comment}{/*\ square\ of\ mean\ and\ mean\ of\ square\ */}}
+\DoxyCodeLine{00067\ \ \ \ \ q63\_t\ \ \ \ \ \ \ \ \ \ \ sum\ =\ 0LL;}
+\DoxyCodeLine{00068\ \ \ \ \ q15\_t\ in;\ }
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{keywordflow}{if}\ (blockSize\ <=\ 1U)\ \{}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ *pResult\ =\ 0;}
+\DoxyCodeLine{00072\ \ \ \ \ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00073\ \ \ \ \ \}}
+\DoxyCodeLine{00074\ }
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00076\ \ \ \ \ blkCnt\ =\ blockSize\ >>\ 3;}
+\DoxyCodeLine{00077\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00078\ \ \ \ \ \{}
+\DoxyCodeLine{00079\ \ \ \ \ \ \ \ \ vecSrc\ =\ vldrhq\_s16(pSrc);}
+\DoxyCodeLine{00080\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ C\ =\ (A[0]\ *\ A[0]\ +\ A[1]\ *\ A[1]\ +\ ...\ +\ A[blockSize-\/1]\ *\ A[blockSize-\/1])\ */}}
+\DoxyCodeLine{00081\ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Compute\ Sum\ of\ squares\ of\ the\ input\ samples}}
+\DoxyCodeLine{00082\ \textcolor{comment}{\ \ \ \ \ \ \ \ \ *\ and\ then\ store\ the\ result\ in\ a\ temporary\ variable,\ sumOfSquares.\ */}}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \ \ \ \ \ \ \ \ sumOfSquares\ =\ vmlaldavaq\_s16(sumOfSquares,\ vecSrc,\ vecSrc);}
+\DoxyCodeLine{00085\ \ \ \ \ \ \ \ \ sum\ =\ vaddvaq\_s16(sum,\ vecSrc);}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ blkCnt\ -\/-\/;}
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ pSrc\ +=\ 8;}
+\DoxyCodeLine{00089\ \ \ \ \ \}}
+\DoxyCodeLine{00090\ }
+\DoxyCodeLine{00091\ \ \ \ \ \textcolor{comment}{/*\ Tail\ */}}
+\DoxyCodeLine{00092\ \ \ \ \ blkCnt\ =\ blockSize\ \&\ 7;}
+\DoxyCodeLine{00093\ \ \ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00094\ \ \ \ \ \{}
+\DoxyCodeLine{00095\ \ \ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A[0]\ *\ A[0]\ +\ A[1]\ *\ A[1]\ +\ ...\ +\ A[blockSize-\/1]\ *\ A[blockSize-\/1]\ */}}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A[0]\ +\ A[1]\ +\ ...\ +\ A[blockSize-\/1]\ */}}
+\DoxyCodeLine{00097\ }
+\DoxyCodeLine{00098\ \ \ \ \ \ \ in\ =\ *pSrc++;}
+\DoxyCodeLine{00099\ \ \ \ \ \ \ \textcolor{comment}{/*\ Compute\ sum\ of\ squares\ and\ store\ result\ in\ a\ temporary\ variable,\ sumOfSquares.\ */}}
+\DoxyCodeLine{00100\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00101\ \ \ \ \ \ \ sumOfSquares\ =\ \_\_SMLALD(in,\ in,\ sumOfSquares);}
+\DoxyCodeLine{00102\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00103\ \ \ \ \ \ \ sumOfSquares\ +=\ (in\ *\ in);}
+\DoxyCodeLine{00104\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_DSP)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00105\ \ \ \ \ \ \ \textcolor{comment}{/*\ Compute\ sum\ and\ store\ result\ in\ a\ temporary\ variable,\ sum.\ */}}
+\DoxyCodeLine{00106\ \ \ \ \ \ \ sum\ +=\ in;}
+\DoxyCodeLine{00107\ \ \ }
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00109\ \ \ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00110\ \ \ \ \ \}}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \ \ \textcolor{comment}{/*\ Compute\ Mean\ of\ squares\ of\ the\ input\ samples}}
+\DoxyCodeLine{00113\ \textcolor{comment}{\ \ \ \ \ *\ and\ then\ store\ the\ result\ in\ a\ temporary\ variable,\ meanOfSquares.\ */}}
+\DoxyCodeLine{00114\ \ \ \ \ meanOfSquares\ =\ arm\_div\_q63\_to\_q31(sumOfSquares,\ (blockSize\ -\/\ 1U));}
+\DoxyCodeLine{00115\ }
+\DoxyCodeLine{00116\ \ \ \ \ \textcolor{comment}{/*\ Compute\ square\ of\ mean\ */}}
+\DoxyCodeLine{00117\ \ \ \ \ squareOfMean\ =\ arm\_div\_q63\_to\_q31((q63\_t)sum\ *\ sum,\ (q31\_t)(blockSize\ *\ (blockSize\ -\/\ 1U)));}
+\DoxyCodeLine{00118\ }
+\DoxyCodeLine{00119\ \ \ \ \ \textcolor{comment}{/*\ mean\ of\ the\ squares\ minus\ the\ square\ of\ the\ mean.\ */}}
+\DoxyCodeLine{00120\ \ \ \ \ *pResult\ =\ (meanOfSquares\ -\/\ squareOfMean)\ >>\ 15;}
+\DoxyCodeLine{00121\ \}}
+\DoxyCodeLine{00122\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00123\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group__variance_gaef3ebc6401209c3f93749e08d341ab48}{arm\_var\_q15}}(}
+\DoxyCodeLine{00124\ \ \ \textcolor{keyword}{const}\ q15\_t\ *\ pSrc,}
+\DoxyCodeLine{00125\ \ \ \ \ \ \ \ \ uint32\_t\ blockSize,}
+\DoxyCodeLine{00126\ \ \ \ \ \ \ \ \ q15\_t\ *\ pResult)}
+\DoxyCodeLine{00127\ \{}
+\DoxyCodeLine{00128\ \ \ \ \ \ \ \ \ uint32\_t\ blkCnt;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Loop\ counter\ */}}
+\DoxyCodeLine{00129\ \ \ \ \ \ \ \ \ q31\_t\ sum\ =\ 0;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Accumulator\ */}}
+\DoxyCodeLine{00130\ \ \ \ \ \ \ \ \ q31\_t\ meanOfSquares,\ squareOfMean;\ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Square\ of\ mean\ and\ mean\ of\ square\ */}}
+\DoxyCodeLine{00131\ \ \ \ \ \ \ \ \ q63\_t\ sumOfSquares\ =\ 0;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Sum\ of\ squares\ */}}
+\DoxyCodeLine{00132\ \ \ \ \ \ \ \ \ q15\_t\ in;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ variable\ to\ store\ input\ value\ */}}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)\ \&\&\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00135\ \ \ \ \ \ \ \ \ q31\_t\ in32;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ variable\ to\ store\ input\ value\ */}}
+\DoxyCodeLine{00136\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \ \ \textcolor{keywordflow}{if}\ (blockSize\ <=\ 1U)}
+\DoxyCodeLine{00139\ \ \ \{}
+\DoxyCodeLine{00140\ \ \ \ \ *pResult\ =\ 0;}
+\DoxyCodeLine{00141\ \ \ \ \ \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00142\ \ \ \}}
+\DoxyCodeLine{00143\ }
+\DoxyCodeLine{00144\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_LOOPUNROLL)}}
+\DoxyCodeLine{00145\ }
+\DoxyCodeLine{00146\ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ 4\ outputs\ at\ a\ time\ */}}
+\DoxyCodeLine{00147\ \ \ blkCnt\ =\ blockSize\ >>\ 2U;}
+\DoxyCodeLine{00148\ }
+\DoxyCodeLine{00149\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00150\ \ \ \{}
+\DoxyCodeLine{00151\ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A[0]\ *\ A[0]\ +\ A[1]\ *\ A[1]\ +\ ...\ +\ A[blockSize-\/1]\ *\ A[blockSize-\/1]\ */}}
+\DoxyCodeLine{00152\ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A[0]\ +\ A[1]\ +\ ...\ +\ A[blockSize-\/1]\ */}}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00154\ \ \ \ \ \textcolor{comment}{/*\ Compute\ sum\ of\ squares\ and\ store\ result\ in\ a\ temporary\ variable,\ sumOfSquares.\ */}}
+\DoxyCodeLine{00155\ \ \ \ \ \textcolor{comment}{/*\ Compute\ sum\ and\ store\ result\ in\ a\ temporary\ variable,\ sum.\ */}}
+\DoxyCodeLine{00156\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00157\ \ \ \ \ in32\ =\ read\_q15x2\_ia\ (\&pSrc);}
+\DoxyCodeLine{00158\ \ \ \ \ sumOfSquares\ =\ \_\_SMLALD(in32,\ in32,\ sumOfSquares);}
+\DoxyCodeLine{00159\ \ \ \ \ sum\ +=\ ((in32\ <<\ 16U)\ >>\ 16U);}
+\DoxyCodeLine{00160\ \ \ \ \ sum\ +=\ \ (in32\ >>\ 16U);}
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00162\ \ \ \ \ in32\ =\ read\_q15x2\_ia\ (\&pSrc);}
+\DoxyCodeLine{00163\ \ \ \ \ sumOfSquares\ =\ \_\_SMLALD(in32,\ in32,\ sumOfSquares);}
+\DoxyCodeLine{00164\ \ \ \ \ sum\ +=\ ((in32\ <<\ 16U)\ >>\ 16U);}
+\DoxyCodeLine{00165\ \ \ \ \ sum\ +=\ \ (in32\ >>\ 16U);}
+\DoxyCodeLine{00166\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00167\ \ \ \ \ in\ =\ *pSrc++;}
+\DoxyCodeLine{00168\ \ \ \ \ sumOfSquares\ +=\ (in\ *\ in);}
+\DoxyCodeLine{00169\ \ \ \ \ sum\ +=\ in;}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00171\ \ \ \ \ in\ =\ *pSrc++;}
+\DoxyCodeLine{00172\ \ \ \ \ sumOfSquares\ +=\ (in\ *\ in);}
+\DoxyCodeLine{00173\ \ \ \ \ sum\ +=\ in;}
+\DoxyCodeLine{00174\ }
+\DoxyCodeLine{00175\ \ \ \ \ in\ =\ *pSrc++;}
+\DoxyCodeLine{00176\ \ \ \ \ sumOfSquares\ +=\ (in\ *\ in);}
+\DoxyCodeLine{00177\ \ \ \ \ sum\ +=\ in;}
+\DoxyCodeLine{00178\ }
+\DoxyCodeLine{00179\ \ \ \ \ in\ =\ *pSrc++;}
+\DoxyCodeLine{00180\ \ \ \ \ sumOfSquares\ +=\ (in\ *\ in);}
+\DoxyCodeLine{00181\ \ \ \ \ sum\ +=\ in;}
+\DoxyCodeLine{00182\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_DSP)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00183\ }
+\DoxyCodeLine{00184\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00185\ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00186\ \ \ \}}
+\DoxyCodeLine{00187\ }
+\DoxyCodeLine{00188\ \ \ \textcolor{comment}{/*\ Loop\ unrolling:\ Compute\ remaining\ outputs\ */}}
+\DoxyCodeLine{00189\ \ \ blkCnt\ =\ blockSize\ \%\ 0x4U;}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00192\ }
+\DoxyCodeLine{00193\ \ \ \textcolor{comment}{/*\ Initialize\ blkCnt\ with\ number\ of\ samples\ */}}
+\DoxyCodeLine{00194\ \ \ blkCnt\ =\ blockSize;}
+\DoxyCodeLine{00195\ }
+\DoxyCodeLine{00196\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_LOOPUNROLL)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00197\ }
+\DoxyCodeLine{00198\ \ \ \textcolor{keywordflow}{while}\ (blkCnt\ >\ 0U)}
+\DoxyCodeLine{00199\ \ \ \{}
+\DoxyCodeLine{00200\ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A[0]\ *\ A[0]\ +\ A[1]\ *\ A[1]\ +\ ...\ +\ A[blockSize-\/1]\ *\ A[blockSize-\/1]\ */}}
+\DoxyCodeLine{00201\ \ \ \ \ \textcolor{comment}{/*\ C\ =\ A[0]\ +\ A[1]\ +\ ...\ +\ A[blockSize-\/1]\ */}}
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00203\ \ \ \ \ in\ =\ *pSrc++;}
+\DoxyCodeLine{00204\ \ \ \ \ \textcolor{comment}{/*\ Compute\ sum\ of\ squares\ and\ store\ result\ in\ a\ temporary\ variable,\ sumOfSquares.\ */}}
+\DoxyCodeLine{00205\ \textcolor{preprocessor}{\#if\ defined\ (ARM\_MATH\_DSP)}}
+\DoxyCodeLine{00206\ \ \ \ \ sumOfSquares\ =\ \_\_SMLALD(in,\ in,\ sumOfSquares);}
+\DoxyCodeLine{00207\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00208\ \ \ \ \ sumOfSquares\ +=\ (in\ *\ in);}
+\DoxyCodeLine{00209\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ \#if\ defined\ (ARM\_MATH\_DSP)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00210\ \ \ \ \ \textcolor{comment}{/*\ Compute\ sum\ and\ store\ result\ in\ a\ temporary\ variable,\ sum.\ */}}
+\DoxyCodeLine{00211\ \ \ \ \ sum\ +=\ in;}
+\DoxyCodeLine{00212\ }
+\DoxyCodeLine{00213\ \ \ \ \ \textcolor{comment}{/*\ Decrement\ loop\ counter\ */}}
+\DoxyCodeLine{00214\ \ \ \ \ blkCnt-\/-\/;}
+\DoxyCodeLine{00215\ \ \ \}}
+\DoxyCodeLine{00216\ }
+\DoxyCodeLine{00217\ \ \ \textcolor{comment}{/*\ Compute\ Mean\ of\ squares\ and\ store\ result\ in\ a\ temporary\ variable,\ meanOfSquares.\ */}}
+\DoxyCodeLine{00218\ \ \ meanOfSquares\ =\ (q31\_t)\ (sumOfSquares\ /\ (q63\_t)(blockSize\ -\/\ 1U));}
+\DoxyCodeLine{00219\ }
+\DoxyCodeLine{00220\ \ \ \textcolor{comment}{/*\ Compute\ square\ of\ mean\ */}}
+\DoxyCodeLine{00221\ \ \ squareOfMean\ =\ (q31\_t)\ ((q63\_t)\ sum\ *\ sum\ /\ (q63\_t)(blockSize\ *\ (blockSize\ -\/\ 1U)));}
+\DoxyCodeLine{00222\ }
+\DoxyCodeLine{00223\ \ \ \textcolor{comment}{/*\ mean\ of\ squares\ minus\ the\ square\ of\ mean.\ */}}
+\DoxyCodeLine{00224\ \ \ *pResult\ =\ (meanOfSquares\ -\/\ squareOfMean)\ >>\ 15U;}
+\DoxyCodeLine{00225\ \}}
+\DoxyCodeLine{00226\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ defined(ARM\_MATH\_MVEI)\ */}\textcolor{preprocessor}{}}
+\DoxyCodeLine{00227\ }
+
+\end{DoxyCode}

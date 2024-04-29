@@ -1,0 +1,116 @@
+\doxysection{arm\+\_\+rfft\+\_\+init\+\_\+f32.\+c}
+\hypertarget{arm__rfft__init__f32_8c_source}{}\label{arm__rfft__init__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_rfft\_init\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/TransformFunctions/arm\_rfft\_init\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_rfft\_init\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ RFFT\ \&\ RIFFT\ Floating\ point\ initialisation\ function}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/transform\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}arm\_common\_tables.h"{}}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00067\ arm\_status\ \mbox{\hyperlink{group___real_f_f_t_ga10717ee326bf50832ef1c25b85a23068}{arm\_rfft\_init\_f32}}(}
+\DoxyCodeLine{00068\ \ \ \mbox{\hyperlink{structarm__rfft__instance__f32}{arm\_rfft\_instance\_f32}}\ *\ S,}
+\DoxyCodeLine{00069\ \ \ \mbox{\hyperlink{structarm__cfft__radix4__instance__f32}{arm\_cfft\_radix4\_instance\_f32}}\ *\ S\_CFFT,}
+\DoxyCodeLine{00070\ \ \ uint32\_t\ fftLenReal,}
+\DoxyCodeLine{00071\ \ \ uint32\_t\ ifftFlagR,}
+\DoxyCodeLine{00072\ \ \ uint32\_t\ bitReverseFlag)}
+\DoxyCodeLine{00073\ \{}
+\DoxyCodeLine{00074\ \ \ \ \textcolor{comment}{/*\ \ Initialise\ the\ default\ arm\ status\ */}}
+\DoxyCodeLine{00075\ \ \ arm\_status\ status\ =\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00076\ }
+\DoxyCodeLine{00077\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_FFT\_ALLOW\_TABLES)}}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \textcolor{preprocessor}{\#if\ !defined(ARM\_DSP\_CONFIG\_TABLES)\ ||\ defined(ARM\_ALL\_FFT\_TABLES)\ ||\ defined(ARM\_TABLE\_REALCOEF\_F32)}}
+\DoxyCodeLine{00080\ }
+\DoxyCodeLine{00081\ \ \ \textcolor{comment}{/*\ \ Initialise\ the\ default\ arm\ status\ */}}
+\DoxyCodeLine{00082\ \ \ status\ =\ ARM\_MATH\_SUCCESS;}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00084\ \ \ \textcolor{comment}{/*\ \ Initialize\ the\ Real\ FFT\ length\ */}}
+\DoxyCodeLine{00085\ \ \ S-\/>fftLenReal\ =\ (uint16\_t)\ fftLenReal;}
+\DoxyCodeLine{00086\ }
+\DoxyCodeLine{00087\ \ \ \textcolor{comment}{/*\ \ Initialize\ the\ Complex\ FFT\ length\ */}}
+\DoxyCodeLine{00088\ \ \ S-\/>fftLenBy2\ =\ (uint16\_t)\ fftLenReal\ /\ 2U;}
+\DoxyCodeLine{00089\ }
+\DoxyCodeLine{00090\ \ \ \textcolor{comment}{/*\ \ Initialize\ the\ Twiddle\ coefficientA\ pointer\ */}}
+\DoxyCodeLine{00091\ \ \ S-\/>pTwiddleAReal\ =\ (float32\_t\ *)\ \mbox{\hyperlink{group___real_f_f_t___table_ga8b1ad947c470596674fa3364e16045c6}{realCoefA}};}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ \textcolor{comment}{/*\ \ Initialize\ the\ Twiddle\ coefficientB\ pointer\ */}}
+\DoxyCodeLine{00094\ \ \ S-\/>pTwiddleBReal\ =\ (float32\_t\ *)\ \mbox{\hyperlink{group___real_f_f_t___table_gac52f98b52a1f03bfac8b57a67ba07397}{realCoefB}};}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \textcolor{comment}{/*\ \ Initialize\ the\ Flag\ for\ selection\ of\ RFFT\ or\ RIFFT\ */}}
+\DoxyCodeLine{00097\ \ \ S-\/>ifftFlagR\ =\ (uint8\_t)\ ifftFlagR;}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \textcolor{comment}{/*\ \ Initialize\ the\ Flag\ for\ calculation\ Bit\ reversal\ or\ not\ */}}
+\DoxyCodeLine{00100\ \ \ S-\/>bitReverseFlagR\ =\ (uint8\_t)\ bitReverseFlag;}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \textcolor{comment}{/*\ \ Initializations\ of\ structure\ parameters\ depending\ on\ the\ FFT\ length\ */}}
+\DoxyCodeLine{00103\ \ \ \textcolor{keywordflow}{switch}\ (S-\/>fftLenReal)}
+\DoxyCodeLine{00104\ \ \ \{}
+\DoxyCodeLine{00105\ \ \ \ \ \textcolor{comment}{/*\ Init\ table\ modifier\ value\ */}}
+\DoxyCodeLine{00106\ \ \ \textcolor{keywordflow}{case}\ 8192U:}
+\DoxyCodeLine{00107\ \ \ \ \ S-\/>twidCoefRModifier\ =\ 1U;}
+\DoxyCodeLine{00108\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00109\ \ \ \textcolor{keywordflow}{case}\ 2048U:}
+\DoxyCodeLine{00110\ \ \ \ \ S-\/>twidCoefRModifier\ =\ 4U;}
+\DoxyCodeLine{00111\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00112\ \ \ \textcolor{keywordflow}{case}\ 512U:}
+\DoxyCodeLine{00113\ \ \ \ \ S-\/>twidCoefRModifier\ =\ 16U;}
+\DoxyCodeLine{00114\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00115\ \ \ \textcolor{keywordflow}{case}\ 128U:}
+\DoxyCodeLine{00116\ \ \ \ \ S-\/>twidCoefRModifier\ =\ 64U;}
+\DoxyCodeLine{00117\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00118\ \ \ \textcolor{keywordflow}{default}:}
+\DoxyCodeLine{00119\ \ \ \ \ \textcolor{comment}{/*\ \ Reporting\ argument\ error\ if\ rfftSize\ is\ not\ valid\ value\ */}}
+\DoxyCodeLine{00120\ \ \ \ \ status\ =\ ARM\_MATH\_ARGUMENT\_ERROR;}
+\DoxyCodeLine{00121\ \ \ \ \ \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00122\ \ \ \}}
+\DoxyCodeLine{00123\ }
+\DoxyCodeLine{00124\ \ \ \textcolor{comment}{/*\ Init\ Complex\ FFT\ Instance\ */}}
+\DoxyCodeLine{00125\ \ \ S-\/>pCfft\ =\ S\_CFFT;}
+\DoxyCodeLine{00126\ }
+\DoxyCodeLine{00127\ \ \ \textcolor{keywordflow}{if}\ (S-\/>ifftFlagR)}
+\DoxyCodeLine{00128\ \ \ \{}
+\DoxyCodeLine{00129\ \ \ \ \ \textcolor{comment}{/*\ Initializes\ the\ CIFFT\ Module\ for\ fftLenreal/2\ length\ */}}
+\DoxyCodeLine{00130\ \ \ \ \ \mbox{\hyperlink{group___complex_f_f_t_gaf336459f684f0b17bfae539ef1b1b78a}{arm\_cfft\_radix4\_init\_f32}}(S-\/>pCfft,\ S-\/>fftLenBy2,\ 1U,\ 0U);}
+\DoxyCodeLine{00131\ \ \ \}}
+\DoxyCodeLine{00132\ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00133\ \ \ \{}
+\DoxyCodeLine{00134\ \ \ \ \ \textcolor{comment}{/*\ Initializes\ the\ CFFT\ Module\ for\ fftLenreal/2\ length\ */}}
+\DoxyCodeLine{00135\ \ \ \ \ \mbox{\hyperlink{group___complex_f_f_t_gaf336459f684f0b17bfae539ef1b1b78a}{arm\_cfft\_radix4\_init\_f32}}(S-\/>pCfft,\ S-\/>fftLenBy2,\ 0U,\ 0U);}
+\DoxyCodeLine{00136\ \ \ \}}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00139\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00140\ \ \ \textcolor{comment}{/*\ return\ the\ status\ of\ RFFT\ Init\ function\ */}}
+\DoxyCodeLine{00141\ \ \ \textcolor{keywordflow}{return}\ (status);}
+\DoxyCodeLine{00142\ }
+\DoxyCodeLine{00143\ \}}
+\DoxyCodeLine{00144\ }
+
+\end{DoxyCode}

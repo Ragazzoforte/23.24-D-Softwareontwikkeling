@@ -1,0 +1,96 @@
+\doxysection{arm\+\_\+heap\+\_\+sort\+\_\+f32.\+c}
+\hypertarget{arm__heap__sort__f32_8c_source}{}\label{arm__heap__sort__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/SupportFunctions/arm\_heap\_sort\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/SupportFunctions/arm\_heap\_sort\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_heap\_sort\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Floating\ point\ heap\ sort}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/support\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}arm\_sorting.h"{}}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ }
+\DoxyCodeLine{00034\ \textcolor{keyword}{static}\ \textcolor{keywordtype}{void}\ arm\_heapify(float32\_t\ *\ pSrc,\ uint32\_t\ n,\ uint32\_t\ i,\ uint8\_t\ dir)}
+\DoxyCodeLine{00035\ \{}
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{comment}{/*\ Put\ all\ the\ elements\ of\ pSrc\ in\ heap\ order\ */}}
+\DoxyCodeLine{00037\ \ \ \ \ uint32\_t\ k\ =\ i;\ \textcolor{comment}{//\ Initialize\ largest/smallest\ as\ root\ }}
+\DoxyCodeLine{00038\ \ \ \ \ uint32\_t\ l\ =\ 2*i\ +\ 1;\ \textcolor{comment}{//\ left\ =\ 2*i\ +\ 1\ }}
+\DoxyCodeLine{00039\ \ \ \ \ uint32\_t\ r\ =\ 2*i\ +\ 2;\ \textcolor{comment}{//\ right\ =\ 2*i\ +\ 2\ }}
+\DoxyCodeLine{00040\ \ \ \ \ float32\_t\ temp;}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{keywordflow}{if}\ (l\ <\ n\ \&\&\ dir==(pSrc[l]\ >\ pSrc[k])\ )}
+\DoxyCodeLine{00043\ \ \ \ \ \ \ \ \ k\ =\ l;\ }
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{keywordflow}{if}\ (r\ <\ n\ \&\&\ dir==(pSrc[r]\ >\ pSrc[k])\ )}
+\DoxyCodeLine{00046\ \ \ \ \ \ \ \ \ k\ =\ r;\ }
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \ \ \ \ \textcolor{keywordflow}{if}\ (k\ !=\ i)\ }
+\DoxyCodeLine{00049\ \ \ \ \ \{\ }
+\DoxyCodeLine{00050\ \ \ \ \ temp\ =\ pSrc[i];}
+\DoxyCodeLine{00051\ \ \ \ \ pSrc[i]=pSrc[k];}
+\DoxyCodeLine{00052\ \ \ \ \ pSrc[k]=temp;}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \ \ \ \ \ \ \ \ arm\_heapify(pSrc,\ n,\ k,\ dir);\ }
+\DoxyCodeLine{00055\ \ \ \ \ \}}
+\DoxyCodeLine{00056\ \}}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00084\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{group___sorting_gad78df0bb55b3491037cadcfca558a8e5}{arm\_heap\_sort\_f32}}(}
+\DoxyCodeLine{00085\ \ \ \textcolor{keyword}{const}\ \mbox{\hyperlink{structarm__sort__instance__f32}{arm\_sort\_instance\_f32}}\ *\ S,\ }
+\DoxyCodeLine{00086\ \ \ \ \ \ \ \ \ float32\_t\ *\ pSrc,\ }
+\DoxyCodeLine{00087\ \ \ \ \ \ \ \ \ float32\_t\ *\ pDst,\ }
+\DoxyCodeLine{00088\ \ \ \ \ \ \ \ \ uint32\_t\ blockSize)}
+\DoxyCodeLine{00089\ \{}
+\DoxyCodeLine{00090\ \ \ \ \ float32\_t\ *\ pA;}
+\DoxyCodeLine{00091\ \ \ \ \ int32\_t\ i;}
+\DoxyCodeLine{00092\ \ \ \ \ float32\_t\ temp;}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00094\ \ \ \ \ \textcolor{keywordflow}{if}(pSrc\ !=\ pDst)\ \textcolor{comment}{//\ out-\/of-\/place}}
+\DoxyCodeLine{00095\ \ \ \ \ \{\ \ \ }
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ memcpy(pDst,\ pSrc,\ blockSize*\textcolor{keyword}{sizeof}(float32\_t)\ );}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ pA\ =\ pDst;}
+\DoxyCodeLine{00098\ \ \ \ \ \}}
+\DoxyCodeLine{00099\ \ \ \ \ \textcolor{keywordflow}{else}}
+\DoxyCodeLine{00100\ \ \ \ \ \ \ \ \ pA\ =\ pSrc;}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{comment}{//\ Build\ the\ heap\ array\ so\ that\ the\ largest\ value\ is\ the\ root}}
+\DoxyCodeLine{00103\ \ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ blockSize/2\ -\/\ 1;\ i\ >=\ 0;\ i-\/-\/)\ }
+\DoxyCodeLine{00104\ \ \ \ \ \ \ \ \ arm\_heapify(pA,\ blockSize,\ i,\ S-\/>dir);\ }
+\DoxyCodeLine{00105\ }
+\DoxyCodeLine{00106\ \ \ \ \ \textcolor{keywordflow}{for}\ (i\ =\ blockSize\ -\/\ 1;\ i\ >=\ 0;\ i-\/-\/)}
+\DoxyCodeLine{00107\ \ \ \ \ \{}
+\DoxyCodeLine{00108\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Swap}}
+\DoxyCodeLine{00109\ \ \ \ \ temp\ =\ pA[i];}
+\DoxyCodeLine{00110\ \ \ \ \ pA[i]\ =\ pA[0];}
+\DoxyCodeLine{00111\ \ \ \ \ \ \ \ \ pA[0]\ =\ temp;}
+\DoxyCodeLine{00112\ }
+\DoxyCodeLine{00113\ \ \ \ \ \ \ \ \ \textcolor{comment}{//\ Restore\ heap\ order}}
+\DoxyCodeLine{00114\ \ \ \ \ arm\_heapify(pA,\ i,\ 0,\ S-\/>dir);}
+\DoxyCodeLine{00115\ \ \ \ \ \}}
+\DoxyCodeLine{00116\ \}}
+
+\end{DoxyCode}

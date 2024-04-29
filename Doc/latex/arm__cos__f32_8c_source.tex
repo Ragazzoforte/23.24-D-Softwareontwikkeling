@@ -1,0 +1,86 @@
+\doxysection{arm\+\_\+cos\+\_\+f32.\+c}
+\hypertarget{arm__cos__f32_8c_source}{}\label{arm__cos__f32_8c_source}\index{VGA\_Driver/Drivers/CMSIS/DSP/Source/FastMathFunctions/arm\_cos\_f32.c@{VGA\_Driver/Drivers/CMSIS/DSP/Source/FastMathFunctions/arm\_cos\_f32.c}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/}}
+\DoxyCodeLine{00002\ \textcolor{comment}{\ *\ Project:\ \ \ \ \ \ CMSIS\ DSP\ Library}}
+\DoxyCodeLine{00003\ \textcolor{comment}{\ *\ Title:\ \ \ \ \ \ \ \ arm\_cos\_f32.c}}
+\DoxyCodeLine{00004\ \textcolor{comment}{\ *\ Description:\ \ Fast\ cosine\ calculation\ for\ floating-\/point\ values}}
+\DoxyCodeLine{00005\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00006\ \textcolor{comment}{\ *\ \$Date:\ \ \ \ \ \ \ \ 23\ April\ 2021}}
+\DoxyCodeLine{00007\ \textcolor{comment}{\ *\ \$Revision:\ \ \ \ V1.9.0}}
+\DoxyCodeLine{00008\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00009\ \textcolor{comment}{\ *\ Target\ Processor:\ Cortex-\/M\ and\ Cortex-\/A\ cores}}
+\DoxyCodeLine{00010\ \textcolor{comment}{\ *\ -\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/\ */}}
+\DoxyCodeLine{00011\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00012\ \textcolor{comment}{\ *\ Copyright\ (C)\ 2010-\/2021\ ARM\ Limited\ or\ its\ affiliates.\ All\ rights\ reserved.}}
+\DoxyCodeLine{00013\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00014\ \textcolor{comment}{\ *\ SPDX-\/License-\/Identifier:\ Apache-\/2.0}}
+\DoxyCodeLine{00015\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00016\ \textcolor{comment}{\ *\ Licensed\ under\ the\ Apache\ License,\ Version\ 2.0\ (the\ License);\ you\ may}}
+\DoxyCodeLine{00017\ \textcolor{comment}{\ *\ not\ use\ this\ file\ except\ in\ compliance\ with\ the\ License.}}
+\DoxyCodeLine{00018\ \textcolor{comment}{\ *\ You\ may\ obtain\ a\ copy\ of\ the\ License\ at}}
+\DoxyCodeLine{00019\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00020\ \textcolor{comment}{\ *\ www.apache.org/licenses/LICENSE-\/2.0}}
+\DoxyCodeLine{00021\ \textcolor{comment}{\ *}}
+\DoxyCodeLine{00022\ \textcolor{comment}{\ *\ Unless\ required\ by\ applicable\ law\ or\ agreed\ to\ in\ writing,\ software}}
+\DoxyCodeLine{00023\ \textcolor{comment}{\ *\ distributed\ under\ the\ License\ is\ distributed\ on\ an\ AS\ IS\ BASIS,\ WITHOUT}}
+\DoxyCodeLine{00024\ \textcolor{comment}{\ *\ WARRANTIES\ OR\ CONDITIONS\ OF\ ANY\ KIND,\ either\ express\ or\ implied.}}
+\DoxyCodeLine{00025\ \textcolor{comment}{\ *\ See\ the\ License\ for\ the\ specific\ language\ governing\ permissions\ and}}
+\DoxyCodeLine{00026\ \textcolor{comment}{\ *\ limitations\ under\ the\ License.}}
+\DoxyCodeLine{00027\ \textcolor{comment}{\ */}}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#include\ "{}dsp/fast\_math\_functions.h"{}}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#include\ "{}arm\_common\_tables.h"{}}}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00070\ float32\_t\ \mbox{\hyperlink{group__cos_gace15287f9c64b9b4084d1c797d4c49d8}{arm\_cos\_f32}}(}
+\DoxyCodeLine{00071\ \ \ float32\_t\ x)}
+\DoxyCodeLine{00072\ \{}
+\DoxyCodeLine{00073\ \ \ float32\_t\ cosVal,\ fract,\ in;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Temporary\ input,\ output\ variables\ */}}
+\DoxyCodeLine{00074\ \ \ uint16\_t\ index;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Index\ variable\ */}}
+\DoxyCodeLine{00075\ \ \ float32\_t\ a,\ b;\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{comment}{/*\ Two\ nearest\ output\ values\ */}}
+\DoxyCodeLine{00076\ \ \ int32\_t\ n;}
+\DoxyCodeLine{00077\ \ \ float32\_t\ findex;}
+\DoxyCodeLine{00078\ }
+\DoxyCodeLine{00079\ \ \ \textcolor{comment}{/*\ input\ x\ is\ in\ radians\ */}}
+\DoxyCodeLine{00080\ \ \ \textcolor{comment}{/*\ Scale\ input\ to\ [0\ 1]\ range\ from\ [0\ 2*PI]\ ,\ divide\ input\ by\ 2*pi,\ add\ 0.25\ (pi/2)\ to\ read\ sine\ table\ */}}
+\DoxyCodeLine{00081\ \ \ in\ =\ x\ *\ 0.159154943092f\ +\ 0.25f;}
+\DoxyCodeLine{00082\ }
+\DoxyCodeLine{00083\ \ \ \textcolor{comment}{/*\ Calculation\ of\ floor\ value\ of\ input\ */}}
+\DoxyCodeLine{00084\ \ \ n\ =\ (int32\_t)\ in;}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00086\ \ \ \textcolor{comment}{/*\ Make\ negative\ values\ towards\ -\/infinity\ */}}
+\DoxyCodeLine{00087\ \ \ \textcolor{keywordflow}{if}\ (in\ <\ 0.0f)}
+\DoxyCodeLine{00088\ \ \ \{}
+\DoxyCodeLine{00089\ \ \ \ \ n-\/-\/;}
+\DoxyCodeLine{00090\ \ \ \}}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \ \ \textcolor{comment}{/*\ Map\ input\ value\ to\ [0\ 1]\ */}}
+\DoxyCodeLine{00093\ \ \ in\ =\ in\ -\/\ (float32\_t)\ n;}
+\DoxyCodeLine{00094\ }
+\DoxyCodeLine{00095\ \ \ \textcolor{comment}{/*\ Calculation\ of\ index\ of\ the\ table\ */}}
+\DoxyCodeLine{00096\ \ \ findex\ =\ (float32\_t)FAST\_MATH\_TABLE\_SIZE\ *\ in;}
+\DoxyCodeLine{00097\ \ \ index\ =\ (uint16\_t)findex;}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \textcolor{comment}{/*\ when\ "{}in"{}\ is\ exactly\ 1,\ we\ need\ to\ rotate\ the\ index\ down\ to\ 0\ */}}
+\DoxyCodeLine{00100\ \ \ \textcolor{keywordflow}{if}\ (index\ >=\ FAST\_MATH\_TABLE\_SIZE)\ \{}
+\DoxyCodeLine{00101\ \ \ \ \ index\ =\ 0;}
+\DoxyCodeLine{00102\ \ \ \ \ findex\ -\/=\ (float32\_t)FAST\_MATH\_TABLE\_SIZE;}
+\DoxyCodeLine{00103\ \ \ \}}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \textcolor{comment}{/*\ fractional\ value\ calculation\ */}}
+\DoxyCodeLine{00106\ \ \ fract\ =\ findex\ -\/\ (float32\_t)\ index;}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ \ \ \textcolor{comment}{/*\ Read\ two\ nearest\ values\ of\ input\ value\ from\ the\ cos\ table\ */}}
+\DoxyCodeLine{00109\ \ \ a\ =\ sinTable\_f32[index];}
+\DoxyCodeLine{00110\ \ \ b\ =\ sinTable\_f32[index+1];}
+\DoxyCodeLine{00111\ }
+\DoxyCodeLine{00112\ \ \ \textcolor{comment}{/*\ Linear\ interpolation\ process\ */}}
+\DoxyCodeLine{00113\ \ \ cosVal\ =\ (1.0f\ -\/\ fract)\ *\ a\ +\ fract\ *\ b;}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00115\ \ \ \textcolor{comment}{/*\ Return\ output\ value\ */}}
+\DoxyCodeLine{00116\ \ \ \textcolor{keywordflow}{return}\ (cosVal);}
+\DoxyCodeLine{00117\ \}}
+\DoxyCodeLine{00118\ }
+
+\end{DoxyCode}

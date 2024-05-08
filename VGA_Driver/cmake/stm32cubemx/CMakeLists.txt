@@ -21,15 +21,15 @@ target_include_directories(stm32cubemx INTERFACE
 )
 
 target_sources(stm32cubemx INTERFACE
-    ../../logic_layer.c
+    ../../Core/Src/logic_layer.c
     ../../Core/Src/main.c
     ../../Core/Src/misc.c
-    ../../Core/Src/startup_stm32f407xx.c
+    ../../Core/Src/startup_stm32f4xx.c
     ../../Core/Src/stm32_ub_vga_screen.c
-    ../../Core/Src/stm32fxx_dma.c
-    ../../Core/Src/stm32fxx_gpio.c
-    ../../Core/Src/stm32fxx_rcc.c
-    ../../Core/Src/stm32fxx_tim.c
+    ../../Core/Src/stm32f4xx_dma.c
+    ../../Core/Src/stm32f4xx_gpio.c
+    ../../Core/Src/stm32f4xx_rcc.c
+    ../../Core/Src/stm32f4xx_tim.c
     ../../Core/Src/system_stm32f4xx.c
     ../../Core/Src/user_interface.c
     ../../Core/Src/vga_driver.c

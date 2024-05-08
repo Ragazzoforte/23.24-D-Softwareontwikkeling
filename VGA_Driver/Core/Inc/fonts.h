@@ -1,5 +1,5 @@
 /*
- * arial_fonts.h
+ * fonts.h
  *
  *  Created on: 8 mei 2024
  *      Author: Michel Vollmuller

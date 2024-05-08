@@ -21,7 +21,7 @@ int main(void)
 
 	UB_VGA_Screen_Init(); // Init VGA-Screen
 
-	UB_VGA_FillScreen(VGA_COL_BLUE);
+	UB_VGA_FillScreen(VGA_COL_MAGENTA);
 
   while(1)
   {

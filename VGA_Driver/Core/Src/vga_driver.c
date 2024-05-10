@@ -80,14 +80,28 @@ int API_draw_bitmap (int x_lup, int y_lup, int bm_nr)
 /**
   * @brief  API_clearscreen() is used to clear the VGA screen.  
   *           
-  * @note   selected color must be predefined         
+  * @note   selected color must be predefined, valid colours: zwart, lichtmagenta, magenta, blauw, lichtblauw, cyaan, lichtcyaan groen, lichtgroen, geel, rood, lichtrood, bruin, grijs, wit    
   *     
   * @param  
   * @retval 
   */
-int API_clearscreen (int color)
+int API_clearscreen (char *colour)
 {
-
+  switch (*(int*)colour) 
+  {
+    case 1:
+      // Code to clear the screen with color:
+      break;
+    case 2:
+      // Code to clear the screen with color:
+      break;
+    case 3:
+      // Code to clear the screen with color:
+      break;
+    default:
+      // Code to handle invalid color input
+      break;
+  }
 }
 
 /**

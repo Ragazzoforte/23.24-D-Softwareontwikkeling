@@ -115,50 +115,50 @@ int API_clearscreen (char *colour)
   switch (colour_choice) 
   {
     case ZWART:
-    UB_VGA_FillScreen(VGA_COL_BLACK); //VGA display is cleared with zwart
+    UB_VGA_FillScreen(VGA_COL_BLACK); //VGA display is cleared with the colour: zwart
       break;
-    // case LICHTMAGENTA:
-    //   UB_VGA_FillScreen(VGA_COL_LICHTMAGENTA);
-    //   break;
-    // case MAGENTA:
-    //   UB_VGA_FillScreen(VGA_COL_MAGENTA);
-    //   break;
-    // case BLAUW:
-    //   UB_VGA_FillScreen(VGA_COL_BLAUW);
-    //   break;
-    // case LICHTBLAUW:
-    //   UB_VGA_FillScreen(VGA_COL_LICHTBLAUW);
-    //   break;
-    // case CYAAN:
-    //   UB_VGA_FillScreen(VGA_COL_CYAAN);
-    //   break;
-    // case LICHTCYAAN:
-    //   UB_VGA_FillScreen(VGA_COL_LICHTCYAAN);
-    //   break;
-    // case GROEN:
-    //   UB_VGA_FillScreen(VGA_COL_GROEN);
-    //   break;
-    // case LICHTGROEN:
-    //   UB_VGA_FillScreen(VGA_COL_LICHTGROEN);
-    //   break;
-    // case GEEL:
-    //   UB_VGA_FillScreen(VGA_COL_GEEL);
-    //   break;
-    // case ROOD:
-    //   UB_VGA_FillScreen(VGA_COL_ROOD);
-    //   break;
-    // case LICHTROOD:
-    //   UB_VGA_FillScreen(VGA_COL_LICHTROOD);
-    //   break;
-    // case BRUIN:
-    //   UB_VGA_FillScreen(VGA_COL_BRUIN);
-    //   break;
-    // case GRIJS:
-    //   UB_VGA_FillScreen(VGA_COL_GRIJS);
-    //   break;
-    // case WIT:
-    //   UB_VGA_FillScreen(VGA_COL_WIT);
-      // break;
+    case LICHTMAGENTA:
+      UB_VGA_FillScreen(VGA_COL_LIGHT_MAGENTA); //VGA display is cleared with the colour: lichtmagenta
+      break;
+    case MAGENTA:
+      UB_VGA_FillScreen(VGA_COL_MAGENTA); //VGA display is cleared with the colour: magenta
+      break;
+    case BLAUW:
+      UB_VGA_FillScreen(VGA_COL_BLUE); //VGA display is cleared with the colour: blauw
+      break;
+    case LICHTBLAUW:
+      UB_VGA_FillScreen(VGA_COL_LIGHT_BLUE); //VGA display is cleared with the colour: lichtblauw
+      break;
+    case CYAAN:
+      UB_VGA_FillScreen(VGA_COL_CYAN); //VGA display is cleared with the colour: cyaan
+      break;
+    case LICHTCYAAN:
+      UB_VGA_FillScreen(VGA_COL_LIGHT_CYAN); //VGA display is cleared with the colour: lichtcyaan
+      break;
+    case GROEN:
+      UB_VGA_FillScreen(VGA_COL_GREEN); //VGA display is cleared with the colour: groen
+      break;
+    case LICHTGROEN:
+      UB_VGA_FillScreen(VGA_COL_LIGHT_GREEN); //VGA display is cleared with the colour: lichtgroen
+      break;
+    case GEEL:
+      UB_VGA_FillScreen(VGA_COL_YELLOW); //VGA display is cleared with the colour: geel
+      break;
+    case ROOD:
+      UB_VGA_FillScreen(VGA_COL_RED); //VGA display is cleared with the colour: rood
+      break;
+    case LICHTROOD:
+      UB_VGA_FillScreen(VGA_COL_LIGHT_RED); //VGA display is cleared with the colour: lichtrood
+      break;
+    case BRUIN:
+      UB_VGA_FillScreen(VGA_COL_BROWN); //VGA display is cleared with the colour: bruin
+      break;
+    case GRIJS:
+      UB_VGA_FillScreen(VGA_COL_GREY); //VGA display is cleared with the colour: grijs
+      break;
+    case WIT:
+      UB_VGA_FillScreen(VGA_COL_WHITE); //VGA display is cleared with the colour: wit
+      break;
     default:
       // Code to handle invalid color input
       break;

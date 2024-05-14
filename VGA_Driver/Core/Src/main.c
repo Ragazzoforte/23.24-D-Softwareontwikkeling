@@ -23,6 +23,6 @@ int main(void)
 
   while(1)
   {
-
+    API_clearscreen("blauw");
   }
 }

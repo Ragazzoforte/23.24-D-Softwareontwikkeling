@@ -14,6 +14,14 @@
 #include "stm32_ub_vga_screen.h"
 #include <math.h>
 
+// #define x_lup 10
+// #define y_lup 10
+// #define color 0xFF
+// #define text "Hello"
+// #define fontname "arial"
+// #define fontsize 1
+// #define fontstyle 1
+// #define reserved 0
 
 int main(void)
 {
@@ -21,8 +29,10 @@ int main(void)
 
 	UB_VGA_Screen_Init(); // Init VGA-Screen
 
+  API_clearscreen("blauw");
+
   while(1)
   {
-    API_clearscreen("blauw");
+    API_draw_text(10, 10, VGA_COL_WHITE, "Hello", "Arial", 2, 2, 0);
   }
 }

@@ -33,8 +33,6 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include <stdint.h>
-
 //--------------------------------------------------------------
 #ifndef __STM32F4_UB_MAIN_H
 #define __STM32F4_UB_MAIN_H
@@ -46,5 +44,11 @@ extern "C" {
 #include "stm32f4xx.h"
 #include "vga_driver.h"
 #include "stm32_ub_vga_screen.h"
+#include "logic_layer.h"
+#include "fonts.h"
+
+// #include <stdio.h>
+#include <string.h>
+// #include <stdint.h>
 //--------------------------------------------------------------
 #endif // __STM32F4_UB_MAIN_H

@@ -5,10 +5,8 @@
  *      Author: Michel Vollmuller
  */
 
-#ifndef fonts.h
-#define fonts.h
-
-#include "main.h"
+#ifndef fonts_h
+#define fonts_h
 
 #define NR_OF_ELEMENTS 2
 #define NR_OF_SYMBOLS 95

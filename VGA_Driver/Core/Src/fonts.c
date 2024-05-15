@@ -7,7 +7,7 @@
  * Font data for Arial normal, italic and bold in both small and large size
  * Font data for Consolas normal, italic and bold in both small and large size
  */
-#include "fonts.h"
+#include "main.h"
 
 /*
 **  Font data for Arial 8pt

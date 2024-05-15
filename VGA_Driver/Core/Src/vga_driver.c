@@ -46,6 +46,8 @@
 #define BRUIN         511801994
 #define GRIJS         517718569
 #define WIT           492542
+
+#define ARIAL         352
 //--------------------------------------------------------------
 
 /**
@@ -58,7 +60,76 @@
   */
 int API_draw_text (int x_lup, int y_lup, int color, char *text, char *fontname,int fontsize, int fontstyle, int reserved) // fontsize:1 small, 2 big
 {
+  /*Variable*/
+	const uint8_t  *pfont;
+	const uint16_t *pdescript;
+  const unsigned long fontname_hash = hash(*fontname);
+  uint16_t symbol_nr, symbol_width = 0, symbol_width_pixels, symbol_start, symbol_height; // used for searching the descriptor
+  int a = 0;
+  int i = 0, x, y;
+  uint8_t temp, bitmask, bit;
 
+  switch(fontname_hash)
+  {
+    case ARIAL:
+      switch(fontstyle) 
+        {
+          case ITALIC:
+            switch(fontsize)
+            {
+              case LARGE:
+                a = 10;
+                pfont = arial_italic_11ptBitmaps;
+                pdescript = arial_italic_11ptDescriptors[0];
+                symbol_height = ARIAL_LARGE_ITALIC_HEIGHT;    /* font height in pixels */
+                break;
+              default: // SMALL
+                a = 11;
+                pfont = arial_italic_8ptBitmaps;
+                pdescript = arial_italic_8ptDescriptors[0];
+                symbol_height = ARIAL_SMALL_ITALIC_HEIGHT;   /* font height in pixels */
+                break;
+            }
+            break;
+
+          case BOLD:
+            switch(fontsize)
+            {
+              case LARGE:
+                pfont = arial_bold_11ptBitmaps;
+                pdescript = arial_bold_11ptDescriptors[0];
+                symbol_height = ARIAL_LARGE_BOLD_HEIGHT; 	/* font height in pixels */
+                break;
+              default: // SMALL
+                pfont = arial_bold_8ptBitmaps;
+                pdescript = arial_bold_8ptDescriptors[0];
+                symbol_height = ARIAL_SMALL_BOLD_HEIGHT; 	/* font height in pixels */
+                break;
+            }
+            break;
+
+          default: // NORMAL
+            switch(fontsize)
+            {
+              case LARGE:
+                pfont = arial_11ptBitmaps;
+                pdescript = arial_11ptDescriptors[0];
+                symbol_height = ARIAL_LARGE_HEIGHT;    	/* font height in pixels */
+                break;
+              default: // SMALL
+                pfont = arial_bold_8ptBitmaps;
+                pdescript = arial_8ptDescriptors[0];
+                symbol_height = ARIAL_SMALL_HEIGHT; 	/* font height in pixels */
+                break;
+            }
+            break;
+        }
+    default:
+      for(i=0;i<strlen(text)+1;i++)
+      {
+        symbol_nr = (*(text+i)) - ASCII_OFFSET;/* determines which symbol from the font library should be selected */
+      }
+  }
 }
 
 /**

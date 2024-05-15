@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define UART_BUFFER_SIZE 100
+
 void UART_Init(uint32_t baudrate);
 void UART_SendChar (char c);
 void UART_SendString (char *string);

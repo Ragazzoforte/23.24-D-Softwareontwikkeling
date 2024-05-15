@@ -5,15 +5,7 @@
   * @brief   uart driver functions source file
   *
   *   This file provides five functions to be called from the logic_layer:
-  *      - uart_init(): used to initialize the uart communication 
-  *
-  *      - API_draw_line(): used to draw a line to the VGA screen.  
-  *                                     
-  *      - API_draw_rectangle(): used to draw a rectangle to the VGA screen.
-  * 
-  *      - API_draw_bitmap(): used to draw a figure (bitmap) to the VGA screen.  
-  * 
-  *      - API_clearscreen(): used to clear the VGA screen.  
+  *      - uart_init(): used to initialize the uart communication  
   * 
   ****************************************************************************** 
   */
@@ -25,9 +17,87 @@
 #include "uart.h"
 #include "stm32f4xx.h"
 #include "stm32f4xx_rcc.h"
+#include "stm32f4XX_dma.h"
+
+uint8_t UART_RX_Buff[UART_BUFFER_SIZE];
+
+void DMA1_Stream5_IRQHandler(void) // UART RX
+{
+  if(DMA_GetITStatus(DMA1_Stream5, DMA_IT_TCIF5))
+  {
+    // UART RX Transfer complete interrupt
+
+  }
+
+  if(DMA_GetITStatus(DMA1_Stream5, DMA_IT_TEIF5))
+  {
+    // UART RX Transfer error interrupt
+
+  }
+}
+
+void DMA1_Stream6_IRQHandler(void) // UART TX
+{
+  if(DMA_GetITStatus(DMA1_Stream6, DMA_IT_TCIF6))
+  {
+    // UART TX Transfer complete interrupt
+
+  }
+
+  if(DMA_GetITStatus(DMA1_Stream6, DMA_IT_TEIF6))
+  {
+    // UART TX Transfer error interrupt
+
+  }
+}
 
 void UART_Init(uint32_t baudrate)
 {
+    // configure DMA
+    RCC_AHB1PeriphResetCmd(RCC_AHB1Periph_DMA1, ENABLE);
+    //RCC_AHB1PeriphResetCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+    DMA_InitTypeDef DMA_USART2_RX;
+    DMA_USART2_RX.DMA_Channel = DMA_Channel_4;
+    DMA_USART2_RX.DMA_Memory0BaseAddr = 0x00000000;     // memory address
+    DMA_USART2_RX.DMA_PeripheralBaseAddr = USART2->DR; // UART address
+    DMA_USART2_RX.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+    DMA_USART2_RX.DMA_PeripheralDataSize = DMA_MemoryDataSize_Byte;
+    DMA_USART2_RX.DMA_DIR = DMA_DIR_PeripheralToMemory;
+    DMA_USART2_RX.DMA_Mode = DMA_Mode_Normal;
+    DMA_USART2_RX.DMA_MemoryInc = DMA_MemoryInc_Enable;
+    DMA_USART2_RX.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
+    DMA_USART2_RX.DMA_BufferSize = UART_BUFFER_SIZE;
+    DMA_USART2_RX.DMA_Priority = DMA_Priority_Medium;
+    DMA_USART2_RX.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+    DMA_USART2_RX.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+    DMA_USART2_RX.DMA_FIFOMode = DMA_FIFOMode_Disable;
+
+    DMA_InitTypeDef DMA_USART2_TX;
+    DMA_USART2_TX.DMA_Channel = DMA_Channel_4;
+    DMA_USART2_TX.DMA_Memory0BaseAddr = 0x00000000;     // memory address
+    DMA_USART2_TX.DMA_PeripheralBaseAddr = USART2->DR; // UART address
+    DMA_USART2_TX.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+    DMA_USART2_TX.DMA_PeripheralDataSize = DMA_MemoryDataSize_Byte;
+    DMA_USART2_TX.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+    DMA_USART2_TX.DMA_Mode = DMA_Mode_Normal;
+    DMA_USART2_TX.DMA_MemoryInc = DMA_MemoryInc_Enable;
+    DMA_USART2_TX.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
+    DMA_USART2_TX.DMA_BufferSize = UART_BUFFER_SIZE;
+    DMA_USART2_TX.DMA_Priority = DMA_Priority_Medium;
+    DMA_USART2_TX.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+    DMA_USART2_TX.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+    DMA_USART2_TX.DMA_FIFOMode = DMA_FIFOMode_Disable;
+
+    DMA_ITConfig(DMA1_Stream4, DMA_IT_TC, ENABLE); // enable transfer complete interrupt
+    DMA_ITConfig(DMA1_Stream4, DMA_IT_TE, ENABLE); // enable transfer error interrupt
+
+    DMA_Init(DMA1_Stream4, &DMA_USART2_RX);
+    DMA_Init(DMA1_Stream4, &DMA_USART2_TX);
+  
+   // DMA_Cmd(DMA1_Stream4, &DMA_USART2_RX);
+    
+
     // enable GPIO A clock
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
 
@@ -70,13 +140,13 @@ void UART_SendChar (char c)
 	
 	****************************************/
 
-	USART2->DR = c;   // LOad the Data
+	USART2->DR = c;   // Load the Data
 	while (!(USART2->SR & (1<<6)));  // Wait for TC to SET.. This indicates that the data has been transmitted
 }
 
 void UART_SendString (char *string)
 {
-	while (*string) UART2_SendChar (*string++);
+	while (*string) UART_SendChar (*string++);
 }
 
 uint8_t UART_GetChar (void)

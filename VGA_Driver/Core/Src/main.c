@@ -13,7 +13,9 @@
 #include "main.h"
 #include "stm32_ub_vga_screen.h"
 #include <math.h>
+#include "uart.h"
 
+#define BAUD_RATE 1200
 
 int main(void)
 {
@@ -23,8 +25,14 @@ int main(void)
 
 	UB_VGA_FillScreen(VGA_COL_MAGENTA);
 
+  UART_Init(BAUD_RATE);
+
+
+
   while(1)
   {
-
+    //uint8_t byte = UART_GetChar();
+    //UART_SendString("ik ben een stm32F407 maar koalaberen zijn ook erg mooie beesten");
+    //delay(50);
   }
 }

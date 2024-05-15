@@ -46,6 +46,8 @@
 #define BRUIN         511801994
 #define GRIJS         517718569
 #define WIT           492542
+
+#define UNUSED(x) (void)(x)
 //--------------------------------------------------------------
 
 /**
@@ -119,6 +121,7 @@ int API_draw_line (int x1, int y1, int x2, int y2, int colour, int thickness, in
     }
   }
   return 0;
+  UNUSED(reserved);
 }
 
 /**
@@ -147,23 +150,21 @@ int API_draw_rectangle (int x, int y, int width, int height, int colour, int fil
   
   API_draw_line(x, y, x + width, y, colour, 1, reserved1); // Draw the top line
   
-  // Draw the bottom line
-  API_draw_line(x, y + height, x + width, y + height, colour, 1, reserved1);
+  API_draw_line(x, y + height, x + width, y + height, colour, 1, reserved1); // Draw the bottom line
   
-  // Draw the left line
-  API_draw_line(x, y, x, y + height, colour, 1, reserved1);
+  API_draw_line(x, y, x, y + height, colour, 1, reserved1); // Draw the left line
+
+  API_draw_line(x + width, y, x + width, y + height, colour, 1, reserved1);   // Draw the right line
   
-  // Draw the right line
-  API_draw_line(x + width, y, x + width, y + height, colour, 1, reserved1);
-  
-  if (filled) // Check if the rectangle should be filled
+  if (filled == 1) // Check if the rectangle should be filled
   {
     for (int i = 1; i < height; i++) // Iterate over the rows of the rectangle
     {
       API_draw_line(x, y + i, x + width, y + i, colour, 1, reserved1); // Draw a horizontal line for each row
     }
   }
-  
+  UNUSED(reserved1);
+  UNUSED(reserved2);
   return 0;
 }
 

@@ -26,7 +26,7 @@ void DMA1_Stream5_IRQHandler(void) // UART RX
   if(DMA_GetITStatus(DMA1_Stream5, DMA_IT_TCIF5))
   {
     // UART RX Transfer complete interrupt
-
+    DMA_Cmd(DMA1_Stream5, DISABLE);
   }
 
   if(DMA_GetITStatus(DMA1_Stream5, DMA_IT_TEIF5))
@@ -51,16 +51,32 @@ void DMA1_Stream6_IRQHandler(void) // UART TX
   }
 }
 
-void UART_Init(uint32_t baudrate)
+void USART2_IRQHandler(void)
 {
-    // configure DMA
-    RCC_AHB1PeriphResetCmd(RCC_AHB1Periph_DMA1, ENABLE);
-    //RCC_AHB1PeriphResetCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+  if(USART2->SR & (1<<5))
+  {
+    // USART RX interrupt
+    DMA_Cmd(DMA1_Stream5, ENABLE);
+  }
 
+  if(USART2->SR & (1<<6))
+  {
+    // UART TX interrupt
+
+  }
+}
+
+void UART_Init(uint32_t baudrate, uint32_t *DMA_Memory)
+{
+    // configure RCC
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | RCC_APB1Periph_USART2, ENABLE);
+
+    // configure DMA
     DMA_InitTypeDef DMA_USART2_RX;
     DMA_USART2_RX.DMA_Channel = DMA_Channel_4;
-    DMA_USART2_RX.DMA_Memory0BaseAddr = 0x00000000;     // memory address
-    DMA_USART2_RX.DMA_PeripheralBaseAddr = USART2->DR; // UART address
+    DMA_USART2_RX.DMA_Memory0BaseAddr = (uint32_t)DMA_Memory; // memory address
+    DMA_USART2_RX.DMA_PeripheralBaseAddr = USART2->DR;        // UART address
     DMA_USART2_RX.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
     DMA_USART2_RX.DMA_PeripheralDataSize = DMA_MemoryDataSize_Byte;
     DMA_USART2_RX.DMA_DIR = DMA_DIR_PeripheralToMemory;
@@ -73,29 +89,29 @@ void UART_Init(uint32_t baudrate)
     DMA_USART2_RX.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
     DMA_USART2_RX.DMA_FIFOMode = DMA_FIFOMode_Disable;
 
-    DMA_InitTypeDef DMA_USART2_TX;
-    DMA_USART2_TX.DMA_Channel = DMA_Channel_4;
-    DMA_USART2_TX.DMA_Memory0BaseAddr = 0x00000000;     // memory address
-    DMA_USART2_TX.DMA_PeripheralBaseAddr = USART2->DR; // UART address
-    DMA_USART2_TX.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-    DMA_USART2_TX.DMA_PeripheralDataSize = DMA_MemoryDataSize_Byte;
-    DMA_USART2_TX.DMA_DIR = DMA_DIR_MemoryToPeripheral;
-    DMA_USART2_TX.DMA_Mode = DMA_Mode_Normal;
-    DMA_USART2_TX.DMA_MemoryInc = DMA_MemoryInc_Enable;
-    DMA_USART2_TX.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
-    DMA_USART2_TX.DMA_BufferSize = UART_BUFFER_SIZE;
-    DMA_USART2_TX.DMA_Priority = DMA_Priority_Medium;
-    DMA_USART2_TX.DMA_MemoryBurst = DMA_MemoryBurst_Single;
-    DMA_USART2_TX.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-    DMA_USART2_TX.DMA_FIFOMode = DMA_FIFOMode_Disable;
+    // DMA_InitTypeDef DMA_USART2_TX;
+    // DMA_USART2_TX.DMA_Channel = DMA_Channel_4;
+    // DMA_USART2_TX.DMA_Memory0BaseAddr = 0x00000000;     // memory address
+    // DMA_USART2_TX.DMA_PeripheralBaseAddr = USART2->DR; // UART address
+    // DMA_USART2_TX.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+    // DMA_USART2_TX.DMA_PeripheralDataSize = DMA_MemoryDataSize_Byte;
+    // DMA_USART2_TX.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+    // DMA_USART2_TX.DMA_Mode = DMA_Mode_Normal;
+    // DMA_USART2_TX.DMA_MemoryInc = DMA_MemoryInc_Enable;
+    // DMA_USART2_TX.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
+    // DMA_USART2_TX.DMA_BufferSize = UART_BUFFER_SIZE;
+    // DMA_USART2_TX.DMA_Priority = DMA_Priority_Medium;
+    // DMA_USART2_TX.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+    // DMA_USART2_TX.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+    // DMA_USART2_TX.DMA_FIFOMode = DMA_FIFOMode_Disable;
 
-    DMA_ITConfig(DMA1_Stream4, DMA_IT_TC, ENABLE); // enable transfer complete interrupt
-    DMA_ITConfig(DMA1_Stream4, DMA_IT_TE, ENABLE); // enable transfer error interrupt
+    DMA_ITConfig(DMA1_Stream5, DMA_IT_TC, ENABLE); // enable transfer complete interrupt
+    // DMA_ITConfig(DMA1_Stream6, DMA_IT_TE, ENABLE); // enable transfer error interrupt
 
-    DMA_Init(DMA1_Stream4, &DMA_USART2_RX);
-    DMA_Init(DMA1_Stream4, &DMA_USART2_TX);
+    DMA_Init(DMA1_Stream5, &DMA_USART2_RX);
+    // DMA_Init(DMA1_Stream6, &DMA_USART2_TX);
   
-   // DMA_Cmd(DMA1_Stream4, &DMA_USART2_RX);
+    
     
 
     // enable GPIO A clock
@@ -115,6 +131,8 @@ void UART_Init(uint32_t baudrate)
     // enable uart
     USART2->CR1 = 0x00;     // Clear all existing settings
     USART2->CR1 |= (0<<12); // M  = 0... 8 data bits
+    USART2->CR1 |= (1<<5);  // RXNEIE = 1... Enable 'Data register not empty' interrupt
+    USART2->CR1 |= (1<<6);  // TCIE = 1... Enable 'Transmission complete' interrupt
     USART2->CR1 |= (1<<13); // UE = 1... Enable USART
 
     // set the boudrate
@@ -126,6 +144,8 @@ void UART_Init(uint32_t baudrate)
     // enable rx and tx
     USART2->CR1 |= (1<<2);  // RE=1.. Enable Receiver
     USART2->CR1 |= (1<<3);  // TE=1.. Enable Transmitter
+
+
 }
 
 void UART_SendChar (char c)

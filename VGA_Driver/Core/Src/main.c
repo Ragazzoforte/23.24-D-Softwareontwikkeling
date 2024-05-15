@@ -25,7 +25,9 @@ int main(void)
 
 	UB_VGA_FillScreen(VGA_COL_MAGENTA);
 
-  UART_Init(BAUD_RATE);
+  uint32_t RX_Buffer[UART_BUFFER_SIZE];
+
+  UART_Init(BAUD_RATE, &RX_Buffer[0]);
 
 
 

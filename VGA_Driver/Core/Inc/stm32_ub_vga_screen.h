@@ -39,7 +39,7 @@
 #define VGA_COL_RED            0xE0
 #define VGA_COL_LIGHT_RED      0xE4
 #define VGA_COL_BROWN          0xAD
-#define VGA_COL_GREY           0x05 //0xAF or 0x05
+#define VGA_COL_GREY           0x49
 #define VGA_COL_WHITE          0xFF
 
 //--------------------------------------------------------------

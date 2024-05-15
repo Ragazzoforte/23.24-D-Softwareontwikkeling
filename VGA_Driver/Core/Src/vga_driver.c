@@ -93,6 +93,7 @@ int API_draw_line (int x1, int y1, int x2, int y2, int colour, int thickness, in
   
   while (1<2) 
   {
+    UB_VGA_SetPixel(x1, y1, colour);
     if (x1 == x2 && y1 == y2) //check if the end of the line is reached
     { 
       break; 
@@ -107,7 +108,7 @@ int API_draw_line (int x1, int y1, int x2, int y2, int colour, int thickness, in
     }
     
     if (store_error < y_difference) //check if the error is smaller than the y-difference
-    { 
+    {
       slope_error += x_difference; //update error
       y1 += step_y; //update y-coordinate
     }
@@ -125,12 +126,45 @@ int API_draw_line (int x1, int y1, int x2, int y2, int colour, int thickness, in
   *           
   * @note   To draw a rotated rectangle use 'API_draw_line()'   
   *     
-  * @param  
-  * @retval 
+  * @param x: the x-coordinate of the top-left corner of the rectangle
+  * @param y: the y-coordinate of the top-left corner of the rectangle
+  * @param width: the width of the rectangle
+  * @param height: the height of the rectangle
+  * @param colour: the colour of the rectangle
+  * @param filled: whether the rectangle should be filled in or not
+  * @param reserved1: reserved for future use
+  * @param reserved2: reserved for future use
+  * 
+  * @retval
   */
 int API_draw_rectangle (int x, int y, int width, int height, int colour, int filled, int reserved1, int reserved2) // e.g.: weight, bordercolor
 {
-
+  if (x < 0 || x >= VGA_DISPLAY_X || y < 0 || y >= VGA_DISPLAY_Y || width <= 0 || height <= 0) // Check if the coordinates or dimensions are invalid
+  {
+    // Handle the error here
+    return -1;
+  }
+  
+  API_draw_line(x, y, x + width, y, colour, 1, reserved1); // Draw the top line
+  
+  // Draw the bottom line
+  API_draw_line(x, y + height, x + width, y + height, colour, 1, reserved1);
+  
+  // Draw the left line
+  API_draw_line(x, y, x, y + height, colour, 1, reserved1);
+  
+  // Draw the right line
+  API_draw_line(x + width, y, x + width, y + height, colour, 1, reserved1);
+  
+  if (filled) // Check if the rectangle should be filled
+  {
+    for (int i = 1; i < height; i++) // Iterate over the rows of the rectangle
+    {
+      API_draw_line(x, y + i, x + width, y + i, colour, 1, reserved1); // Draw a horizontal line for each row
+    }
+  }
+  
+  return 0;
 }
 
 /**

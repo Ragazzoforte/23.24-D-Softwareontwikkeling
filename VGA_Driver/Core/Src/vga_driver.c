@@ -63,97 +63,143 @@ int API_draw_text (int x_lup, int y_lup, int color, char *text, char *fontname,i
   /*Variable*/
 	const uint8_t  *pfont;
 	const uint16_t *pdescript;
-  const unsigned long fontname_hash = hash(*fontname);
   uint16_t symbol_nr, symbol_width_pixels, symbol_start, symbol_height; // used for searching the descriptor
-  int a = 0;
   int i = 0;
-  uint8_t temp, bitmask, bit;
 
-  switch(fontname_hash)
+
+  if (strcmp(fontname, "arial") == 0)
   {
-    case ARIAL:
-      switch(fontstyle) 
-        {
-          case ITALIC:
-            switch(fontsize)
-            {
-              case LARGE:
-                a = 10;
-                pfont = arial_italic_11ptBitmaps;
-                pdescript = arial_italic_11ptDescriptors[0];
-                symbol_height = ARIAL_LARGE_ITALIC_HEIGHT;    /* font height in pixels */
-                break;
-              default: // SMALL
-                a = 11;
-                pfont = arial_italic_8ptBitmaps;
-                pdescript = arial_italic_8ptDescriptors[0];
-                symbol_height = ARIAL_SMALL_ITALIC_HEIGHT;   /* font height in pixels */
-                break;
-            }
-            break;
-
-          case BOLD:
-            switch(fontsize)
-            {
-              case LARGE:
-                pfont = arial_bold_11ptBitmaps;
-                pdescript = arial_bold_11ptDescriptors[0];
-                symbol_height = ARIAL_LARGE_BOLD_HEIGHT; 	/* font height in pixels */
-                break;
-              default: // SMALL
-                pfont = arial_bold_8ptBitmaps;
-                pdescript = arial_bold_8ptDescriptors[0];
-                symbol_height = ARIAL_SMALL_BOLD_HEIGHT; 	/* font height in pixels */
-                break;
-            }
-            break;
-
-          default: // NORMAL
-            switch(fontsize)
-            {
-              case LARGE:
-                pfont = arial_11ptBitmaps;
-                pdescript = arial_11ptDescriptors[0];
-                symbol_height = ARIAL_LARGE_HEIGHT;    	/* font height in pixels */
-                break;
-              default: // SMALL
-                a = 100;
-                pfont = arial_8ptBitmaps;
-                pdescript = arial_8ptDescriptors[0];
-                symbol_height = ARIAL_SMALL_HEIGHT; 	/* font height in pixels */
-                break;
-            }
-            break;
-        }
-    default:
-      pfont = arial_8ptBitmaps;
-      pdescript = arial_8ptDescriptors[0];
-      symbol_height = ARIAL_SMALL_HEIGHT;
-      int opschuiven = 0;
-      for(i=0;i<strlen(text);i++)
+    switch(fontstyle) 
       {
-        symbol_nr = (*(text+i)) - ASCII_OFFSET;/* determines which symbol from the font library should be selected */
-        symbol_start = *(pdescript + symbol_nr * ARRAY_DIMENSION + CHAR_START_OFFSET); /* retrieves the starting element in the font bitmap */
-        symbol_width_pixels = *(pdescript + symbol_nr * ARRAY_DIMENSION); /* retrieves the symbol width expressed in pixels */
-          // Draw the bitmap
-        // int bitmap_width = 6; // Width of the bitmap in pixels
-        for (int y = 0+symbol_start; y < symbol_height+symbol_start; y++) 
-        {
-          for (int x = 0; x < symbol_width_pixels; x++) 
+        case ITALIC:
+          switch(fontsize)
           {
-            // Calculate the index into the bitmap array
-            int index = y + (x / 8);
-            // Calculate the bit position within the current byte
-            int bit = 7 - (x % 8);
-            // Get the value of the current pixel
-            int pixel = (pfont[index] >> bit) & 1;
-
-            // Set the pixel color based on the value of the current pixel
-            if (pixel == 1) UB_VGA_SetPixel(x_lup + x + opschuiven, y_lup + y - symbol_start, color);
+            case LARGE:
+              pfont = arial_italic_11ptBitmaps;
+              pdescript = arial_italic_11ptDescriptors[0];
+              symbol_height = ARIAL_LARGE_ITALIC_HEIGHT;    /* font height in pixels */
+              break;
+            default: // SMALL
+              pfont = arial_italic_8ptBitmaps;
+              pdescript = arial_italic_8ptDescriptors[0];
+              symbol_height = ARIAL_SMALL_ITALIC_HEIGHT;   /* font height in pixels */
+              break;
           }
-        }
-        opschuiven += symbol_width_pixels+1;
+          break;
+
+        case BOLD:
+          switch(fontsize)
+          {
+            case LARGE:
+              pfont = arial_bold_11ptBitmaps;
+              pdescript = arial_bold_11ptDescriptors[0];
+              symbol_height = ARIAL_LARGE_BOLD_HEIGHT; 	/* font height in pixels */
+              break;
+            default: // SMALL
+              pfont = arial_bold_8ptBitmaps;
+              pdescript = arial_bold_8ptDescriptors[0];
+              symbol_height = ARIAL_SMALL_BOLD_HEIGHT; 	/* font height in pixels */
+              break;
+          }
+          break;
+
+        default: // NORMAL
+          switch(fontsize)
+          {
+            case LARGE:
+              pfont = arial_11ptBitmaps;
+              pdescript = arial_11ptDescriptors[0];
+              symbol_height = ARIAL_LARGE_HEIGHT;    	/* font height in pixels */
+              break;
+            default: // SMALL
+              pfont = arial_8ptBitmaps;
+              pdescript = arial_8ptDescriptors[0];
+              symbol_height = ARIAL_SMALL_HEIGHT; 	/* font height in pixels */
+              break;
+          }
+          break;
       }
+  }
+  if(strcmp(fontname, "consolas") == 0)
+  {
+    switch(fontstyle) 
+      {
+        case ITALIC:
+          switch(fontsize)
+          {
+            case LARGE:
+              pfont = consolas_italic_11ptBitmaps;
+              pdescript = consolas_italic_11ptDescriptors[0];
+              symbol_height = ARIAL_LARGE_ITALIC_HEIGHT;    /* font height in pixels */
+              break;
+            default: // SMALL
+              pfont = consolas_italic_8ptBitmaps;
+              pdescript = consolas_italic_8ptDescriptors[0];
+              symbol_height = ARIAL_SMALL_ITALIC_HEIGHT;   /* font height in pixels */
+              break;
+          }
+          break;
+
+        case BOLD:
+          switch(fontsize)
+          {
+            case LARGE:
+              pfont = consolas_bold_11ptBitmaps;
+              pdescript = consolas_bold_11ptDescriptors[0];
+              symbol_height = ARIAL_LARGE_BOLD_HEIGHT; 	/* font height in pixels */
+              break;
+            default: // SMALL
+              pfont = consolas_bold_8ptBitmaps;
+              pdescript = consolas_bold_8ptDescriptors[0];
+              symbol_height = ARIAL_SMALL_BOLD_HEIGHT; 	/* font height in pixels */
+              break;
+          }
+          break;
+
+        default: // NORMAL
+          switch(fontsize)
+          {
+            case LARGE:
+              pfont = consolas_11ptBitmaps;
+              pdescript = consolas_11ptDescriptors[0];
+              symbol_height = ARIAL_LARGE_HEIGHT;    	/* font height in pixels */
+              break;
+            default: // SMALL
+              pfont = consolas_8ptBitmaps;
+              pdescript = consolas_8ptDescriptors[0];
+              symbol_height = ARIAL_SMALL_HEIGHT; 	/* font height in pixels */
+              break;
+          }
+          break;
+      }
+
+  }
+  if(pfont != NULL && pdescript != NULL)
+  {
+    // default:
+    int opschuiven = 0;
+    for(i=0;i<strlen(text);i++)
+    {
+      symbol_nr = (*(text+i)) - ASCII_OFFSET;/* determines which symbol from the font library should be selected */
+      symbol_start = *(pdescript + symbol_nr * ARRAY_DIMENSION + CHAR_START_OFFSET); /* retrieves the starting element in the font bitmap */
+      symbol_width_pixels = *(pdescript + symbol_nr * ARRAY_DIMENSION); /* retrieves the symbol width expressed in pixels */
+        // Draw the bitmap
+      // int bitmap_width = 6; // Width of the bitmap in pixels
+      for (int y = 0+symbol_start; y < symbol_height+symbol_start; y++) {
+        for (int x = 0; x < symbol_width_pixels; x++) {
+          // Calculate the index into the bitmap array
+          int index = y + (x / 8);
+          // Calculate the bit position within the current byte
+          int bit = 7 - (x % 8);
+          // Get the value of the current pixel
+          int pixel = (pfont[index] >> bit) & 1;
+
+          // Set the pixel color based on the value of the current pixel
+          if (pixel == 1) UB_VGA_SetPixel(x_lup + x + opschuiven, y_lup + y - symbol_start, color);
+        }
+      }
+      opschuiven += symbol_width_pixels+1;
+    }
   }
 }
 

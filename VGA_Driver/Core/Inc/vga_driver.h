@@ -5,8 +5,12 @@
 #define LETTERA 'a'
 #define LETTERC 'c'
 
-#define ARIAL 353
-#define CONSOLAS 2
+#define arial_hash 510602739
+#define Arial_hash 472653267
+#define ARIAL_hash 471467347
+#define consolas_hash 1405698636
+#define Consolas_hash 3415123500
+#define CONSOLAS_hash 3746353484
 
 #define NORMAL 1
 #define ITALIC 2

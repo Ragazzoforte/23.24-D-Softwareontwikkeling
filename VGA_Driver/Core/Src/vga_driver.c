@@ -149,7 +149,7 @@ int API_draw_text (int x_lup, int y_lup, int color, char *text, char *fontname,i
             int pixel = (pfont[index] >> bit) & 1;
 
             // Set the pixel color based on the value of the current pixel
-            if (pixel == 1) UB_VGA_SetPixel(x_lup + x + opschuiven, y_lup + y - symbol_start, VGA_COL_WHITE);
+            if (pixel == 1) UB_VGA_SetPixel(x_lup + x + opschuiven, y_lup + y - symbol_start, color);
           }
         }
         opschuiven += symbol_width_pixels+1;

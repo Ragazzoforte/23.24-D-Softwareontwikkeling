@@ -30,7 +30,7 @@ int main(void)
 	UB_VGA_Screen_Init(); // Init VGA-Screen
 
   API_clearscreen("blauw");
-  API_draw_text (10, 10, VGA_COL_BLACK, "Mijn naam is Michel Vollmuller", "Arial", 1, 1, 1);
+  API_draw_text (10, 10, VGA_COL_RED, "Mijn naam is Michel Vollmuller", "Arial", 1, 1, 1);
 
   while(1)
   {

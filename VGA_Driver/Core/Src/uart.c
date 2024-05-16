@@ -15,11 +15,12 @@
   */
 
 #include "uart.h"
+#include "misc.h"
 #include "stm32f4xx.h"
 #include "stm32f4xx_rcc.h"
 #include "stm32f4XX_dma.h"
 
-uint8_t UART_RX_Buff[UART_BUFFER_SIZE];
+uint32_t DMA_Memory[UART_BUFFER_SIZE];
 
 void DMA1_Stream5_IRQHandler(void) // UART RX
 {
@@ -66,14 +67,37 @@ void USART2_IRQHandler(void)
   }
 }
 
-void UART_Init(uint32_t baudrate, uint32_t *DMA_Memory)
+// void UART_Init_IRQ(void)
+// {
+//   NVIC_InitTypeDef NVIC_InitStructure;
+
+//   DMA_ITConfig(DMA1_Stream5, DMA_IT_TC, ENABLE); // enable transfer complete interrupt
+//   //DMA_ITConfig(DMA1_Stream6, DMA_IT_TE, ENABLE); // enable transfer error interrupt
+
+//   NVIC_InitStructure.NVIC_IRQChannel = DMA1_Stream5_IRQn;
+//   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+//   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+//   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//   NVIC_Init(&NVIC_InitStructure);
+
+// }
+
+void UART_Init_DMA(void)
 {
     // configure RCC
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | RCC_APB1Periph_USART2, ENABLE);
+    RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN; // Enable DMA clock
+    NVIC_EnableIRQ(DMA1_Stream5_IRQn);
+    //NVIC_EnableIRQ(DMA1_Stream6_IRQn);
+    
+    //RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | RCC_APB1Periph_USART2, ENABLE);
 
     // configure DMA
     DMA_InitTypeDef DMA_USART2_RX;
+
+    //RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
+
+    DMA_Cmd(DMA1_Stream5, DISABLE);
+    DMA_DeInit(DMA1_Stream5);
     DMA_USART2_RX.DMA_Channel = DMA_Channel_4;
     DMA_USART2_RX.DMA_Memory0BaseAddr = (uint32_t)DMA_Memory; // memory address
     DMA_USART2_RX.DMA_PeripheralBaseAddr = USART2->DR;        // UART address
@@ -88,11 +112,14 @@ void UART_Init(uint32_t baudrate, uint32_t *DMA_Memory)
     DMA_USART2_RX.DMA_MemoryBurst = DMA_MemoryBurst_Single;
     DMA_USART2_RX.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
     DMA_USART2_RX.DMA_FIFOMode = DMA_FIFOMode_Disable;
+    DMA_Init(DMA1_Stream5, &DMA_USART2_RX);
+
+    
 
     // DMA_InitTypeDef DMA_USART2_TX;
     // DMA_USART2_TX.DMA_Channel = DMA_Channel_4;
-    // DMA_USART2_TX.DMA_Memory0BaseAddr = 0x00000000;     // memory address
-    // DMA_USART2_TX.DMA_PeripheralBaseAddr = USART2->DR; // UART address
+    // DMA_USART2_TX.DMA_Memory0BaseAddr = (uint32_t)DMA_Memory; // memory address
+    // DMA_USART2_TX.DMA_PeripheralBaseAddr = USART2->DR;        // UART address
     // DMA_USART2_TX.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
     // DMA_USART2_TX.DMA_PeripheralDataSize = DMA_MemoryDataSize_Byte;
     // DMA_USART2_TX.DMA_DIR = DMA_DIR_MemoryToPeripheral;
@@ -105,17 +132,17 @@ void UART_Init(uint32_t baudrate, uint32_t *DMA_Memory)
     // DMA_USART2_TX.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
     // DMA_USART2_TX.DMA_FIFOMode = DMA_FIFOMode_Disable;
 
-    DMA_ITConfig(DMA1_Stream5, DMA_IT_TC, ENABLE); // enable transfer complete interrupt
-    // DMA_ITConfig(DMA1_Stream6, DMA_IT_TE, ENABLE); // enable transfer error interrupt
-
-    DMA_Init(DMA1_Stream5, &DMA_USART2_RX);
+    
     // DMA_Init(DMA1_Stream6, &DMA_USART2_TX);
-  
-    
-    
+}
 
+void UART_Init(uint32_t baudrate)
+{
     // enable GPIO A clock
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+
+    // init DMA
+    UART_Init_DMA();
 
     // enable USART2 clock
     RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
@@ -128,25 +155,29 @@ void UART_Init(uint32_t baudrate, uint32_t *DMA_Memory)
     GPIOA->AFR[0]  |= (7<<8);   // Bites   (11:10:9:8) = 0:1:1:1  --> AF7 Alternate function for USART2 at Pin PA2
     GPIOA->AFR[0]  |= (7<<12);  // Bites (15:14:13:12) = 0:1:1:1  --> AF7 Alternate function for USART2 at Pin PA3
 
-    // enable uart
-    USART2->CR1 = 0x00;     // Clear all existing settings
-    USART2->CR1 |= (0<<12); // M  = 0... 8 data bits
-    USART2->CR1 |= (1<<5);  // RXNEIE = 1... Enable 'Data register not empty' interrupt
-    USART2->CR1 |= (1<<6);  // TCIE = 1... Enable 'Transmission complete' interrupt
-    USART2->CR1 |= (1<<13); // UE = 1... Enable USART
-
-    // set the boudrate
+    //***** [UART SETTINGS]*****//
     RCC_ClocksTypeDef clocks;
     RCC_ClocksTypeDef *clocks_ptr = &clocks;
     RCC_GetClocksFreq(clocks_ptr);
-    USART2->BRR = clocks.PCLK1_Frequency/baudrate;   
-
-    // enable rx and tx
+    USART2->BRR = clocks.PCLK1_Frequency/baudrate;  // set the boudrate
+    
+    USART2->CR1 = 0x00;     // Clear all existing CR1 settings
     USART2->CR1 |= (1<<2);  // RE=1.. Enable Receiver
     USART2->CR1 |= (1<<3);  // TE=1.. Enable Transmitter
+    USART2->CR1 |= (1<<5);  // RXNEIE = 1... Enable 'Data register not empty' interrupt
+    USART2->CR1 |= (1<<6);  // TCIE = 1... Enable 'Transmission complete' interrupt
+    
+    USART2->CR2 = 0x00;     // Clear all existing CR2 settings
+    USART2->CR3 = 0x00;     // Clear all existing CR3 settings
+    USART2->CR3 |= (1<<6);  // DMA enable receiver
+    //USART2->CR3 |= (1<<7);  // DMA enable transmitter
 
-
+    NVIC_EnableIRQ(USART2_IRQn);
+    USART2->CR1 |= (1<<13); // Enable USART I.E. GO!!!
 }
+
+
+//=============================================== [ Functions ] ===============================================//
 
 void UART_SendChar (char c)
 {

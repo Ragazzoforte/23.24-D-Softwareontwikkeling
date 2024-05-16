@@ -15,7 +15,7 @@
 #include <math.h>
 #include "uart.h"
 
-#define BAUD_RATE 1200
+#define BAUD_RATE 115200
 
 int main(void)
 {
@@ -23,18 +23,15 @@ int main(void)
 
 	UB_VGA_Screen_Init(); // Init VGA-Screen
 
-	UB_VGA_FillScreen(VGA_COL_MAGENTA);
+	UB_VGA_FillScreen(VGA_COL_WHITE);
 
-  uint32_t RX_Buffer[UART_BUFFER_SIZE];
+  UART_Init(BAUD_RATE);
 
-  UART_Init(BAUD_RATE, &RX_Buffer[0]);
-
-
-
+  //UART_SendString("ik ben een stm32F407 maar koalaberen zijn ook erg mooie beesten");
   while(1)
   {
     //uint8_t byte = UART_GetChar();
-    //UART_SendString("ik ben een stm32F407 maar koalaberen zijn ook erg mooie beesten");
+    
     //delay(50);
   }
 }

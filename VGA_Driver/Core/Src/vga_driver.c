@@ -286,7 +286,69 @@ int API_draw_rectangle (int x, int y, int width, int height, int colour, int fil
   */
 int API_draw_bitmap (int x_lup, int y_lup, int bm_nr)
 {
+	//bron: http://www.brackeen.com/vga/bitmaps.html
+	const uint8_t *pbitmap;
+	int img_width, img_height;
+	int x, y;
 
+	switch(bm_nr)
+	{
+		case SMILEY_HAPPY:
+			pbitmap    = smiley_happy;
+			img_width  = SMILEY_WIDTH;
+			img_height = SMILEY_HEIGHT;
+			break;
+
+		case SMILEY_SAD:
+			pbitmap    = smiley_sad;
+			img_width  = SMILEY_WIDTH;
+			img_height = SMILEY_HEIGHT;
+			break;
+
+		case ARROW_UP:
+			pbitmap    = arrow_up;
+			img_width  = ARROW_UP_WIDTH;
+			img_height = ARROW_UP_HEIGHT;
+			break;
+
+		case ARROW_RIGHT:
+			pbitmap    = arrow_right;
+			img_width  = ARROW_RIGHT_WIDTH;
+			img_height = ARROW_RIGHT_HEIGHT;
+			break;
+
+		case ARROW_DOWN:
+			pbitmap    = arrow_down;
+			img_width  = ARROW_DOWN_WIDTH;
+			img_height = ARROW_DOWN_HEIGHT;
+
+			break;
+
+		case ARROW_LEFT:
+			pbitmap    = arrow_left;
+			img_width  = ARROW_LEFT_WIDTH;
+			img_height = ARROW_LEFT_HEIGHT;
+
+			break;
+
+		case MEGAMAN:
+			pbitmap	   = megaman_2;
+			img_width  = MEGAMAN_WIDTH;
+			img_height = MEGAMAN_HEIGHT;
+			break;
+
+		default: break;
+	}
+
+	for(y=0; y<img_height;y++)
+	{
+
+		for(x=0; x<img_width;x++)
+		{
+			UB_VGA_SetPixel(x_lup + x, y_lup + y, *(pbitmap + (y*img_width) + x));
+		}
+	}
+	return 0;
 }
 
 /**

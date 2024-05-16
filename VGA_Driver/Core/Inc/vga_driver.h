@@ -1,6 +1,14 @@
 #ifndef vga_driver_h
 #define vga_driver_h
 
+#define SMILEY_HAPPY 1
+#define SMILEY_SAD 2
+#define ARROW_UP 3
+#define ARROW_RIGHT 4
+#define ARROW_DOWN 5
+#define ARROW_LEFT 6
+#define MEGAMAN 7
+
 #define MAX_LEN_FONTNAME 30
 #define LETTERA 'a'
 #define LETTERC 'c'

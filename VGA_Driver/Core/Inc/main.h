@@ -46,6 +46,7 @@ extern "C" {
 #include "stm32_ub_vga_screen.h"
 #include "logic_layer.h"
 #include "fonts.h"
+#include "bitmap.h"
 
 // #include <stdio.h>
 #include <string.h>

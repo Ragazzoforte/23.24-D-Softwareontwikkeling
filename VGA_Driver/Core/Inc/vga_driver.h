@@ -5,7 +5,7 @@
 #define LETTERA 'a'
 #define LETTERC 'c'
 
-#define ARIAL 354
+#define ARIAL 353
 #define CONSOLAS 2
 
 #define NORMAL 1

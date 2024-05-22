@@ -222,7 +222,7 @@ int API_draw_rectangle (int x, int y, int width, int height, int colour, int fil
   * @param  
   * @retval 
   */
-int API_draw_polygon (int x, int y, int corners, int colour, int filled)
+int API_draw_polygon (int x, int y, int size, int corners, int colour, int filled)
 {
   // if (corners < 3) // Check if the number of corners is valid
   // {
@@ -231,7 +231,7 @@ int API_draw_polygon (int x, int y, int corners, int colour, int filled)
   // }
 
   int angle = 360 / corners; // Calculate the angle between each corner
-  int radius = 25; // Set the radius of the polygon
+  int radius = size; // Set the radius of the polygon
 
   int x_center = x; // Calculate the x-coordinate of the center of the polygon
   int y_center = y; // Calculate the y-coordinate of the center of the polygon
@@ -256,31 +256,14 @@ int API_draw_polygon (int x, int y, int corners, int colour, int filled)
   
     API_draw_line(x_prev, y_prev, x_curr, y_curr, colour, 1, 0); // Draw a line between the previous and current corner
     
-    if (filled == 1) // Check if the polygon should be filled
-    {
-      int y_min = y_prev < y_curr ? y_prev : y_curr; // Find the minimum y-coordinate
-      int y_max = y_prev > y_curr ? y_prev : y_curr; // Find the maximum y-coordinate
-      
-      for (int j = y_min + 1; j < y_max; j++) // Iterate over the rows between the minimum and maximum y-coordinate
-      {
-      int x_intersection = ((j - y_prev) * (x_curr - x_prev)) / (y_curr - y_prev) + x_prev; // Calculate the x-coordinate of the intersection point
-      
-      if (x_intersection < x_prev) // Check if the intersection point is to the left of the previous corner
-      {
-        for (int k = x_intersection; k < x_prev; k++) // Iterate over the columns between the intersection point and the previous corner
-        {
-        API_draw_line(k, j, x_prev, j, colour, 1, 0); // Draw a horizontal line for each column
-        }
-      }
-      else // The intersection point is to the right of the previous corner
-      {
-        for (int k = x_prev + 1; k <= x_intersection; k++) // Iterate over the columns between the previous corner and the intersection point
-        {
-        API_draw_line(x_prev, j, k, j, colour, 1, 0); // Draw a horizontal line for each column
-        }
-      }
-      }
-    }
+    // if (filled == 1) // Check if the polygon should be filled
+    // {
+    //   for (int j = y_prev + 1; j < y_curr; j++) // Iterate over the rows between the previous and current corner
+    //   {
+    //     API_draw_line(x_prev, j, x_curr, j, colour, 1, 0); // Draw a horizontal line for each row
+    //   }
+    // }
+    
     x_prev = x_curr; // Update the previous corner's x-coordinate
     y_prev = y_curr; // Update the previous corner's y-coordinate
   }

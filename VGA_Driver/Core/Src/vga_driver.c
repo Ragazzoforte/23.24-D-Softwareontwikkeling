@@ -51,13 +51,21 @@
 //--------------------------------------------------------------
 
 /**
-  * @brief  API_draw_text() is used to draw a string to the VGA screen.  
-  *           
-  * @note   selected font must be a certain format         
-  *     
-  * @param  
-  * @retval 
-  */
+ * @brief Draws a string to the VGA screen.
+ * 
+ * This function draws a string to the VGA screen using the specified font, size, and style.
+ * 
+ * @param x_lup The x-coordinate of the left upper point where the text should start.
+ * @param y_lup The y-coordinate of the left upper point where the text should start.
+ * @param color The color of the text.
+ * @param text The text to be drawn.
+ * @param fontname The name of the font to be used.
+ * @param fontsize The size of the font. 1 for small, 2 for big.
+ * @param fontstyle The style of the font. Use the predefined constants for this.
+ * @param reserved Reserved for future use.
+ * 
+ * @return Returns 0 on success, non-zero error code on failure.
+ */
 int API_draw_text (int x_lup, int y_lup, int color, char *text, char *fontname,int fontsize, int fontstyle, int reserved) // fontsize:1 small, 2 big
 {
   /*Variable*/
@@ -66,7 +74,7 @@ int API_draw_text (int x_lup, int y_lup, int color, char *text, char *fontname,i
   uint16_t symbol_nr, symbol_width_pixels, symbol_start, symbol_height; // used for searching the descriptor
   int i = 0;
 
-
+  /*Choose Font library*/
   if (strcmp(fontname, "arial") == 0)
   {
     switch(fontstyle) 
@@ -174,6 +182,7 @@ int API_draw_text (int x_lup, int y_lup, int color, char *text, char *fontname,i
       }
 
   }
+  /*Draw text*/
   if(pfont != NULL && pdescript != NULL)
   {
     // default:
@@ -198,6 +207,7 @@ int API_draw_text (int x_lup, int y_lup, int color, char *text, char *fontname,i
       opschuiven += symbol_width_pixels+1;
     }
   }
+  return 0;
 }
 
 /**

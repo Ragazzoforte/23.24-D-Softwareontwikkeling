@@ -46,8 +46,8 @@
 #define BRUIN         511801994
 #define GRIJS         517718569
 #define WIT           492542
+#define UNUSED(x) (void)(x)
 
-#define ARIAL         352
 //--------------------------------------------------------------
 
 /**
@@ -211,16 +211,64 @@ int API_draw_text (int x_lup, int y_lup, int color, char *text, char *fontname,i
 }
 
 /**
-  * @brief  API_draw_line() is used to draw a line to the VGA screen.  
+  * @brief Draw a line on the VGA screen.  
   *           
-  * @note   Select the shape of the line ending with the last parameter.         
-  *     
-  * @param  
-  * @retval 
+  * @note  This function uses the Bresenham's line algorithm to draw a line on the VGA screen.
+  * 
+  * @param x1: the x-coordinate of the starting point of the line
+  * @param y1: the y-coordinate of the starting point of the line
+  * @param x2: the x-coordinate of the ending point of the line
+  * @param y2: the y-coordinate of the ending point of the line
+  * @param colour: the colour of the line
+  * @param weight: the weight/thicknes of the line
+  * @param reserved: reserved for future use
+  * 
+  * @retval none 
   */
-int API_draw_line (int x_1, int y_1, int x_2, int y2, int color, int weight, int reserved)
+int API_draw_line (int x1, int y1, int x2, int y2, int colour, int thickness, int reserved)
 {
+  int x_difference = x2 - x1; //calculate the difference in x-coordinates
+  int y_difference = y2 - y1; //calculate the difference in y-coordinates
+  int step_x = x1 < x2 ? 1 : -1; //set the step size for the x-coordinate
+  int step_y = y1 < y2 ? 1 : -1; //set the step size for the y-coordinate
+  int slope_error = (x_difference > y_difference ? x_difference : -y_difference) / 2; //calculate the error
+  int store_error;
+  
+  if (x1 < 0 || x1 >= VGA_DISPLAY_X || x2 < 0 || x2 >= VGA_DISPLAY_X || y1 < 0 || y1 >= VGA_DISPLAY_Y || y2 < 0 || y2 >= VGA_DISPLAY_Y) // Check if the coordinates are out of the screen
+  {
+    // Handle the error here
+    return -1;
+  }
+  
+  while (1<2) 
+  {
+    UB_VGA_SetPixel(x1, y1, colour);
+    if (x1 == x2 && y1 == y2) //check if the end of the line is reached
+    { 
+      break; 
+    }
+    
+    store_error = slope_error; //store the error
 
+    if (store_error > -x_difference) //check if the error is larger than the negative x-difference
+    { 
+      slope_error -= y_difference; //update error
+      x1 += step_x; //update x-coordinate
+    }
+    
+    if (store_error < y_difference) //check if the error is smaller than the y-difference
+    {
+      slope_error += x_difference; //update error
+      y1 += step_y; //update y-coordinate
+    }
+
+    for (int i=0 ; i<thickness ; i++) //draw the line, including the specified weight
+    {
+      UB_VGA_SetPixel(x1 + i, y1, colour);
+    }
+  }
+  return 0;
+  UNUSED(reserved);
 }
 
 /**
@@ -228,12 +276,43 @@ int API_draw_line (int x_1, int y_1, int x_2, int y2, int color, int weight, int
   *           
   * @note   To draw a rotated rectangle use 'API_draw_line()'   
   *     
-  * @param  
-  * @retval 
+  * @param x: the x-coordinate of the top-left corner of the rectangle
+  * @param y: the y-coordinate of the top-left corner of the rectangle
+  * @param width: the width of the rectangle
+  * @param height: the height of the rectangle
+  * @param colour: the colour of the rectangle
+  * @param filled: whether the rectangle should be filled in or not
+  * @param reserved1: reserved for future use
+  * @param reserved2: reserved for future use
+  * 
+  * @retval
   */
-int API_draw_rectangle (int x, int y, int width, int height, int color, int filled, int reserved1, int reserved2) // e.g.: weight, bordercolor
+int API_draw_rectangle (int x, int y, int width, int height, int colour, int filled, int reserved1, int reserved2) // e.g.: weight, bordercolor
 {
+  if (x < 0 || x >= VGA_DISPLAY_X || y < 0 || y >= VGA_DISPLAY_Y || width <= 0 || height <= 0) // Check if the coordinates or dimensions are invalid
+  {
+    // Handle the error here
+    return -1;
+  }
+  
+  API_draw_line(x, y, x + width, y, colour, 1, reserved1); // Draw the top line
+  
+  API_draw_line(x, y + height, x + width, y + height, colour, 1, reserved1); // Draw the bottom line
+  
+  API_draw_line(x, y, x, y + height, colour, 1, reserved1); // Draw the left line
 
+  API_draw_line(x + width, y, x + width, y + height, colour, 1, reserved1);   // Draw the right line
+  
+  if (filled == 1) // Check if the rectangle should be filled
+  {
+    for (int i = 1; i < height; i++) // Iterate over the rows of the rectangle
+    {
+      API_draw_line(x, y + i, x + width, y + i, colour, 1, reserved1); // Draw a horizontal line for each row
+    }
+  }
+  UNUSED(reserved1);
+  UNUSED(reserved2);
+  return 0;
 }
 
 /**

@@ -9,11 +9,20 @@
  */
 #include "main.h"
 
-/*
-**  Font data for Arial 8pt
-*/
 
-/* Character bitmaps for Arial 8pt */
+/**
+ * @brief Bitmap data for Arial 8pt font.
+ * 
+ * This array contains the bitmap data for the Arial 8pt font. Each byte in the array represents 8 pixels,
+ * with the MSB representing the leftmost pixel and the LSB representing the rightmost pixel.
+ * 
+ * The data is organized as a series of rows, with each row representing a line of text. The height of each
+ * row is determined by the font size (8pt in this case).
+ * 
+ * The width of each row (i.e., the number of bytes per row) is determined by the number of characters in the
+ * font and the width of each character.
+ */
+
 const uint8_t arial_8ptBitmaps[] =
 {
 	/* @0 ' ' (2 pixels wide) */
@@ -1157,8 +1166,22 @@ const uint8_t arial_8ptBitmaps[] =
 	0x00, //
 };
 
-/* Character descriptors for Arial 8pt */
-/* { [Char width in bits], [Offset into arial_8ptCharBitmaps in bytes] } */
+
+
+/**
+ * @brief Descriptors for Arial 8pt font.
+ * 
+ * This array contains the descriptors for the Arial 8pt font. Each descriptor provides information about
+ * a specific character in the font, such as its width and the offset of its bitmap data in the 
+ * arial_8ptBitmaps array.
+ * 
+ * The array is organized as a 2D array with `NR_OF_SYMBOLS` rows and `NR_OF_ELEMENTS` columns. Each row
+ * corresponds to a character in the font, and the columns provide the following information for each character:
+ * 
+ * 0: The width of the character in pixels.
+ * 1: The vertical offset of the character's bitmap data in the arial_8ptBitmaps array.
+ * 
+ */
 const uint16_t arial_8ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 {
 	{2, 0}, 		/*   */
@@ -1259,11 +1282,18 @@ const uint16_t arial_8ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 };
 
 
-/*
-**  Font data for Arial 8pt italic
-*/
-
-/* Character bitmaps for Arial 8pt italic */
+/**
+ * @brief Bitmap data for Arial 8pt italic font.
+ * 
+ * This array contains the bitmap data for the Arial 8pt font. Each byte in the array represents 8 pixels,
+ * with the MSB representing the leftmost pixel and the LSB representing the rightmost pixel.
+ * 
+ * The data is organized as a series of rows, with each row representing a line of text. The height of each
+ * row is determined by the font size (8pt in this case).
+ * 
+ * The width of each row (i.e., the number of bytes per row) is determined by the number of characters in the
+ * font and the width of each character.
+ */
 const uint8_t arial_italic_8ptBitmaps[] =
 {
 	/* @0 ' ' (2 pixels wide) */
@@ -2597,8 +2627,20 @@ const uint8_t arial_italic_8ptBitmaps[] =
 	0x00, //
 };
 
-/* Character descriptors for Arial 8pt italic */
-/* { [Char width in bits], [Offset into arial_italic_8ptCharBitmaps in bytes] } */
+/**
+ * @brief Descriptors for Arial 8pt italic font.
+ * 
+ * This array contains the descriptors for the Arial 8pt font. Each descriptor provides information about
+ * a specific character in the font, such as its width and the offset of its bitmap data in the 
+ * arial_8ptBitmaps array.
+ * 
+ * The array is organized as a 2D array with `NR_OF_SYMBOLS` rows and `NR_OF_ELEMENTS` columns. Each row
+ * corresponds to a character in the font, and the columns provide the following information for each character:
+ * 
+ * 0: The width of the character in pixels.
+ * 1: The vertical offset of the character's bitmap data in the arial_8ptBitmaps array.
+ * 
+ */
 const uint16_t arial_italic_8ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 {
 	{2, 0}, 		/*   */
@@ -2699,11 +2741,18 @@ const uint16_t arial_italic_8ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 };
 
 
-/*
-**  Font data for Arial 8pt bold
-*/
-
-/* Character bitmaps for Arial 8pt bold */
+/**
+ * @brief Bitmap data for Arial 8pt bold font.
+ * 
+ * This array contains the bitmap data for the Arial 8pt font. Each byte in the array represents 8 pixels,
+ * with the MSB representing the leftmost pixel and the LSB representing the rightmost pixel.
+ * 
+ * The data is organized as a series of rows, with each row representing a line of text. The height of each
+ * row is determined by the font size (8pt in this case).
+ * 
+ * The width of each row (i.e., the number of bytes per row) is determined by the number of characters in the
+ * font and the width of each character.
+ */
 const uint8_t arial_bold_8ptBitmaps[] =
 {
 	/* @0 ' ' (2 pixels wide) */
@@ -3942,8 +3991,20 @@ const uint8_t arial_bold_8ptBitmaps[] =
 	0x00, //
 };
 
-/* Character descriptors for Arial 8pt bold */
-/* { [Char width in bits], [Offset into arial_bold_8ptCharBitmaps in bytes] } */
+/**
+ * @brief Descriptors for Arial 8pt bold font.
+ * 
+ * This array contains the descriptors for the Arial 8pt font. Each descriptor provides information about
+ * a specific character in the font, such as its width and the offset of its bitmap data in the 
+ * arial_8ptBitmaps array.
+ * 
+ * The array is organized as a 2D array with `NR_OF_SYMBOLS` rows and `NR_OF_ELEMENTS` columns. Each row
+ * corresponds to a character in the font, and the columns provide the following information for each character:
+ * 
+ * 0: The width of the character in pixels.
+ * 1: The vertical offset of the character's bitmap data in the arial_8ptBitmaps array.
+ * 
+ */
 const uint16_t arial_bold_8ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 {
 	{2, 0}, 		/*   */
@@ -4044,11 +4105,18 @@ const uint16_t arial_bold_8ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 };
 
 
-/*
-**  Font data for Arial 11pt
-*/
-
-/* Character bitmaps for Arial 11pt */
+/**
+ * @brief Bitmap data for Arial 11pt font.
+ * 
+ * This array contains the bitmap data for the Arial 8pt font. Each byte in the array represents 8 pixels,
+ * with the MSB representing the leftmost pixel and the LSB representing the rightmost pixel.
+ * 
+ * The data is organized as a series of rows, with each row representing a line of text. The height of each
+ * row is determined by the font size (8pt in this case).
+ * 
+ * The width of each row (i.e., the number of bytes per row) is determined by the number of characters in the
+ * font and the width of each character.
+ */
 const uint8_t arial_11ptBitmaps[] =
 {
 	/* @0 ' ' (2 pixels wide) */
@@ -5667,8 +5735,20 @@ const uint8_t arial_11ptBitmaps[] =
 	0x00, //
 };
 
-/* Character descriptors for Arial 11pt */
-/* { [Char width in bits], [Offset into arial_11ptCharBitmaps in bytes] } */
+/**
+ * @brief Descriptors for Arial 11pt font.
+ * 
+ * This array contains the descriptors for the Arial 8pt font. Each descriptor provides information about
+ * a specific character in the font, such as its width and the offset of its bitmap data in the 
+ * arial_8ptBitmaps array.
+ * 
+ * The array is organized as a 2D array with `NR_OF_SYMBOLS` rows and `NR_OF_ELEMENTS` columns. Each row
+ * corresponds to a character in the font, and the columns provide the following information for each character:
+ * 
+ * 0: The width of the character in pixels.
+ * 1: The vertical offset of the character's bitmap data in the arial_8ptBitmaps array.
+ * 
+ */
 const uint16_t arial_11ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 {
 	{2, 0}, 		/*   */
@@ -5769,11 +5849,18 @@ const uint16_t arial_11ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 };
 
 
-/*
-**  Font data for Arial 11pt italic
-*/
-
-/* Character bitmaps for Arial 11pt */
+/**
+ * @brief Bitmap data for Arial 11pt italic font.
+ * 
+ * This array contains the bitmap data for the Arial 8pt font. Each byte in the array represents 8 pixels,
+ * with the MSB representing the leftmost pixel and the LSB representing the rightmost pixel.
+ * 
+ * The data is organized as a series of rows, with each row representing a line of text. The height of each
+ * row is determined by the font size (8pt in this case).
+ * 
+ * The width of each row (i.e., the number of bytes per row) is determined by the number of characters in the
+ * font and the width of each character.
+ */
 const uint8_t arial_italic_11ptBitmaps[] =
 {
 	/* @0 ' ' (2 pixels wide) */
@@ -7392,8 +7479,20 @@ const uint8_t arial_italic_11ptBitmaps[] =
 	0x00, //
 };
 
-/* Character descriptors for Arial 11pt italic */
-/* { [Char width in bits], [Offset into arial_italic_11ptCharBitmaps in bytes] } */
+/**
+ * @brief Descriptors for Arial 11pt italic font.
+ * 
+ * This array contains the descriptors for the Arial 8pt font. Each descriptor provides information about
+ * a specific character in the font, such as its width and the offset of its bitmap data in the 
+ * arial_8ptBitmaps array.
+ * 
+ * The array is organized as a 2D array with `NR_OF_SYMBOLS` rows and `NR_OF_ELEMENTS` columns. Each row
+ * corresponds to a character in the font, and the columns provide the following information for each character:
+ * 
+ * 0: The width of the character in pixels.
+ * 1: The vertical offset of the character's bitmap data in the arial_8ptBitmaps array.
+ * 
+ */
 const uint16_t arial_italic_11ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 {
 	{2, 0}, 		/*   */
@@ -7494,11 +7593,18 @@ const uint16_t arial_italic_11ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 };
 
 
-/*
-**  Font data for Arial 11pt bold
-*/
-
-/* Character bitmaps for Arial 11pt */
+/**
+ * @brief Bitmap data for Arial 11pt bold font.
+ * 
+ * This array contains the bitmap data for the Arial 8pt font. Each byte in the array represents 8 pixels,
+ * with the MSB representing the leftmost pixel and the LSB representing the rightmost pixel.
+ * 
+ * The data is organized as a series of rows, with each row representing a line of text. The height of each
+ * row is determined by the font size (8pt in this case).
+ * 
+ * The width of each row (i.e., the number of bytes per row) is determined by the number of characters in the
+ * font and the width of each character.
+ */
 const uint8_t arial_bold_11ptBitmaps[] =
 {
 	/* @0 ' ' (2 pixels wide) */
@@ -9212,8 +9318,20 @@ const uint8_t arial_bold_11ptBitmaps[] =
 	0x00, //
 };
 
-/* Character descriptors for Arial 11pt bold*/
-/* { [Char width in bits], [Offset into arial_bold_11ptBitmaps in bytes] } */
+/**
+ * @brief Descriptors for Arial 11pt bold font.
+ * 
+ * This array contains the descriptors for the Arial 8pt font. Each descriptor provides information about
+ * a specific character in the font, such as its width and the offset of its bitmap data in the 
+ * arial_8ptBitmaps array.
+ * 
+ * The array is organized as a 2D array with `NR_OF_SYMBOLS` rows and `NR_OF_ELEMENTS` columns. Each row
+ * corresponds to a character in the font, and the columns provide the following information for each character:
+ * 
+ * 0: The width of the character in pixels.
+ * 1: The vertical offset of the character's bitmap data in the arial_8ptBitmaps array.
+ * 
+ */
 const uint16_t arial_bold_11ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 {
 	{2, 0}, 		/*   */
@@ -9315,12 +9433,18 @@ const uint16_t arial_bold_11ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 
 
 
-/*
-**  Font data for Consolas small normal
-*/
-
-
-/* Character bitmaps for Consolas 8pt normal */
+/**
+ * @brief Bitmap data for Consolas 8pt font.
+ * 
+ * This array contains the bitmap data for the Arial 8pt font. Each byte in the array represents 8 pixels,
+ * with the MSB representing the leftmost pixel and the LSB representing the rightmost pixel.
+ * 
+ * The data is organized as a series of rows, with each row representing a line of text. The height of each
+ * row is determined by the font size (8pt in this case).
+ * 
+ * The width of each row (i.e., the number of bytes per row) is determined by the number of characters in the
+ * font and the width of each character.
+ */
 const uint8_t consolas_8ptBitmaps[] =
 {
 	/* @0 ' ' (2 pixels wide) */
@@ -10559,8 +10683,20 @@ const uint8_t consolas_8ptBitmaps[] =
 	0x00, //
 };
 
-/* Character descriptors for Consolas 8pt */
-/* { [Char width in bits], [Offset into consolas_8ptCharBitmaps in bytes] } */
+/**
+ * @brief Descriptors for Consolas 8pt font.
+ * 
+ * This array contains the descriptors for the Arial 8pt font. Each descriptor provides information about
+ * a specific character in the font, such as its width and the offset of its bitmap data in the 
+ * arial_8ptBitmaps array.
+ * 
+ * The array is organized as a 2D array with `NR_OF_SYMBOLS` rows and `NR_OF_ELEMENTS` columns. Each row
+ * corresponds to a character in the font, and the columns provide the following information for each character:
+ * 
+ * 0: The width of the character in pixels.
+ * 1: The vertical offset of the character's bitmap data in the arial_8ptBitmaps array.
+ * 
+ */
 const uint16_t consolas_8ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 {
 	{2, 0}, 		/*   */
@@ -10661,11 +10797,18 @@ const uint16_t consolas_8ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 };
 
 
-/*
-**  Font data for Consolas small italic
-*/
-
-/* Character bitmaps for Consolas 8pt italic */
+/**
+ * @brief Bitmap data for Consolas 8pt italic font.
+ * 
+ * This array contains the bitmap data for the Arial 8pt font. Each byte in the array represents 8 pixels,
+ * with the MSB representing the leftmost pixel and the LSB representing the rightmost pixel.
+ * 
+ * The data is organized as a series of rows, with each row representing a line of text. The height of each
+ * row is determined by the font size (8pt in this case).
+ * 
+ * The width of each row (i.e., the number of bytes per row) is determined by the number of characters in the
+ * font and the width of each character.
+ */
 const uint8_t consolas_italic_8ptBitmaps[] =
 {
 	/* @0 ' ' (2 pixels wide) */
@@ -11904,8 +12047,20 @@ const uint8_t consolas_italic_8ptBitmaps[] =
 	0x00, //
 };
 
-/* Character descriptors for Consolas 8pt italic */
-/* { [Char width in bits], [Offset into consolas_italic_8ptCharBitmaps in bytes] } */
+/**
+ * @brief Descriptors for Consolas 8pt italic font.
+ * 
+ * This array contains the descriptors for the Arial 8pt font. Each descriptor provides information about
+ * a specific character in the font, such as its width and the offset of its bitmap data in the 
+ * arial_8ptBitmaps array.
+ * 
+ * The array is organized as a 2D array with `NR_OF_SYMBOLS` rows and `NR_OF_ELEMENTS` columns. Each row
+ * corresponds to a character in the font, and the columns provide the following information for each character:
+ * 
+ * 0: The width of the character in pixels.
+ * 1: The vertical offset of the character's bitmap data in the arial_8ptBitmaps array.
+ * 
+ */
 const uint16_t consolas_italic_8ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 {
 	{2, 0}, 		/*   */
@@ -12006,11 +12161,18 @@ const uint16_t consolas_italic_8ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 };
 
 
-/*
-**  Font data for Consolas 8pt bold
-*/
-
-/* Character bitmaps for Consolas 8pt bold */
+/**
+ * @brief Bitmap data for Consolas 8pt bold font.
+ * 
+ * This array contains the bitmap data for the Arial 8pt font. Each byte in the array represents 8 pixels,
+ * with the MSB representing the leftmost pixel and the LSB representing the rightmost pixel.
+ * 
+ * The data is organized as a series of rows, with each row representing a line of text. The height of each
+ * row is determined by the font size (8pt in this case).
+ * 
+ * The width of each row (i.e., the number of bytes per row) is determined by the number of characters in the
+ * font and the width of each character.
+ */
 const uint8_t consolas_bold_8ptBitmaps[] =
 {
 	/* @0 ' ' (2 pixels wide) */
@@ -13249,8 +13411,20 @@ const uint8_t consolas_bold_8ptBitmaps[] =
 	0x00, //
 };
 
-/* Character descriptors for Consolas 8pt bold */
-/* { [Char width in bits], [Offset into consolas_bold_8ptCharBitmaps in bytes] } */
+/**
+ * @brief Descriptors for Consolas 8pt bold font.
+ * 
+ * This array contains the descriptors for the Arial 8pt font. Each descriptor provides information about
+ * a specific character in the font, such as its width and the offset of its bitmap data in the 
+ * arial_8ptBitmaps array.
+ * 
+ * The array is organized as a 2D array with `NR_OF_SYMBOLS` rows and `NR_OF_ELEMENTS` columns. Each row
+ * corresponds to a character in the font, and the columns provide the following information for each character:
+ * 
+ * 0: The width of the character in pixels.
+ * 1: The vertical offset of the character's bitmap data in the arial_8ptBitmaps array.
+ * 
+ */
 const uint16_t consolas_bold_8ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 {
 	{2, 0}, 		/*   */
@@ -13351,11 +13525,18 @@ const uint16_t consolas_bold_8ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 };
 
 
-/*
-**  Font data for Consolas 11pt
-*/
-
-/* Character bitmaps for Consolas 11pt */
+/**
+ * @brief Bitmap data for Consolas 11pt font.
+ * 
+ * This array contains the bitmap data for the Arial 8pt font. Each byte in the array represents 8 pixels,
+ * with the MSB representing the leftmost pixel and the LSB representing the rightmost pixel.
+ * 
+ * The data is organized as a series of rows, with each row representing a line of text. The height of each
+ * row is determined by the font size (8pt in this case).
+ * 
+ * The width of each row (i.e., the number of bytes per row) is determined by the number of characters in the
+ * font and the width of each character.
+ */
 const uint8_t consolas_11ptBitmaps[] =
 {
 	/* @0 ' ' (2 pixels wide) */
@@ -14974,8 +15155,20 @@ const uint8_t consolas_11ptBitmaps[] =
 	0x00, //
 };
 
-/* Character descriptors for Consolas 11pt */
-/* { [Char width in bits], [Offset into consolas_11ptCharBitmaps in bytes] } */
+/**
+ * @brief Descriptors for Consolas 11pt font.
+ * 
+ * This array contains the descriptors for the Arial 8pt font. Each descriptor provides information about
+ * a specific character in the font, such as its width and the offset of its bitmap data in the 
+ * arial_8ptBitmaps array.
+ * 
+ * The array is organized as a 2D array with `NR_OF_SYMBOLS` rows and `NR_OF_ELEMENTS` columns. Each row
+ * corresponds to a character in the font, and the columns provide the following information for each character:
+ * 
+ * 0: The width of the character in pixels.
+ * 1: The vertical offset of the character's bitmap data in the arial_8ptBitmaps array.
+ * 
+ */
 const uint16_t consolas_11ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 {
 	{2, 0}, 		/*   */
@@ -15076,11 +15269,18 @@ const uint16_t consolas_11ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 };
 
 
-/*
-**  Font data for Consolas 11pt italic
-*/
-
-/* Character bitmaps for Consolas 11pt italic */
+/**
+ * @brief Bitmap data for Consolas 11pt  italic font.
+ * 
+ * This array contains the bitmap data for the Arial 8pt font. Each byte in the array represents 8 pixels,
+ * with the MSB representing the leftmost pixel and the LSB representing the rightmost pixel.
+ * 
+ * The data is organized as a series of rows, with each row representing a line of text. The height of each
+ * row is determined by the font size (8pt in this case).
+ * 
+ * The width of each row (i.e., the number of bytes per row) is determined by the number of characters in the
+ * font and the width of each character.
+ */
 const uint8_t consolas_italic_11ptBitmaps[] =
 {
 	/* @0 ' ' (2 pixels wide) */
@@ -16699,8 +16899,20 @@ const uint8_t consolas_italic_11ptBitmaps[] =
 	0x00, //
 };
 
-/* Character descriptors for Consolas 11pt italic */
-/* { [Char width in bits], [Offset into consolas_italic_11ptCharBitmaps in bytes] } */
+/**
+ * @brief Descriptors for Consolas 11pt italic font.
+ * 
+ * This array contains the descriptors for the Arial 8pt font. Each descriptor provides information about
+ * a specific character in the font, such as its width and the offset of its bitmap data in the 
+ * arial_8ptBitmaps array.
+ * 
+ * The array is organized as a 2D array with `NR_OF_SYMBOLS` rows and `NR_OF_ELEMENTS` columns. Each row
+ * corresponds to a character in the font, and the columns provide the following information for each character:
+ * 
+ * 0: The width of the character in pixels.
+ * 1: The vertical offset of the character's bitmap data in the arial_8ptBitmaps array.
+ * 
+ */
 const uint16_t consolas_italic_11ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 {
 	{2, 0}, 		/*   */
@@ -16801,11 +17013,18 @@ const uint16_t consolas_italic_11ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 };
 
 
-/*
-**  Font data for Consolas 11pt bold
-*/
-
-/* Character bitmaps for Consolas 11pt bold*/
+/**
+ * @brief Bitmap data for Consolas 11pt bold font.
+ * 
+ * This array contains the bitmap data for the Arial 8pt font. Each byte in the array represents 8 pixels,
+ * with the MSB representing the leftmost pixel and the LSB representing the rightmost pixel.
+ * 
+ * The data is organized as a series of rows, with each row representing a line of text. The height of each
+ * row is determined by the font size (8pt in this case).
+ * 
+ * The width of each row (i.e., the number of bytes per row) is determined by the number of characters in the
+ * font and the width of each character.
+ */
 const uint8_t consolas_bold_11ptBitmaps[] =
 {
 	/* @0 ' ' (2 pixels wide) */
@@ -18424,8 +18643,20 @@ const uint8_t consolas_bold_11ptBitmaps[] =
 	0x00, //
 };
 
-/* Character descriptors for Consolas 11pt bold */
-/* { [Char width in bits], [Offset into consolas_bold_11ptCharBitmaps in bytes] } */
+/**
+ * @brief Descriptors for Consolas 11pt bold font.
+ * 
+ * This array contains the descriptors for the Arial 8pt font. Each descriptor provides information about
+ * a specific character in the font, such as its width and the offset of its bitmap data in the 
+ * arial_8ptBitmaps array.
+ * 
+ * The array is organized as a 2D array with `NR_OF_SYMBOLS` rows and `NR_OF_ELEMENTS` columns. Each row
+ * corresponds to a character in the font, and the columns provide the following information for each character:
+ * 
+ * 0: The width of the character in pixels.
+ * 1: The vertical offset of the character's bitmap data in the arial_8ptBitmaps array.
+ * 
+ */
 const uint16_t consolas_bold_11ptDescriptors[NR_OF_SYMBOLS][NR_OF_ELEMENTS] =
 {
 	{2, 0}, 		/*   */

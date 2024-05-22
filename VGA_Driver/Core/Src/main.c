@@ -12,14 +12,20 @@
 
 #include "main.h"
 #include "stm32_ub_vga_screen.h"
-#include <math.h>
+#include "stm32f4xx_it.h"
+// #include <math.h>
 
 
 int main(void)
-{
-	SystemInit(); // System speed to 168MHz
+{	SystemInit(); // System speed to 168MHz
 
 	UB_VGA_Screen_Init(); // Init VGA-Screen
+
+  UB_VGA_FillScreen(VGA_COL_RED); // Fill screen with red color
+
+  UB_VGA_SetPixel(100, 100, VGA_COL_BLUE); // Set a blue pixel
+
+  API_draw_polygon(100, 100, 6, VGA_COL_GREEN, 1); // Draw a green polygon
 
   while(1)
   {

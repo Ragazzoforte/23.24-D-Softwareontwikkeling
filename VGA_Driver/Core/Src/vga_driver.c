@@ -47,7 +47,53 @@
 #define GRIJS         517718569
 #define WIT           492542
 
+#define PI 3.14159265
+#define TERMS 4
+
 #define UNUSED(x) (void)(x)
+const double cos_table[73] = {
+    1.0000000, 0.9961947, 0.9848078, 0.9659258, 0.9396926, 
+    0.9063078, 0.8660254, 0.8191520, 0.7660444, 0.7071068, 
+    0.6427876, 0.5735764, 0.5000000, 0.4226183, 0.3420201, 
+    0.2588190, 0.1736482, 0.0871557, 0.0000000, -0.0871557, 
+    -0.1736482, -0.2588190, -0.3420201, -0.4226183, -0.5000000, 
+    -0.5735764, -0.6427876, -0.7071068, -0.7660444, -0.8191520, 
+    -0.8660254, -0.9063078, -0.9396926, -0.9659258, -0.9848078, 
+    -0.9961947, -1.0000000, -0.9961947, -0.9848078, -0.9659258, 
+    -0.9396926, -0.9063078, -0.8660254, -0.8191520, -0.7660444, 
+    -0.7071068, -0.6427876, -0.5735764, -0.5000000, -0.4226183, 
+    -0.3420201, -0.2588190, -0.1736482, -0.0871557, -0.0000000, 
+    0.0871557, 0.1736482, 0.2588190, 0.3420201, 0.4226183, 
+    0.5000000, 0.5735764, 0.6427876, 0.7071068, 0.7660444, 
+    0.8191520, 0.8660254, 0.9063078, 0.9396926, 0.9659258, 
+    0.9848078, 0.9961947, 1.0000000, 0.9961947, 0.9848078, 
+    0.9659258, 0.9396926, 0.9063078, 0.8660254, 0.8191520, 
+    0.7660444, 0.7071068, 0.6427876, 0.5735764, 0.5000000
+};
+const double sin_table[73] = {
+    0.0000000, 0.0871557, 0.1736482, 0.2588190, 0.3420201, 
+    0.4226183, 0.5000000, 0.5735764, 0.6427876, 0.7071068, 
+    0.7660444, 0.8191520, 0.8660254, 0.9063078, 0.9396926, 
+    0.9659258, 0.9848078, 0.9961947, 1.0000000, 0.9961947, 
+    0.9848078, 0.9659258, 0.9396926, 0.9063078, 0.8660254, 
+    0.8191520, 0.7660444, 0.7071068, 0.6427876, 0.5735764, 
+    0.5000000, 0.4226183, 0.3420201, 0.2588190, 0.1736482, 
+    0.0871557, 0.0000000, -0.0871557, -0.1736482, -0.2588190, 
+    -0.3420201, -0.4226183, -0.5000000, -0.5735764, -0.6427876, 
+    -0.7071068, -0.7660444, -0.8191520, -0.8660254, -0.9063078, 
+    -0.9396926, -0.9659258, -0.9848078, -0.9961947, -1.0000000, 
+    -0.9961947, -0.9848078, -0.9659258, -0.9396926, -0.9063078, 
+    -0.8660254, -0.8191520, -0.7660444, -0.7071068, -0.6427876, 
+    -0.5735764, -0.5000000, -0.4226183, -0.3420201, -0.2588190, 
+    -0.1736482, -0.0871557, -0.0000000, 0.0871557, 0.1736482, 
+    0.2588190, 0.3420201, 0.4226183, 0.5000000, 0.5735764, 
+    0.6427876, 0.7071068, 0.7660444, 0.8191520, 0.8660254, 
+    0.9063078, 0.9396926, 0.9659258, 0.9848078, 0.9961947, 
+    1.0000000
+};
+//--------------------------------------------------------------
+// double fast_cos(int angle);
+// double fast_sin(int angle);
 //--------------------------------------------------------------
 
 /**
@@ -80,11 +126,11 @@ int API_draw_text (int x_lup, int y_lup, int color, char *text, char *fontname,i
   */
 int API_draw_line (int x1, int y1, int x2, int y2, int colour, int thickness, int reserved)
 {
-  int x_difference = x2 - x1; //calculate the difference in x-coordinates
-  int y_difference = y2 - y1; //calculate the difference in y-coordinates
+  int x_difference = abs(x2 - x1); //calculate the difference in x-coordinates
+  int y_difference = abs(y2 - y1); //calculate the difference in y-coordinates
   int step_x = x1 < x2 ? 1 : -1; //set the step size for the x-coordinate
   int step_y = y1 < y2 ? 1 : -1; //set the step size for the y-coordinate
-  int slope_error = (x_difference > y_difference ? x_difference : -y_difference) / 2; //calculate the error
+  int slope_error = (x_difference > y_difference ? x_difference : -y_difference)/2; //calculate the error
   int store_error;
   
   if (x1 < 0 || x1 >= VGA_DISPLAY_X || x2 < 0 || x2 >= VGA_DISPLAY_X || y1 < 0 || y1 >= VGA_DISPLAY_Y || y2 < 0 || y2 >= VGA_DISPLAY_Y) // Check if the coordinates are out of the screen
@@ -141,7 +187,7 @@ int API_draw_line (int x1, int y1, int x2, int y2, int colour, int thickness, in
   * @retval
   */
 int API_draw_rectangle (int x, int y, int width, int height, int colour, int filled, int reserved1, int reserved2) // e.g.: weight, bordercolor
-{
+{ 
   if (x < 0 || x >= VGA_DISPLAY_X || y < 0 || y >= VGA_DISPLAY_Y || width <= 0 || height <= 0) // Check if the coordinates or dimensions are invalid
   {
     // Handle the error here
@@ -169,6 +215,119 @@ int API_draw_rectangle (int x, int y, int width, int height, int colour, int fil
 }
 
 /**
+  * @brief  API_draw_polygon() is used to draw a polygon to the VGA screen.  
+  *           
+  * @note   selected polygon must not exceed a certain size         
+  *     
+  * @param  
+  * @retval 
+  */
+int API_draw_polygon (int x, int y, int corners, int colour, int filled)
+{
+  // if (corners < 3) // Check if the number of corners is valid
+  // {
+  //   // Handle the error here
+  //   return -1;
+  // }
+
+  int angle = 360 / corners; // Calculate the angle between each corner
+  int radius = 25; // Set the radius of the polygon
+
+  int x_center = x; // Calculate the x-coordinate of the center of the polygon
+  int y_center = y; // Calculate the y-coordinate of the center of the polygon
+
+  int x_first = x_center + radius; // Calculate the x-coordinate of the first corner
+  int y_first = y_center; // Calculate the y-coordinate of the first corner
+
+  int x_prev = x_first; // Initialize the previous corner's x-coordinate
+  int y_prev = y_first; // Initialize the previous corner's y-coordinate
+
+  double cos, sin;
+  int x_curr, y_curr;
+  int index = 0;
+
+  for (int i = 1  ; i <= corners; i++) // Iterate over each corner of the polygon
+  {
+    index = (angle* i) / 5;
+    cos = cos_table[index];
+    sin = sin_table[index];
+    x_curr = x_center + (radius * cos); // Calculate the x-coordinate of the current corner
+    y_curr = y_center - (radius * sin); // Calculate the y-coordinate of the current corner
+  
+    API_draw_line(x_prev, y_prev, x_curr, y_curr, colour, 1, 0); // Draw a line between the previous and current corner
+    
+    if (filled == 1) // Check if the polygon should be filled
+    {
+      int y_min = y_prev < y_curr ? y_prev : y_curr; // Find the minimum y-coordinate
+      int y_max = y_prev > y_curr ? y_prev : y_curr; // Find the maximum y-coordinate
+      
+      for (int j = y_min + 1; j < y_max; j++) // Iterate over the rows between the minimum and maximum y-coordinate
+      {
+      int x_intersection = ((j - y_prev) * (x_curr - x_prev)) / (y_curr - y_prev) + x_prev; // Calculate the x-coordinate of the intersection point
+      
+      if (x_intersection < x_prev) // Check if the intersection point is to the left of the previous corner
+      {
+        for (int k = x_intersection; k < x_prev; k++) // Iterate over the columns between the intersection point and the previous corner
+        {
+        API_draw_line(k, j, x_prev, j, colour, 1, 0); // Draw a horizontal line for each column
+        }
+      }
+      else // The intersection point is to the right of the previous corner
+      {
+        for (int k = x_prev + 1; k <= x_intersection; k++) // Iterate over the columns between the previous corner and the intersection point
+        {
+        API_draw_line(x_prev, j, k, j, colour, 1, 0); // Draw a horizontal line for each column
+        }
+      }
+      }
+    }
+    x_prev = x_curr; // Update the previous corner's x-coordinate
+    y_prev = y_curr; // Update the previous corner's y-coordinate
+  }
+
+  // Close the polygon by drawing a line from the last corner to the first one
+  API_draw_line(x_prev, y_prev, x_first, y_first, colour, 1, 0);
+  return 0;
+}
+
+
+// double fast_cos(int angle)
+// {
+//   // return 0;
+//   // Lookup table for cosine values
+  
+//   // Normalize the angle to be within 0 to 360 degrees
+//   // angle = angle % 360;
+  
+//   // Convert the angle to an index in the lookup table
+//   int index = (angle / 20);
+  
+//   // Return the cosine value from the lookup table
+//   double cos_angle = cos_table[index];
+
+//   // for(int i = 0; i < 100000; i++)
+//   // {
+//   //   __NOP();
+//   //   // asm("nop");
+//   // }
+//   return cos_angle;
+// }
+
+// double fast_sin(int angle)
+// {
+//   // Lookup table for sine values
+
+//   // Normalize the angle to be within 0 to 360 degrees
+//   // angle %= 360;
+//   // Convert the angle to an index in the lookup table
+//   int index = (angle / 20);
+  
+//   // Return the cosine value from the lookup table
+//   double sin_angle = 
+//   return sin_angle;
+// }
+
+/**
   * @brief  API_draw_bitmap() is used to draw a figure (bitmap) to the VGA screen.  
   *           
   * @note   selected picture must not exceed a certain size         
@@ -178,7 +337,7 @@ int API_draw_rectangle (int x, int y, int width, int height, int colour, int fil
   */
 int API_draw_bitmap (int x_lup, int y_lup, int bm_nr)
 {
-
+  return 0;
 }
 
 /**

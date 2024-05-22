@@ -224,11 +224,11 @@ int API_draw_rectangle (int x, int y, int width, int height, int colour, int fil
   */
 int API_draw_polygon (int x, int y, int size, int corners, int colour, int filled)
 {
-  // if (corners < 3) // Check if the number of corners is valid
-  // {
-  //   // Handle the error here
-  //   return -1;
-  // }
+  if (corners < 3) // Check if the number of corners is valid
+  {
+    // Handle the error here
+    return -1;
+  }
 
   int angle = 360 / corners; // Calculate the angle between each corner
   int radius = size; // Set the radius of the polygon

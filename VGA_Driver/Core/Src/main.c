@@ -23,9 +23,6 @@ int main(void)
 
   UB_VGA_FillScreen(VGA_COL_RED); // Fill screen with red color
 
-  UB_VGA_SetPixel(100, 100, VGA_COL_BLUE); // Set a blue pixel
-
-  API_draw_polygon(100, 50, 50, 3, VGA_COL_GREEN, 1); // Draw a green polygon
   while(1)
   {
 

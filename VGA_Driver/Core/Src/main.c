@@ -27,7 +27,7 @@ int main(void)
 
   UART_Init(BAUD_RATE);
 
-  //UART_SendString("ik ben een stm32F407 maar koalaberen zijn ook erg mooie beesten");
+  UART_SendString("ik ben een stm32F407 maar koalaberen zijn ook erg mooie beesten");
   while(1)
   {
     //uint8_t byte = UART_GetChar();

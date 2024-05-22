@@ -31,7 +31,7 @@ int main(void)
 
   API_clearscreen("blauw");
   API_draw_text (10, 5, VGA_COL_RED, "Hallo mijn naam is Michel Vollmuller", "consolas", 1, 1, 1);
-  API_draw_bitmap (100, 100, 7);
+  API_draw_bitmap (10, 50, 7);
 
   while(1)
   {

@@ -1,3 +1,8 @@
+/*
+ * vga_driver.h
+ *    Author: Michel Vollmuller
+ */
+
 #ifndef vga_driver_h
 #define vga_driver_h
 
@@ -8,6 +13,7 @@
 #define ARROW_DOWN 5
 #define ARROW_LEFT 6
 #define MEGAMAN 7
+
 
 #define MAX_LEN_FONTNAME 30
 #define LETTERA 'a'

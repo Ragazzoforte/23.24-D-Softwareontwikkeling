@@ -28,6 +28,7 @@
 #define ARROW_RIGHT_HEIGHT  27
 
 
+
 extern const uint8_t megaman[];
 extern const uint8_t megaman_2[MEGAMAN_WIDTH * MEGAMAN_HEIGHT];
 extern const uint8_t smiley_happy[SMILEY_WIDTH * SMILEY_HEIGHT];

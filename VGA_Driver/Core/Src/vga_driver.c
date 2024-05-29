@@ -424,7 +424,7 @@ int API_draw_polygon (int x, int y, int size, int corners, int colour, int fille
   return 0;
 }
 
-
+/**
  * @brief Draws a bitmap to the VGA screen.
  * 
  * This function draws a bitmap to the VGA screen at the specified coordinates. The bitmap is selected by number

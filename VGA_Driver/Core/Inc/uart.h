@@ -20,6 +20,6 @@ extern bool msgReceivedUSART2;
 void UART_Init(uint32_t baudrate);
 void UART_SendChar (char c);
 void UART_SendString (char *string);
-uint8_t UART_GetChar (void);
+// char* UART_GetString (void);
 
 #endif // UART_H

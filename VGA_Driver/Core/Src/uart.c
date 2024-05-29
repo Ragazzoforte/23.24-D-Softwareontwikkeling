@@ -16,6 +16,9 @@
 
 #include "uart.h"
 
+char UART_TX_message[UART_BUFFER_SIZE];
+
+
 char UART_RX_message[UART_BUFFER_SIZE];
 uint16_t charCnt = 0;
 bool msgReceivedUSART2 = false;
@@ -55,7 +58,14 @@ void USART2_IRQHandler(void)
   if(USART2->SR & (1<<4))
   {
     // UART IDLE interrupt (Idle line)
-    USART2->CR1 ^= (1<<4); // Disable idle line interrupt
+    // USART2->CR1 ^= (1<<4); // Disable idle line interrupt
+    // USART2->SR &= ~(1<<4);
+    volatile uint32_t tempreg;
+    tempreg = USART2->SR;
+    (void) tempreg;
+    tempreg = USART2->DR;
+    (void) tempreg;
+    
   	msgReceivedUSART2 = true;
     charCnt = 0;
 
@@ -64,7 +74,7 @@ void USART2_IRQHandler(void)
   if(USART2->SR & (1<<5))
   {
     // USART RX interrupt
-    if(charCnt == 0) USART2->CR1 ^= (1<<4); // Enable idle line interrupt
+    //if(charCnt == 0) USART2->CR1 ^= (1<<4); // Enable idle line interrupt
     if (USART2->DR != 0)
 		{
 			UART_RX_message[charCnt] = USART2->DR;
@@ -166,7 +176,7 @@ void UART_Init(uint32_t baudrate)
     USART2->CR1 = 0x00;     // Clear all existing CR1 settings
     USART2->CR1 ^= (1<<2);  // RE=1.. Enable Receiver
     USART2->CR1 ^= (1<<3);  // TE=1.. Enable Transmitter
-    // USART2->CR1 ^= (1<<4);  // IDLEIE = 1... Enable 'Idle line' interrupt
+    USART2->CR1 ^= (1<<4);  // IDLEIE = 1... Enable 'Idle line' interrupt
     USART2->CR1 ^= (1<<5);  // RXNEIE = 1... Enable 'Data register not empty' interrupt
     // USART2->CR1 ^= (1<<6);  // TCIE = 1... Enable 'Transmission complete' interrupt
     // USART2->CR1 ^= (1<<7);  // TXEIE = 1... Enable 'Trasmit data register empty' interrupt
@@ -201,30 +211,29 @@ void UART_SendChar (char c)
 
 void UART_SendString (char *string)
 {
-  //DMA_Cmd(DMA1_Stream6, ENABLE);
+  USART2->CR1 ^= (1<<5); // disable RXNE
+  strcpy(UART_TX_message, string);
+
 
   // to interrupt enable TC interrupt here.
-  for(int i;i< sizeof(string); i++)
+  uint8_t i;
+  for(i=0 ;i< (int)strlen(string); ++i)
   {
-    UART_SendChar(*string);
-    string++;
+    UART_SendChar(*(string+i));
+    // string++;
   }
+
+  USART2->CR1 ^= (1<<5); // enable RXNE
 }
 
-uint8_t UART_GetChar (void)
-{
-		/*********** STEPS FOLLOWED *************
+// char* UART_GetString (void)
+// {
+// 	char message[sizeof(UART_RX_message)];
 	
-	1. Wait for the RXNE bit to set. It indicates that the data has been received and can be read.
-	2. Read the data from USART_DR  Register. This also clears the RXNE bit
 	
-	****************************************/
-	uint8_t Temp;
-	
-	while (!(USART2->SR & (1<<5)));  // Wait for RXNE to SET.. This indicates that the data has been Received
-	Temp = USART2->DR;  // Read the data. 
-	return Temp;
-}
+  
+//   return &message;
+// }
 
 /**
   * @}

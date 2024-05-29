@@ -27,14 +27,14 @@ int main(void)
 
   UART_Init(BAUD_RATE);
 
+  UART_SendString(" "); // First char (weird bug)
   UART_SendString("ik ben een stm32F407 maar koalaberen zijn ook erg mooie beesten");
   while(true)
   {
     if(msgReceivedUSART2 == true)
     {
+      UART_SendString(UART_RX_message);
       msgReceivedUSART2 = false; // reset message flag
-      UART_SendString(UART_RX_message); // do something with message
-      memset(UART_RX_message, 0, UART_BUFFER_SIZE); // clear buffer for next message (optional)
     }
   }
 }

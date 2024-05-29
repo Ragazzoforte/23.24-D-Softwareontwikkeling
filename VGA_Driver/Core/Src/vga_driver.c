@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * @file    vga_driver.c
-  * @author  Tijmen Willems
+  * @author  Tijmen Willems, Michel Vollmuller, Tim Wannet
   * @brief   VGA driver functions source file
   *
   *   This file provides five functions to be called from the logic_layer:
@@ -21,6 +21,9 @@
 /** @addtogroup VGA driver functions
   * @{
   */
+//--------------------------------------------------------------
+// Includes
+//--------------------------------------------------------------
 //--------------------------------------------------------------
 // Includes
 //--------------------------------------------------------------
@@ -59,9 +62,9 @@
  * @param y_lup The y-coordinate of the left upper point where the text should start.
  * @param color The color of the text.
  * @param text The text to be drawn.
- * @param fontname The name of the font to be used.
+ * @param fontname The name of the font to be used. arial or consolas
  * @param fontsize The size of the font. 1 for small, 2 for big.
- * @param fontstyle The style of the font. Use the predefined constants for this.
+ * @param fontstyle The style of the font. Use the predefined constants for this. 1 for normal, 2 for italic, 3 for bold.
  * @param reserved Reserved for future use.
  * 
  * @return Returns 0 on success, non-zero error code on failure.
@@ -316,16 +319,91 @@ int API_draw_rectangle (int x, int y, int width, int height, int colour, int fil
 }
 
 /**
-  * @brief  API_draw_bitmap() is used to draw a figure (bitmap) to the VGA screen.  
-  *           
-  * @note   selected picture must not exceed a certain size         
-  *     
-  * @param  
-  * @retval 
-  */
+ * @brief Draws a bitmap to the VGA screen.
+ * 
+ * This function draws a bitmap to the VGA screen at the specified coordinates. The bitmap is selected by number
+ * from a predefined list of bitmaps.
+ * 
+ * @param x_lup The x-coordinate of the left upper point where the bitmap should be drawn.
+ * @param y_lup The y-coordinate of the left upper point where the bitmap should be drawn.
+ * @param bm_nr The number of the bitmap to be drawn. This corresponds to an index in the predefined list of bitmaps.
+ *           The following bitmaps are available:
+ *            - 1: Smiley happy
+ *            - 2: Smiley sad
+ *            - 3: Arrow up
+ *            - 4: Arrow right
+ *            - 5: Arrow down
+ *            - 6: Arrow left
+ *            - 7: Megaman
+ * 
+ * @return Returns 0 on success, non-zero error code on failure.
+ */
 int API_draw_bitmap (int x_lup, int y_lup, int bm_nr)
 {
+	//bron: http://www.brackeen.com/vga/bitmaps.html
+	const uint8_t *pbitmap;
+	int img_width, img_height;
+	int x, y;
 
+  /*bitmap chooser*/
+	switch(bm_nr)
+	{
+		case SMILEY_HAPPY:
+			pbitmap    = smiley_happy;
+			img_width  = SMILEY_WIDTH;
+			img_height = SMILEY_HEIGHT;
+			break;
+
+		case SMILEY_SAD:
+			pbitmap    = smiley_sad;
+			img_width  = SMILEY_WIDTH;
+			img_height = SMILEY_HEIGHT;
+			break;
+
+		case ARROW_UP:
+			pbitmap    = arrow_up;
+			img_width  = ARROW_UP_WIDTH;
+			img_height = ARROW_UP_HEIGHT;
+			break;
+
+		case ARROW_RIGHT:
+			pbitmap    = arrow_right;
+			img_width  = ARROW_RIGHT_WIDTH;
+			img_height = ARROW_RIGHT_HEIGHT;
+			break;
+
+		case ARROW_DOWN:
+			pbitmap    = arrow_down;
+			img_width  = ARROW_DOWN_WIDTH;
+			img_height = ARROW_DOWN_HEIGHT;
+
+			break;
+
+		case ARROW_LEFT:
+			pbitmap    = arrow_left;
+			img_width  = ARROW_LEFT_WIDTH;
+			img_height = ARROW_LEFT_HEIGHT;
+
+			break;
+
+		case MEGAMAN:
+			pbitmap	   = megaman_2;
+			img_width  = MEGAMAN_WIDTH;
+			img_height = MEGAMAN_HEIGHT;
+			break;
+
+		default: break;
+	}
+  /*draw bitmap*/
+	for(y=0; y<img_height;y++)
+	{
+
+		for(x=0; x<img_width;x++)
+		{
+			UB_VGA_SetPixel(x_lup + x, y_lup + y, *(pbitmap + (y*img_width) + x));
+		}
+	}
+	return 0;
 }
 
 /**

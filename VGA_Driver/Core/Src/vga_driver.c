@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * @file    vga_driver.c
-  * @author  Tijmen Willems
+  * @author  Tijmen Willems, Michel Vollmuller, Tim Wannet
   * @brief   VGA driver functions source file
   *
   *   This file provides five functions to be called from the logic_layer:
@@ -21,6 +21,9 @@
 /** @addtogroup VGA driver functions
   * @{
   */
+//--------------------------------------------------------------
+// Includes
+//--------------------------------------------------------------
 //--------------------------------------------------------------
 // Includes
 //--------------------------------------------------------------
@@ -46,11 +49,13 @@
 #define BRUIN         511801994
 #define GRIJS         517718569
 #define WIT           492542
-
 #define PI 3.14159265
 #define TERMS 4
-
+//--------------------------------------------------------------
+// Function Defines
+//--------------------------------------------------------------
 #define UNUSED(x) (void)(x)
+
 const double cos_table[73] = {
     1.0000000, 0.9961947, 0.9848078, 0.9659258, 0.9396926, 
     0.9063078, 0.8660254, 0.8191520, 0.7660444, 0.7071068, 
@@ -92,21 +97,167 @@ const double sin_table[73] = {
     1.0000000
 };
 //--------------------------------------------------------------
-// double fast_cos(int angle);
-// double fast_sin(int angle);
+
 //--------------------------------------------------------------
 
 /**
-  * @brief  API_draw_text() is used to draw a string to the VGA screen.  
-  *           
-  * @note   selected font must be a certain format         
-  *     
-  * @param  
-  * @retval 
-  */
+ * @brief Draws a string to the VGA screen.
+ * 
+ * This function draws a string to the VGA screen using the specified font, size, and style.
+ * 
+ * @param x_lup The x-coordinate of the left upper point where the text should start.
+ * @param y_lup The y-coordinate of the left upper point where the text should start.
+ * @param color The color of the text.
+ * @param text The text to be drawn.
+ * @param fontname The name of the font to be used. arial or consolas
+ * @param fontsize The size of the font. 1 for small, 2 for big.
+ * @param fontstyle The style of the font. Use the predefined constants for this. 1 for normal, 2 for italic, 3 for bold.
+ * @param reserved Reserved for future use.
+ * 
+ * @return Returns 0 on success, non-zero error code on failure.
+ */
 int API_draw_text (int x_lup, int y_lup, int color, char *text, char *fontname,int fontsize, int fontstyle, int reserved) // fontsize:1 small, 2 big
 {
+  /*Variable*/
+	const uint8_t  *pfont;
+	const uint16_t *pdescript;
+  uint16_t symbol_nr, symbol_width_pixels, symbol_start, symbol_height; // used for searching the descriptor
+  int i = 0;
 
+  /*Choose Font library*/
+  if (strcmp(fontname, "arial") == 0)
+  {
+    switch(fontstyle) 
+      {
+        case ITALIC:
+          switch(fontsize)
+          {
+            case LARGE:
+              pfont = arial_italic_11ptBitmaps;
+              pdescript = arial_italic_11ptDescriptors[0];
+              symbol_height = ARIAL_LARGE_ITALIC_HEIGHT;    /* font height in pixels */
+              break;
+            default: // SMALL
+              pfont = arial_italic_8ptBitmaps;
+              pdescript = arial_italic_8ptDescriptors[0];
+              symbol_height = ARIAL_SMALL_ITALIC_HEIGHT;   /* font height in pixels */
+              break;
+          }
+          break;
+
+        case BOLD:
+          switch(fontsize)
+          {
+            case LARGE:
+              pfont = arial_bold_11ptBitmaps;
+              pdescript = arial_bold_11ptDescriptors[0];
+              symbol_height = ARIAL_LARGE_BOLD_HEIGHT; 	/* font height in pixels */
+              break;
+            default: // SMALL
+              pfont = arial_bold_8ptBitmaps;
+              pdescript = arial_bold_8ptDescriptors[0];
+              symbol_height = ARIAL_SMALL_BOLD_HEIGHT; 	/* font height in pixels */
+              break;
+          }
+          break;
+
+        default: // NORMAL
+          switch(fontsize)
+          {
+            case LARGE:
+              pfont = arial_11ptBitmaps;
+              pdescript = arial_11ptDescriptors[0];
+              symbol_height = ARIAL_LARGE_HEIGHT;    	/* font height in pixels */
+              break;
+            default: // SMALL
+              pfont = arial_8ptBitmaps;
+              pdescript = arial_8ptDescriptors[0];
+              symbol_height = ARIAL_SMALL_HEIGHT; 	/* font height in pixels */
+              break;
+          }
+          break;
+      }
+  }
+  if(strcmp(fontname, "consolas") == 0)
+  {
+    switch(fontstyle) 
+      {
+        case ITALIC:
+          switch(fontsize)
+          {
+            case LARGE:
+              pfont = consolas_italic_11ptBitmaps;
+              pdescript = consolas_italic_11ptDescriptors[0];
+              symbol_height = ARIAL_LARGE_ITALIC_HEIGHT;    /* font height in pixels */
+              break;
+            default: // SMALL
+              pfont = consolas_italic_8ptBitmaps;
+              pdescript = consolas_italic_8ptDescriptors[0];
+              symbol_height = ARIAL_SMALL_ITALIC_HEIGHT;   /* font height in pixels */
+              break;
+          }
+          break;
+
+        case BOLD:
+          switch(fontsize)
+          {
+            case LARGE:
+              pfont = consolas_bold_11ptBitmaps;
+              pdescript = consolas_bold_11ptDescriptors[0];
+              symbol_height = ARIAL_LARGE_BOLD_HEIGHT; 	/* font height in pixels */
+              break;
+            default: // SMALL
+              pfont = consolas_bold_8ptBitmaps;
+              pdescript = consolas_bold_8ptDescriptors[0];
+              symbol_height = ARIAL_SMALL_BOLD_HEIGHT; 	/* font height in pixels */
+              break;
+          }
+          break;
+
+        default: // NORMAL
+          switch(fontsize)
+          {
+            case LARGE:
+              pfont = consolas_11ptBitmaps;
+              pdescript = consolas_11ptDescriptors[0];
+              symbol_height = ARIAL_LARGE_HEIGHT;    	/* font height in pixels */
+              break;
+            default: // SMALL
+              pfont = consolas_8ptBitmaps;
+              pdescript = consolas_8ptDescriptors[0];
+              symbol_height = ARIAL_SMALL_HEIGHT; 	/* font height in pixels */
+              break;
+          }
+          break;
+      }
+
+  }
+  /*Draw text*/
+  if(pfont != NULL && pdescript != NULL)
+  {
+    // default:
+    int opschuiven = 0;
+    int index = 0;
+    for(i=0;i<strlen(text);i++)
+    {
+      symbol_nr = (*(text+i)) - ASCII_OFFSET;/* determines which symbol from the font library should be selected */
+      symbol_start = *(pdescript + symbol_nr * ARRAY_DIMENSION + CHAR_START_OFFSET); /* retrieves the starting element in the font bitmap */
+      symbol_width_pixels = *(pdescript + symbol_nr * ARRAY_DIMENSION); /* retrieves the symbol width expressed in pixels */
+      for (int y = 0+symbol_start; y < (symbol_height)+symbol_start; y++) {
+        for (int x = 0; x < (symbol_width_pixels); x++) {
+          if (symbol_width_pixels >= 8) index = (y*2)-symbol_start + (x / symbol_width_pixels);// Calculate the index into the bitmap array
+          if (symbol_width_pixels <= 8) index = (y) + (x / symbol_width_pixels);// Calculate the index into the bitmap array
+          int bit = 7 - (x % symbol_width_pixels);// Calculate the bit position within the current byte
+          int pixel = (pfont[index] >> bit) & 1;// Get the value of the current pixel
+
+          // Set the pixel color based on the value of the current pixel
+          if (pixel == 1) UB_VGA_SetPixel(x_lup + x + opschuiven, y_lup + y - symbol_start, color);
+        }
+      }
+      opschuiven += symbol_width_pixels+1;
+    }
+  }
+  return 0;
 }
 
 /**
@@ -274,53 +425,91 @@ int API_draw_polygon (int x, int y, int size, int corners, int colour, int fille
 }
 
 
-// double fast_cos(int angle)
-// {
-//   // return 0;
-//   // Lookup table for cosine values
-  
-//   // Normalize the angle to be within 0 to 360 degrees
-//   // angle = angle % 360;
-  
-//   // Convert the angle to an index in the lookup table
-//   int index = (angle / 20);
-  
-//   // Return the cosine value from the lookup table
-//   double cos_angle = cos_table[index];
-
-//   // for(int i = 0; i < 100000; i++)
-//   // {
-//   //   __NOP();
-//   //   // asm("nop");
-//   // }
-//   return cos_angle;
-// }
-
-// double fast_sin(int angle)
-// {
-//   // Lookup table for sine values
-
-//   // Normalize the angle to be within 0 to 360 degrees
-//   // angle %= 360;
-//   // Convert the angle to an index in the lookup table
-//   int index = (angle / 20);
-  
-//   // Return the cosine value from the lookup table
-//   double sin_angle = 
-//   return sin_angle;
-// }
-
-/**
-  * @brief  API_draw_bitmap() is used to draw a figure (bitmap) to the VGA screen.  
-  *           
-  * @note   selected picture must not exceed a certain size         
-  *     
-  * @param  
-  * @retval 
-  */
+ * @brief Draws a bitmap to the VGA screen.
+ * 
+ * This function draws a bitmap to the VGA screen at the specified coordinates. The bitmap is selected by number
+ * from a predefined list of bitmaps.
+ * 
+ * @param x_lup The x-coordinate of the left upper point where the bitmap should be drawn.
+ * @param y_lup The y-coordinate of the left upper point where the bitmap should be drawn.
+ * @param bm_nr The number of the bitmap to be drawn. This corresponds to an index in the predefined list of bitmaps.
+ *           The following bitmaps are available:
+ *            - 1: Smiley happy
+ *            - 2: Smiley sad
+ *            - 3: Arrow up
+ *            - 4: Arrow right
+ *            - 5: Arrow down
+ *            - 6: Arrow left
+ *            - 7: Megaman
+ * 
+ * @return Returns 0 on success, non-zero error code on failure.
+ */
 int API_draw_bitmap (int x_lup, int y_lup, int bm_nr)
 {
-  return 0;
+	//bron: http://www.brackeen.com/vga/bitmaps.html
+	const uint8_t *pbitmap;
+	int img_width, img_height;
+	int x, y;
+
+  /*bitmap chooser*/
+	switch(bm_nr)
+	{
+		case SMILEY_HAPPY:
+			pbitmap    = smiley_happy;
+			img_width  = SMILEY_WIDTH;
+			img_height = SMILEY_HEIGHT;
+			break;
+
+		case SMILEY_SAD:
+			pbitmap    = smiley_sad;
+			img_width  = SMILEY_WIDTH;
+			img_height = SMILEY_HEIGHT;
+			break;
+
+		case ARROW_UP:
+			pbitmap    = arrow_up;
+			img_width  = ARROW_UP_WIDTH;
+			img_height = ARROW_UP_HEIGHT;
+			break;
+
+		case ARROW_RIGHT:
+			pbitmap    = arrow_right;
+			img_width  = ARROW_RIGHT_WIDTH;
+			img_height = ARROW_RIGHT_HEIGHT;
+			break;
+
+		case ARROW_DOWN:
+			pbitmap    = arrow_down;
+			img_width  = ARROW_DOWN_WIDTH;
+			img_height = ARROW_DOWN_HEIGHT;
+
+			break;
+
+		case ARROW_LEFT:
+			pbitmap    = arrow_left;
+			img_width  = ARROW_LEFT_WIDTH;
+			img_height = ARROW_LEFT_HEIGHT;
+
+			break;
+
+		case MEGAMAN:
+			pbitmap	   = megaman_2;
+			img_width  = MEGAMAN_WIDTH;
+			img_height = MEGAMAN_HEIGHT;
+			break;
+
+		default: break;
+	}
+  /*draw bitmap*/
+	for(y=0; y<img_height;y++)
+	{
+
+		for(x=0; x<img_width;x++)
+		{
+			UB_VGA_SetPixel(x_lup + x, y_lup + y, *(pbitmap + (y*img_width) + x));
+		}
+	}
+	return 0;
 }
 
 /**

@@ -15,9 +15,18 @@
 #include "stm32f4xx_it.h"
 // #include <math.h>
 
+// #define x_lup 10
+// #define y_lup 10
+// #define color 0xFF
+// #define text "Hello"
+// #define fontname "arial"
+// #define fontsize 1
+// #define fontstyle 1
+// #define reserved 0
 
 int main(void)
-{	SystemInit(); // System speed to 168MHz
+{	
+  SystemInit(); // System speed to 168MHz
 
 	UB_VGA_Screen_Init(); // Init VGA-Screen
 
@@ -25,6 +34,5 @@ int main(void)
 
   while(1)
   {
-
   }
 }

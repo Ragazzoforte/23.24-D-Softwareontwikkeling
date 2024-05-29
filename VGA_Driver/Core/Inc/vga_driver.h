@@ -24,9 +24,9 @@
 #define Consolas_hash 3415123500
 #define CONSOLAS_hash 3746353484
 
-#define NORMAL 1
-#define ITALIC 2
-#define BOLD 3
+#define NORMAL 1498505684
+#define ITALIC 412296731
+#define BOLD 491321
 
 #define ARIAL_SMALL_HEIGHT		  10
 #define ARIAL_SMALL_ITALIC_HEIGHT 12

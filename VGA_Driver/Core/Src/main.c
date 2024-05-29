@@ -41,18 +41,13 @@ int main(void)
   // char *myStrings[8] = {"rechthoek", "25", "80", "100", "110", "blauw", "0"}; 
 
   // tekst, x, y, kleur, tekst, fontnaam (arial, consolas), fontgrootte (1,2), fontstijl (normaal, vet, cursief)
-  char *myStrings[8] = {"tekst", "25", "80", "blauw", "Hello Michel", "arial", "1", "1"};
+  char *myStrings[8] = {"tekst", "25", "80", "blauw", "Hello Michel", "arial", "1", "cursief"};
 
   //bitmap, nr, x-lup, y-lup
   // char *myStrings[4] = {"bitmap", "7", "100", "100"}; 
 
   //clearscherm, kleur
   // char *myStrings[2] = {"clearscherm", "blauw"}; 
-
-  unsigned long normaal = hash("normaal");
-  unsigned long cursief = hash("cursief");
-  unsigned long vet = hash("vet");
-
   int a = kiezen(myStrings, 7);
 
   while(1)

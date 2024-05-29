@@ -17,7 +17,7 @@ int kiezen(char* str[], int size)
 			// break;
 
         case tekst:
-            API_draw_text (atoi(str[1]), atoi(str[2]), color_chooser(str[3]), str[4], str[5], atoi(str[6]), atoi(str[7]), atoi(str[8]));
+            API_draw_text (atoi(str[1]), atoi(str[2]), color_chooser(str[3]), str[4], str[5], atoi(str[6]), hash(str[7]), atoi(str[8]));
 			return 3;
 			// break;
         

@@ -520,62 +520,10 @@ int API_draw_bitmap (int x_lup, int y_lup, int bm_nr)
   * @param colour: the color to clear the screen with
   * @retval none
   */
-int API_clearscreen (char *colour)
+int API_clearscreen (int colour)
 {
-  unsigned long colour_choice = hash(colour); //convert the string to a unique value for the switch case
-
-  switch (colour_choice) 
-  {
-    case ZWART:
-    UB_VGA_FillScreen(VGA_COL_BLACK); //VGA display is cleared with the colour: zwart
-      break;
-    case LICHTMAGENTA:
-      UB_VGA_FillScreen(VGA_COL_LIGHT_MAGENTA); //VGA display is cleared with the colour: lichtmagenta
-      break;
-    case MAGENTA:
-      UB_VGA_FillScreen(VGA_COL_MAGENTA); //VGA display is cleared with the colour: magenta
-      break;
-    case BLAUW:
-      UB_VGA_FillScreen(VGA_COL_BLUE); //VGA display is cleared with the colour: blauw
-      break;
-    case LICHTBLAUW:
-      UB_VGA_FillScreen(VGA_COL_LIGHT_BLUE); //VGA display is cleared with the colour: lichtblauw
-      break;
-    case CYAAN:
-      UB_VGA_FillScreen(VGA_COL_CYAN); //VGA display is cleared with the colour: cyaan
-      break;
-    case LICHTCYAAN:
-      UB_VGA_FillScreen(VGA_COL_LIGHT_CYAN); //VGA display is cleared with the colour: lichtcyaan
-      break;
-    case GROEN:
-      UB_VGA_FillScreen(VGA_COL_GREEN); //VGA display is cleared with the colour: groen
-      break;
-    case LICHTGROEN:
-      UB_VGA_FillScreen(VGA_COL_LIGHT_GREEN); //VGA display is cleared with the colour: lichtgroen
-      break;
-    case GEEL:
-      UB_VGA_FillScreen(VGA_COL_YELLOW); //VGA display is cleared with the colour: geel
-      break;
-    case ROOD:
-      UB_VGA_FillScreen(VGA_COL_RED); //VGA display is cleared with the colour: rood
-      break;
-    case LICHTROOD:
-      UB_VGA_FillScreen(VGA_COL_LIGHT_RED); //VGA display is cleared with the colour: lichtrood
-      break;
-    case BRUIN:
-      UB_VGA_FillScreen(VGA_COL_BROWN); //VGA display is cleared with the colour: bruin
-      break;
-    case GRIJS:
-      UB_VGA_FillScreen(VGA_COL_GREY); //VGA display is cleared with the colour: grijs
-      break;
-    case WIT:
-      UB_VGA_FillScreen(VGA_COL_WHITE); //VGA display is cleared with the colour: wit
-      break;
-    default:
-      // Code to handle invalid color input
-      break;
-  }
-return 0;
+  UB_VGA_FillScreen(colour);
+  return 0;
 }
 
 /**
@@ -594,6 +542,68 @@ unsigned long hash(char *str) {
         hash = ((hash << 5) + hash) + c;
     return hash;
 }
+
 /**
-  * @}
-  */
+ * @brief gives the corresponding colour value for the given string
+ * 
+ * @param str The string to be converted to a colour value
+ * 
+ * @return Returns the color value on success.
+ * @return Returns 100 on error.
+ */
+uint8_t color_chooser(char *str)
+{
+  unsigned long colour_choice = hash(str); //convert the string to a unique value for the switch case
+
+  switch (colour_choice) 
+  {
+    case ZWART:
+      return VGA_COL_BLACK; //VGA display is cleared with the colour: zwart
+
+    case LICHTMAGENTA:
+      return VGA_COL_LIGHT_MAGENTA; //VGA display is cleared with the colour: lichtmagenta
+
+    case MAGENTA:
+      return VGA_COL_MAGENTA; //VGA display is cleared with the colour: magenta
+
+    case BLAUW:
+      return VGA_COL_BLUE; //VGA display is cleared with the colour: blauw
+
+    case LICHTBLAUW:
+      return VGA_COL_LIGHT_BLUE; //VGA display is cleared with the colour: lichtblauw
+
+    case CYAAN:
+      return VGA_COL_CYAN; //VGA display is cleared with the colour: cyaan
+
+    case LICHTCYAAN:
+      return VGA_COL_LIGHT_CYAN; //VGA display is cleared with the colour: lichtcyaan
+
+    case GROEN:
+      return VGA_COL_GREEN; //VGA display is cleared with the colour: groen
+
+    case LICHTGROEN:
+      return VGA_COL_LIGHT_GREEN; //VGA display is cleared with the colour: lichtgroen
+
+    case GEEL:
+      return VGA_COL_YELLOW; //VGA display is cleared with the colour: geel
+
+    case ROOD:
+      return VGA_COL_RED; //VGA display is cleared with the colour: rood
+
+    case LICHTROOD:
+      return VGA_COL_LIGHT_RED; //VGA display is cleared with the colour: lichtrood
+
+    case BRUIN:
+      return VGA_COL_BROWN; //VGA display is cleared with the colour: bruin
+
+    case GRIJS:
+      return VGA_COL_GREY; //VGA display is cleared with the colour: grijs
+
+    case WIT:
+      return VGA_COL_WHITE; //VGA display is cleared with the colour: wit
+
+    default:
+      return 100; // Code to handle invalid color input
+  }
+return 0;
+}

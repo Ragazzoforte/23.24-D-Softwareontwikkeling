@@ -52,5 +52,6 @@ extern "C" {
 // #include <stdio.h>
 #include <string.h>
 // #include <stdint.h>
+#include <stdlib.h>
 //--------------------------------------------------------------
 #endif // __STM32F4_UB_MAIN_H

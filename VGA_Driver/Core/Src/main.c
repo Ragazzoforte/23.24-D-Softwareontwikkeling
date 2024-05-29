@@ -12,7 +12,8 @@
 
 #include "main.h"
 #include "stm32_ub_vga_screen.h"
-#include <math.h>
+#include "stm32f4xx_it.h"
+// #include <math.h>
 
 // #define x_lup 10
 // #define y_lup 10
@@ -24,13 +25,14 @@
 // #define reserved 0
 
 int main(void)
-{
+{	
   SystemInit(); // System speed to 168MHz
 
 	UB_VGA_Screen_Init(); // Init VGA-Screen
 
-  API_clearscreen("blauw");
-  API_draw_text (10, 5, VGA_COL_RED, "Hallo mijn naam is Michel Vollmuller", "consolas", 1, 1, 1);
+  UB_VGA_FillScreen(VGA_COL_RED); // Fill screen with red color
+
+  API_draw_polygon(50, 50, 25, 5, VGA_COL_BLUE, 1); // Draw a blue pentagon
 
   while(1)
   {

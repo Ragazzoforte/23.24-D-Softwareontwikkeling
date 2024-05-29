@@ -21,6 +21,7 @@ target_include_directories(stm32cubemx INTERFACE
 )
 
 target_sources(stm32cubemx INTERFACE
+    ../../Core/Src/stm32f4xx_it.c
     ../../Core/Src/bitmap.c
     ../../Core/Src/fonts.c
     ../../Core/Src/logic_layer.c

@@ -14,13 +14,20 @@
  * @param str The input string.
  * @return The first word of the string.
  */
-char* UI_string_to_function(char* str)
+command UI_string_to_function(char* str)
 {
-    char* first_word;
-    char* rest = str;
-
-    // Get the first token
-    first_word = strtok_r(rest, ",", &rest);
-
-    return first_word; // Return the first token
+    command newCommand;
+    newCommand.arg[0] = str;
+    uint8_t i = 1;
+    while(*str != '\0')
+    {   
+        if(*str == ',')
+        {
+            *str = '\0';
+            newCommand.arg[i] = str+2;
+            i++;
+        }
+        str++;
+    }
+    return newCommand; // Return the first token
 }

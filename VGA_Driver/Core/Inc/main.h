@@ -47,6 +47,7 @@ extern "C" {
 #include "logic_layer.h"
 #include "fonts.h"
 #include "bitmap.h"
+#include "user_interface.h"
 
 // #include <stdio.h>
 #include <string.h>

@@ -13,8 +13,6 @@
 #define ARROW_DOWN 5
 #define ARROW_LEFT 6
 #define MEGAMAN 7
-
-
 #define MAX_LEN_FONTNAME 30
 #define LETTERA 'a'
 #define LETTERC 'c'

@@ -1,33 +1,33 @@
 #include "main.h"
 
-int kiezen(char* str[], int size)
+int kiezen(command str)
 {
-	unsigned long functie = hash(str[0]);
+	unsigned long functie = hash(str.arg[0]);
 
 	switch (functie)
 	{
 		case lijn:
-            API_draw_line (atoi(str[1]), atoi(str[2]), atoi(str[3]), atoi(str[4]), color_chooser(str[5]), atoi(str[6]), atoi(str[7]));
+            API_draw_line (atoi(str.arg[1]), atoi(str.arg[2]), atoi(str.arg[3]), atoi(str.arg[4]), color_chooser(str.arg[5]), atoi(str.arg[6]), atoi(str.arg[7]));
 			return 1;
 			// break;
 		
         case rechthoek:
-            API_draw_rectangle (atoi(str[1]), atoi(str[2]), atoi(str[3]), atoi(str[4]), color_chooser(str[5]), atoi(str[6]), atoi(str[7]), atoi(str[8]));
+            API_draw_rectangle (atoi(str.arg[1]), atoi(str.arg[2]), atoi(str.arg[3]), atoi(str.arg[4]), color_chooser(str.arg[5]), atoi(str.arg[6]), atoi(str.arg[7]), atoi(str.arg[8]));
 			return 2;
 			// break;
 
         case tekst:
-            API_draw_text (atoi(str[1]), atoi(str[2]), color_chooser(str[3]), str[4], str[5], atoi(str[6]), hash(str[7]), atoi(str[8]));
+            API_draw_text (atoi(str.arg[1]), atoi(str.arg[2]), color_chooser(str.arg[3]), str.arg[4], str.arg[5], atoi(str.arg[6]), hash(str.arg[7]), atoi(str.arg[8]));
 			return 3;
 			// break;
         
         case bitmap:
-            API_draw_bitmap (atoi(str[2]), atoi(str[3]), atoi(str[1]));
+            API_draw_bitmap (atoi(str.arg[2]), atoi(str.arg[3]), atoi(str.arg[1]));
             return 4;
             // break;
         
         case clearscherm:
-            API_clearscreen (color_chooser(str[1]));
+            API_clearscreen (color_chooser(str.arg[1]));
             return 5;
             // break;
         

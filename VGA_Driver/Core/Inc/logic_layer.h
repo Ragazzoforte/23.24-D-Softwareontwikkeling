@@ -3,6 +3,7 @@
 
 #include "main.h"
 #include "fonts.h"
+#include "user_interface.h"
 
 #define lijn 15858359
 #define rechthoek 4254663175
@@ -14,6 +15,6 @@
 #define cirkel 4032920196
 #define figuur 4149942492
 
-int kiezen(char* str[], int size);
+int kiezen(command str);
 
 #endif /* logic_layer_h */

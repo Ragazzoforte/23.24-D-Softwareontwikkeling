@@ -370,10 +370,14 @@ int API_draw_rectangle (int x, int y, int width, int height, int colour, int fil
   *           
   * @note   selected polygon must not exceed a certain size         
   *     
-  * @param  
-  * @retval 
+  * @param  x: the x-coordinate where the polygon should start drawing
+  * @param  y: the y-coordinate where the polygon should start drawing
+  * @param  size: the size of the polygon
+  * @param  corners: the number of corners the polygon should have
+  * @param  colour: the colour of the polygon
+  * @retval none
   */
-int API_draw_polygon (int x, int y, int size, int corners, int colour, int filled)
+int API_draw_polygon (int x, int y, int size, int corners, int colour, int reserved)
 {
   if (corners < 3) // Check if the number of corners is valid
   {
@@ -399,24 +403,18 @@ int API_draw_polygon (int x, int y, int size, int corners, int colour, int fille
 
   for (int i = 1  ; i <= corners; i++) // Iterate over each corner of the polygon
   {
-    index = (angle* i) / 5;
-    cos = cos_table[index];
+    index = (angle* i) / 5; // Calculate the index into the cosine and sine tables, max 5 degrees intervals
+    cos = cos_table[index]; 
     sin = sin_table[index];
     x_curr = x_center + (radius * cos); // Calculate the x-coordinate of the current corner
     y_curr = y_center - (radius * sin); // Calculate the y-coordinate of the current corner
   
     API_draw_line(x_prev, y_prev, x_curr, y_curr, colour, 1, 0); // Draw a line between the previous and current corner
     
-    // if (filled == 1) // Check if the polygon should be filled
-    // {
-    //   for (int j = y_prev + 1; j < y_curr; j++) // Iterate over the rows between the previous and current corner
-    //   {
-    //     API_draw_line(x_prev, j, x_curr, j, colour, 1, 0); // Draw a horizontal line for each row
-    //   }
-    // }
     
     x_prev = x_curr; // Update the previous corner's x-coordinate
     y_prev = y_curr; // Update the previous corner's y-coordinate
+    UNUSED(reserved);
   }
 
   // Close the polygon by drawing a line from the last corner to the first one

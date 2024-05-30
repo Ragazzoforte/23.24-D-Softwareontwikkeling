@@ -34,6 +34,8 @@ int main(void)
     if(msgReceivedUSART2 == true)
     {
       UART_SendString(UART_RX_message);
+      
+      memset(UART_RX_message, 0, UART_BUFFER_SIZE);
       msgReceivedUSART2 = false; // reset message flag
     }
   }

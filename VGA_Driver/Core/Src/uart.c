@@ -222,7 +222,7 @@ void UART_SendString (char *string)
     UART_SendChar(*(string+i));
     // string++;
   }
-
+  memset(UART_TX_message, 0, UART_BUFFER_SIZE);
   USART2->CR1 ^= (1<<5); // enable RXNE
 }
 

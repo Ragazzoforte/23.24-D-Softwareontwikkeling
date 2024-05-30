@@ -24,6 +24,9 @@ int main(void)
 
 	UB_VGA_Screen_Init(); // Init VGA-Screen
 
+	UB_VGA_FillScreen(VGA_COL_WHITE);
+  API_draw_polygon(50, 50, 25, 5, VGA_COL_BLUE, 1); // Draw a blue pentagon
+
   UART_Init(BAUD_RATE);
 
   UART_SendString(" "); // First char (weird bug)
@@ -33,11 +36,8 @@ int main(void)
     if(msgReceivedUSART2 == true)
     {
       UART_SendString(UART_RX_message);
-
       int a = kiezen(UI_string_to_function(UART_RX_message));
-
       memset(UART_RX_message, 0, UART_BUFFER_SIZE);
       msgReceivedUSART2 = false; // reset message flag
     }
   }
-}

@@ -18,13 +18,14 @@ command UI_string_to_function(char* str)
 {
     command newCommand;
     newCommand.arg[0] = str;
-    uint8_t i = 1;
+    uint8_t i=1, j=1;
     while(*str != '\0')
     {   
         if(*str == ',')
         {
             *str = '\0';
-            newCommand.arg[i] = str+2;
+            while(*str+j == ' ') j++;
+            newCommand.arg[i] = str+j;
             i++;
         }
         str++;

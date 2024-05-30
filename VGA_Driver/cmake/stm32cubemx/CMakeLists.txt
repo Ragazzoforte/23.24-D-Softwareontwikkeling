@@ -34,6 +34,7 @@ target_sources(stm32cubemx INTERFACE
     ../../Core/Src/stm32f4xx_rcc.c
     ../../Core/Src/stm32f4xx_tim.c
     ../../Core/Src/system_stm32f4xx.c
+    ../../Core/Src/uart.c
     ../../Core/Src/user_interface.c
     ../../Core/Src/vga_driver.c
     ../../startup_stm32f407xx.s

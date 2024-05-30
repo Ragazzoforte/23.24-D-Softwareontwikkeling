@@ -15,6 +15,6 @@
 #define cirkel 4032920196
 #define figuur 4149942492
 
-int kiezen(command str);
+void kiezen(command str);
 
 #endif /* logic_layer_h */

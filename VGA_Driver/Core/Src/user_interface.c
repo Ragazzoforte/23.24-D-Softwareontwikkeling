@@ -8,11 +8,11 @@
 
 /**
  * @brief Converts a string to a function name.
- * This function takes a string as input and returns the first word of the string.
+ * This function takes a string as input and returns the separated strings
  * The string is tokenized using the comma (',') delimiter.
  * 
  * @param str The input string.
- * @return The first word of the string.
+ * @return a struct with the strings
  */
 command UI_string_to_function(char* str)
 {

@@ -4,7 +4,7 @@
 
 typedef struct command
 {
-    char* arg[8];
+    char* arg[20];
 } command;
 
 command UI_string_to_function(char* str);

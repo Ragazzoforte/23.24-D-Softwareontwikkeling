@@ -181,56 +181,59 @@ int API_draw_text (int x_lup, int y_lup, int color, char *text, char *fontname,i
   if(strcmp(fontname, "consolas") == 0)
   {
     switch(fontstyle) 
-      {
-        case ITALIC:
-          switch(fontsize)
-          {
-            case LARGE:
-              pfont = consolas_italic_11ptBitmaps;
-              pdescript = consolas_italic_11ptDescriptors[0];
-              symbol_height = ARIAL_LARGE_ITALIC_HEIGHT;    /* font height in pixels */
-              break;
-            default: // SMALL
-              pfont = consolas_italic_8ptBitmaps;
-              pdescript = consolas_italic_8ptDescriptors[0];
-              symbol_height = ARIAL_SMALL_ITALIC_HEIGHT;   /* font height in pixels */
-              break;
-          }
-          break;
+    {
+      case ITALIC:
+        switch(fontsize)
+        {
+          case LARGE:
+            pfont = consolas_italic_11ptBitmaps;
+            pdescript = consolas_italic_11ptDescriptors[0];
+            symbol_height = ARIAL_LARGE_ITALIC_HEIGHT;    /* font height in pixels */
+            break;
+          default: // SMALL
+            pfont = consolas_italic_8ptBitmaps;
+            pdescript = consolas_italic_8ptDescriptors[0];
+            symbol_height = ARIAL_SMALL_ITALIC_HEIGHT;   /* font height in pixels */
+            break;
+        }
+        break;
 
-        case BOLD:
-          switch(fontsize)
-          {
-            case LARGE:
-              pfont = consolas_bold_11ptBitmaps;
-              pdescript = consolas_bold_11ptDescriptors[0];
-              symbol_height = ARIAL_LARGE_BOLD_HEIGHT; 	/* font height in pixels */
-              break;
-            default: // SMALL
-              pfont = consolas_bold_8ptBitmaps;
-              pdescript = consolas_bold_8ptDescriptors[0];
-              symbol_height = ARIAL_SMALL_BOLD_HEIGHT; 	/* font height in pixels */
-              break;
-          }
-          break;
+      case BOLD:
+        switch(fontsize)
+        {
+          case LARGE:
+            pfont = consolas_bold_11ptBitmaps;
+            pdescript = consolas_bold_11ptDescriptors[0];
+            symbol_height = ARIAL_LARGE_BOLD_HEIGHT; 	/* font height in pixels */
+            break;
+          default: // SMALL
+            pfont = consolas_bold_8ptBitmaps;
+            pdescript = consolas_bold_8ptDescriptors[0];
+            symbol_height = ARIAL_SMALL_BOLD_HEIGHT; 	/* font height in pixels */
+            break;
+        }
+        break;
 
-        default: // NORMAL
-          switch(fontsize)
-          {
-            case LARGE:
-              pfont = consolas_11ptBitmaps;
-              pdescript = consolas_11ptDescriptors[0];
-              symbol_height = ARIAL_LARGE_HEIGHT;    	/* font height in pixels */
-              break;
-            default: // SMALL
-              pfont = consolas_8ptBitmaps;
-              pdescript = consolas_8ptDescriptors[0];
-              symbol_height = ARIAL_SMALL_HEIGHT; 	/* font height in pixels */
-              break;
-          }
-          break;
-      }
-
+      default: // NORMAL
+        switch(fontsize)
+        {
+          case LARGE:
+            pfont = consolas_11ptBitmaps;
+            pdescript = consolas_11ptDescriptors[0];
+            symbol_height = ARIAL_LARGE_HEIGHT;    	/* font height in pixels */
+            break;
+          default: // SMALL
+            pfont = consolas_8ptBitmaps;
+            pdescript = consolas_8ptDescriptors[0];
+            symbol_height = ARIAL_SMALL_HEIGHT; 	/* font height in pixels */
+            break;
+        }
+        break;
+    }
+  }
+  else
+  {
+    UART_SendString("This font is not available. Try again.");
   }
   /*Draw text*/
   if(pfont != NULL && pdescript != NULL)
@@ -496,7 +499,11 @@ int API_draw_bitmap (int x_lup, int y_lup, int bm_nr)
 			img_height = MEGAMAN_HEIGHT;
 			break;
 
-		default: break;
+		default: 
+    	pbitmap	   = megaman_2;
+			img_width  = MEGAMAN_WIDTH;
+			img_height = MEGAMAN_HEIGHT;
+			break;
 	}
   /*draw bitmap*/
 	for(y=0; y<img_height;y++)
@@ -557,51 +564,67 @@ uint8_t color_chooser(char *str)
   {
     case ZWART:
       return VGA_COL_BLACK; //VGA display is cleared with the colour: zwart
+      break;
 
     case LICHTMAGENTA:
       return VGA_COL_LIGHT_MAGENTA; //VGA display is cleared with the colour: lichtmagenta
+      break;
 
     case MAGENTA:
       return VGA_COL_MAGENTA; //VGA display is cleared with the colour: magenta
+      break;
 
     case BLAUW:
       return VGA_COL_BLUE; //VGA display is cleared with the colour: blauw
+      break;
 
     case LICHTBLAUW:
       return VGA_COL_LIGHT_BLUE; //VGA display is cleared with the colour: lichtblauw
+      break;
 
     case CYAAN:
       return VGA_COL_CYAN; //VGA display is cleared with the colour: cyaan
+      break;
 
     case LICHTCYAAN:
       return VGA_COL_LIGHT_CYAN; //VGA display is cleared with the colour: lichtcyaan
+      break;
 
     case GROEN:
       return VGA_COL_GREEN; //VGA display is cleared with the colour: groen
+      break;
 
     case LICHTGROEN:
       return VGA_COL_LIGHT_GREEN; //VGA display is cleared with the colour: lichtgroen
+      break;
 
     case GEEL:
       return VGA_COL_YELLOW; //VGA display is cleared with the colour: geel
+      break;
 
     case ROOD:
       return VGA_COL_RED; //VGA display is cleared with the colour: rood
+      break;
 
     case LICHTROOD:
       return VGA_COL_LIGHT_RED; //VGA display is cleared with the colour: lichtrood
+      break;
 
     case BRUIN:
       return VGA_COL_BROWN; //VGA display is cleared with the colour: bruin
+      break;
 
     case GRIJS:
       return VGA_COL_GREY; //VGA display is cleared with the colour: grijs
+      break;
 
     case WIT:
       return VGA_COL_WHITE; //VGA display is cleared with the colour: wit
+      break;
 
     default:
-      return 100; // Code to handle invalid color input
+      UART_SendString("This color is not available. try again.");
+      break;
   }
 return 0;
 }

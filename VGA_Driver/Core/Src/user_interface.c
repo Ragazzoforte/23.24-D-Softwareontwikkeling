@@ -24,9 +24,19 @@ command UI_string_to_function(char* str)
         if(*str == ',')
         {
             *str = '\0';
-            while(*str+j == ' ') j++;
+            char *temp = str+1;
+            while(*temp == 32)
+            {
+                temp++;
+                j++;
+            }
             newCommand.arg[i] = str+j;
+            j=1;
             i++;
+        }
+        if(*str == '\n' | *str == '\r')
+        {
+            *str = '\0';
         }
         str++;
     }

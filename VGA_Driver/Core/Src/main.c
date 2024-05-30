@@ -14,16 +14,18 @@
 #include "stm32_ub_vga_screen.h"
 #include <math.h>
 #include "uart.h"
-
+#include "stm32f4xx_it.h"
 #define BAUD_RATE 115200
 
+
 int main(void)
-{
-	SystemInit(); // System speed to 168MHz
+{	
+  SystemInit(); // System speed to 168MHz
 
 	UB_VGA_Screen_Init(); // Init VGA-Screen
 
 	UB_VGA_FillScreen(VGA_COL_WHITE);
+  API_draw_polygon(50, 50, 25, 5, VGA_COL_BLUE, 1); // Draw a blue pentagon
 
   UART_Init(BAUD_RATE);
 
@@ -39,4 +41,3 @@ int main(void)
       msgReceivedUSART2 = false; // reset message flag
     }
   }
-}

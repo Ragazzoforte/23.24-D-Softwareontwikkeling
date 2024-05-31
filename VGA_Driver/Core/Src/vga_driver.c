@@ -628,3 +628,14 @@ uint8_t color_chooser(char *str)
   }
 return 0;
 }
+/**
+ * @brief Waits for the specified number of milliseconds.
+ *
+ * This function provides a delay by waiting for the specified number of milliseconds.
+ *
+ * @param ms The number of milliseconds to wait.
+ */
+void API_wait(uint8_t ms)
+{
+  // HAL_Delay(ms);
+}

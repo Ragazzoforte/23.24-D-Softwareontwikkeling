@@ -635,7 +635,7 @@ return 0;
  *
  * @param ms The number of milliseconds to wait.
  */
-void API_wait(uint8_t ms)
+void API_wait(int ms)
 {
-  // HAL_Delay(ms);
+
 }

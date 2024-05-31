@@ -54,5 +54,5 @@ extern int API_draw_bitmap (int x_lup, int y_lup, int bm_nr);
 extern int API_clearscreen (int colour);
 extern unsigned long hash(char *str);
 extern uint8_t color_chooser(char *str);
-extern void API_wait(uint8_t ms);
+extern void API_wait(uint32_t ms);
 #endif /* vga_driver_h */

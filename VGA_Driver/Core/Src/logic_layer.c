@@ -61,6 +61,10 @@ void kiezen(command str)
             UART_SendString("command not available yet. Try another function.");
             break;
 
+        case polygon:
+            API_draw_polygon (atoi(str.arg[1]), atoi(str.arg[2]), atoi(str.arg[3]), atoi(str.arg[4]), color_chooser(str.arg[5]), 0);
+            break;
+
 		default:
             UART_SendString("command not found. Try again.");
 			break;

@@ -14,6 +14,7 @@
 #define herhaal 1948098847
 #define cirkel 4032920196
 #define figuur 4149942492
+#define polygon 4074764338
 
 void kiezen(command str);
 

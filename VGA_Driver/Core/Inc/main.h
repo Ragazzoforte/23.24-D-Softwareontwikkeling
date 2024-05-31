@@ -47,9 +47,11 @@ extern "C" {
 #include "logic_layer.h"
 #include "fonts.h"
 #include "bitmap.h"
+#include "user_interface.h"
 
 // #include <stdio.h>
 #include <string.h>
 // #include <stdint.h>
+#include <stdlib.h>
 //--------------------------------------------------------------
 #endif // __STM32F4_UB_MAIN_H

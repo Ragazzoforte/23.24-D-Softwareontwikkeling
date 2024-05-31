@@ -181,56 +181,59 @@ int API_draw_text (int x_lup, int y_lup, int color, char *text, char *fontname,i
   if(strcmp(fontname, "consolas") == 0)
   {
     switch(fontstyle) 
-      {
-        case ITALIC:
-          switch(fontsize)
-          {
-            case LARGE:
-              pfont = consolas_italic_11ptBitmaps;
-              pdescript = consolas_italic_11ptDescriptors[0];
-              symbol_height = ARIAL_LARGE_ITALIC_HEIGHT;    /* font height in pixels */
-              break;
-            default: // SMALL
-              pfont = consolas_italic_8ptBitmaps;
-              pdescript = consolas_italic_8ptDescriptors[0];
-              symbol_height = ARIAL_SMALL_ITALIC_HEIGHT;   /* font height in pixels */
-              break;
-          }
-          break;
+    {
+      case ITALIC:
+        switch(fontsize)
+        {
+          case LARGE:
+            pfont = consolas_italic_11ptBitmaps;
+            pdescript = consolas_italic_11ptDescriptors[0];
+            symbol_height = ARIAL_LARGE_ITALIC_HEIGHT;    /* font height in pixels */
+            break;
+          default: // SMALL
+            pfont = consolas_italic_8ptBitmaps;
+            pdescript = consolas_italic_8ptDescriptors[0];
+            symbol_height = ARIAL_SMALL_ITALIC_HEIGHT;   /* font height in pixels */
+            break;
+        }
+        break;
 
-        case BOLD:
-          switch(fontsize)
-          {
-            case LARGE:
-              pfont = consolas_bold_11ptBitmaps;
-              pdescript = consolas_bold_11ptDescriptors[0];
-              symbol_height = ARIAL_LARGE_BOLD_HEIGHT; 	/* font height in pixels */
-              break;
-            default: // SMALL
-              pfont = consolas_bold_8ptBitmaps;
-              pdescript = consolas_bold_8ptDescriptors[0];
-              symbol_height = ARIAL_SMALL_BOLD_HEIGHT; 	/* font height in pixels */
-              break;
-          }
-          break;
+      case BOLD:
+        switch(fontsize)
+        {
+          case LARGE:
+            pfont = consolas_bold_11ptBitmaps;
+            pdescript = consolas_bold_11ptDescriptors[0];
+            symbol_height = ARIAL_LARGE_BOLD_HEIGHT; 	/* font height in pixels */
+            break;
+          default: // SMALL
+            pfont = consolas_bold_8ptBitmaps;
+            pdescript = consolas_bold_8ptDescriptors[0];
+            symbol_height = ARIAL_SMALL_BOLD_HEIGHT; 	/* font height in pixels */
+            break;
+        }
+        break;
 
-        default: // NORMAL
-          switch(fontsize)
-          {
-            case LARGE:
-              pfont = consolas_11ptBitmaps;
-              pdescript = consolas_11ptDescriptors[0];
-              symbol_height = ARIAL_LARGE_HEIGHT;    	/* font height in pixels */
-              break;
-            default: // SMALL
-              pfont = consolas_8ptBitmaps;
-              pdescript = consolas_8ptDescriptors[0];
-              symbol_height = ARIAL_SMALL_HEIGHT; 	/* font height in pixels */
-              break;
-          }
-          break;
-      }
-
+      default: // NORMAL
+        switch(fontsize)
+        {
+          case LARGE:
+            pfont = consolas_11ptBitmaps;
+            pdescript = consolas_11ptDescriptors[0];
+            symbol_height = ARIAL_LARGE_HEIGHT;    	/* font height in pixels */
+            break;
+          default: // SMALL
+            pfont = consolas_8ptBitmaps;
+            pdescript = consolas_8ptDescriptors[0];
+            symbol_height = ARIAL_SMALL_HEIGHT; 	/* font height in pixels */
+            break;
+        }
+        break;
+    }
+  }
+  else
+  {
+    UART_SendString("This font is not available. Try again.");
   }
   /*Draw text*/
   if(pfont != NULL && pdescript != NULL)
@@ -370,10 +373,14 @@ int API_draw_rectangle (int x, int y, int width, int height, int colour, int fil
   *           
   * @note   selected polygon must not exceed a certain size         
   *     
-  * @param  
-  * @retval 
+  * @param  x: the x-coordinate where the polygon should start drawing
+  * @param  y: the y-coordinate where the polygon should start drawing
+  * @param  size: the size of the polygon
+  * @param  corners: the number of corners the polygon should have
+  * @param  colour: the colour of the polygon
+  * @retval none
   */
-int API_draw_polygon (int x, int y, int size, int corners, int colour, int filled)
+int API_draw_polygon (int x, int y, int size, int corners, int colour, int reserved)
 {
   if (corners < 3) // Check if the number of corners is valid
   {
@@ -399,24 +406,18 @@ int API_draw_polygon (int x, int y, int size, int corners, int colour, int fille
 
   for (int i = 1  ; i <= corners; i++) // Iterate over each corner of the polygon
   {
-    index = (angle* i) / 5;
-    cos = cos_table[index];
+    index = (angle* i) / 5; // Calculate the index into the cosine and sine tables, max 5 degrees intervals
+    cos = cos_table[index]; 
     sin = sin_table[index];
     x_curr = x_center + (radius * cos); // Calculate the x-coordinate of the current corner
     y_curr = y_center - (radius * sin); // Calculate the y-coordinate of the current corner
   
     API_draw_line(x_prev, y_prev, x_curr, y_curr, colour, 1, 0); // Draw a line between the previous and current corner
     
-    // if (filled == 1) // Check if the polygon should be filled
-    // {
-    //   for (int j = y_prev + 1; j < y_curr; j++) // Iterate over the rows between the previous and current corner
-    //   {
-    //     API_draw_line(x_prev, j, x_curr, j, colour, 1, 0); // Draw a horizontal line for each row
-    //   }
-    // }
     
     x_prev = x_curr; // Update the previous corner's x-coordinate
     y_prev = y_curr; // Update the previous corner's y-coordinate
+    UNUSED(reserved);
   }
 
   // Close the polygon by drawing a line from the last corner to the first one
@@ -498,7 +499,11 @@ int API_draw_bitmap (int x_lup, int y_lup, int bm_nr)
 			img_height = MEGAMAN_HEIGHT;
 			break;
 
-		default: break;
+		default: 
+    	pbitmap	   = megaman_2;
+			img_width  = MEGAMAN_WIDTH;
+			img_height = MEGAMAN_HEIGHT;
+			break;
 	}
   /*draw bitmap*/
 	for(y=0; y<img_height;y++)
@@ -520,62 +525,10 @@ int API_draw_bitmap (int x_lup, int y_lup, int bm_nr)
   * @param colour: the color to clear the screen with
   * @retval none
   */
-int API_clearscreen (char *colour)
+int API_clearscreen (int colour)
 {
-  unsigned long colour_choice = hash(colour); //convert the string to a unique value for the switch case
-
-  switch (colour_choice) 
-  {
-    case ZWART:
-    UB_VGA_FillScreen(VGA_COL_BLACK); //VGA display is cleared with the colour: zwart
-      break;
-    case LICHTMAGENTA:
-      UB_VGA_FillScreen(VGA_COL_LIGHT_MAGENTA); //VGA display is cleared with the colour: lichtmagenta
-      break;
-    case MAGENTA:
-      UB_VGA_FillScreen(VGA_COL_MAGENTA); //VGA display is cleared with the colour: magenta
-      break;
-    case BLAUW:
-      UB_VGA_FillScreen(VGA_COL_BLUE); //VGA display is cleared with the colour: blauw
-      break;
-    case LICHTBLAUW:
-      UB_VGA_FillScreen(VGA_COL_LIGHT_BLUE); //VGA display is cleared with the colour: lichtblauw
-      break;
-    case CYAAN:
-      UB_VGA_FillScreen(VGA_COL_CYAN); //VGA display is cleared with the colour: cyaan
-      break;
-    case LICHTCYAAN:
-      UB_VGA_FillScreen(VGA_COL_LIGHT_CYAN); //VGA display is cleared with the colour: lichtcyaan
-      break;
-    case GROEN:
-      UB_VGA_FillScreen(VGA_COL_GREEN); //VGA display is cleared with the colour: groen
-      break;
-    case LICHTGROEN:
-      UB_VGA_FillScreen(VGA_COL_LIGHT_GREEN); //VGA display is cleared with the colour: lichtgroen
-      break;
-    case GEEL:
-      UB_VGA_FillScreen(VGA_COL_YELLOW); //VGA display is cleared with the colour: geel
-      break;
-    case ROOD:
-      UB_VGA_FillScreen(VGA_COL_RED); //VGA display is cleared with the colour: rood
-      break;
-    case LICHTROOD:
-      UB_VGA_FillScreen(VGA_COL_LIGHT_RED); //VGA display is cleared with the colour: lichtrood
-      break;
-    case BRUIN:
-      UB_VGA_FillScreen(VGA_COL_BROWN); //VGA display is cleared with the colour: bruin
-      break;
-    case GRIJS:
-      UB_VGA_FillScreen(VGA_COL_GREY); //VGA display is cleared with the colour: grijs
-      break;
-    case WIT:
-      UB_VGA_FillScreen(VGA_COL_WHITE); //VGA display is cleared with the colour: wit
-      break;
-    default:
-      // Code to handle invalid color input
-      break;
-  }
-return 0;
+  UB_VGA_FillScreen(colour);
+  return 0;
 }
 
 /**
@@ -594,6 +547,84 @@ unsigned long hash(char *str) {
         hash = ((hash << 5) + hash) + c;
     return hash;
 }
+
 /**
-  * @}
-  */
+ * @brief gives the corresponding colour value for the given string
+ * 
+ * @param str The string to be converted to a colour value
+ * 
+ * @return Returns the color value on success.
+ * @return Returns 100 on error.
+ */
+uint8_t color_chooser(char *str)
+{
+  unsigned long colour_choice = hash(str); //convert the string to a unique value for the switch case
+
+  switch (colour_choice) 
+  {
+    case ZWART:
+      return VGA_COL_BLACK; //VGA display is cleared with the colour: zwart
+      break;
+
+    case LICHTMAGENTA:
+      return VGA_COL_LIGHT_MAGENTA; //VGA display is cleared with the colour: lichtmagenta
+      break;
+
+    case MAGENTA:
+      return VGA_COL_MAGENTA; //VGA display is cleared with the colour: magenta
+      break;
+
+    case BLAUW:
+      return VGA_COL_BLUE; //VGA display is cleared with the colour: blauw
+      break;
+
+    case LICHTBLAUW:
+      return VGA_COL_LIGHT_BLUE; //VGA display is cleared with the colour: lichtblauw
+      break;
+
+    case CYAAN:
+      return VGA_COL_CYAN; //VGA display is cleared with the colour: cyaan
+      break;
+
+    case LICHTCYAAN:
+      return VGA_COL_LIGHT_CYAN; //VGA display is cleared with the colour: lichtcyaan
+      break;
+
+    case GROEN:
+      return VGA_COL_GREEN; //VGA display is cleared with the colour: groen
+      break;
+
+    case LICHTGROEN:
+      return VGA_COL_LIGHT_GREEN; //VGA display is cleared with the colour: lichtgroen
+      break;
+
+    case GEEL:
+      return VGA_COL_YELLOW; //VGA display is cleared with the colour: geel
+      break;
+
+    case ROOD:
+      return VGA_COL_RED; //VGA display is cleared with the colour: rood
+      break;
+
+    case LICHTROOD:
+      return VGA_COL_LIGHT_RED; //VGA display is cleared with the colour: lichtrood
+      break;
+
+    case BRUIN:
+      return VGA_COL_BROWN; //VGA display is cleared with the colour: bruin
+      break;
+
+    case GRIJS:
+      return VGA_COL_GREY; //VGA display is cleared with the colour: grijs
+      break;
+
+    case WIT:
+      return VGA_COL_WHITE; //VGA display is cleared with the colour: wit
+      break;
+
+    default:
+      UART_SendString("This color is not available. try again.");
+      break;
+  }
+return 0;
+}

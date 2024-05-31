@@ -10,7 +10,7 @@
   ****************************************************************************** 
   */
 
-/** @addtogroup UART driver functions
+/** @addtogroup VGA driver functions
   * @{
   */
 
@@ -52,6 +52,7 @@ void USART2_IRQHandler(void)
   if(USART2->SR & (1<<6))
   {
     // UART TC interrupt (Transmission complete)
+
   }
 
   if(USART2->SR & (1<<7))
@@ -107,34 +108,37 @@ void UART_Init(uint32_t baudrate)
     USART2->CR2 = 0x00;     // Clear all existing CR2 settings
     USART2->CR3 = 0x00;     // Clear all existing CR3 settings
 
-
     USART2->CR1 ^= (1<<13); // Enable USART I.E. GO!!!
     NVIC_EnableIRQ(USART2_IRQn);
 }
 
-/**
-  * @brief  Sends a single character over the UART interface. the function blocks untill the character is send.
-  * @param  c: any ascii character to be sent
-  * @retval None
-  */
 
 void UART_SendChar (char c)
 {
+	/*********** STEPS FOLLOWED *************
+	
+	1. Write the data to send in the USART_DR register (this clears the TXE bit). Repeat this
+		 for each data to be transmitted in case of single buffer.
+	2. After writing the last data into the USART_DR register, wait until TC=1. This indicates
+		 that the transmission of the last frame is complete. This is required for instance when
+		 the USART is disabled or enters the Halt mode to avoid corrupting the last transmission.
+	
+	****************************************/
 	USART2->DR = c;   // Load the Data
 	while (!(USART2->SR & (1<<6)));  // Wait for TC to SET.. This indicates that the data has been transmitted
 }
+
 
 /**
   * @brief  Sends a single character over the UART interface. the function blocks untill the character is send.
   * @param  string: any ascii character to be sent
   * @retval None
   */
-
 void UART_SendString (char *string)
 {
   USART2->CR1 ^= (1<<5); // disable RXNE
   strcpy(UART_TX_message, string);
-
+  
   uint8_t i;
   for(i=0 ;i< (int)strlen(string); ++i)
   {

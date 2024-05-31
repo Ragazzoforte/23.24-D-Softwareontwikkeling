@@ -15,8 +15,8 @@
 #include <math.h>
 #include "uart.h"
 #include "stm32f4xx_it.h"
-#define BAUD_RATE 115200
 
+#define BAUD_RATE 115200
 
 int main(void)
 {	
@@ -36,8 +36,9 @@ int main(void)
     if(msgReceivedUSART2 == true)
     {
       UART_SendString(UART_RX_message);
-      
+      kiezen(UI_string_to_function(UART_RX_message));
       memset(UART_RX_message, 0, UART_BUFFER_SIZE);
       msgReceivedUSART2 = false; // reset message flag
     }
   }
+}

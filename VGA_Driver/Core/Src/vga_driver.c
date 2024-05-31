@@ -243,18 +243,21 @@ int API_draw_text (int x_lup, int y_lup, int color, char *text, char *fontname,i
     int index = 0;
     for(i=0;i<strlen(text);i++)
     {
-      symbol_nr = (*(text+i)) - ASCII_OFFSET;/* determines which symbol from the font library should be selected */
-      symbol_start = *(pdescript + symbol_nr * ARRAY_DIMENSION + CHAR_START_OFFSET); /* retrieves the starting element in the font bitmap */
-      symbol_width_pixels = *(pdescript + symbol_nr * ARRAY_DIMENSION); /* retrieves the symbol width expressed in pixels */
-      for (int y = 0+symbol_start; y < (symbol_height)+symbol_start; y++) {
-        for (int x = 0; x < (symbol_width_pixels); x++) {
-          if (symbol_width_pixels >= 8) index = (y*2)-symbol_start + (x / symbol_width_pixels);// Calculate the index into the bitmap array
-          if (symbol_width_pixels <= 8) index = (y) + (x / symbol_width_pixels);// Calculate the index into the bitmap array
-          int bit = 7 - (x % symbol_width_pixels);// Calculate the bit position within the current byte
-          int pixel = (pfont[index] >> bit) & 1;// Get the value of the current pixel
+      if(!((*(text+i) == 92)&(*(text+i+1) == ',')))
+      {
+        symbol_nr = (*(text+i)) - ASCII_OFFSET;/* determines which symbol from the font library should be selected */
+        symbol_start = *(pdescript + symbol_nr * ARRAY_DIMENSION + CHAR_START_OFFSET); /* retrieves the starting element in the font bitmap */
+        symbol_width_pixels = *(pdescript + symbol_nr * ARRAY_DIMENSION); /* retrieves the symbol width expressed in pixels */
+        for (int y = 0+symbol_start; y < (symbol_height)+symbol_start; y++) {
+          for (int x = 0; x < (symbol_width_pixels); x++) {
+            if (symbol_width_pixels >= 8) index = (y*2)-symbol_start + (x / symbol_width_pixels);// Calculate the index into the bitmap array
+            if (symbol_width_pixels <= 8) index = (y) + (x / symbol_width_pixels);// Calculate the index into the bitmap array
+            int bit = 7 - (x % symbol_width_pixels);// Calculate the bit position within the current byte
+            int pixel = (pfont[index] >> bit) & 1;// Get the value of the current pixel
 
-          // Set the pixel color based on the value of the current pixel
-          if (pixel == 1) UB_VGA_SetPixel(x_lup + x + opschuiven, y_lup + y - symbol_start, color);
+            // Set the pixel color based on the value of the current pixel
+            if (pixel == 1) UB_VGA_SetPixel(x_lup + x + opschuiven, y_lup + y - symbol_start, color);
+          }
         }
       }
       opschuiven += symbol_width_pixels+1;

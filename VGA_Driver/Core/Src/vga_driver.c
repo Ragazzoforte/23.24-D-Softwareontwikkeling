@@ -388,40 +388,43 @@ int API_draw_polygon (int x, int y, int size, int corners, int colour, int reser
     return -1;
   }
 
-  int angle = 360 / corners; // Calculate the angle between each corner
-  int radius = size; // Set the radius of the polygon
+    double angle_step = 360.0 / corners; // Calculate the angle between each corner
+    double angle; 
+    int radius = size; // Set the radius of the polygon
 
-  int x_center = x; // Calculate the x-coordinate of the center of the polygon
-  int y_center = y; // Calculate the y-coordinate of the center of the polygon
+    int x_center = x; // Calculate the x-coordinate of the center of the polygon
+    int y_center = y; // Calculate the y-coordinate of the center of the polygon
 
-  int x_first = x_center + radius; // Calculate the x-coordinate of the first corner
-  int y_first = y_center; // Calculate the y-coordinate of the first corner
+    int x_first = x_center + radius; // Calculate the x-coordinate of the first corner
+    int y_first = y_center; // Calculate the y-coordinate of the first corner
 
-  int x_prev = x_first; // Initialize the previous corner's x-coordinate
-  int y_prev = y_first; // Initialize the previous corner's y-coordinate
+    int x_prev = x_first; // Initialize the previous corner's x-coordinate
+    int y_prev = y_first; // Initialize the previous corner's y-coordinate
 
-  double cos, sin;
-  int x_curr, y_curr;
-  int index = 0;
+    int x_curr, y_curr;
 
-  for (int i = 1  ; i <= corners; i++) // Iterate over each corner of the polygon
-  {
-    index = (angle* i) / 5; // Calculate the index into the cosine and sine tables, max 5 degrees intervals
-    cos = cos_table[index]; 
-    sin = sin_table[index];
-    x_curr = x_center + (radius * cos); // Calculate the x-coordinate of the current corner
-    y_curr = y_center - (radius * sin); // Calculate the y-coordinate of the current corner
-  
-    API_draw_line(x_prev, y_prev, x_curr, y_curr, colour, 1, 0); // Draw a line between the previous and current corner
-    
-    
-    x_prev = x_curr; // Update the previous corner's x-coordinate
-    y_prev = y_curr; // Update the previous corner's y-coordinate
-    UNUSED(reserved);
-  }
+    for (int i = 1; i <= corners; i++) // Iterate over each corner of the polygon
+    {
+        angle = angle_step * i;
+        int index = (int)(angle / 5.0) % 72; // Calculate the index into the cosine and sine tables
+
+        double cos_val = cos_table[index];
+        double sin_val = sin_table[index];
+
+        x_curr = x_center + (radius * cos_val); // Calculate the x-coordinate of the current corner
+        y_curr = y_center - (radius * sin_val); // Calculate the y-coordinate of the current corner
+
+        API_draw_line(x_prev, y_prev, x_curr, y_curr, colour, 1, 0); // Draw a line between the previous and current corner
+
+        x_prev = x_curr; // Update the previous corner's x-coordinate
+        y_prev = y_curr; // Update the previous corner's y-coordinate
+    }
+
 
   // Close the polygon by drawing a line from the last corner to the first one
   API_draw_line(x_prev, y_prev, x_first, y_first, colour, 1, 0);
+
+  UNUSED(reserved);
   return 0;
 }
 

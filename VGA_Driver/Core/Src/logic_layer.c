@@ -17,6 +17,7 @@
  * en roept de juiste API-functie aan met de gegeven argumenten.
  * 
  * @param str De commando-string die moet worden verwerkt.
+ * @return none
  */
 
 void kiezen(command str)
@@ -54,7 +55,7 @@ void kiezen(command str)
             break;
         
         case cirkel:
-            UART_SendString("command not available yet. Try another function.");
+            API_draw_polygon(atoi(str.arg[1]), atoi(str.arg[2]), atoi(str.arg[3]), 70, color_chooser(str.arg[4]), 0);
             break;  
         
         case figuur:

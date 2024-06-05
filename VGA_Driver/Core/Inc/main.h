@@ -48,6 +48,9 @@ extern "C" {
 #include "fonts.h"
 #include "bitmap.h"
 #include "user_interface.h"
+#include <math.h>
+#include "uart.h"
+#include "stm32f4xx_it.h"
 
 // #include <stdio.h>
 #include <string.h>

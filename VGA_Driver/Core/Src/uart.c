@@ -30,9 +30,9 @@ void USART2_IRQHandler(void)
     // USART2->SR &= ~(1<<4);
     volatile uint32_t tempreg;
     tempreg = USART2->SR;
-    (void) tempreg;
+    (void) tempreg;       // clear status register
     tempreg = USART2->DR;
-    (void) tempreg;
+    (void) tempreg;       // clear Data register
     
   	msgReceivedUSART2 = true;
     charCnt = 0;
@@ -74,7 +74,6 @@ void USART2_IRQHandler(void)
   *         @arg 115200
   * @retval None
   */
-
 void UART_Init(uint32_t baudrate)
 {
     // Configure RCC
@@ -112,18 +111,13 @@ void UART_Init(uint32_t baudrate)
     NVIC_EnableIRQ(USART2_IRQn);
 }
 
-
+/**
+  * @brief  Sends a character over the UART bus
+  * @param  c: the character to be sent
+  * @retval None
+  */
 void UART_SendChar (char c)
 {
-	/*********** STEPS FOLLOWED *************
-	
-	1. Write the data to send in the USART_DR register (this clears the TXE bit). Repeat this
-		 for each data to be transmitted in case of single buffer.
-	2. After writing the last data into the USART_DR register, wait until TC=1. This indicates
-		 that the transmission of the last frame is complete. This is required for instance when
-		 the USART is disabled or enters the Halt mode to avoid corrupting the last transmission.
-	
-	****************************************/
 	USART2->DR = c;   // Load the Data
 	while (!(USART2->SR & (1<<6)));  // Wait for TC to SET.. This indicates that the data has been transmitted
 }

@@ -1,20 +1,16 @@
 //--------------------------------------------------------------
 // File     : main.c
-// Datum    : 30.03.2016
-// Version  : 1.0
+// Datum    : 05.06.2024
+// Version  : 1.1
 // Autor    : UB
-// mods by	: J.F. van der Bent
+// mods by	: Michel Vollmuller, Tim Wannet en Tijmen Willems
 // CPU      : STM32F4
-// IDE      : CooCox CoIDE 1.7.x
+// IDE      : Microsoft VSCode 1.89.1
 // Module   : CMSIS_BOOT, M4_CMSIS_CORE
-// Function : VGA_core DMA LIB 320x240, 8bit color
+// Function : VGA_driver 320x240, 8bit color
 //--------------------------------------------------------------
 
 #include "main.h"
-#include "stm32_ub_vga_screen.h"
-#include <math.h>
-#include "uart.h"
-#include "stm32f4xx_it.h"
 
 #define BAUD_RATE 115200
 

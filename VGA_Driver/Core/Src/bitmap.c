@@ -1,14 +1,10 @@
 /**
  * @file bitmap.c
- * @brief This file contains bitmap data for various sprites.
- * 
- * Each array in this file represents a bitmap image where each element corresponds to a pixel's color in the image.
- * The color of each pixel is represented as an 8-bit unsigned integer.
- * The data is organized as a series of rows, with each row representing a line of the sprite.
- * The height and width of the sprite are determined by the size of the array and the specific layout of the bitmap data.
- * 
- * @author Michel Vollmuller
+ * @brief This file contains different bitmap images.
+ * @author Michel Vollmuller, Tim Wannet, Tijmen Willems
  * @date 22-05-2024
+ * @pre This file must be used in combination with main.h
+ 
  */
 #include "main.h"
 
@@ -358,7 +354,13 @@ const uint8_t arrow_right[ARROW_RIGHT_WIDTH * ARROW_RIGHT_HEIGHT] = {
 		0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0xfe, 0xff, 0x71, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xfe, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 };
 
-// 'michiel_scager', 320x240px
+/**
+ * @brief A bitmap representation of Michiel Scager.
+ * 
+ * This array represents a bitmap image where each element corresponds to a pixel's color in the image.
+ * The image dimensions are defined by the constants MICHIEL_WIDTH and MICHIEL_HEIGHT.
+ * The color of each pixel is represented as an 8-bit unsigned integer.
+ */
 const uint8_t michiel[MICHIEL_WIDTH * MICHIEL_HEIGHT] = {
 	0x6d, 0x6d, 0x71, 0x71, 0x92, 0x92, 0x92, 0x96, 0x96, 0x96, 0x92, 0x92, 0x71, 0x71, 0x6d, 0x6d, 
 	0x4d, 0x49, 0x48, 0x48, 0x48, 0x28, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x28, 0x49, 0x49, 0x6d, 
@@ -4622,6 +4624,13 @@ const uint8_t michiel[MICHIEL_WIDTH * MICHIEL_HEIGHT] = {
 	0x28, 0x28, 0x28, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 0x24, 
 };
 
+/**
+ * @brief A bitmap representation of Franc.
+ * 
+ * This array represents a bitmap image where each element corresponds to a pixel's color in the image.
+ * The image dimensions are defined by the constants FRANC_WIDTH and FRANC_HEIGHT.
+ * The color of each pixel is represented as an 8-bit unsigned integer.
+ */
 const uint8_t franc[FRANC_WIDTH * FRANC_HEIGHT] = {
 	0x6d, 0x49, 0x24, 0x49, 0x6d, 0x92, 0xb6, 0xb6, 0xb6, 0x92, 0x49, 0x24, 0x24, 0x24, 0x24, 0x24, 
 	0x24, 0x24, 0x25, 0x49, 0x49, 0x29, 0x24, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -8226,6 +8235,13 @@ const uint8_t franc[FRANC_WIDTH * FRANC_HEIGHT] = {
 	
 };
 
+/**
+ * @brief A bitmap representation of our group image.
+ * 
+ * This array represents a bitmap image where each element corresponds to a pixel's color in the image.
+ * The image dimensions are defined by the constants GROUP_WIDTH and GROUP_HEIGHT.
+ * The color of each pixel is represented as an 8-bit unsigned integer.
+ */
 const uint8_t groep[GROEP_WIDTH * GROEP_HEIGHT] = {
 	0xfb, 0xfb, 0xfb, 0xfb, 0xfb, 0xdb, 0xdb, 0xdb, 0xfb, 0xfb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 
 	0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 0xdb, 

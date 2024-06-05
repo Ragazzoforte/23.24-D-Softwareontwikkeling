@@ -1,8 +1,14 @@
-/*
- * bitmap.h
- *
- *  Created on: 16 mei 2024
- *      Author: Michel Vollmuller
+/**
+ * @file bitmap.h
+ * @author Michel Vollmuller (michel.vollmuller@student.hu.nl)
+ * @author Tim Wannet (tim.wannet@student.hu.nl)
+ * @author Tijmen Willems (tijmen.willems@student.hu.nl)
+ * @brief headerfile of bitmap.c
+ * @version 0.1
+ * @date 05-06-2024
+ * 
+ * @copyright Copyright (c) 2024
+ * 
  */
 
 #ifndef bitmap_h

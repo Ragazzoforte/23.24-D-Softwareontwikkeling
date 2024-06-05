@@ -1,3 +1,16 @@
+/**
+ * @file logic_layer.h
+ * @author Michel Vollmuller (michel.vollmuller@gmail.com)
+ * @author Tim Wannet (tim.wannet@student.hu.nl)
+ * @author Tijmen Willems (tijmen.willems@student.hu.nl)
+ * @brief headerfile of logic_layer.c
+ * @version 0.1
+ * @date 05-06-2024
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+
 #ifndef logic_layer_h
 #define logic_layer_h
 

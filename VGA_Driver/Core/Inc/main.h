@@ -3,22 +3,17 @@
 //--------------------------------------------------------------
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.h
-  * @brief          : Header for main.c file.
-  *                   This file contains the common defines of the application.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ * @file main.h
+ * @author Michel Vollmuller (michel.vollmuller@gmail.com)
+ * @author Tim Wannet (tim.wannet@student.hu.nl)
+ * @author Tijmen Willems (tijmen.willems@student.hu.nl)
+ * @brief headerfile of main.c
+ * @version 0.1
+ * @date 05-06-2024
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -37,6 +32,7 @@ extern "C" {
 #ifndef __STM32F4_UB_MAIN_H
 #define __STM32F4_UB_MAIN_H
 
+#define BAUD_RATE 115200
 
 //--------------------------------------------------------------
 // Includes
@@ -48,10 +44,15 @@ extern "C" {
 #include "fonts.h"
 #include "bitmap.h"
 #include "user_interface.h"
+#include "stm32_ub_vga_screen.h"
+#include "uart.h"
+#include "stm32f4xx_it.h"
+#include "user_interface.h"
 
 // #include <stdio.h>
 #include <string.h>
 // #include <stdint.h>
 #include <stdlib.h>
+#include <math.h>
 //--------------------------------------------------------------
 #endif // __STM32F4_UB_MAIN_H

@@ -1,10 +1,14 @@
-#include "main.h"
-#include "user_interface.h"
-
 /**
  * @file user_interface.c
  * @brief This file contains the implementation of the user interface functions.
+ * 
+ * @authors Michel Vollmuller, Tim Wannet, Tijmen Willems
+ * @date 5 mei 2024
+ * @version 1.0
+ * @pre This file must be used in combination with main.h
  */
+
+#include "main.h"
 
 /**
  * @brief Converts a string to a function name.

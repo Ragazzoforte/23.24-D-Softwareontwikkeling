@@ -1,0 +1,175 @@
+\doxysubsubsubsection{Double Buffer mode functions}
+\hypertarget{group___d_m_a___group3}{}\label{group___d_m_a___group3}\index{Double Buffer mode functions@{Double Buffer mode functions}}
+
+
+Double Buffer mode functions.  
+
+
+\doxysubsubsubsubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{group___d_m_a___group3_ga8d0957e50302efaf48a16c62d14c9ca8}{DMA\+\_\+\+Double\+Buffer\+Mode\+Config}} (\mbox{\hyperlink{struct_d_m_a___stream___type_def}{DMA\+\_\+\+Stream\+\_\+\+Type\+Def}} \texorpdfstring{$\ast$}{*}DMAy\+\_\+\+Streamx, uint32\+\_\+t Memory1\+Base\+Addr, uint32\+\_\+t DMA\+\_\+\+Current\+Memory)
+\begin{DoxyCompactList}\small\item\em Configures, when the DMAy Streamx is disabled, the double buffer mode and the current memory target. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group___d_m_a___group3_ga7fe09e62ea3125db384829dab59ebe3e}{DMA\+\_\+\+Double\+Buffer\+Mode\+Cmd}} (\mbox{\hyperlink{struct_d_m_a___stream___type_def}{DMA\+\_\+\+Stream\+\_\+\+Type\+Def}} \texorpdfstring{$\ast$}{*}DMAy\+\_\+\+Streamx, \mbox{\hyperlink{group___exported__types_gac9a7e9a35d2513ec15c3b537aaa4fba1}{Functional\+State}} New\+State)
+\begin{DoxyCompactList}\small\item\em Enables or disables the double buffer mode for the selected DMA stream. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group___d_m_a___group3_ga4ebcffd32eb6968ac61cfb64a6bae258}{DMA\+\_\+\+Memory\+Target\+Config}} (\mbox{\hyperlink{struct_d_m_a___stream___type_def}{DMA\+\_\+\+Stream\+\_\+\+Type\+Def}} \texorpdfstring{$\ast$}{*}DMAy\+\_\+\+Streamx, uint32\+\_\+t Memory\+Base\+Addr, uint32\+\_\+t DMA\+\_\+\+Memory\+Target)
+\begin{DoxyCompactList}\small\item\em Configures the Memory address for the next buffer transfer in double buffer mode (for dynamic use). This function can be called when the DMA Stream is enabled and when the transfer is ongoing. ~\newline
+ \end{DoxyCompactList}\item 
+uint32\+\_\+t \mbox{\hyperlink{group___d_m_a___group3_ga74b6624f9faa2f43c9369ddbdeab241c}{DMA\+\_\+\+Get\+Current\+Memory\+Target}} (\mbox{\hyperlink{struct_d_m_a___stream___type_def}{DMA\+\_\+\+Stream\+\_\+\+Type\+Def}} \texorpdfstring{$\ast$}{*}DMAy\+\_\+\+Streamx)
+\begin{DoxyCompactList}\small\item\em Returns the current memory target used by double buffer transfer. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsubsubsubsection{Detailed Description}
+Double Buffer mode functions. 
+
+\begin{DoxyVerb} ===============================================================================
+                         Double Buffer mode functions
+ ===============================================================================  
+
+  This subsection provides function allowing to configure and control the double 
+  buffer mode parameters.
+  
+  The Double Buffer mode can be used only when Circular mode is enabled.
+  The Double Buffer mode cannot be used when transferring data from Memory to Memory.
+  
+  The Double Buffer mode allows to set two different Memory addresses from/to which
+  the DMA controller will access alternatively (after completing transfer to/from target
+  memory 0, it will start transfer to/from target memory 1).
+  This allows to reduce software overhead for double buffering and reduce the CPU
+  access time.
+
+  Two functions must be called before calling the DMA_Init() function:
+   - void DMA_DoubleBufferModeConfig(DMA_Stream_TypeDef* DMAy_Streamx, uint32_t Memory1BaseAddr,
+                                uint32_t DMA_CurrentMemory);
+   - void DMA_DoubleBufferModeCmd(DMA_Stream_TypeDef* DMAy_Streamx, FunctionalState NewState);
+   
+  DMA_DoubleBufferModeConfig() is called to configure the Memory 1 base address and the first
+  Memory target from/to which the transfer will start after enabling the DMA Stream.
+  Then DMA_DoubleBufferModeCmd() must be called to enable the Double Buffer mode (or disable 
+  it when it should not be used).
+  
+   
+  Two functions can be called dynamically when the transfer is ongoing (or when the DMA Stream is 
+  stopped) to modify on of the target Memories addresses or to check wich Memory target is currently
+   used:
+    - void DMA_MemoryTargetConfig(DMA_Stream_TypeDef* DMAy_Streamx, uint32_t MemoryBaseAddr,
+                            uint32_t DMA_MemoryTarget);
+    - uint32_t DMA_GetCurrentMemoryTarget(DMA_Stream_TypeDef* DMAy_Streamx);
+
+  DMA_MemoryTargetConfig() can be called to modify the base address of one of the two target Memories.
+  The Memory of which the base address will be modified must not be currently be used by the DMA Stream
+  (ie. if the DMA Stream is currently transferring from Memory 1 then you can only modify base address
+  of target Memory 0 and vice versa).
+  To check this condition, it is recommended to use the function DMA_GetCurrentMemoryTarget() which
+  returns the index of the Memory target currently in use by the DMA Stream.\end{DoxyVerb}
+ 
+
+\doxysubsubsubsubsection{Function Documentation}
+\Hypertarget{group___d_m_a___group3_ga7fe09e62ea3125db384829dab59ebe3e}\label{group___d_m_a___group3_ga7fe09e62ea3125db384829dab59ebe3e} 
+\index{Double Buffer mode functions@{Double Buffer mode functions}!DMA\_DoubleBufferModeCmd@{DMA\_DoubleBufferModeCmd}}
+\index{DMA\_DoubleBufferModeCmd@{DMA\_DoubleBufferModeCmd}!Double Buffer mode functions@{Double Buffer mode functions}}
+\doxysubsubsubsubsubsection{\texorpdfstring{DMA\_DoubleBufferModeCmd()}{DMA\_DoubleBufferModeCmd()}}
+{\footnotesize\ttfamily void DMA\+\_\+\+Double\+Buffer\+Mode\+Cmd (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{struct_d_m_a___stream___type_def}{DMA\+\_\+\+Stream\+\_\+\+Type\+Def}} \texorpdfstring{$\ast$}{*}}]{DMAy\+\_\+\+Streamx,  }\item[{\mbox{\hyperlink{group___exported__types_gac9a7e9a35d2513ec15c3b537aaa4fba1}{Functional\+State}}}]{New\+State }\end{DoxyParamCaption})}
+
+
+
+Enables or disables the double buffer mode for the selected DMA stream. 
+
+\begin{DoxyNote}{Note}
+This function can be called only when the DMA Stream is disabled. ~\newline
+ 
+\end{DoxyNote}
+
+\begin{DoxyParams}{Parameters}
+{\em DMAy\+\_\+\+Streamx} & where y can be 1 or 2 to select the DMA and x can be 0 to 7 to select the DMA Stream. \\
+\hline
+{\em New\+State} & new state of the DMAy Streamx double buffer mode. This parameter can be\+: ENABLE or DISABLE. \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}
+\Hypertarget{group___d_m_a___group3_ga8d0957e50302efaf48a16c62d14c9ca8}\label{group___d_m_a___group3_ga8d0957e50302efaf48a16c62d14c9ca8} 
+\index{Double Buffer mode functions@{Double Buffer mode functions}!DMA\_DoubleBufferModeConfig@{DMA\_DoubleBufferModeConfig}}
+\index{DMA\_DoubleBufferModeConfig@{DMA\_DoubleBufferModeConfig}!Double Buffer mode functions@{Double Buffer mode functions}}
+\doxysubsubsubsubsubsection{\texorpdfstring{DMA\_DoubleBufferModeConfig()}{DMA\_DoubleBufferModeConfig()}}
+{\footnotesize\ttfamily void DMA\+\_\+\+Double\+Buffer\+Mode\+Config (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{struct_d_m_a___stream___type_def}{DMA\+\_\+\+Stream\+\_\+\+Type\+Def}} \texorpdfstring{$\ast$}{*}}]{DMAy\+\_\+\+Streamx,  }\item[{uint32\+\_\+t}]{Memory1\+Base\+Addr,  }\item[{uint32\+\_\+t}]{DMA\+\_\+\+Current\+Memory }\end{DoxyParamCaption})}
+
+
+
+Configures, when the DMAy Streamx is disabled, the double buffer mode and the current memory target. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em DMAy\+\_\+\+Streamx} & where y can be 1 or 2 to select the DMA and x can be 0 to 7 to select the DMA Stream. \\
+\hline
+{\em Memory1\+Base\+Addr} & the base address of the second buffer (Memory 1) ~\newline
+ \\
+\hline
+{\em DMA\+\_\+\+Current\+Memory} & specifies which memory will be first buffer for the transactions when the Stream will be enabled. This parameter can be one of the following values\+: \begin{DoxyItemize}
+\item DMA\+\_\+\+Memory\+\_\+0\+: Memory 0 is the current buffer. \item DMA\+\_\+\+Memory\+\_\+1\+: Memory 1 is the current buffer. ~\newline
+\end{DoxyItemize}
+\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+Memory0\+Base\+Addr is set by the DMA structure configuration in \doxylink{group___d_m_a___group1_gaced8a4149acfb0a50b50e63273a87148}{DMA\+\_\+\+Init()}.
+\end{DoxyNote}
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}
+\Hypertarget{group___d_m_a___group3_ga74b6624f9faa2f43c9369ddbdeab241c}\label{group___d_m_a___group3_ga74b6624f9faa2f43c9369ddbdeab241c} 
+\index{Double Buffer mode functions@{Double Buffer mode functions}!DMA\_GetCurrentMemoryTarget@{DMA\_GetCurrentMemoryTarget}}
+\index{DMA\_GetCurrentMemoryTarget@{DMA\_GetCurrentMemoryTarget}!Double Buffer mode functions@{Double Buffer mode functions}}
+\doxysubsubsubsubsubsection{\texorpdfstring{DMA\_GetCurrentMemoryTarget()}{DMA\_GetCurrentMemoryTarget()}}
+{\footnotesize\ttfamily uint32\+\_\+t DMA\+\_\+\+Get\+Current\+Memory\+Target (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{struct_d_m_a___stream___type_def}{DMA\+\_\+\+Stream\+\_\+\+Type\+Def}} \texorpdfstring{$\ast$}{*}}]{DMAy\+\_\+\+Streamx }\end{DoxyParamCaption})}
+
+
+
+Returns the current memory target used by double buffer transfer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em DMAy\+\_\+\+Streamx} & where y can be 1 or 2 to select the DMA and x can be 0 to 7 to select the DMA Stream. \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em The} & memory target number\+: 0 for Memory0 or 1 for Memory1. \\
+\hline
+\end{DoxyRetVals}
+\Hypertarget{group___d_m_a___group3_ga4ebcffd32eb6968ac61cfb64a6bae258}\label{group___d_m_a___group3_ga4ebcffd32eb6968ac61cfb64a6bae258} 
+\index{Double Buffer mode functions@{Double Buffer mode functions}!DMA\_MemoryTargetConfig@{DMA\_MemoryTargetConfig}}
+\index{DMA\_MemoryTargetConfig@{DMA\_MemoryTargetConfig}!Double Buffer mode functions@{Double Buffer mode functions}}
+\doxysubsubsubsubsubsection{\texorpdfstring{DMA\_MemoryTargetConfig()}{DMA\_MemoryTargetConfig()}}
+{\footnotesize\ttfamily void DMA\+\_\+\+Memory\+Target\+Config (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{struct_d_m_a___stream___type_def}{DMA\+\_\+\+Stream\+\_\+\+Type\+Def}} \texorpdfstring{$\ast$}{*}}]{DMAy\+\_\+\+Streamx,  }\item[{uint32\+\_\+t}]{Memory\+Base\+Addr,  }\item[{uint32\+\_\+t}]{DMA\+\_\+\+Memory\+Target }\end{DoxyParamCaption})}
+
+
+
+Configures the Memory address for the next buffer transfer in double buffer mode (for dynamic use). This function can be called when the DMA Stream is enabled and when the transfer is ongoing. ~\newline
+ 
+
+
+\begin{DoxyParams}{Parameters}
+{\em DMAy\+\_\+\+Streamx} & where y can be 1 or 2 to select the DMA and x can be 0 to 7 to select the DMA Stream. \\
+\hline
+{\em Memory\+Base\+Addr} & The base address of the target memory buffer \\
+\hline
+{\em DMA\+\_\+\+Memory\+Target} & Next memory target to be used. This parameter can be one of the following values\+: \begin{DoxyItemize}
+\item DMA\+\_\+\+Memory\+\_\+0\+: To use the memory address 0 \item DMA\+\_\+\+Memory\+\_\+1\+: To use the memory address 1\end{DoxyItemize}
+\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+It is not allowed to modify the Base Address of a target Memory when this target is involved in the current transfer. ie. If the DMA Stream is currently transferring to/from Memory 1, then it not possible to modify Base address of Memory 1, but it is possible to modify Base address of Memory 0. To know which Memory is currently used, you can use the function \doxylink{group___d_m_a___group3_ga74b6624f9faa2f43c9369ddbdeab241c}{DMA\+\_\+\+Get\+Current\+Memory\+Target()}. ~\newline
+
+\end{DoxyNote}
+
+\begin{DoxyRetVals}{Return values}
+{\em None} & \\
+\hline
+\end{DoxyRetVals}

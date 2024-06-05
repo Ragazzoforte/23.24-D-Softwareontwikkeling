@@ -1,26 +1,6 @@
 var searchData=
 [
-  ['_5f_5fdma_5fhandletypedef_0',['__DMA_HandleTypeDef',['../struct_____d_m_a___handle_type_def.html',1,'']]],
-  ['_5f_5fi2s_5fhandletypedef_1',['__I2S_HandleTypeDef',['../struct_____i2_s___handle_type_def.html',1,'']]],
-  ['_5f_5fiar_5fu32_2',['__iar_u32',['../struct____iar__u32.html',1,'']]],
-  ['_5f_5fsmartcard_5fhandletypedef_3',['__SMARTCARD_HandleTypeDef',['../struct_____s_m_a_r_t_c_a_r_d___handle_type_def.html',1,'']]],
-  ['_5f_5fsmbus_5fhandletypedef_4',['__SMBUS_HandleTypeDef',['../struct_____s_m_b_u_s___handle_type_def.html',1,'']]],
-  ['_5f_5fspi_5fhandletypedef_5',['__SPI_HandleTypeDef',['../struct_____s_p_i___handle_type_def.html',1,'']]],
-  ['_5f_5fuart_5fhandletypedef_6',['__UART_HandleTypeDef',['../struct_____u_a_r_t___handle_type_def.html',1,'']]],
-  ['_5f_5fusart_5fhandletypedef_7',['__USART_HandleTypeDef',['../struct_____u_s_a_r_t___handle_type_def.html',1,'']]],
-  ['_5fabstractcntrlmgmtfunctionaldescriptor_8',['_AbstractCntrlMgmtFunctionalDescriptor',['../struct___abstract_cntrl_mgmt_functional_descriptor.html',1,'']]],
-  ['_5fcallmgmtfunctionaldescriptor_9',['_CallMgmtFunctionalDescriptor',['../struct___call_mgmt_functional_descriptor.html',1,'']]],
-  ['_5fcdc_5flinecodingstructure_10',['_CDC_LineCodingStructure',['../union___c_d_c___line_coding_structure.html',1,'']]],
-  ['_5fcdc_5fprocess_11',['_CDC_Process',['../struct___c_d_c___process.html',1,'']]],
-  ['_5fconfigurationdescriptor_12',['_ConfigurationDescriptor',['../struct___configuration_descriptor.html',1,'']]],
-  ['_5fdescheader_13',['_DescHeader',['../struct___desc_header.html',1,'']]],
-  ['_5fdevicedescriptor_14',['_DeviceDescriptor',['../struct___device_descriptor.html',1,'']]],
-  ['_5fendpointdescriptor_15',['_EndpointDescriptor',['../struct___endpoint_descriptor.html',1,'']]],
-  ['_5ffunctionaldescriptorheader_16',['_FunctionalDescriptorHeader',['../struct___functional_descriptor_header.html',1,'']]],
-  ['_5finterfacedescriptor_17',['_InterfaceDescriptor',['../struct___interface_descriptor.html',1,'']]],
-  ['_5fsetuppkt_5fstruc_18',['_SetupPkt_Struc',['../struct___u_s_b___setup_1_1___setup_pkt___struc.html',1,'_USB_Setup']]],
-  ['_5funionfunctionaldescriptor_19',['_UnionFunctionalDescriptor',['../struct___union_functional_descriptor.html',1,'']]],
-  ['_5fusb_5fsetup_20',['_USB_Setup',['../union___u_s_b___setup.html',1,'']]],
-  ['_5fusbh_5fcdcinterfacedesc_21',['_USBH_CDCInterfaceDesc',['../struct___u_s_b_h___c_d_c_interface_desc.html',1,'']]],
-  ['_5fusbh_5fhandletypedef_22',['_USBH_HandleTypeDef',['../struct___u_s_b_h___handle_type_def.html',1,'']]]
+  ['adc_5fcommon_5ftypedef_0',['ADC_Common_TypeDef',['../struct_a_d_c___common___type_def.html',1,'']]],
+  ['adc_5ftypedef_1',['ADC_TypeDef',['../struct_a_d_c___type_def.html',1,'']]],
+  ['apsr_5ftype_2',['APSR_Type',['../union_a_p_s_r___type.html',1,'']]]
 ];

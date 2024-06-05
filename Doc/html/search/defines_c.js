@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['vdd_5fvalue_0',['VDD_VALUE',['../stm32f4xx__hal__conf__template_8h.html#aae550dad9f96d52cfce5e539adadbbb4',1,'stm32f4xx_hal_conf_template.h']]]
+  ['ram_5fsize_0',['RAM_SIZE',['../stm32__ub__vga__screen_8h.html#ab82dd208a7e716e09a3f8c229bfe78d7',1,'stm32_ub_vga_screen.h']]],
+  ['rechthoek_1',['rechthoek',['../logic__layer_8h.html#a31c77e330c44762274e4f65947daad00',1,'logic_layer.h']]]
 ];

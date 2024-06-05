@@ -511,6 +511,24 @@ int API_draw_bitmap (int x_lup, int y_lup, int bm_nr)
 			img_width  = MEGAMAN_WIDTH;
 			img_height = MEGAMAN_HEIGHT;
 			break;
+    
+    case MICHIEL:
+			pbitmap	   = michiel;
+			img_width  = MICHIEL_WIDTH;
+			img_height = MICHIEL_HEIGHT;
+			break;
+  
+    case FRANC:  
+      pbitmap	   = franc;
+      img_width  = FRANC_WIDTH;
+      img_height = FRANC_HEIGHT;
+      break;
+
+    case GROEP:
+      pbitmap	   = groep;
+      img_width  = GROEP_WIDTH;
+      img_height = GROEP_HEIGHT;
+      break;
 
 		default: 
     	pbitmap	   = megaman_2;

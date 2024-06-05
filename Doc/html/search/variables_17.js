@@ -1,28 +1,6 @@
 var searchData=
 [
-  ['w_0',['w',['../group___c_m_s_i_s__core___debug_functions.html#gad0fb62e7a08e70fc5e0a76b67809f84b',1,'APSR_Type::w'],['../group___c_m_s_i_s__core___debug_functions.html#gad0fb62e7a08e70fc5e0a76b67809f84b',1,'IPSR_Type::w'],['../group___c_m_s_i_s__core___debug_functions.html#gad0fb62e7a08e70fc5e0a76b67809f84b',1,'xPSR_Type::w'],['../group___c_m_s_i_s__core___debug_functions.html#gad0fb62e7a08e70fc5e0a76b67809f84b',1,'CONTROL_Type::w'],['../union_c_p_s_r___type.html#ad0fb62e7a08e70fc5e0a76b67809f84b',1,'CPSR_Type::w'],['../union_s_c_t_l_r___type.html#ad0fb62e7a08e70fc5e0a76b67809f84b',1,'SCTLR_Type::w'],['../union_a_c_t_l_r___type.html#ad0fb62e7a08e70fc5e0a76b67809f84b',1,'ACTLR_Type::w'],['../union_c_p_a_c_r___type.html#ad0fb62e7a08e70fc5e0a76b67809f84b',1,'CPACR_Type::w'],['../union_d_f_s_r___type.html#ad0fb62e7a08e70fc5e0a76b67809f84b',1,'DFSR_Type::w'],['../union_i_f_s_r___type.html#ad0fb62e7a08e70fc5e0a76b67809f84b',1,'IFSR_Type::w'],['../union_i_s_r___type.html#ad0fb62e7a08e70fc5e0a76b67809f84b',1,'ISR_Type::w'],['../structcmsis__nn__tile.html#a10eaf5bb734b696e5bcb6fd5b7033b60',1,'cmsis_nn_tile::w'],['../structcmsis__nn__dims.html#a10eaf5bb734b696e5bcb6fd5b7033b60',1,'cmsis_nn_dims::w']]],
-  ['watchdogmode_1',['WatchdogMode',['../struct_a_d_c___analog_w_d_g_conf_type_def.html#a13924e920be2454c955a2139e2c3eb1a',1,'ADC_AnalogWDGConfTypeDef']]],
-  ['watchdognumber_2',['WatchdogNumber',['../struct_a_d_c___analog_w_d_g_conf_type_def.html#a316457f389072f7a80b62e2b3c8fdef4',1,'ADC_AnalogWDGConfTypeDef']]],
-  ['wcfgr_3',['WCFGR',['../struct_d_s_i___type_def.html#a2f09c62b1fbeff179ab435e0cd07a2ba',1,'DSI_TypeDef']]],
-  ['wcr_4',['WCR',['../struct_d_s_i___type_def.html#a4ca8d4e372398db0e5045993ffa56b05',1,'DSI_TypeDef']]],
-  ['weekday_5',['WeekDay',['../struct_r_t_c___date_type_def.html#af39df3e46151584e8cb28dfb7de43dec',1,'RTC_DateTypeDef']]],
-  ['weights_5f128_6',['Weights_128',['../group___d_c_t4___i_d_c_t4___table.html#gad00f29d896d64d6da7afbbb9d3e182a4',1,'Weights_128:&#160;arm_common_tables.c'],['../group___d_c_t4___i_d_c_t4___table.html#gad00f29d896d64d6da7afbbb9d3e182a4',1,'Weights_128:&#160;arm_common_tables.c']]],
-  ['weightsq31_5f128_7',['WeightsQ31_128',['../group___d_c_t4___i_d_c_t4___table.html#ga02d7024538a87214296b01d83ba36b02',1,'WeightsQ31_128:&#160;arm_common_tables.c'],['../group___d_c_t4___i_d_c_t4___table.html#ga02d7024538a87214296b01d83ba36b02',1,'WeightsQ31_128:&#160;arm_common_tables.c']]],
-  ['whpcr_8',['WHPCR',['../struct_l_t_d_c___layer___type_def.html#a36bded5d2b6b499385e45660f4a3c867',1,'LTDC_Layer_TypeDef']]],
-  ['wier_9',['WIER',['../struct_d_s_i___type_def.html#abf251c3d39400d58da7eb5c8f8354160',1,'DSI_TypeDef']]],
-  ['wifcr_10',['WIFCR',['../struct_d_s_i___type_def.html#a72700b16163185c01a76b121f2a260d4',1,'DSI_TypeDef']]],
-  ['window_11',['Window',['../struct_w_w_d_g___init_type_def.html#a0ea3a5767370dd42e6108643f23d5c68',1,'WWDG_InitTypeDef']]],
-  ['windowcoefs_12',['windowCoefs',['../structarm__mfcc__instance__f32.html#a4a698086e918a056cb7175569c59cb61',1,'arm_mfcc_instance_f32::windowCoefs'],['../structarm__mfcc__instance__q31.html#a1fc91e7ce8c2582d9e142ff25ca3c8ca',1,'arm_mfcc_instance_q31::windowCoefs'],['../structarm__mfcc__instance__q15.html#af4dfc8960dea69fe00bf6018eb70eb5a',1,'arm_mfcc_instance_q15::windowCoefs']]],
-  ['wisr_13',['WISR',['../struct_d_s_i___type_def.html#a5ae1f4ac0e821b4d9f945e1b9d7aeccc',1,'DSI_TypeDef']]],
-  ['wnr_14',['WnR',['../union_d_f_s_r___type.html#aa8089da315dd4f8084f3418d6d58b757',1,'DFSR_Type']]],
-  ['word_15',['word',['../unionarm__nnword.html#a28bd9dbf5f26312fb6f1ae07496df471',1,'arm_nnword']]],
-  ['wordlength_16',['WordLength',['../struct_i_r_d_a___init_type_def.html#ae5e60b9a021fe0009588fc86c7584a5a',1,'IRDA_InitTypeDef::WordLength'],['../struct_s_m_a_r_t_c_a_r_d___init_type_def.html#ae5e60b9a021fe0009588fc86c7584a5a',1,'SMARTCARD_InitTypeDef::WordLength'],['../struct_u_a_r_t___init_type_def.html#ae5e60b9a021fe0009588fc86c7584a5a',1,'UART_InitTypeDef::WordLength'],['../struct_u_s_a_r_t___init_type_def.html#ae5e60b9a021fe0009588fc86c7584a5a',1,'USART_InitTypeDef::WordLength']]],
-  ['wpcr_17',['WPCR',['../struct_d_s_i___type_def.html#af13e333411bfc7c44433b91f22091e49',1,'DSI_TypeDef']]],
-  ['wpr_18',['WPR',['../struct_r_t_c___type_def.html#a6204786b050eb135fabb15784698e86e',1,'RTC_TypeDef']]],
-  ['wrpcr_19',['WRPCR',['../struct_d_s_i___type_def.html#a5eb6c6db929319dddfbb044e546f4d93',1,'DSI_TypeDef']]],
-  ['wrpsector_20',['WRPSector',['../struct_f_l_a_s_h___o_b_program_init_type_def.html#a549b7149fc7cec7fa1235aa040b9d498',1,'FLASH_OBProgramInitTypeDef']]],
-  ['wrpstate_21',['WRPState',['../struct_f_l_a_s_h___o_b_program_init_type_def.html#ab5ab320199482e9eb21dc8460501dea5',1,'FLASH_OBProgramInitTypeDef']]],
-  ['wutr_22',['WUTR',['../struct_r_t_c___type_def.html#ac5b3c8be61045a304d3076d4714d29f2',1,'RTC_TypeDef']]],
-  ['wvpcr_23',['WVPCR',['../struct_l_t_d_c___layer___type_def.html#aafd5aea090b8ab4f7cbaee88503cb6a1',1,'LTDC_Layer_TypeDef']]],
-  ['wxn_24',['WXN',['../union_s_c_t_l_r___type.html#aa27b6ff641427c1b03f375f71bca5138',1,'SCTLR_Type']]]
+  ['w_0',['w',['../group___c_m_s_i_s__core___debug_functions.html#gae4c2ef8c9430d7b7bef5cbfbbaed3a94',1,'APSR_Type::w'],['../group___c_m_s_i_s__core___debug_functions.html#ga4adca999d3a0bc1ae682d73ea7cfa879',1,'IPSR_Type::w'],['../group___c_m_s_i_s__core___debug_functions.html#ga1a47176768f45f79076c4f5b1b534bc2',1,'xPSR_Type::w'],['../group___c_m_s_i_s__core___debug_functions.html#ga6b642cca3d96da660b1198c133ca2a1f',1,'CONTROL_Type::w']]],
+  ['wpr_1',['WPR',['../struct_r_t_c___type_def.html#ad54765af56784498a3ae08686b79a1ff',1,'RTC_TypeDef']]],
+  ['wutr_2',['WUTR',['../struct_r_t_c___type_def.html#ad93017bb0a778a2aad9cd71211fc770a',1,'RTC_TypeDef']]]
 ];

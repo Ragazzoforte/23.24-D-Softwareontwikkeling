@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['error_5fhandler_0',['Error_Handler',['../main_8h.html#a1730ffe1e560465665eb47d9264826f9',1,'Error_Handler(void):&#160;main.c'],['../main_8c.html#a1730ffe1e560465665eb47d9264826f9',1,'Error_Handler(void):&#160;main.c']]]
+  ['5_0',['Flash Latency(WS)                      | 5',['../system__stm32f4xx_8c.html#flash-latencyws-----------------------5',1,'']]],
+  ['5_20this_20file_20configures_20the_20system_20clock_20as_20follows_3a_1',['5. This file configures the system clock as follows:',['../system__stm32f4xx_8c.html#autotoc_md5-this-file-configures-the-system-clock-as-follows',1,'']]]
 ];

@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['c_3a2004_20compliance_20exceptions_0',['MISRA-C:2004 Compliance Exceptions',['../_c_m_s_i_s__m_i_s_r_a__exceptions.html',1,'']]],
-  ['cmsis_20dsp_20software_20library_1',['CMSIS DSP Software Library',['../index.html',1,'']]],
-  ['compliance_20exceptions_2',['MISRA-C:2004 Compliance Exceptions',['../_c_m_s_i_s__m_i_s_r_a__exceptions.html',1,'']]]
+  ['cmsis_20cortex_20m4_0',['CMSIS Cortex-M4',['../index.html',1,'']]],
+  ['cortex_20m4_1',['CMSIS Cortex-M4',['../index.html',1,'']]]
 ];

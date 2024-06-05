@@ -1,4 +1,4 @@
 var main_8h =
 [
-    [ "Error_Handler", "main_8h.html#a1730ffe1e560465665eb47d9264826f9", null ]
+    [ "__STM32F4_UB_MAIN_H", "main_8h.html#a83827e2973c8820108f8f72d0bee98a9", null ]
 ];

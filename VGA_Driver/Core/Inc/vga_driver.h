@@ -13,6 +13,9 @@
 #define ARROW_DOWN 5
 #define ARROW_LEFT 6
 #define MEGAMAN 7
+#define MICHIEL 8
+#define FRANC 9
+#define GROEP 15
 #define MAX_LEN_FONTNAME 30
 #define LETTERA 'a'
 #define LETTERC 'c'

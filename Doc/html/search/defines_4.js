@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['external_5fclock_5fvalue_0',['EXTERNAL_CLOCK_VALUE',['../stm32f4xx__hal__conf__template_8h.html#a8c47c935e91e70569098b41718558648',1,'stm32f4xx_hal_conf_template.h']]]
+  ['error_5ffontname_0',['ERROR_FONTNAME',['../vga__driver_8h.html#a6f9d0f9f313f1be36e0ef19ea31e2b67',1,'vga_driver.h']]],
+  ['error_5ffontname_5funknown_1',['ERROR_FONTNAME_UNKNOWN',['../vga__driver_8h.html#abc27a2833b28cd5389cfbea0e7616463',1,'vga_driver.h']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['pendsv_5fhandler_0',['PendSV_Handler',['../stm32f4xx__it_8h.html#a6303e1f258cbdc1f970ce579cc015623',1,'PendSV_Handler(void):&#160;stm32f4xx_it.c'],['../stm32f4xx__it_8c.html#a6303e1f258cbdc1f970ce579cc015623',1,'PendSV_Handler(void):&#160;stm32f4xx_it.c']]]
+  ['kiezen_0',['kiezen',['../logic__layer_8h.html#a5f43719211fbc120aba0a64af4f50107',1,'kiezen(command str):&#160;logic_layer.c'],['../logic__layer_8c.html#a5f43719211fbc120aba0a64af4f50107',1,'kiezen(command str):&#160;logic_layer.c']]]
 ];

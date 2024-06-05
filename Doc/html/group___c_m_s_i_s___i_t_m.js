@@ -1,0 +1,36 @@
+var group___c_m_s_i_s___i_t_m =
+[
+    [ "CMSIS Core Debug", "group___c_m_s_i_s___core_debug.html", "group___c_m_s_i_s___core_debug" ],
+    [ "ITM_Type", "struct_i_t_m___type.html", [
+      [ "PORT", "group___c_m_s_i_s__core___debug_functions.html#gad9f8d413a216e7b9a24596ab1071deb0", null ],
+      [ "RESERVED0", "group___c_m_s_i_s__core___debug_functions.html#ga2c5ae30385b5f370d023468ea9914c0e", null ],
+      [ "RESERVED1", "group___c_m_s_i_s__core___debug_functions.html#gafffce5b93bbfedbaee85357d0b07ebce", null ],
+      [ "RESERVED2", "group___c_m_s_i_s__core___debug_functions.html#gaf56b2f07bc6b42cd3e4d17e1b27cff7b", null ],
+      [ "TCR", "group___c_m_s_i_s__core___debug_functions.html#ga58f169e1aa40a9b8afb6296677c3bb45", null ],
+      [ "TER", "group___c_m_s_i_s__core___debug_functions.html#ga91a040e1b162e1128ac1e852b4a0e589", null ],
+      [ "TPR", "group___c_m_s_i_s__core___debug_functions.html#ga93b480aac6da620bbb611212186d47fa", null ],
+      [ "u16", "group___c_m_s_i_s__core___debug_functions.html#ga12aa4eb4d9dcb589a5d953c836f4e8f4", null ],
+      [ "u32", "group___c_m_s_i_s__core___debug_functions.html#ga6882fa5af67ef5c5dfb433b3b68939df", null ],
+      [ "u8", "group___c_m_s_i_s__core___debug_functions.html#gabea77b06775d325e5f6f46203f582433", null ]
+    ] ],
+    [ "ITM_TCR_BUSY_Msk", "group___c_m_s_i_s___i_t_m.html#ga43ad7cf33de12f2ef3a412d4f354c60f", null ],
+    [ "ITM_TCR_BUSY_Pos", "group___c_m_s_i_s___i_t_m.html#ga9174ad4a36052c377cef4e6aba2ed484", null ],
+    [ "ITM_TCR_GTSFREQ_Msk", "group___c_m_s_i_s___i_t_m.html#gade862cf009827f7f6748fc44c541b067", null ],
+    [ "ITM_TCR_GTSFREQ_Pos", "group___c_m_s_i_s___i_t_m.html#ga96c7c7cbc0d98426c408090b41f583f1", null ],
+    [ "ITM_TCR_ITMENA_Msk", "group___c_m_s_i_s___i_t_m.html#ga7dd53e3bff24ac09d94e61cb595cb2d9", null ],
+    [ "ITM_TCR_ITMENA_Pos", "group___c_m_s_i_s___i_t_m.html#ga3286b86004bce7ffe17ee269f87f8d9d", null ],
+    [ "ITM_TCR_SWOENA_Msk", "group___c_m_s_i_s___i_t_m.html#ga97476cb65bab16a328b35f81fd02010a", null ],
+    [ "ITM_TCR_SWOENA_Pos", "group___c_m_s_i_s___i_t_m.html#ga7a380f0c8078f6560051406583ecd6a5", null ],
+    [ "ITM_TCR_SYNCENA_Msk", "group___c_m_s_i_s___i_t_m.html#gac89b74a78701c25b442105d7fe2bbefb", null ],
+    [ "ITM_TCR_SYNCENA_Pos", "group___c_m_s_i_s___i_t_m.html#gaa93a1147a39fc63980d299231252a30e", null ],
+    [ "ITM_TCR_TraceBusID_Msk", "group___c_m_s_i_s___i_t_m.html#ga60c20bd9649d1da5a2be8e656ba19a60", null ],
+    [ "ITM_TCR_TraceBusID_Pos", "group___c_m_s_i_s___i_t_m.html#gaca0281de867f33114aac0636f7ce65d3", null ],
+    [ "ITM_TCR_TSENA_Msk", "group___c_m_s_i_s___i_t_m.html#ga436b2e8fa24328f48f2da31c00fc9e65", null ],
+    [ "ITM_TCR_TSENA_Pos", "group___c_m_s_i_s___i_t_m.html#ga5aa381845f810114ab519b90753922a1", null ],
+    [ "ITM_TCR_TSPrescale_Msk", "group___c_m_s_i_s___i_t_m.html#ga7a723f71bfb0204c264d8dbe8cc7ae52", null ],
+    [ "ITM_TCR_TSPrescale_Pos", "group___c_m_s_i_s___i_t_m.html#gad7bc9ee1732032c6e0de035f0978e473", null ],
+    [ "ITM_TCR_TXENA_Msk", "group___c_m_s_i_s___i_t_m.html#gac20ab2d72a9ecbec649d229e3800aa31", null ],
+    [ "ITM_TCR_TXENA_Pos", "group___c_m_s_i_s___i_t_m.html#ga543636236b85604f4bba68e7ae42a122", null ],
+    [ "ITM_TPR_PRIVMASK_Msk", "group___c_m_s_i_s___i_t_m.html#ga168e089d882df325a387aab3a802a46b", null ],
+    [ "ITM_TPR_PRIVMASK_Pos", "group___c_m_s_i_s___i_t_m.html#ga7abe5e590d1611599df87a1884a352e8", null ]
+];

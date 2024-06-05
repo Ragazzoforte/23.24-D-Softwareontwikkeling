@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['mac_5faddr0_0',['MAC_ADDR0',['../stm32f4xx__hal__conf__template_8h.html#ab84a2e15d360e2644ada09641513a941',1,'stm32f4xx_hal_conf_template.h']]]
+  ['italic_0',['ITALIC',['../vga__driver_8h.html#af706885b9b3eb2821dff28f8e7f7bb3f',1,'vga_driver.h']]]
 ];

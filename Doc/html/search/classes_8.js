@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['hash_5fdigest_5ftypedef_0',['HASH_DIGEST_TypeDef',['../struct_h_a_s_h___d_i_g_e_s_t___type_def.html',1,'']]],
-  ['hash_5ftypedef_1',['HASH_TypeDef',['../struct_h_a_s_h___type_def.html',1,'']]]
+  ['nvic_5finittypedef_0',['NVIC_InitTypeDef',['../struct_n_v_i_c___init_type_def.html',1,'']]],
+  ['nvic_5ftype_1',['NVIC_Type',['../struct_n_v_i_c___type.html',1,'']]]
 ];

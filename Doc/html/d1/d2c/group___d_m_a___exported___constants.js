@@ -1,0 +1,25 @@
+var group___d_m_a___exported___constants =
+[
+    [ "DMA_channel", "df/dbb/group___d_m_a__channel.html", "df/dbb/group___d_m_a__channel" ],
+    [ "DMA_data_transfer_direction", "dd/d15/group___d_m_a__data__transfer__direction.html", "dd/d15/group___d_m_a__data__transfer__direction" ],
+    [ "DMA_data_buffer_size", "d6/d0b/group___d_m_a__data__buffer__size.html", "d6/d0b/group___d_m_a__data__buffer__size" ],
+    [ "DMA_peripheral_incremented_mode", "d5/ddb/group___d_m_a__peripheral__incremented__mode.html", "d5/ddb/group___d_m_a__peripheral__incremented__mode" ],
+    [ "DMA_memory_incremented_mode", "d4/d3c/group___d_m_a__memory__incremented__mode.html", "d4/d3c/group___d_m_a__memory__incremented__mode" ],
+    [ "DMA_peripheral_data_size", "d9/dfd/group___d_m_a__peripheral__data__size.html", "d9/dfd/group___d_m_a__peripheral__data__size" ],
+    [ "DMA_memory_data_size", "db/d35/group___d_m_a__memory__data__size.html", "db/d35/group___d_m_a__memory__data__size" ],
+    [ "DMA_circular_normal_mode", "d1/dba/group___d_m_a__circular__normal__mode.html", "d1/dba/group___d_m_a__circular__normal__mode" ],
+    [ "DMA_priority_level", "d8/da7/group___d_m_a__priority__level.html", "d8/da7/group___d_m_a__priority__level" ],
+    [ "DMA_fifo_direct_mode", "d0/db9/group___d_m_a__fifo__direct__mode.html", "d0/db9/group___d_m_a__fifo__direct__mode" ],
+    [ "DMA_fifo_threshold_level", "d4/de4/group___d_m_a__fifo__threshold__level.html", "d4/de4/group___d_m_a__fifo__threshold__level" ],
+    [ "DMA_memory_burst", "d7/d63/group___d_m_a__memory__burst.html", "d7/d63/group___d_m_a__memory__burst" ],
+    [ "DMA_peripheral_burst", "d1/d86/group___d_m_a__peripheral__burst.html", "d1/d86/group___d_m_a__peripheral__burst" ],
+    [ "DMA_fifo_status_level", "d5/d42/group___d_m_a__fifo__status__level.html", "d5/d42/group___d_m_a__fifo__status__level" ],
+    [ "DMA_flags_definition", "de/d17/group___d_m_a__flags__definition.html", "de/d17/group___d_m_a__flags__definition" ],
+    [ "DMA_interrupt_enable_definitions", "d2/dcc/group___d_m_a__interrupt__enable__definitions.html", "d2/dcc/group___d_m_a__interrupt__enable__definitions" ],
+    [ "DMA_interrupts_definitions", "d4/d46/group___d_m_a__interrupts__definitions.html", "d4/d46/group___d_m_a__interrupts__definitions" ],
+    [ "DMA_peripheral_increment_offset", "dc/d99/group___d_m_a__peripheral__increment__offset.html", "dc/d99/group___d_m_a__peripheral__increment__offset" ],
+    [ "DMA_flow_controller_definitions", "de/d34/group___d_m_a__flow__controller__definitions.html", "de/d34/group___d_m_a__flow__controller__definitions" ],
+    [ "DMA_memory_targets_definitions", "d8/d5c/group___d_m_a__memory__targets__definitions.html", "d8/d5c/group___d_m_a__memory__targets__definitions" ],
+    [ "IS_DMA_ALL_CONTROLLER", "d1/d2c/group___d_m_a___exported___constants.html#gaad08400369c8c129927cdb9cf1baae29", null ],
+    [ "IS_DMA_ALL_PERIPH", "d1/d2c/group___d_m_a___exported___constants.html#gabcab9fa1c48b148703a8f41c1d99e0c8", null ]
+];

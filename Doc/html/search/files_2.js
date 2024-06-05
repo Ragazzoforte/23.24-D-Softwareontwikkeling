@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['main_2ec_0',['main.c',['../main_8c.html',1,'']]],
-  ['main_2eh_1',['main.h',['../main_8h.html',1,'']]]
+  ['fonts_2ec_0',['fonts.c',['../fonts_8c.html',1,'']]],
+  ['fonts_2eh_1',['fonts.h',['../fonts_8h.html',1,'']]]
 ];

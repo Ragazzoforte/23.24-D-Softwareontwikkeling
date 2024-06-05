@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['main_2ec_0',['main.c',['../main_8c.html',1,'']]],
-  ['main_2eh_1',['main.h',['../main_8h.html',1,'']]]
+  ['bitmap_2ec_0',['bitmap.c',['../bitmap_8c.html',1,'']]],
+  ['bitmap_2eh_1',['bitmap.h',['../bitmap_8h.html',1,'']]]
 ];

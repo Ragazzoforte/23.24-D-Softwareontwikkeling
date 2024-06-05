@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['tick_5fint_5fpriority_0',['TICK_INT_PRIORITY',['../stm32f4xx__hal__conf__template_8h.html#ae27809d4959b9fd5b5d974e3e1c77d2e',1,'stm32f4xx_hal_conf_template.h']]]
+  ['normal_0',['NORMAL',['../vga__driver_8h.html#a1291f416b069313021b519eea62d5bf1',1,'vga_driver.h']]],
+  ['nr_5fof_5felements_1',['NR_OF_ELEMENTS',['../fonts_8h.html#a8197af79301d34d7d6ce702c46f1369e',1,'fonts.h']]],
+  ['nr_5fof_5fsymbols_2',['NR_OF_SYMBOLS',['../fonts_8h.html#a0b8a015ffacd76287209cdc8d889d340',1,'fonts.h']]]
 ];

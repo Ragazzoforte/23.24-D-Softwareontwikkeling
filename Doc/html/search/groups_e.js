@@ -1,5 +1,28 @@
 var searchData=
 [
-  ['jensenshannon_0',['JensenShannon',['../group___jensen_shannon.html',1,'']]],
-  ['jpeg_20aliased_20macros_20maintained_20for_20legacy_20purpose_1',['HAL JPEG Aliased Macros maintained for legacy purpose',['../group___h_a_l___j_p_e_g___aliased___macros.html',1,'']]]
+  ['scb_0',['SCB',['../group___c_m_s_i_s___s_c_b.html',1,'CMSIS SCB'],['../group___c_m_s_i_s___s_cn_s_c_b.html',1,'CMSIS System Control and ID Register not in the SCB']]],
+  ['simd_20intrinsics_1',['CMSIS SIMD Intrinsics',['../group___c_m_s_i_s___s_i_m_d__intrinsics.html',1,'']]],
+  ['specific_20features_2',['Advanced-control timers (TIM1 and TIM8) specific features',['../group___t_i_m___group4.html',1,'']]],
+  ['specific_20interface_20management_20functions_3',['Specific interface management functions',['../group___t_i_m___group8.html',1,'']]],
+  ['specific_20remapping_20management_20function_4',['Specific remapping management function',['../group___t_i_m___group9.html',1,'']]],
+  ['stm32f4xx_5',['Stm32f4xx',['../group__stm32f4xx.html',1,'']]],
+  ['stm32f4xx_5fstdperiph_5fdriver_6',['STM32F4xx_StdPeriph_Driver',['../group___s_t_m32_f4xx___std_periph___driver.html',1,'']]],
+  ['stm32f4xx_5fsystem_7',['Stm32f4xx_system',['../group__stm32f4xx__system.html',1,'']]],
+  ['stm32f4xx_5fsystem_5fexported_5fconstants_8',['STM32F4xx_System_Exported_Constants',['../group___s_t_m32_f4xx___system___exported___constants.html',1,'']]],
+  ['stm32f4xx_5fsystem_5fexported_5ffunctions_9',['STM32F4xx_System_Exported_Functions',['../group___s_t_m32_f4xx___system___exported___functions.html',1,'']]],
+  ['stm32f4xx_5fsystem_5fexported_5fmacros_10',['STM32F4xx_System_Exported_Macros',['../group___s_t_m32_f4xx___system___exported___macros.html',1,'']]],
+  ['stm32f4xx_5fsystem_5fexported_5ftypes_11',['STM32F4xx_System_Exported_types',['../group___s_t_m32_f4xx___system___exported__types.html',1,'']]],
+  ['stm32f4xx_5fsystem_5fincludes_12',['STM32F4xx_System_Includes',['../group___s_t_m32_f4xx___system___includes.html',1,'']]],
+  ['stm32f4xx_5fsystem_5fprivate_5fdefines_13',['STM32F4xx_System_Private_Defines',['../group___s_t_m32_f4xx___system___private___defines.html',1,'']]],
+  ['stm32f4xx_5fsystem_5fprivate_5ffunctionprototypes_14',['STM32F4xx_System_Private_FunctionPrototypes',['../group___s_t_m32_f4xx___system___private___function_prototypes.html',1,'']]],
+  ['stm32f4xx_5fsystem_5fprivate_5ffunctions_15',['STM32F4xx_System_Private_Functions',['../group___s_t_m32_f4xx___system___private___functions.html',1,'']]],
+  ['stm32f4xx_5fsystem_5fprivate_5fincludes_16',['STM32F4xx_System_Private_Includes',['../group___s_t_m32_f4xx___system___private___includes.html',1,'']]],
+  ['stm32f4xx_5fsystem_5fprivate_5fmacros_17',['STM32F4xx_System_Private_Macros',['../group___s_t_m32_f4xx___system___private___macros.html',1,'']]],
+  ['stm32f4xx_5fsystem_5fprivate_5ftypesdefinitions_18',['STM32F4xx_System_Private_TypesDefinitions',['../group___s_t_m32_f4xx___system___private___types_definitions.html',1,'']]],
+  ['stm32f4xx_5fsystem_5fprivate_5fvariables_19',['STM32F4xx_System_Private_Variables',['../group___s_t_m32_f4xx___system___private___variables.html',1,'']]],
+  ['synchronization_20management_20functions_20',['Synchronization management functions',['../group___t_i_m___group7.html',1,'']]],
+  ['system_20ahb_20and_20apb_20busses_20clocks_20configuration_20functions_21',['System AHB and APB busses clocks configuration functions',['../group___r_c_c___group2.html',1,'']]],
+  ['system_20control_20and_20id_20register_20not_20in_20the_20scb_22',['CMSIS System Control and ID Register not in the SCB',['../group___c_m_s_i_s___s_cn_s_c_b.html',1,'']]],
+  ['systick_23',['CMSIS SysTick',['../group___c_m_s_i_s___sys_tick.html',1,'']]],
+  ['systick_20functions_24',['CMSIS Core SysTick Functions',['../group___c_m_s_i_s___core___sys_tick_functions.html',1,'']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['applicationtypedef_0',['ApplicationTypeDef',['../group___u_s_b_h___h_o_s_t.html#gaf9938846bd2b8b20906b069c56a9519f',1,'usb_host.h']]]
+  ['bitaction_0',['BitAction',['../group___g_p_i_o.html#ga176130b21c0e719121470a6042d4cf19',1,'stm32f4xx_gpio.h']]]
 ];

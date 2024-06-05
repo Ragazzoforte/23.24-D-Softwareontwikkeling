@@ -31,7 +31,6 @@ int main(void)
 
   UART_SendString(" "); // First char (weird bug)
   UART_SendString("ik ben een stm32F407 maar koalaberen zijn ook erg mooie beesten");
-  unsigned long a = hash("polygon");
   while(true)
   {
     if(msgReceivedUSART2 == true)

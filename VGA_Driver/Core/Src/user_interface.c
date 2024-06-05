@@ -18,23 +18,18 @@ command UI_string_to_function(char* str)
 {
     command newCommand;
     newCommand.arg[0] = str;
-    uint8_t i=1, j=1;
+    uint8_t i=1;
     while(*str != '\0')
     {   
-        if(*str == ',')
+        if((*str == ',' )&( *(str-1) != 92)) //check for comma without backslash
         {
             *str = '\0';
-            char *temp = str+1;
-            while(*temp == 32)
-            {
-                temp++;
-                j++;
-            }
+            uint8_t j = 1;
+            while(*(str+j) == 32) j++;
             newCommand.arg[i] = str+j;
-            j=1;
             i++;
         }
-        if(*str == '\n' | *str == '\r')
+        if((*str == '\n' )|( *str == '\r'))
         {
             *str = '\0';
         }

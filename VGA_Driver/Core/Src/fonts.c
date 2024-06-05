@@ -1,11 +1,14 @@
-/*
- * fonts.c
- *
- *  Created on: 8 mei 2024
- *      Author: Michel Vollmuller
+/**
+ * @brief For al the bitmaps of the different fonts.
  * 
- * Font data for Arial normal, italic and bold in both small and large size
- * Font data for Consolas normal, italic and bold in both small and large size
+ * This file contains the main function of the program. It initializes the system, sets up the VGA screen, and enters a loop to handle UART messages.
+ * 
+ * @file fonts.c
+ * @authors	Michel Vollmuller, Tim Wannet, Tijmen Willems
+ * @date 5 mei 2024
+ * @version 1.0
+ * @pre This file must be used in combination with main.h
+ * 
  */
 #include "main.h"
 

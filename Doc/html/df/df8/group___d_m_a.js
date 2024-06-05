@@ -1,7 +1,7 @@
 var group___d_m_a =
 [
-    [ "DMA_Exported_Constants", "d1/d2c/group___d_m_a___exported___constants.html", "d1/d2c/group___d_m_a___exported___constants" ],
     [ "DMA_Private_Functions", "de/dd4/group___d_m_a___private___functions.html", "de/dd4/group___d_m_a___private___functions" ],
+    [ "DMA_Exported_Constants", "d1/d2c/group___d_m_a___exported___constants.html", "d1/d2c/group___d_m_a___exported___constants" ],
     [ "DMA_InitTypeDef", "d4/d43/struct_d_m_a___init_type_def.html", [
       [ "DMA_BufferSize", "d4/d43/struct_d_m_a___init_type_def.html#a999df57215b28b3b1b3b6836c4952ca5", null ],
       [ "DMA_Channel", "d4/d43/struct_d_m_a___init_type_def.html#a68cba36c380e7297b23b09a16c809969", null ],

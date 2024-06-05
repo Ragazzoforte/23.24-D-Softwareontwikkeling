@@ -1,23 +1,25 @@
-//--------------------------------------------------------------
-// File     : main.c
-// Datum    : 30.03.2016
-// Version  : 1.0
-// Autor    : UB
-// mods by	: J.F. van der Bent
-// CPU      : STM32F4
-// IDE      : CooCox CoIDE 1.7.x
-// Module   : CMSIS_BOOT, M4_CMSIS_CORE
-// Function : VGA_core DMA LIB 320x240, 8bit color
-//--------------------------------------------------------------
+/**
+ * @brief main.c
+ * 
+ * This file contains the main function of the program. It initializes the system, sets up the VGA screen, and enters a loop to handle UART messages.
+ * 
+ * @file main.c
+ * @authors Michel Vollmuller, Tim Wannet, Tijmen Willems
+ * @date 5 mei 2024
+ * @version 1.0
+ * @pre This file must be used in combination with main.h
+ * 
+ */
 
 #include "main.h"
-#include "stm32_ub_vga_screen.h"
-#include <math.h>
-#include "uart.h"
-#include "stm32f4xx_it.h"
 
-#define BAUD_RATE 115200
-
+/**
+ * @brief Main function of the program.
+ * 
+ * This function initializes the system, sets up the VGA screen, and enters a loop to handle UART messages.
+ * 
+ * @return no return value
+ */
 int main(void)
 {	
   SystemInit(); // System speed to 168MHz

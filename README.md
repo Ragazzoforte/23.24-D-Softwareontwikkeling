@@ -60,29 +60,39 @@ By separating the concerns into different layers. The 3-layer model promotes mod
 and modify.
 
 ## Graphical Design
-![Local Image](./HLD.png)
+![Local Image](./Media/HLD.png)
 
 From the image above you can see the 3-layer model representeted in a high level design.
 As explained in the last chapter the 3-layer model is separated in 4 different parts: User Interface, Logic Layer, VGA Driver and UART Driver.
 
 1. User Interface
+The User Interface (blue) is represented by 2 blocks in the HLD: "Translat_string_to_command" and "Execute_command: kiezen()".
+It recieves a string from the terminal by the UART Driver, translates this string to a command and calles the fuction defined in the Logic Layer.
+
 The User Interface is being handled by the following files:
 - user_interface.c/h: mostly handles the incoming string and translates this to the respected function.
 
 2. Logic Layer
+Inside the Logic Layer (green) the incoming command from the User Interface. Here the command is being translated to the correct function that is defined in the VGA Driver. The Logic Layer also defines the fonts and bitmaps that are being used in the program.
+
 The Logic Later is being handled by the following files:
 - Logic_layer.c/h: Chooses the correct function based on the incoming message (from uart.c/h)
 - font.c/h: Contains all the fonts that are being used in the program.
 - bitmap.c/h: Contains all the bitmaps that are being used in the program.
 
 3. VGA Driver
-- vga_driver.c/h: Has all functions that are being used to draw on the screen or are being used to help the functions.
+The VGA Driver (red) is the layer that is responsible for drawing on the screen.
+Errors are being handled in the driver and send to the UART Driver to be displayed on the terminal.
 The switch case from the Logic Layer refers to 3 functions in the VGA Driver, these are example functions and represent all the functions that are defined in the VGA Driver.
 
+The VGA Driver is being handled by the following files:
+- vga_driver.c/h: Has all functions that are being used to draw on the screen or are being used to help the functions.
+
 4. UART Driver
+This Layer (yellow) is used for the communication between the terminal and the User Interface. It recieves the incoming string from terminal and sends the errors back received from the VGA Driver. 
+
 The UART Driver is being handled by the following files:
 - uart.c/h: With the lack of HAL libraries there was the need of making a own UART program so the microcontroller could communicate with the terminal. This program is optimized to minimize stuttering, minimize sync issues and optimize speed.
-
 
 ## Scipts-commands
 - lijn, x, y, x’, y’, kleur, dikte

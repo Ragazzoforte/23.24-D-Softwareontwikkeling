@@ -1,3 +1,14 @@
+/**
+ * @brief stm32_ub_vga_screen.c
+ * 
+ * 
+ * @file stm32_ub_vga_screen.c
+ * @authors Michel Vollmuller, Tim Wannet, Tijmen Willems
+ * @date 5 mei 2024
+ * @version 1.0
+ * 
+ */
+
 //--------------------------------------------------------------
 // File     : stm32_ub_vga_320x240.c
 // CPU      : STM32F4

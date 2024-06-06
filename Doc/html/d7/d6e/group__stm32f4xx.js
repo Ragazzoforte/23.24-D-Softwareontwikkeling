@@ -5,7 +5,7 @@ var group__stm32f4xx =
     [ "Exported_types", "d9/d3e/group___exported__types.html", "d9/d3e/group___exported__types" ],
     [ "Peripheral_registers_structures", "d0/d99/group___peripheral__registers__structures.html", "d0/d99/group___peripheral__registers__structures" ],
     [ "Peripheral_memory_map", "da/ddf/group___peripheral__memory__map.html", "da/ddf/group___peripheral__memory__map" ],
-    [ "Peripheral_declaration", "d1/ddc/group___peripheral__declaration.html", "d1/ddc/group___peripheral__declaration" ],
+    [ "Peripheral_declaration", "d1/ddc/group___peripheral__declaration.html", null ],
     [ "Exported_constants", "da/dfb/group___exported__constants.html", "da/dfb/group___exported__constants" ],
-    [ "Exported_macro", "d8/d35/group___exported__macro.html", "d8/d35/group___exported__macro" ]
+    [ "Exported_macro", "d8/d35/group___exported__macro.html", null ]
 ];

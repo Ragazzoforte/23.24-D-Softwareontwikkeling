@@ -1,13 +1,13 @@
 var group___g_p_i_o =
 [
-    [ "GPIO_Private_Functions", "group___g_p_i_o___private___functions.html", "group___g_p_i_o___private___functions" ],
     [ "GPIO_Exported_Constants", "group___g_p_i_o___exported___constants.html", "group___g_p_i_o___exported___constants" ],
+    [ "GPIO_Private_Functions", "group___g_p_i_o___private___functions.html", "group___g_p_i_o___private___functions" ],
     [ "GPIO_InitTypeDef", "struct_g_p_i_o___init_type_def.html", [
-      [ "GPIO_Mode", "struct_g_p_i_o___init_type_def.html#a55bd77e335c2bfeec9caa5dc922b791b", null ],
-      [ "GPIO_OType", "struct_g_p_i_o___init_type_def.html#af48c56f3e56e71204c8904ea29f5181b", null ],
-      [ "GPIO_Pin", "struct_g_p_i_o___init_type_def.html#a0beb7bf54bbf5fff56f49d8beba2e3df", null ],
-      [ "GPIO_PuPd", "struct_g_p_i_o___init_type_def.html#aad62942c003bc2083d37f10f6f39bd5f", null ],
-      [ "GPIO_Speed", "struct_g_p_i_o___init_type_def.html#ac05832cacebc861a9acf5294d702c16b", null ]
+      [ "GPIO_Mode", "struct_g_p_i_o___init_type_def.html#a0c7e8901d8b511bbb8c3b153f705dbba", null ],
+      [ "GPIO_OType", "struct_g_p_i_o___init_type_def.html#a321a268abbed3d2f01c27383e8daf92d", null ],
+      [ "GPIO_Pin", "struct_g_p_i_o___init_type_def.html#a15699fc7e215ac2579cd24ca76cd4591", null ],
+      [ "GPIO_PuPd", "struct_g_p_i_o___init_type_def.html#aeb0168ffc465346d21f3120aec320b72", null ],
+      [ "GPIO_Speed", "struct_g_p_i_o___init_type_def.html#a57b08335216f50618ebc080e4fbb0a80", null ]
     ] ],
     [ "IS_GPIO_ALL_PERIPH", "group___g_p_i_o.html#ga68b2a1f0b05c13978217db5439c7f790", null ],
     [ "IS_GPIO_BIT_ACTION", "group___g_p_i_o.html#ga6b882caa8ed9857c5c7267959a7818c5", null ],

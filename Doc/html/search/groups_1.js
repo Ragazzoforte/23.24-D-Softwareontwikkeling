@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['buffer_20mode_20functions_0',['Double Buffer mode functions',['../de/d7c/group___d_m_a___group3.html',1,'']]],
-  ['busses_20clocks_20configuration_20functions_1',['System AHB and APB busses clocks configuration functions',['../de/dbb/group___r_c_c___group2.html',1,'']]]
+  ['functions_0',['driver functions',['../d6/db7/group___v_g_a.html',1,'']]]
 ];

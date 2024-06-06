@@ -1,12 +1,12 @@
 var group___r_c_c =
 [
-    [ "RCC_Private_Functions", "group___r_c_c___private___functions.html", "group___r_c_c___private___functions" ],
     [ "RCC_Exported_Constants", "group___r_c_c___exported___constants.html", "group___r_c_c___exported___constants" ],
+    [ "RCC_Private_Functions", "group___r_c_c___private___functions.html", "group___r_c_c___private___functions" ],
     [ "RCC_ClocksTypeDef", "struct_r_c_c___clocks_type_def.html", [
-      [ "HCLK_Frequency", "struct_r_c_c___clocks_type_def.html#a41b9859d33954117daf7fab42f804b92", null ],
-      [ "PCLK1_Frequency", "struct_r_c_c___clocks_type_def.html#add4cfc63c35178d187107edc764e0b8f", null ],
-      [ "PCLK2_Frequency", "struct_r_c_c___clocks_type_def.html#ad854f0b70a6c4cf6de6dbbdcbc99b856", null ],
-      [ "SYSCLK_Frequency", "struct_r_c_c___clocks_type_def.html#a2ba325067f3d464ad7955358932563d8", null ]
+      [ "HCLK_Frequency", "struct_r_c_c___clocks_type_def.html#a5f9bf60f522a160aa7a878acf92ce129", null ],
+      [ "PCLK1_Frequency", "struct_r_c_c___clocks_type_def.html#a9045b24904bde572d479e85c6d2801f6", null ],
+      [ "PCLK2_Frequency", "struct_r_c_c___clocks_type_def.html#a45ada83b2d388a60ed994451f260f389", null ],
+      [ "SYSCLK_Frequency", "struct_r_c_c___clocks_type_def.html#a48b5f04759728e39921969e75c4899e8", null ]
     ] ],
     [ "BDCR_ADDRESS", "group___r_c_c.html#ga40b5a415d697b6af7babd8a208c92435", null ],
     [ "BDCR_BDRST_BB", "group___r_c_c.html#ga892fdf297b85b85cbaf0723649b31818", null ],
@@ -79,6 +79,5 @@ var group___r_c_c =
     [ "RCC_RTCCLKCmd", "group___r_c_c.html#ga9802f84846df2cea8e369234ed13b159", null ],
     [ "RCC_RTCCLKConfig", "group___r_c_c.html#ga1473d8a5a020642966359611c44181b0", null ],
     [ "RCC_SYSCLKConfig", "group___r_c_c.html#ga3551a36a8f0a3dc96a74d6b939048337", null ],
-    [ "RCC_WaitForHSEStartUp", "group___r_c_c.html#gae0f15692614dd048ee4110a056f001dc", null ],
-    [ "APBAHBPrescTable", "group___r_c_c.html#gab4232f78d57fe4cfed7055005999ee44", null ]
+    [ "RCC_WaitForHSEStartUp", "group___r_c_c.html#gae0f15692614dd048ee4110a056f001dc", null ]
 ];

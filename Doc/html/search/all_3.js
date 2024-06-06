@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['4_0',['APB1 Prescaler                         | 4',['../d4/d04/system__stm32f4xx_8c.html#autotoc_md17',1,'']]]
+  ['bitmap_2ec_0',['bitmap.c',['../df/d9a/bitmap_8c.html',1,'']]],
+  ['bitmap_2eh_1',['bitmap.h',['../da/dcb/bitmap_8h.html',1,'']]],
+  ['branches_2',['Branches',['../index.html#autotoc_md5',1,'']]]
 ];

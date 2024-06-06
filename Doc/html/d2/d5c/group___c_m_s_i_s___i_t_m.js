@@ -2,16 +2,13 @@ var group___c_m_s_i_s___i_t_m =
 [
     [ "CMSIS Core Debug", "d0/d1e/group___c_m_s_i_s___core_debug.html", "d0/d1e/group___c_m_s_i_s___core_debug" ],
     [ "ITM_Type", "d0/d47/struct_i_t_m___type.html", [
-      [ "PORT", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gad9f8d413a216e7b9a24596ab1071deb0", null ],
-      [ "RESERVED0", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga2c5ae30385b5f370d023468ea9914c0e", null ],
-      [ "RESERVED1", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gafffce5b93bbfedbaee85357d0b07ebce", null ],
-      [ "RESERVED2", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gaf56b2f07bc6b42cd3e4d17e1b27cff7b", null ],
-      [ "TCR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga58f169e1aa40a9b8afb6296677c3bb45", null ],
-      [ "TER", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga91a040e1b162e1128ac1e852b4a0e589", null ],
-      [ "TPR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga93b480aac6da620bbb611212186d47fa", null ],
-      [ "u16", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga12aa4eb4d9dcb589a5d953c836f4e8f4", null ],
-      [ "u32", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga6882fa5af67ef5c5dfb433b3b68939df", null ],
-      [ "u8", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gabea77b06775d325e5f6f46203f582433", null ]
+      [ "PORT", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga95d6dd68e2d2d252ef38c97738b31bd8", null ],
+      [ "TCR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gae9dd9282fab299d0cd6e119564688e53", null ],
+      [ "TER", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga8ffb3c6b706b03334f6fe37ef5d8b165", null ],
+      [ "TPR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga72bb9b7d61fe3262cd2a6070a7bd5b69", null ],
+      [ "u16", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gae8d499140220fa6d4eab1da7262bf08e", null ],
+      [ "u32", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gacaf6d0e14a3d4b541c624913b4a1931e", null ],
+      [ "u8", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga0374c0b98ab9de6f71fabff7412df832", null ]
     ] ],
     [ "ITM_TCR_BUSY_Msk", "d2/d5c/group___c_m_s_i_s___i_t_m.html#ga43ad7cf33de12f2ef3a412d4f354c60f", null ],
     [ "ITM_TCR_BUSY_Pos", "d2/d5c/group___c_m_s_i_s___i_t_m.html#ga9174ad4a36052c377cef4e6aba2ed484", null ],

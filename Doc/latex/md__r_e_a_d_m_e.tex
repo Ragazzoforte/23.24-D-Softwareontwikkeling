@@ -1,0 +1,96 @@
+\chapter{23.24-\/D-\/\+Softwareontwikkeling}
+\label{md__r_e_a_d_m_e}\index{23.24-\/D-\/Softwareontwikkeling@{23.24-\/D-\/Softwareontwikkeling}}
+\label{md__r_e_a_d_m_e_autotoc_md0}%
+jaar 23/24 periode D Software Ontwikkeling\doxysection{Project Description}\label{md__r_e_a_d_m_e_autotoc_md1}
+The demo application follows the 3-\/Tier model and showcase the EE-\/\+API-\/\+LIB functions in the third layer. It will execute commands from a scripting language with the following structure\+:
+
+Front Layer\+: Reads script commands. Logic Layer\+: Contains drawing functionality. I/O Layer\+: Manages input and output to the hardware. By completing this project, We will deliver a fully operational solution with the EE-\/\+API-\/library and a client application, along with comprehensive documentation and professional source code. This will enable IP’s in-\/house programmers to gain practical experience with the new VGA screens.\doxysubsection{Team members}\label{md__r_e_a_d_m_e_autotoc_md2}
+
+\begin{DoxyItemize}
+\item Michel Vollmuller
+\item Tim Wannet
+\item Tijmen Willems
+\end{DoxyItemize}\doxysubsection{Project workflow}\label{md__r_e_a_d_m_e_autotoc_md3}
+
+\begin{DoxyItemize}
+\item {\bfseries{Development Tools}}\+: Visual Studio Code, Git, Git\+Hub Desktop and Gitkraken.
+\item {\bfseries{Methodology}}\+: Scrum with Github as scrum board. ({\texttt{ https\+://github.\+com/users/\+Ragazzoforte/projects/2/views/1}})
+\item {\bfseries{Communication Tools}}\+: Whats\+App and Git\+Hub (scrum).
+\item {\bfseries{Documentation Tools}}\+: Doxygen and Git\+Hub. ({\texttt{ https\+://ragazzoforte.\+github.\+io/23.\+24-\/\+D-\/\+Softwareontwikkeling/}})
+\item {\bfseries{Version Control}}\+: Git\+Hub
+\item {\bfseries{Coding Standards}}\+: C++ Coding Standards
+\end{DoxyItemize}\doxysection{Project rules}\label{md__r_e_a_d_m_e_autotoc_md4}
+\doxysubsection{Branches}\label{md__r_e_a_d_m_e_autotoc_md5}
+From every issue, a new branch will be created. The branch name will be the same as the issue name. The branch will be merged into the main branch after the issue is completed. Every branch will be deleted after merging.
+
+A Branch name should always start with the following prefixes\+:
+
+
+\begin{DoxyItemize}
+\item Feature Branches\+: feature/.
+\item Bugfix Branches\+: bugfix/.
+\item Hotfix Branches\+: hotfix/.
+\item Release Branches\+: release/.
+\item Documentation Branches\+: docs/.
+\end{DoxyItemize}\doxysection{Manual}\label{md__r_e_a_d_m_e_autotoc_md6}
+\doxysubsection{3-\/layer model}\label{md__r_e_a_d_m_e_autotoc_md7}
+The 3-\/layer model, also known as the layered architecture, is a software design pattern that separates the functionality of a program into three distinct layers\+: the user interface (UI) layer, the logic layer, and the I/O (input/output) layer. Each layer has a specific responsibility and interacts with the other layers in a controlled manner.
+
+
+\begin{DoxyEnumerate}
+\item User Interface (UI) Layer\+: The User Interface Layer the topmost layer of the application and is the only layer that interacts directly with the user. The UI Layer is responsible for displaying the user interface, handling user input, and presenting the output of the program to the user. It is also responsible for translating user input into commands that can be understood by the logic layer.
+\item Logic Layer\+: The logic layer contains the core functionality and business logic of the program. Here the commands are translated into their respective functions. The layer can utilize text, fonts and bitmaps to draw on the screen.
+\item I/O (Input/\+Output) Layer\+: The I/O Layer handles the communication between the program and the user. It is responsible for reading input data from a command line and writing data to the command line. This layer abstracts the details of the underlying I/O operations, providing a consistent interface for the logic layer to interact with different data sources. Input and output data is being handled by the Serial\+Port\+\_\+\+Terminal.\+exe program that connect via serial to the STM32\+F407\+VG microcontroller. The layer also handles the communication between the program and the VGA screen to display the output. The VGA screen is connected to the microcontroller via a VGA cable. To optimise modularity the i/o layer is seperated in 2 sections\+: the UART driver and the VGA driver.
+\end{DoxyEnumerate}
+
+By separating the concerns into different layers. The 3-\/layer model promotes modularity, reusability, and maintainability of the code. It allows for easier testing, as each layer can be tested independently. It provides a clear separation of responsibilities, making the code easier to understand and modify.\doxysubsection{Graphical Design}\label{md__r_e_a_d_m_e_autotoc_md8}
+
+
+From the image above you can see the 3-\/layer model representeted in a high level design. As explained in the last chapter the 3-\/layer model is separated in 4 different parts\+: User Interface, Logic Layer, VGA Driver and UART Driver.
+
+
+\begin{DoxyEnumerate}
+\item User Interface The User Interface (blue) is represented by 2 blocks in the HLD\+: "{}\+Translat\+\_\+string\+\_\+to\+\_\+command"{} and "{}\+Execute\+\_\+command\+: kiezen()"{}. It recieves a string from the terminal by the UART Driver, translates this string to a command and calles the fuction defined in the Logic Layer.
+\end{DoxyEnumerate}
+
+The User Interface is being handled by the following files\+:
+\begin{DoxyItemize}
+\item user\+\_\+interface.\+c/h\+: mostly handles the incoming string and translates this to the respected function.
+\end{DoxyItemize}
+\begin{DoxyEnumerate}
+\item Logic Layer Inside the Logic Layer (green) the incoming command from the User Interface. Here the command is being translated to the correct function that is defined in the VGA Driver. The Logic Layer also defines the fonts and bitmaps that are being used in the program.
+\end{DoxyEnumerate}
+
+The Logic Later is being handled by the following files\+:
+\begin{DoxyItemize}
+\item Logic\+\_\+layer.\+c/h\+: Chooses the correct function based on the incoming message (from uart.\+c/h)
+\item font.\+c/h\+: Contains all the fonts that are being used in the program.
+\item bitmap.\+c/h\+: Contains all the bitmaps that are being used in the program.
+\end{DoxyItemize}
+\begin{DoxyEnumerate}
+\item VGA Driver The VGA Driver (red) is the layer that is responsible for drawing on the screen. Errors are being handled in the driver and send to the UART Driver to be displayed on the terminal. The switch case from the Logic Layer refers to 3 functions in the VGA Driver, these are example functions and represent all the functions that are defined in the VGA Driver.
+\end{DoxyEnumerate}
+
+The VGA Driver is being handled by the following files\+:
+\begin{DoxyItemize}
+\item vga\+\_\+driver.\+c/h\+: Has all functions that are being used to draw on the screen or are being used to help the functions.
+\end{DoxyItemize}
+\begin{DoxyEnumerate}
+\item UART Driver This Layer (yellow) is used for the communication between the terminal and the User Interface. It recieves the incoming string from terminal and sends the errors back received from the VGA Driver.
+\end{DoxyEnumerate}
+
+The UART Driver is being handled by the following files\+:
+\begin{DoxyItemize}
+\item uart.\+c/h\+: With the lack of HAL libraries there was the need of making a own UART program so the microcontroller could communicate with the terminal. This program is optimized to minimize stuttering, minimize sync issues and optimize speed.
+\end{DoxyItemize}\doxysubsection{Scipts-\/commands}\label{md__r_e_a_d_m_e_autotoc_md9}
+
+\begin{DoxyItemize}
+\item lijn, x, y, x’, y’, kleur, dikte
+\item rechthoek, x\+\_\+lup, y\+\_\+lup, breedte, hoogte, kleur, gevuld (1,0) [als 1\+: rand (1px) met kleur]
+\item tekst, x, y, kleur, tekst, fontnaam (arial, consolas), fontgrootte (1,2), fontstijl (normaal, vet, cursief)
+\item bitmap, nr, x-\/lup, y-\/lup [tenminste\+: pijl (in 4 richtingen), smiley (boos, blij)]
+\item clearscherm, kleur
+\item polygon, x, y, size, corner, kleur, reserved
+\item cirkel, x, y, radius, kleur, gevuld (1,0) [als 1\+: rand (1px) met kleur]
+\end{DoxyItemize}\doxysubsection{Colours}\label{md__r_e_a_d_m_e_autotoc_md10}
+zwart, blauw, lichtblauw, groen, lichtgroen, cyaan, lichtcyaan, rood, lichtrood, magenta, lichtmagenta, bruin, geel, grijs, wit 

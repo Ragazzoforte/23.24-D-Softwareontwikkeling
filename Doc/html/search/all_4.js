@@ -1,5 +1,19 @@
 var searchData=
 [
-  ['5_0',['Flash Latency(WS)                      | 5',['../d4/d04/system__stm32f4xx_8c.html#autotoc_md29',1,'']]],
-  ['5_20this_20file_20configures_20the_20system_20clock_20as_20follows_3a_1',['5. This file configures the system clock as follows:',['../d4/d04/system__stm32f4xx_8c.html#autotoc_md11',1,'']]]
+  ['color_5fchooser_0',['color_chooser',['../d6/db7/group___v_g_a.html#gabc15851810d067d9b1871cee94de2a09',1,'color_chooser(char *str):&#160;vga_driver.c'],['../d6/db7/group___v_g_a.html#gabc15851810d067d9b1871cee94de2a09',1,'color_chooser(char *str):&#160;vga_driver.c']]],
+  ['colours_1',['Colours',['../index.html#autotoc_md10',1,'']]],
+  ['command_2',['command',['../dc/d76/structcommand.html',1,'']]],
+  ['commands_3',['Scipts-commands',['../index.html#autotoc_md9',1,'']]],
+  ['consolas_5f11ptbitmaps_4',['consolas_11ptBitmaps',['../d3/d78/fonts_8h.html#ab5504a37e2d77d58c0d79e02c0ebc333',1,'consolas_11ptBitmaps:&#160;fonts.c'],['../d8/d57/fonts_8c.html#ab5504a37e2d77d58c0d79e02c0ebc333',1,'consolas_11ptBitmaps:&#160;fonts.c']]],
+  ['consolas_5f11ptdescriptors_5',['consolas_11ptDescriptors',['../d3/d78/fonts_8h.html#a86a29e8bfb99abd5be2344fbe256478f',1,'consolas_11ptDescriptors:&#160;fonts.c'],['../d8/d57/fonts_8c.html#a86a29e8bfb99abd5be2344fbe256478f',1,'consolas_11ptDescriptors:&#160;fonts.c']]],
+  ['consolas_5f8ptbitmaps_6',['consolas_8ptBitmaps',['../d3/d78/fonts_8h.html#aaa3bed6639ccb759512598a397d9cf1d',1,'consolas_8ptBitmaps:&#160;fonts.c'],['../d8/d57/fonts_8c.html#aaa3bed6639ccb759512598a397d9cf1d',1,'consolas_8ptBitmaps:&#160;fonts.c']]],
+  ['consolas_5f8ptdescriptors_7',['consolas_8ptDescriptors',['../d3/d78/fonts_8h.html#a9b7b4392d41af4e249aabc586f0958c4',1,'consolas_8ptDescriptors:&#160;fonts.c'],['../d8/d57/fonts_8c.html#a9b7b4392d41af4e249aabc586f0958c4',1,'consolas_8ptDescriptors:&#160;fonts.c']]],
+  ['consolas_5fbold_5f11ptbitmaps_8',['consolas_bold_11ptBitmaps',['../d3/d78/fonts_8h.html#a90cb4185e9ca77bc179147c2a24fca62',1,'consolas_bold_11ptBitmaps:&#160;fonts.c'],['../d8/d57/fonts_8c.html#a90cb4185e9ca77bc179147c2a24fca62',1,'consolas_bold_11ptBitmaps:&#160;fonts.c']]],
+  ['consolas_5fbold_5f11ptdescriptors_9',['consolas_bold_11ptDescriptors',['../d3/d78/fonts_8h.html#ab9f89396b26e5d2b9887657e8b3355a6',1,'consolas_bold_11ptDescriptors:&#160;fonts.c'],['../d8/d57/fonts_8c.html#ab9f89396b26e5d2b9887657e8b3355a6',1,'consolas_bold_11ptDescriptors:&#160;fonts.c']]],
+  ['consolas_5fbold_5f8ptbitmaps_10',['consolas_bold_8ptBitmaps',['../d3/d78/fonts_8h.html#a91b2fe5e59ef9a263a50e7575e6d03f5',1,'consolas_bold_8ptBitmaps:&#160;fonts.c'],['../d8/d57/fonts_8c.html#a91b2fe5e59ef9a263a50e7575e6d03f5',1,'consolas_bold_8ptBitmaps:&#160;fonts.c']]],
+  ['consolas_5fbold_5f8ptdescriptors_11',['consolas_bold_8ptDescriptors',['../d3/d78/fonts_8h.html#a84251459981c69fdfbe1e9e1b8b2713e',1,'consolas_bold_8ptDescriptors:&#160;fonts.c'],['../d8/d57/fonts_8c.html#a84251459981c69fdfbe1e9e1b8b2713e',1,'consolas_bold_8ptDescriptors:&#160;fonts.c']]],
+  ['consolas_5fitalic_5f11ptbitmaps_12',['consolas_italic_11ptBitmaps',['../d3/d78/fonts_8h.html#acf1bccf67272f74dac190f3265dc5dfc',1,'consolas_italic_11ptBitmaps:&#160;fonts.c'],['../d8/d57/fonts_8c.html#acf1bccf67272f74dac190f3265dc5dfc',1,'consolas_italic_11ptBitmaps:&#160;fonts.c']]],
+  ['consolas_5fitalic_5f11ptdescriptors_13',['consolas_italic_11ptDescriptors',['../d3/d78/fonts_8h.html#a903c3b4f5d4290056185d9df3130d92b',1,'consolas_italic_11ptDescriptors:&#160;fonts.c'],['../d8/d57/fonts_8c.html#a903c3b4f5d4290056185d9df3130d92b',1,'consolas_italic_11ptDescriptors:&#160;fonts.c']]],
+  ['consolas_5fitalic_5f8ptbitmaps_14',['consolas_italic_8ptBitmaps',['../d3/d78/fonts_8h.html#ad19526073451df1ee95daf0787f79f4c',1,'consolas_italic_8ptBitmaps:&#160;fonts.c'],['../d8/d57/fonts_8c.html#ad19526073451df1ee95daf0787f79f4c',1,'consolas_italic_8ptBitmaps:&#160;fonts.c']]],
+  ['consolas_5fitalic_5f8ptdescriptors_15',['consolas_italic_8ptDescriptors',['../d3/d78/fonts_8h.html#a00e6be17843fc9919302060015a7633a',1,'consolas_italic_8ptDescriptors:&#160;fonts.c'],['../d8/d57/fonts_8c.html#a00e6be17843fc9919302060015a7633a',1,'consolas_italic_8ptDescriptors:&#160;fonts.c']]]
 ];

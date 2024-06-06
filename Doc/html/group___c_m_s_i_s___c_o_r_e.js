@@ -2,44 +2,44 @@ var group___c_m_s_i_s___c_o_r_e =
 [
     [ "CMSIS NVIC", "group___c_m_s_i_s___n_v_i_c.html", "group___c_m_s_i_s___n_v_i_c" ],
     [ "APSR_Type", "union_a_p_s_r___type.html", [
-      [ "_reserved0", "group___c_m_s_i_s__core___debug_functions.html#gafbce95646fd514c10aa85ec0a33db728", null ],
-      [ "_reserved1", "group___c_m_s_i_s__core___debug_functions.html#gac681f266e20b3b3591b961e13633ae13", null ],
-      [ "b", "group___c_m_s_i_s__core___debug_functions.html#gaa0cafff627df6271eda96e47245ed644", null ],
-      [ "C", "group___c_m_s_i_s__core___debug_functions.html#ga86e2c5b891ecef1ab55b1edac0da79a6", null ],
-      [ "GE", "group___c_m_s_i_s__core___debug_functions.html#gadcb98a5b9c93b0cb69cdb7af5638f32e", null ],
-      [ "N", "group___c_m_s_i_s__core___debug_functions.html#ga7e7bbba9b00b0bb3283dc07f1abe37e0", null ],
-      [ "Q", "group___c_m_s_i_s__core___debug_functions.html#ga22d10913489d24ab08bd83457daa88de", null ],
-      [ "V", "group___c_m_s_i_s__core___debug_functions.html#ga8004d224aacb78ca37774c35f9156e7e", null ],
-      [ "w", "group___c_m_s_i_s__core___debug_functions.html#gae4c2ef8c9430d7b7bef5cbfbbaed3a94", null ],
-      [ "Z", "group___c_m_s_i_s__core___debug_functions.html#ga3b04d58738b66a28ff13f23d8b0ba7e5", null ]
+      [ "_reserved0", "group___c_m_s_i_s__core___debug_functions.html#gac8a6a13838a897c8d0b8bc991bbaf7c1", null ],
+      [ "_reserved1", "group___c_m_s_i_s__core___debug_functions.html#ga959a73d8faee56599b7e792a7c5a2d16", null ],
+      [ "b", "group___c_m_s_i_s__core___debug_functions.html#ga84de5f534817cdbf8bd9064080effca2", null ],
+      [ "C", "group___c_m_s_i_s__core___debug_functions.html#ga7a1caf92f32fe9ebd8d1fe89b06c7776", null ],
+      [ "GE", "group___c_m_s_i_s__core___debug_functions.html#gaa91800ec6e90e457c7a1acd1f2e17099", null ],
+      [ "N", "group___c_m_s_i_s__core___debug_functions.html#gabae0610bc2a97bbf7f689e953e0b451f", null ],
+      [ "Q", "group___c_m_s_i_s__core___debug_functions.html#ga65f27ddc4f7e09c14ce7c5211b2e000a", null ],
+      [ "V", "group___c_m_s_i_s__core___debug_functions.html#gacd4a2b64faee91e4a9eef300667fa222", null ],
+      [ "w", "group___c_m_s_i_s__core___debug_functions.html#gad0fb62e7a08e70fc5e0a76b67809f84b", null ],
+      [ "Z", "group___c_m_s_i_s__core___debug_functions.html#ga5ae954cbd9986cd64625d7fa00943c8e", null ]
     ] ],
     [ "IPSR_Type", "union_i_p_s_r___type.html", [
-      [ "_reserved0", "group___c_m_s_i_s__core___debug_functions.html#gad2eb0a06de4f03f58874a727716aa9aa", null ],
-      [ "b", "group___c_m_s_i_s__core___debug_functions.html#gab07241188bb7bb7ef83ee13224f8cece", null ],
-      [ "ISR", "group___c_m_s_i_s__core___debug_functions.html#gab46e5f1b2f4d17cfb9aca4fffcbb2fa5", null ],
-      [ "w", "group___c_m_s_i_s__core___debug_functions.html#ga4adca999d3a0bc1ae682d73ea7cfa879", null ]
+      [ "_reserved0", "group___c_m_s_i_s__core___debug_functions.html#gac8a6a13838a897c8d0b8bc991bbaf7c1", null ],
+      [ "b", "group___c_m_s_i_s__core___debug_functions.html#ga6e920e9d2e9a2738f8face0863888c0e", null ],
+      [ "ISR", "group___c_m_s_i_s__core___debug_functions.html#gad502ba7dbb2aab5f87c782b28f02622d", null ],
+      [ "w", "group___c_m_s_i_s__core___debug_functions.html#gad0fb62e7a08e70fc5e0a76b67809f84b", null ]
     ] ],
     [ "xPSR_Type", "unionx_p_s_r___type.html", [
-      [ "_reserved0", "group___c_m_s_i_s__core___debug_functions.html#gaf438e0f407357e914a70b5bd4d6a97c5", null ],
-      [ "_reserved1", "group___c_m_s_i_s__core___debug_functions.html#ga790056bb6f20ea16cecc784b0dd19ad6", null ],
-      [ "b", "group___c_m_s_i_s__core___debug_functions.html#ga924ad54b9be3a9450ec64014adcb3300", null ],
-      [ "C", "group___c_m_s_i_s__core___debug_functions.html#ga40213a6b5620410cac83b0d89564609d", null ],
-      [ "GE", "group___c_m_s_i_s__core___debug_functions.html#ga2d0ec4ccae337c1df5658f8cf4632e76", null ],
-      [ "ISR", "group___c_m_s_i_s__core___debug_functions.html#ga3e9120dcf1a829fc8d2302b4d0673970", null ],
-      [ "IT", "group___c_m_s_i_s__core___debug_functions.html#ga3200966922a194d84425e2807a7f1328", null ],
-      [ "N", "group___c_m_s_i_s__core___debug_functions.html#ga2db9a52f6d42809627d1a7a607c5dbc5", null ],
-      [ "Q", "group___c_m_s_i_s__core___debug_functions.html#gadd7cbd2b0abd8954d62cd7831796ac7c", null ],
-      [ "T", "group___c_m_s_i_s__core___debug_functions.html#ga7eed9fe24ae8d354cd76ae1c1110a658", null ],
-      [ "V", "group___c_m_s_i_s__core___debug_functions.html#gaf14df16ea0690070c45b95f2116b7a0a", null ],
-      [ "w", "group___c_m_s_i_s__core___debug_functions.html#ga1a47176768f45f79076c4f5b1b534bc2", null ],
-      [ "Z", "group___c_m_s_i_s__core___debug_functions.html#ga1e5d9801013d5146f2e02d9b7b3da562", null ]
+      [ "_reserved0", "group___c_m_s_i_s__core___debug_functions.html#gac8a6a13838a897c8d0b8bc991bbaf7c1", null ],
+      [ "_reserved1", "group___c_m_s_i_s__core___debug_functions.html#ga959a73d8faee56599b7e792a7c5a2d16", null ],
+      [ "b", "group___c_m_s_i_s__core___debug_functions.html#ga61873807b9abee3dfa090c036e580d2e", null ],
+      [ "C", "group___c_m_s_i_s__core___debug_functions.html#ga7a1caf92f32fe9ebd8d1fe89b06c7776", null ],
+      [ "GE", "group___c_m_s_i_s__core___debug_functions.html#gaa91800ec6e90e457c7a1acd1f2e17099", null ],
+      [ "ISR", "group___c_m_s_i_s__core___debug_functions.html#gad502ba7dbb2aab5f87c782b28f02622d", null ],
+      [ "IT", "group___c_m_s_i_s__core___debug_functions.html#ga76485660fe8ad98cdc71ddd7cb0ed777", null ],
+      [ "N", "group___c_m_s_i_s__core___debug_functions.html#gabae0610bc2a97bbf7f689e953e0b451f", null ],
+      [ "Q", "group___c_m_s_i_s__core___debug_functions.html#ga65f27ddc4f7e09c14ce7c5211b2e000a", null ],
+      [ "T", "group___c_m_s_i_s__core___debug_functions.html#ga6e1cf12e53a20224f6f62c001d9be972", null ],
+      [ "V", "group___c_m_s_i_s__core___debug_functions.html#gacd4a2b64faee91e4a9eef300667fa222", null ],
+      [ "w", "group___c_m_s_i_s__core___debug_functions.html#gad0fb62e7a08e70fc5e0a76b67809f84b", null ],
+      [ "Z", "group___c_m_s_i_s__core___debug_functions.html#ga5ae954cbd9986cd64625d7fa00943c8e", null ]
     ] ],
     [ "CONTROL_Type", "union_c_o_n_t_r_o_l___type.html", [
-      [ "_reserved0", "group___c_m_s_i_s__core___debug_functions.html#gaf8c314273a1e4970a5671bd7f8184f50", null ],
-      [ "b", "group___c_m_s_i_s__core___debug_functions.html#ga88e1d44994e57cf101a7871cb2c8cf42", null ],
-      [ "FPCA", "group___c_m_s_i_s__core___debug_functions.html#gac62cfff08e6f055e0101785bad7094cd", null ],
-      [ "nPRIV", "group___c_m_s_i_s__core___debug_functions.html#ga35c1732cf153b7b5c4bd321cf1de9605", null ],
-      [ "SPSEL", "group___c_m_s_i_s__core___debug_functions.html#ga8cc085fea1c50a8bd9adea63931ee8e2", null ],
-      [ "w", "group___c_m_s_i_s__core___debug_functions.html#ga6b642cca3d96da660b1198c133ca2a1f", null ]
+      [ "_reserved0", "group___c_m_s_i_s__core___debug_functions.html#gac8a6a13838a897c8d0b8bc991bbaf7c1", null ],
+      [ "b", "group___c_m_s_i_s__core___debug_functions.html#ga5d690aa9e65fccaa320e1b8613f502c9", null ],
+      [ "FPCA", "group___c_m_s_i_s__core___debug_functions.html#ga2518558c090f60161ba4e718a54ee468", null ],
+      [ "nPRIV", "group___c_m_s_i_s__core___debug_functions.html#ga2a6e513e8a6bf4e58db169e312172332", null ],
+      [ "SPSEL", "group___c_m_s_i_s__core___debug_functions.html#gae185aac93686ffc78e998a9daf41415b", null ],
+      [ "w", "group___c_m_s_i_s__core___debug_functions.html#gad0fb62e7a08e70fc5e0a76b67809f84b", null ]
     ] ]
 ];

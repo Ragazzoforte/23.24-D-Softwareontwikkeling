@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['arial_5fhash_0',['Arial_hash',['../da/d0f/vga__driver_8h.html#a23c388af333402236e15d7f3f9be8811',1,'vga_driver.h']]],
-  ['arial_5fhash_1',['ARIAL_hash',['../da/d0f/vga__driver_8h.html#ad9a882c145a9078f4f6dfe42b58338ab',1,'vga_driver.h']]],
-  ['arial_5fhash_2',['arial_hash',['../da/d0f/vga__driver_8h.html#a97eb095adf0ef5fa5428fe871bc7d7fa',1,'vga_driver.h']]],
+  ['arial_5fhash_0',['arial_hash',['../da/d0f/vga__driver_8h.html#a97eb095adf0ef5fa5428fe871bc7d7fa',1,'vga_driver.h']]],
+  ['arial_5fhash_1',['Arial_hash',['../da/d0f/vga__driver_8h.html#a23c388af333402236e15d7f3f9be8811',1,'vga_driver.h']]],
+  ['arial_5fhash_2',['ARIAL_hash',['../da/d0f/vga__driver_8h.html#ad9a882c145a9078f4f6dfe42b58338ab',1,'vga_driver.h']]],
   ['arial_5flarge_5fbold_5fheight_3',['ARIAL_LARGE_BOLD_HEIGHT',['../d3/d78/fonts_8h.html#aeb65ec62cd9e6cb69645e96a6c9ef843',1,'ARIAL_LARGE_BOLD_HEIGHT:&#160;fonts.h'],['../da/d0f/vga__driver_8h.html#aeb65ec62cd9e6cb69645e96a6c9ef843',1,'ARIAL_LARGE_BOLD_HEIGHT:&#160;vga_driver.h']]],
   ['arial_5flarge_5fheight_4',['ARIAL_LARGE_HEIGHT',['../d3/d78/fonts_8h.html#ab67d95ec7324a5ca67b63f3dde49c888',1,'ARIAL_LARGE_HEIGHT:&#160;fonts.h'],['../da/d0f/vga__driver_8h.html#ab67d95ec7324a5ca67b63f3dde49c888',1,'ARIAL_LARGE_HEIGHT:&#160;vga_driver.h']]],
   ['arial_5flarge_5fitalic_5fheight_5',['ARIAL_LARGE_ITALIC_HEIGHT',['../d3/d78/fonts_8h.html#ad2590e87b245582da1f6e07b2a1e7e3f',1,'ARIAL_LARGE_ITALIC_HEIGHT:&#160;fonts.h'],['../da/d0f/vga__driver_8h.html#ad2590e87b245582da1f6e07b2a1e7e3f',1,'ARIAL_LARGE_ITALIC_HEIGHT:&#160;vga_driver.h']]],

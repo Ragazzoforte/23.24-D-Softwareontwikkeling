@@ -19,6 +19,7 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript" src="darkmode_toggle.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
@@ -109,15 +110,15 @@ Team members</h2>
 <ul>
 <li>Michel Vollmuller</li>
 <li>Tim Wannet</li>
-<li>Tijmen Willemsen</li>
+<li>Tijmen Willems</li>
 </ul>
 <h2><a class="anchor" id="autotoc_md3"></a>
 Project workflow</h2>
 <ul>
-<li><b>Development Tools</b>: Visual Studio Code, GitHub and GitHub Desktop</li>
-<li><b>Methodology</b>: Scrum with Github as scrum board. <a href="https://github.com/users/Ragazzoforte/projects/2/views/1">https://github.com/users/Ragazzoforte/projects/2/views/1</a></li>
-<li><b>Communication Tools</b>: WhatsApp and GitHub.</li>
-<li><b>Documentation Tools</b>: Doxygen and GitHub. <a href="https://ragazzoforte.github.io/23.24-D-Softwareontwikkeling/">https://ragazzoforte.github.io/23.24-D-Softwareontwikkeling/</a></li>
+<li><b>Development Tools</b>: Visual Studio Code, Git, GitHub Desktop and Gitkraken.</li>
+<li><b>Methodology</b>: Scrum with Github as scrum board. (<a href="https://github.com/users/Ragazzoforte/projects/2/views/1">https://github.com/users/Ragazzoforte/projects/2/views/1</a>)</li>
+<li><b>Communication Tools</b>: WhatsApp and GitHub (scrum).</li>
+<li><b>Documentation Tools</b>: Doxygen and GitHub. (<a href="https://ragazzoforte.github.io/23.24-D-Softwareontwikkeling/">https://ragazzoforte.github.io/23.24-D-Softwareontwikkeling/</a>)</li>
 <li><b>Version Control</b>: GitHub</li>
 <li><b>Coding Standards</b>: C++ Coding Standards</li>
 </ul>
@@ -137,11 +138,47 @@ Branches</h2>
 <h1><a class="anchor" id="autotoc_md6"></a>
 Manual</h1>
 <h2><a class="anchor" id="autotoc_md7"></a>
-Graphical Design</h2>
-<p>Een grafisch overzicht met commentaar, met de lagen, functies en onderlinge samenhang. <img src="image.jpg" alt="Local Image" class="inline"/></p>
+3-layer model</h2>
+<p>The 3-layer model, also known as the layered architecture, is a software design pattern that separates the functionality of a program into three distinct layers: the user interface (UI) layer, the logic layer, and the I/O (input/output) layer. Each layer has a specific responsibility and interacts with the other layers in a controlled manner.</p>
+<ol type="1">
+<li>User Interface (UI) Layer: The User Interface Layer the topmost layer of the application and is the only layer that interacts directly with the user. The UI Layer is responsible for displaying the user interface, handling user input, and presenting the output of the program to the user. It is also responsible for translating user input into commands that can be understood by the logic layer.</li>
+<li>Logic Layer: The logic layer contains the core functionality and business logic of the program. Here the commands are translated into their respective functions. The layer can utilize text, fonts and bitmaps to draw on the screen.</li>
+<li>I/O (Input/Output) Layer: The I/O Layer handles the communication between the program and the user. It is responsible for reading input data from a command line and writing data to the command line. This layer abstracts the details of the underlying I/O operations, providing a consistent interface for the logic layer to interact with different data sources. Input and output data is being handled by the SerialPort_Terminal.exe program that connect via serial to the STM32F407VG microcontroller. The layer also handles the communication between the program and the VGA screen to display the output. The VGA screen is connected to the microcontroller via a VGA cable. To optimise modularity the i/o layer is seperated in 2 sections: the UART driver and the VGA driver.</li>
+</ol>
+<p>By separating the concerns into different layers. The 3-layer model promotes modularity, reusability, and maintainability of the code. It allows for easier testing, as each layer can be tested independently. It provides a clear separation of responsibilities, making the code easier to understand and modify.</p>
 <h2><a class="anchor" id="autotoc_md8"></a>
-3-tier model</h2>
-<p>Beschrijving + onderbouwing van 3-lagenmodel.</p>
+Graphical Design</h2>
+<div class="image">
+<img src="HLD.png" alt=""/>
+<div class="caption">
+Local Image</div></div>
+    <p>From the image above you can see the 3-layer model representeted in a high level design. As explained in the last chapter the 3-layer model is separated in 4 different parts: User Interface, Logic Layer, VGA Driver and UART Driver.</p>
+<ol type="1">
+<li>User Interface The User Interface (blue) is represented by 2 blocks in the HLD: "Translat_string_to_command" and "Execute_command: kiezen()". It recieves a string from the terminal by the UART Driver, translates this string to a command and calles the fuction defined in the Logic Layer.</li>
+</ol>
+<p>The User Interface is being handled by the following files:</p><ul>
+<li><a class="el" href="df/da0/user__interface_8c.html" title="This file contains the implementation of the user interface functions.">user_interface.c</a>/h: mostly handles the incoming string and translates this to the respected function.</li>
+</ul>
+<ol type="1">
+<li>Logic Layer Inside the Logic Layer (green) the incoming command from the User Interface. Here the command is being translated to the correct function that is defined in the VGA Driver. The Logic Layer also defines the fonts and bitmaps that are being used in the program.</li>
+</ol>
+<p>The Logic Later is being handled by the following files:</p><ul>
+<li><a class="el" href="d6/d24/logic__layer_8c.html" title="Logic Layer.">Logic_layer.c</a>/h: Chooses the correct function based on the incoming message (from <a class="el" href="d1/d87/uart_8c.html" title="This file contains the implementation of the uart communication.">uart.c</a>/h)</li>
+<li>font.c/h: Contains all the fonts that are being used in the program.</li>
+<li><a class="el" href="df/d9a/bitmap_8c.html" title="This file contains different bitmap images.">bitmap.c</a>/h: Contains all the bitmaps that are being used in the program.</li>
+</ul>
+<ol type="1">
+<li>VGA Driver The VGA Driver (red) is the layer that is responsible for drawing on the screen. Errors are being handled in the driver and send to the UART Driver to be displayed on the terminal. The switch case from the Logic Layer refers to 3 functions in the VGA Driver, these are example functions and represent all the functions that are defined in the VGA Driver.</li>
+</ol>
+<p>The VGA Driver is being handled by the following files:</p><ul>
+<li><a class="el" href="d4/d07/vga__driver_8c.html" title="This file contains the implementation of vga driver functions.">vga_driver.c</a>/h: Has all functions that are being used to draw on the screen or are being used to help the functions.</li>
+</ul>
+<ol type="1">
+<li>UART Driver This Layer (yellow) is used for the communication between the terminal and the User Interface. It recieves the incoming string from terminal and sends the errors back received from the VGA Driver.</li>
+</ol>
+<p>The UART Driver is being handled by the following files:</p><ul>
+<li><a class="el" href="d1/d87/uart_8c.html" title="This file contains the implementation of the uart communication.">uart.c</a>/h: With the lack of HAL libraries there was the need of making a own UART program so the microcontroller could communicate with the terminal. This program is optimized to minimize stuttering, minimize sync issues and optimize speed.</li>
+</ul>
 <h2><a class="anchor" id="autotoc_md9"></a>
 Scipts-commands</h2>
 <ul>

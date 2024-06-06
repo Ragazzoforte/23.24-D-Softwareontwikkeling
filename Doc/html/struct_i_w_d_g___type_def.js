@@ -1,7 +1,7 @@
 var struct_i_w_d_g___type_def =
 [
-    [ "KR", "struct_i_w_d_g___type_def.html#a63089aaa5f4ad34ee2677ebcdee49cd9", null ],
-    [ "PR", "struct_i_w_d_g___type_def.html#a5f2717885ff171e686e0347af9e6b68d", null ],
-    [ "RLR", "struct_i_w_d_g___type_def.html#aa3703eaa40e447dcacc69c0827595532", null ],
-    [ "SR", "struct_i_w_d_g___type_def.html#a9bbfbe921f2acfaf58251849bd0a511c", null ]
+    [ "KR", "struct_i_w_d_g___type_def.html#a2f692354bde770f2a5e3e1b294ec064b", null ],
+    [ "PR", "struct_i_w_d_g___type_def.html#af8d25514079514d38c104402f46470af", null ],
+    [ "RLR", "struct_i_w_d_g___type_def.html#a7015e1046dbd3ea8783b33dc11a69e52", null ],
+    [ "SR", "struct_i_w_d_g___type_def.html#af6aca2bbd40c0fb6df7c3aebe224a360", null ]
 ];

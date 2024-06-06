@@ -1,18 +1,18 @@
 var struct_d_m_a___init_type_def =
 [
-    [ "DMA_BufferSize", "struct_d_m_a___init_type_def.html#a999df57215b28b3b1b3b6836c4952ca5", null ],
-    [ "DMA_Channel", "struct_d_m_a___init_type_def.html#a68cba36c380e7297b23b09a16c809969", null ],
-    [ "DMA_DIR", "struct_d_m_a___init_type_def.html#a91b47435ccf4a40efa97bbbe631789e1", null ],
-    [ "DMA_FIFOMode", "struct_d_m_a___init_type_def.html#a56198043a8d5f2e25a87a79cbe2a3aa5", null ],
-    [ "DMA_FIFOThreshold", "struct_d_m_a___init_type_def.html#a5dbf46e6177ea71b38119e5442a9fb36", null ],
-    [ "DMA_Memory0BaseAddr", "struct_d_m_a___init_type_def.html#a93227da797b033f9bc87523e1cfd8bbb", null ],
-    [ "DMA_MemoryBurst", "struct_d_m_a___init_type_def.html#a10bdf685aa58035632ead27b61fe4ffd", null ],
-    [ "DMA_MemoryDataSize", "struct_d_m_a___init_type_def.html#a74bb71921c4d198d6cf1979c120f694f", null ],
-    [ "DMA_MemoryInc", "struct_d_m_a___init_type_def.html#aaf69c680a297ec01a2ed613289e691a1", null ],
-    [ "DMA_Mode", "struct_d_m_a___init_type_def.html#a8adbe6f3e46471d109afaa3111dce220", null ],
-    [ "DMA_PeripheralBaseAddr", "struct_d_m_a___init_type_def.html#a232af556de7c2eec9a82d448730bd86d", null ],
-    [ "DMA_PeripheralBurst", "struct_d_m_a___init_type_def.html#a331a1d487dba9bcba3f58e136bb91bc1", null ],
-    [ "DMA_PeripheralDataSize", "struct_d_m_a___init_type_def.html#afb46aaadfb80a7e19277c868bd252554", null ],
-    [ "DMA_PeripheralInc", "struct_d_m_a___init_type_def.html#ad4d427790f9a089ca0257a358fc263c2", null ],
-    [ "DMA_Priority", "struct_d_m_a___init_type_def.html#ab9a17bd51778478cbd728c868206dca0", null ]
+    [ "DMA_BufferSize", "struct_d_m_a___init_type_def.html#ad5e4b9069a7a145b3312d54d09059f78", null ],
+    [ "DMA_Channel", "struct_d_m_a___init_type_def.html#afae070f2d49543b1acd3e318c6de8527", null ],
+    [ "DMA_DIR", "struct_d_m_a___init_type_def.html#a4cf4283185065f65d5a63089877cbb8d", null ],
+    [ "DMA_FIFOMode", "struct_d_m_a___init_type_def.html#a684555f9f5644259b7c4ca446b6dcf8f", null ],
+    [ "DMA_FIFOThreshold", "struct_d_m_a___init_type_def.html#a2bbb3ea272279aa5cddef702e153a09d", null ],
+    [ "DMA_Memory0BaseAddr", "struct_d_m_a___init_type_def.html#aebf1267410908265f83a8037245c337e", null ],
+    [ "DMA_MemoryBurst", "struct_d_m_a___init_type_def.html#a90987eb939726acf365f2bf039a51725", null ],
+    [ "DMA_MemoryDataSize", "struct_d_m_a___init_type_def.html#a7ec1648d136d31d6c504565bf6949eb6", null ],
+    [ "DMA_MemoryInc", "struct_d_m_a___init_type_def.html#ad8f8a0f3ba4db5d79fd78d02093e4eb9", null ],
+    [ "DMA_Mode", "struct_d_m_a___init_type_def.html#a5f09c16a03a50120c1a1a49ae6a7c667", null ],
+    [ "DMA_PeripheralBaseAddr", "struct_d_m_a___init_type_def.html#ad02abd574cca0caeacd0cc05d2174a42", null ],
+    [ "DMA_PeripheralBurst", "struct_d_m_a___init_type_def.html#a6772e281310a3e93781364c723984138", null ],
+    [ "DMA_PeripheralDataSize", "struct_d_m_a___init_type_def.html#a61bf939d8657d44a9beb1daa91c14668", null ],
+    [ "DMA_PeripheralInc", "struct_d_m_a___init_type_def.html#ad0bf5e8b3968eaf8dc18e923b94acfe1", null ],
+    [ "DMA_Priority", "struct_d_m_a___init_type_def.html#aabb62e3f5536fc15a201058a1b6bda18", null ]
 ];

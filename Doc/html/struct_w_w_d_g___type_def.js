@@ -1,6 +1,6 @@
 var struct_w_w_d_g___type_def =
 [
-    [ "CFR", "struct_w_w_d_g___type_def.html#adcd6a7e5d75022e46ce60291f4b8544c", null ],
-    [ "CR", "struct_w_w_d_g___type_def.html#a4caf530d45f7428c9700d9c0057135f8", null ],
-    [ "SR", "struct_w_w_d_g___type_def.html#a15655cda4854cc794db1f27b3c0bba38", null ]
+    [ "CFR", "struct_w_w_d_g___type_def.html#ac011ddcfe531f8e16787ea851c1f3667", null ],
+    [ "CR", "struct_w_w_d_g___type_def.html#ab40c89c59391aaa9d9a8ec011dd0907a", null ],
+    [ "SR", "struct_w_w_d_g___type_def.html#af6aca2bbd40c0fb6df7c3aebe224a360", null ]
 ];

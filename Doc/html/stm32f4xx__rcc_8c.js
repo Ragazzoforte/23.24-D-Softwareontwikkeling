@@ -71,6 +71,5 @@ var stm32f4xx__rcc_8c =
     [ "RCC_RTCCLKCmd", "group___r_c_c___group3.html#ga9802f84846df2cea8e369234ed13b159", null ],
     [ "RCC_RTCCLKConfig", "group___r_c_c___group3.html#ga1473d8a5a020642966359611c44181b0", null ],
     [ "RCC_SYSCLKConfig", "group___r_c_c___group2.html#ga3551a36a8f0a3dc96a74d6b939048337", null ],
-    [ "RCC_WaitForHSEStartUp", "group___r_c_c___group1.html#gae0f15692614dd048ee4110a056f001dc", null ],
-    [ "APBAHBPrescTable", "group___r_c_c.html#gab4232f78d57fe4cfed7055005999ee44", null ]
+    [ "RCC_WaitForHSEStartUp", "group___r_c_c___group1.html#gae0f15692614dd048ee4110a056f001dc", null ]
 ];

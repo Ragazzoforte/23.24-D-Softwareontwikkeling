@@ -2,10 +2,10 @@ var group___c_m_s_i_s___sys_tick =
 [
     [ "CMSIS ITM", "d2/d5c/group___c_m_s_i_s___i_t_m.html", "d2/d5c/group___c_m_s_i_s___i_t_m" ],
     [ "SysTick_Type", "dc/d4f/struct_sys_tick___type.html", [
-      [ "CALIB", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga9c9eda0ea6f6a7c904d2d75a6963e238", null ],
-      [ "CTRL", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gaf2ad94ac83e5d40fc6e34884bc1bec5f", null ],
-      [ "LOAD", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gae7bc9d3eac1147f3bba8d73a8395644f", null ],
-      [ "VAL", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga0997ff20f11817f8246e8f0edac6f4e4", null ]
+      [ "CALIB", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga40e07d0a4638a676780713b6ceeec4ef", null ],
+      [ "CTRL", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga15fc8d35f045f329b80c544bef35ff64", null ],
+      [ "LOAD", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gaad9adf4efc940cddb8161b69cfbe19d3", null ],
+      [ "VAL", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga26fb318c3b0a0ec7f45daafd5f8799a3", null ]
     ] ],
     [ "SysTick_CALIB_NOREF_Msk", "d1/de6/group___c_m_s_i_s___sys_tick.html#ga3af0d891fdd99bcc8d8912d37830edb6", null ],
     [ "SysTick_CALIB_NOREF_Pos", "d1/de6/group___c_m_s_i_s___sys_tick.html#ga534dbe414e7a46a6ce4c1eca1fbff409", null ],

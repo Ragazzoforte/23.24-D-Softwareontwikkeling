@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['busfault_5fhandler_0',['BusFault_Handler',['../db/d79/stm32f4xx__it_8c.html#a850cefb17a977292ae5eb4cafa9976c3',1,'BusFault_Handler(void):&#160;stm32f4xx_it.c'],['../df/da1/stm32f4xx__it_8h.html#a850cefb17a977292ae5eb4cafa9976c3',1,'BusFault_Handler(void):&#160;stm32f4xx_it.c']]]
+  ['color_5fchooser_0',['color_chooser',['../d6/db7/group___v_g_a.html#gabc15851810d067d9b1871cee94de2a09',1,'color_chooser(char *str):&#160;vga_driver.c'],['../d6/db7/group___v_g_a.html#gabc15851810d067d9b1871cee94de2a09',1,'color_chooser(char *str):&#160;vga_driver.c']]]
 ];

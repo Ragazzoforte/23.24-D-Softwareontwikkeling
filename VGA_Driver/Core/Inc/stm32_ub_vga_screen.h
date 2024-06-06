@@ -1,6 +1,20 @@
+/**
+ * @brief Headerfile of the VGA screen library.
+ * 
+ * This file contains the main function of the program. It initializes the system, sets up the VGA screen, and enters a loop to handle UART messages.
+ * 
+ * @file stm32_ub_vga_screen.h
+ * @authors Michel Vollmuller, Tim Wannet, Tijmen Willems
+ * @date 5 mei 2024
+ * @version 1.0
+ * 
+ */
+
 //--------------------------------------------------------------
 // File     : stm32_ub_vga_screen.h
 //--------------------------------------------------------------
+
+
 
 //--------------------------------------------------------------
 #ifndef __STM32F4_UB_VGA_SCREEN_H

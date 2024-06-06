@@ -1,16 +1,10 @@
 var struct_n_v_i_c___type =
 [
-    [ "IABR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga33e917b381e08dabe4aa5eb2881a7c11", null ],
-    [ "ICER", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga1965a2e68b61d2e2009621f6949211a5", null ],
-    [ "ICPR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga46241be64208436d35c9a4f8552575c5", null ],
-    [ "IP", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga6524789fedb94623822c3e0a47f3d06c", null ],
-    [ "ISER", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gaf90c80b7c2b48e248780b3781e0df80f", null ],
-    [ "ISPR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gacf8e38fc2e97316242ddeb7ea959ab90", null ],
-    [ "RESERVED0", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga2de17698945ea49abd58a2d45bdc9c80", null ],
-    [ "RESERVED2", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga0953af43af8ec7fd5869a1d826ce5b72", null ],
-    [ "RESERVED3", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga9dd330835dbf21471e7b5be8692d77ab", null ],
-    [ "RESERVED4", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga5c0e5d507ac3c1bd5cdaaf9bbd177790", null ],
-    [ "RESERVED5", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga4f753b4f824270175af045ac99bc12e8", null ],
-    [ "RSERVED1", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga6d1daf7ab6f2ba83f57ff67ae6f571fe", null ],
-    [ "STIR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga0b0d7f3131da89c659a2580249432749", null ]
+    [ "IABR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gac8694e172f431db09b5d570993da3917", null ],
+    [ "ICER", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gaf458bc93cfb899fc1c77c5d1f39dde88", null ],
+    [ "ICPR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga8165d9a8c0090021e56bbe91c2c44667", null ],
+    [ "IP", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga38c377984f751265667317981f101bb4", null ],
+    [ "ISER", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga0bf79013b539f9f929c75bd50f8ec67d", null ],
+    [ "ISPR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gab39acf254b485e3ad71b18aa9f1ca594", null ],
+    [ "STIR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga471c399bb79454dcdfb342a31a5684ae", null ]
 ];

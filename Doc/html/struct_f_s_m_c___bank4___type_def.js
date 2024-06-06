@@ -1,8 +1,8 @@
 var struct_f_s_m_c___bank4___type_def =
 [
-    [ "PATT4", "struct_f_s_m_c___bank4___type_def.html#a4cccc7802b573135311cc38e7f247ff5", null ],
-    [ "PCR4", "struct_f_s_m_c___bank4___type_def.html#a0470b5bbb53e9f1bbde09829371eb72f", null ],
-    [ "PIO4", "struct_f_s_m_c___bank4___type_def.html#a531ebc38c47bebfb198eafb4de24cb2a", null ],
-    [ "PMEM4", "struct_f_s_m_c___bank4___type_def.html#a4ed4ce751e7a8b3207bd20675b1d9085", null ],
-    [ "SR4", "struct_f_s_m_c___bank4___type_def.html#a1e0f09be7fa48bb7b14233866da1dd9f", null ]
+    [ "PATT4", "struct_f_s_m_c___bank4___type_def.html#a955cad1aab7fb2d5b6e216cb29b5e7e2", null ],
+    [ "PCR4", "struct_f_s_m_c___bank4___type_def.html#a2f02e7acfbd7e549ede84633215eb6a1", null ],
+    [ "PIO4", "struct_f_s_m_c___bank4___type_def.html#ac53cd7a08093a4ae8f4de4bcff67a64f", null ],
+    [ "PMEM4", "struct_f_s_m_c___bank4___type_def.html#a3f82cc749845fb0dd7dfa8121d96b663", null ],
+    [ "SR4", "struct_f_s_m_c___bank4___type_def.html#a8218d6e11dae5d4468c69303dec0b4fc", null ]
 ];

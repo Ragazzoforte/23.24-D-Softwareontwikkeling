@@ -61,7 +61,7 @@ and modify.
 
 ## Graphical Design
 
-![Local Image](./Media/HLD.png)
+![Local Image](./Doc/HLD.png)
 
 From the image above you can see the 3-layer model representeted in a high level design.
 As explained in the last chapter the 3-layer model is separated in 4 different parts: User Interface, Logic Layer, VGA Driver and UART Driver.

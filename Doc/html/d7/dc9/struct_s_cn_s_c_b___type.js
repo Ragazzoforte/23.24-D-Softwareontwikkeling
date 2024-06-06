@@ -1,6 +1,5 @@
 var struct_s_cn_s_c_b___type =
 [
-    [ "ACTLR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gaacadedade30422fed705e8dfc8e6cd8d", null ],
-    [ "ICTR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gad99a25f5d4c163d9005ca607c24f6a98", null ],
-    [ "RESERVED0", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gafe1d5fd2966d5062716613b05c8d0ae1", null ]
+    [ "ACTLR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga9a73f00a0223775caeb09c5c6abb3087", null ],
+    [ "ICTR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga5bb2c6795b90f12077534825cc844b56", null ]
 ];

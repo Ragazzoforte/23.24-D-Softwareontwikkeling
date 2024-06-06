@@ -1,5 +1,6 @@
 var NAVTREEINDEX31 =
 {
+"de/d41/group___t_i_m___a_o_e___bit___set___reset.html":[1,4,4,1,13],
 "de/d41/group___t_i_m___a_o_e___bit___set___reset.html#ga0f80ba4fbadd434bc82ca63e904ace41":[1,4,4,1,13,1],
 "de/d41/group___t_i_m___a_o_e___bit___set___reset.html#gaa416873d01fe62fe8d3f9c8bb7853fa1":[1,4,4,1,13,2],
 "de/d41/group___t_i_m___a_o_e___bit___set___reset.html#gaabce6b8865d80929bf69c6c3c7780846":[1,4,4,1,13,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX31 =
 "df/d83/struct_s_p_i___type_def.html#a017d7d54a7bf1925facea6b5e02fec83":[1,5,1,3,28,16],
 "df/d83/struct_s_p_i___type_def.html#a0870177921541602a44f744f1b66e823":[1,5,1,3,28,12],
 "df/d83/struct_s_p_i___type_def.html#a09ce56649bb5477e2fcf3e92bca8f735":[1,5,1,3,28,8],
-"df/d83/struct_s_p_i___type_def.html#a0ffe762827b71caff20c75bf105387f6":[1,5,1,3,28,14],
-"df/d83/struct_s_p_i___type_def.html#a1b7a800c0f56532a431b19cf868e4102":[1,5,1,3,28,7]
+"df/d83/struct_s_p_i___type_def.html#a0ffe762827b71caff20c75bf105387f6":[1,5,1,3,28,14]
 };

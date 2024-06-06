@@ -1,7 +1,7 @@
 var struct_d_m_a___type_def =
 [
-    [ "HIFCR", "struct_d_m_a___type_def.html#a1e4f50b935bab2520788ae936f2e55c1", null ],
-    [ "HISR", "struct_d_m_a___type_def.html#a01a90a5fcd6459e10b81c0ab737dd2e3", null ],
-    [ "LIFCR", "struct_d_m_a___type_def.html#a11adb689c874d38b49fa44990323b653", null ],
-    [ "LISR", "struct_d_m_a___type_def.html#aacb4a0977d281bc809cb5974e178bc2b", null ]
+    [ "HIFCR", "struct_d_m_a___type_def.html#ac55c27aeea4107813c1e7da3fcf46961", null ],
+    [ "HISR", "struct_d_m_a___type_def.html#a6fe40f7ac1a18c2726b328b5ec02b262", null ],
+    [ "LIFCR", "struct_d_m_a___type_def.html#ac4f7bf4cb172024bfc940c00167cd04e", null ],
+    [ "LISR", "struct_d_m_a___type_def.html#a5cdef358e9e95b570358e1f6a3a7f492", null ]
 ];

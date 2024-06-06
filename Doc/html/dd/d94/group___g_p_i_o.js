@@ -3,37 +3,21 @@ var group___g_p_i_o =
     [ "GPIO_Private_Functions", "d5/d88/group___g_p_i_o___private___functions.html", "d5/d88/group___g_p_i_o___private___functions" ],
     [ "GPIO_Exported_Constants", "dd/dd8/group___g_p_i_o___exported___constants.html", "dd/dd8/group___g_p_i_o___exported___constants" ],
     [ "GPIO_InitTypeDef", "dd/d8f/struct_g_p_i_o___init_type_def.html", [
-      [ "GPIO_Mode", "dd/d8f/struct_g_p_i_o___init_type_def.html#a55bd77e335c2bfeec9caa5dc922b791b", null ],
-      [ "GPIO_OType", "dd/d8f/struct_g_p_i_o___init_type_def.html#af48c56f3e56e71204c8904ea29f5181b", null ],
-      [ "GPIO_Pin", "dd/d8f/struct_g_p_i_o___init_type_def.html#a0beb7bf54bbf5fff56f49d8beba2e3df", null ],
-      [ "GPIO_PuPd", "dd/d8f/struct_g_p_i_o___init_type_def.html#aad62942c003bc2083d37f10f6f39bd5f", null ],
-      [ "GPIO_Speed", "dd/d8f/struct_g_p_i_o___init_type_def.html#ac05832cacebc861a9acf5294d702c16b", null ]
+      [ "GPIO_Mode", "dd/d8f/struct_g_p_i_o___init_type_def.html#a0c7e8901d8b511bbb8c3b153f705dbba", null ],
+      [ "GPIO_OType", "dd/d8f/struct_g_p_i_o___init_type_def.html#a321a268abbed3d2f01c27383e8daf92d", null ],
+      [ "GPIO_Pin", "dd/d8f/struct_g_p_i_o___init_type_def.html#a15699fc7e215ac2579cd24ca76cd4591", null ],
+      [ "GPIO_PuPd", "dd/d8f/struct_g_p_i_o___init_type_def.html#aeb0168ffc465346d21f3120aec320b72", null ],
+      [ "GPIO_Speed", "dd/d8f/struct_g_p_i_o___init_type_def.html#a57b08335216f50618ebc080e4fbb0a80", null ]
     ] ],
-    [ "IS_GPIO_ALL_PERIPH", "dd/d94/group___g_p_i_o.html#ga68b2a1f0b05c13978217db5439c7f790", null ],
-    [ "IS_GPIO_BIT_ACTION", "dd/d94/group___g_p_i_o.html#ga6b882caa8ed9857c5c7267959a7818c5", null ],
-    [ "IS_GPIO_MODE", "dd/d94/group___g_p_i_o.html#gacc5fde3eef57ec3c558c11d0011d900c", null ],
-    [ "IS_GPIO_OTYPE", "dd/d94/group___g_p_i_o.html#ga7145550a414f2b0455d79ddde6100af8", null ],
-    [ "IS_GPIO_PUPD", "dd/d94/group___g_p_i_o.html#gae30c92591d1f29dbd594ac3cd855b503", null ],
-    [ "IS_GPIO_SPEED", "dd/d94/group___g_p_i_o.html#ga888e1f951df2fe9dbf827528051a3a56", null ],
-    [ "BitAction", "dd/d94/group___g_p_i_o.html#ga176130b21c0e719121470a6042d4cf19", [
-      [ "Bit_RESET", "dd/d94/group___g_p_i_o.html#gga176130b21c0e719121470a6042d4cf19ae2c026f2b44a949f82a65f3385edef09", null ],
-      [ "Bit_SET", "dd/d94/group___g_p_i_o.html#gga176130b21c0e719121470a6042d4cf19a3c477841a6ceec13fe47ef322432b992", null ]
-    ] ],
+    [ "BitAction", "dd/d94/group___g_p_i_o.html#ga176130b21c0e719121470a6042d4cf19", null ],
     [ "GPIOMode_TypeDef", "dd/d94/group___g_p_i_o.html#ga1347339e1c84a196fabbb31205eec5d4", [
       [ "GPIO_Mode_IN", "dd/d94/group___g_p_i_o.html#gga1347339e1c84a196fabbb31205eec5d4a484aa18a6156ce916049b334ba1839de", null ],
       [ "GPIO_Mode_OUT", "dd/d94/group___g_p_i_o.html#gga1347339e1c84a196fabbb31205eec5d4a60f1d530f4119efcad8e1a68c890c6a6", null ],
       [ "GPIO_Mode_AF", "dd/d94/group___g_p_i_o.html#gga1347339e1c84a196fabbb31205eec5d4a6d44c35c6c5008d85bac9251a867e701", null ],
       [ "GPIO_Mode_AN", "dd/d94/group___g_p_i_o.html#gga1347339e1c84a196fabbb31205eec5d4a6e5c0d7e6d2e22b834b24e1ca1d6d0db", null ]
     ] ],
-    [ "GPIOOType_TypeDef", "dd/d94/group___g_p_i_o.html#gae74212e8d66c389f47326b06bdf6d2ab", [
-      [ "GPIO_OType_PP", "dd/d94/group___g_p_i_o.html#ggae74212e8d66c389f47326b06bdf6d2abad967f141221bf702a343f91ad6acf55f", null ],
-      [ "GPIO_OType_OD", "dd/d94/group___g_p_i_o.html#ggae74212e8d66c389f47326b06bdf6d2aba1e3717d7271e0707f559a149a1963e43", null ]
-    ] ],
-    [ "GPIOPuPd_TypeDef", "dd/d94/group___g_p_i_o.html#gafb7ecd99c44b4fd702d669304a36c2c8", [
-      [ "GPIO_PuPd_NOPULL", "dd/d94/group___g_p_i_o.html#ggafb7ecd99c44b4fd702d669304a36c2c8a013a40bdeb6b3f43e02f8e4da896ba51", null ],
-      [ "GPIO_PuPd_UP", "dd/d94/group___g_p_i_o.html#ggafb7ecd99c44b4fd702d669304a36c2c8a474392f71830af3fcf2c4cc3896c9c8b", null ],
-      [ "GPIO_PuPd_DOWN", "dd/d94/group___g_p_i_o.html#ggafb7ecd99c44b4fd702d669304a36c2c8ab1e6c016575596c73327862984d8955c", null ]
-    ] ],
+    [ "GPIOOType_TypeDef", "dd/d94/group___g_p_i_o.html#gae74212e8d66c389f47326b06bdf6d2ab", null ],
+    [ "GPIOPuPd_TypeDef", "dd/d94/group___g_p_i_o.html#gafb7ecd99c44b4fd702d669304a36c2c8", null ],
     [ "GPIOSpeed_TypeDef", "dd/d94/group___g_p_i_o.html#ga062ad92b67b4a1f301c161022cf3ba8e", [
       [ "GPIO_Speed_2MHz", "dd/d94/group___g_p_i_o.html#gga062ad92b67b4a1f301c161022cf3ba8ea9bff9e174639332007c914483361be18", null ],
       [ "GPIO_Speed_25MHz", "dd/d94/group___g_p_i_o.html#gga062ad92b67b4a1f301c161022cf3ba8ea59a0acdf2ccd1b4b8d507e845e497c62", null ],

@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['u16_0',['u16',['../d9/d3e/group___exported__types.html#gace9d960e74685e2cd84b36132dbbf8aa',1,'stm32f4xx.h']]],
-  ['u32_1',['u32',['../d9/d3e/group___exported__types.html#gafaa62991928fb9fb18ff0db62a040aba',1,'stm32f4xx.h']]],
-  ['u8_2',['u8',['../d9/d3e/group___exported__types.html#ga92c50087ca0e64fa93fc59402c55f8ca',1,'stm32f4xx.h']]],
-  ['uc16_3',['uc16',['../d9/d3e/group___exported__types.html#gabc715ea3779494b5a4f53173a397f7cb',1,'stm32f4xx.h']]],
-  ['uc32_4',['uc32',['../d9/d3e/group___exported__types.html#ga5b628e6a05856ff67e535fa391a57683',1,'stm32f4xx.h']]],
-  ['uc8_5',['uc8',['../d9/d3e/group___exported__types.html#gac74022c74a461f810e0d4fdc9bfea480',1,'stm32f4xx.h']]]
+  ['vsc16_0',['vsc16',['../d9/d3e/group___exported__types.html#ga369ae0177b957e5afa7c1e62312f97c3',1,'stm32f4xx.h']]],
+  ['vsc32_1',['vsc32',['../d9/d3e/group___exported__types.html#gaec1d22666cf030b79051e5daa372fbc8',1,'stm32f4xx.h']]],
+  ['vsc8_2',['vsc8',['../d9/d3e/group___exported__types.html#ga47463bcded079ac61d5da46aff497803',1,'stm32f4xx.h']]],
+  ['vuc16_3',['vuc16',['../d9/d3e/group___exported__types.html#ga7f6037565f0caa27727c8b871daf0d56',1,'stm32f4xx.h']]],
+  ['vuc32_4',['vuc32',['../d9/d3e/group___exported__types.html#ga2e08e321a35a55e72c5b3a507e76371f',1,'stm32f4xx.h']]],
+  ['vuc8_5',['vuc8',['../d9/d3e/group___exported__types.html#gab0ec90ac9b2c5864755998c8d37c264a',1,'stm32f4xx.h']]]
 ];

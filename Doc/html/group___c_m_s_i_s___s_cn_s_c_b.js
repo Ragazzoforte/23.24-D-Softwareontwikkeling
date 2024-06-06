@@ -2,9 +2,9 @@ var group___c_m_s_i_s___s_cn_s_c_b =
 [
     [ "CMSIS SysTick", "group___c_m_s_i_s___sys_tick.html", "group___c_m_s_i_s___sys_tick" ],
     [ "SCnSCB_Type", "struct_s_cn_s_c_b___type.html", [
-      [ "ACTLR", "group___c_m_s_i_s__core___debug_functions.html#gaacadedade30422fed705e8dfc8e6cd8d", null ],
-      [ "ICTR", "group___c_m_s_i_s__core___debug_functions.html#gad99a25f5d4c163d9005ca607c24f6a98", null ],
-      [ "RESERVED0", "group___c_m_s_i_s__core___debug_functions.html#gafe1d5fd2966d5062716613b05c8d0ae1", null ]
+      [ "ACTLR", "group___c_m_s_i_s__core___debug_functions.html#ga9a73f00a0223775caeb09c5c6abb3087", null ],
+      [ "ICTR", "group___c_m_s_i_s__core___debug_functions.html#ga5bb2c6795b90f12077534825cc844b56", null ],
+      [ "RESERVED0", "group___c_m_s_i_s__core___debug_functions.html#ga40626516c1871e2cb75ae9d5940a9341", null ]
     ] ],
     [ "SCnSCB_ACTLR_DISDEFWBUF_Msk", "group___c_m_s_i_s___s_cn_s_c_b.html#ga6cda7b7219232a008ec52cc8e89d5d08", null ],
     [ "SCnSCB_ACTLR_DISDEFWBUF_Pos", "group___c_m_s_i_s___s_cn_s_c_b.html#gafa2eb37493c0f8dae77cde81ecf80f77", null ],

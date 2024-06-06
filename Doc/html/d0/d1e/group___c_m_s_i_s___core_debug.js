@@ -3,10 +3,10 @@ var group___c_m_s_i_s___core_debug =
     [ "CMSIS Core Function Interface", "da/db5/group___c_m_s_i_s___core___function_interface.html", "da/db5/group___c_m_s_i_s___core___function_interface" ],
     [ "CMSIS Core NVIC Functions", "dc/d25/group___c_m_s_i_s___core___n_v_i_c_functions.html", "dc/d25/group___c_m_s_i_s___core___n_v_i_c_functions" ],
     [ "CoreDebug_Type", "d3/d5f/struct_core_debug___type.html", [
-      [ "DCRDR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gab8f4bb076402b61f7be6308075a789c9", null ],
-      [ "DCRSR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#gafefa84bce7497652353a1b76d405d983", null ],
-      [ "DEMCR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga5cdd51dbe3ebb7041880714430edd52d", null ],
-      [ "DHCSR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga25c14c022c73a725a1736e903431095d", null ]
+      [ "DCRDR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga5bcffe99d1d5471d5e5befbc6272ebf0", null ],
+      [ "DCRSR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga7b49cb58573da77cc8a83a1b21262180", null ],
+      [ "DEMCR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga6cdfc0a6ce3e988cc02c2d6e8107d193", null ],
+      [ "DHCSR", "dc/df4/group___c_m_s_i_s__core___debug_functions.html#ga39bc5e68dc6071187fbe2348891eabfa", null ]
     ] ],
     [ "CoreDebug", "d8/dcb/group___c_m_s_i_s__core__register.html#gab6e30a2b802d9021619dbb0be7f5d63d", null ],
     [ "CoreDebug_BASE", "d8/dcb/group___c_m_s_i_s__core__register.html#ga680604dbcda9e9b31a1639fcffe5230b", null ],

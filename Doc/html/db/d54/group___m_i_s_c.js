@@ -1,7 +1,7 @@
 var group___m_i_s_c =
 [
-    [ "MISC_Exported_Constants", "de/de9/group___m_i_s_c___exported___constants.html", "de/de9/group___m_i_s_c___exported___constants" ],
     [ "MISC_Private_Functions", "d8/d88/group___m_i_s_c___private___functions.html", "d8/d88/group___m_i_s_c___private___functions" ],
+    [ "MISC_Exported_Constants", "de/de9/group___m_i_s_c___exported___constants.html", "de/de9/group___m_i_s_c___exported___constants" ],
     [ "NVIC_InitTypeDef", "d5/d31/struct_n_v_i_c___init_type_def.html", [
       [ "NVIC_IRQChannel", "d5/d31/struct_n_v_i_c___init_type_def.html#afa04cf6e559bb690bdd9fcb7e3d93dcf", null ],
       [ "NVIC_IRQChannelCmd", "d5/d31/struct_n_v_i_c___init_type_def.html#acb23fabb995fa4980c768825f12f5815", null ],

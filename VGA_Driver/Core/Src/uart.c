@@ -1,14 +1,14 @@
+
 /**
-  ******************************************************************************
-  * @file    uart.c
-  * @author  Tijmen Willems
-  * @brief   uart driver functions source file
-  *
-  *   This file provides five functions to be called from the logic_layer:
-  *      - uart_init(): used to initialize the uart communication  
-  * 
-  ****************************************************************************** 
-  */
+ * @brief This file contains the implementation of the uart communication.
+ * 
+ * @file uart.c
+ * @authors Michel Vollmuller, Tim Wannet, Tijmen Willems
+ * @date 5 mei 2024
+ * @version 1.0
+ * @pre This file must be used in combination with main.h
+ * 
+ */
 
 /** @addtogroup VGA driver functions
   * @{
@@ -149,7 +149,3 @@ void UART_SendString (char *string)
   memset(UART_TX_message, 0, UART_BUFFER_SIZE); // clear buffer
   USART2->CR1 ^= (1<<5); // enable RXNE
 }
-
-/**
-  * @}
-  */

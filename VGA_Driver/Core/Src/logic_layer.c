@@ -1,15 +1,17 @@
-/*
- * logic_layer.c
- *
- *  Created on: 8 mei 2024
- *      Author: Michel Vollmuller
+/**
+ * @brief Logic Layer
  * 
- * functions: 
- *      - kiezen
+ * @file logic_layer.c
+ * @authors Michel Vollmuller, Tim Wannet, Tijmen Willems
+ * @date 8 mei 2024
+ * @version 1.0
+ * @pre This file must be used in combination with main.h
+ * 
  */
 
 #include "main.h"
 
+void kiezen(command str)
 /**
  * @brief Verwerkt een commando en roept de bijbehorende API-functie aan.
  * 
@@ -19,8 +21,6 @@
  * @param str De commando-string die moet worden verwerkt.
  * @return none
  */
-
-void kiezen(command str)
 {
 	unsigned long functie = hash(str.arg[0]);
 

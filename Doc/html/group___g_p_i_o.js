@@ -1,7 +1,7 @@
 var group___g_p_i_o =
 [
-    [ "GPIO_Exported_Constants", "group___g_p_i_o___exported___constants.html", "group___g_p_i_o___exported___constants" ],
     [ "GPIO_Private_Functions", "group___g_p_i_o___private___functions.html", "group___g_p_i_o___private___functions" ],
+    [ "GPIO_Exported_Constants", "group___g_p_i_o___exported___constants.html", "group___g_p_i_o___exported___constants" ],
     [ "GPIO_InitTypeDef", "struct_g_p_i_o___init_type_def.html", [
       [ "GPIO_Mode", "struct_g_p_i_o___init_type_def.html#a55bd77e335c2bfeec9caa5dc922b791b", null ],
       [ "GPIO_OType", "struct_g_p_i_o___init_type_def.html#af48c56f3e56e71204c8904ea29f5181b", null ],

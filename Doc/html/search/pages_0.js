@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['cmsis_20cortex_20m4_0',['CMSIS Cortex-M4',['../index.html',1,'']]],
-  ['cortex_20m4_1',['CMSIS Cortex-M4',['../index.html',1,'']]]
+  ['23_2024_20d_20softwareontwikkeling_0',['23.24-D-Softwareontwikkeling',['../index.html',1,'']]],
+  ['24_20d_20softwareontwikkeling_1',['23.24-D-Softwareontwikkeling',['../index.html',1,'']]]
 ];

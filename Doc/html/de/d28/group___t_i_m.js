@@ -1,7 +1,7 @@
 var group___t_i_m =
 [
-    [ "TIM_Exported_constants", "da/dda/group___t_i_m___exported__constants.html", "da/dda/group___t_i_m___exported__constants" ],
     [ "TIM_Private_Functions", "dc/dc0/group___t_i_m___private___functions.html", "dc/dc0/group___t_i_m___private___functions" ],
+    [ "TIM_Exported_constants", "da/dda/group___t_i_m___exported__constants.html", "da/dda/group___t_i_m___exported__constants" ],
     [ "TIM_TimeBaseInitTypeDef", "dc/da6/struct_t_i_m___time_base_init_type_def.html", [
       [ "TIM_ClockDivision", "dc/da6/struct_t_i_m___time_base_init_type_def.html#ab473f51adaa9474702e454fc8c24a407", null ],
       [ "TIM_CounterMode", "dc/da6/struct_t_i_m___time_base_init_type_def.html#a0de4138cd939566bc667f21df089e195", null ],

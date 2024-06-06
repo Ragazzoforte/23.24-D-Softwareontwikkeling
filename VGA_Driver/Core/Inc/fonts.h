@@ -1,8 +1,14 @@
-/*
- * fonts.h
- *
- *  Created on: 8 mei 2024
- *      Author: Michel Vollmuller
+/**
+ * @file fonts.h
+ * @author Michel Vollmuller (michel.vollmuller@gmail.com)
+ * @author Tim Wannet (tim.wannet@student.hu.nl)
+ * @author Tijmen Willems (tijmen.willems@student.hu.nl)
+ * @brief headerfile of fonts.c
+ * @version 0.1
+ * @date 05-06-2024
+ * 
+ * @copyright Copyright (c) 2024
+ * 
  */
 
 #ifndef fonts_h

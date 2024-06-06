@@ -1,21 +1,11 @@
 /**
-  ******************************************************************************
   * @file    vga_driver.c
-  * @author  Tijmen Willems, Michel Vollmuller, Tim Wannet
-  * @brief   VGA driver functions source file
+  * @author  Michel Vollmuller, Tim Wannet, Tijmen Willems
+  * @brief   This file contains the implementation of vga driver functions.
   *
-  *   This file provides five functions to be called from the logic_layer:
-  *      - API_draw_text(): used to draw a string to the VGA screen. 
-  *
-  *      - API_draw_line(): used to draw a line to the VGA screen.  
-  *                                     
-  *      - API_draw_rectangle(): used to draw a rectangle to the VGA screen.
-  * 
-  *      - API_draw_bitmap(): used to draw a figure (bitmap) to the VGA screen.  
-  * 
-  *      - API_clearscreen(): used to clear the VGA screen.  
-  * 
-  ****************************************************************************** 
+  * @date 5 mei 2024
+  * @version 1.0
+  * @pre This file must be used in combination with main.h
   */
 
 /** @addtogroup VGA driver functions

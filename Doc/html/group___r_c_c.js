@@ -1,7 +1,7 @@
 var group___r_c_c =
 [
-    [ "RCC_Exported_Constants", "group___r_c_c___exported___constants.html", "group___r_c_c___exported___constants" ],
     [ "RCC_Private_Functions", "group___r_c_c___private___functions.html", "group___r_c_c___private___functions" ],
+    [ "RCC_Exported_Constants", "group___r_c_c___exported___constants.html", "group___r_c_c___exported___constants" ],
     [ "RCC_ClocksTypeDef", "struct_r_c_c___clocks_type_def.html", [
       [ "HCLK_Frequency", "struct_r_c_c___clocks_type_def.html#a41b9859d33954117daf7fab42f804b92", null ],
       [ "PCLK1_Frequency", "struct_r_c_c___clocks_type_def.html#add4cfc63c35178d187107edc764e0b8f", null ],

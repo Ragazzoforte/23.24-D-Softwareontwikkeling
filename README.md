@@ -30,6 +30,7 @@ From every issue, a new branch will be created. The branch name will be the same
 A Branch name should always start with the following prefixes:
 
 - Feature Branches: feature/. 
+
 - Bugfix Branches: bugfix/. 
 - Hotfix Branches: hotfix/.
 - Release Branches: release/.
@@ -38,8 +39,7 @@ A Branch name should always start with the following prefixes:
 # Manual
 
 ## Graphical Design
-
-![Local Image](HLD.png)
+![Local Image](./HLD.png)
 
 
 ## 3-tier model
@@ -78,6 +78,8 @@ vet, cursief)
 - polygon, x, y, size, corner, kleur, reserved
 - cirkel, x, y, radius, kleur, gevuld (1,0) [als 1: rand (1px) met kleur]
 
+
 ## Colours
 zwart, blauw, lichtblauw, groen, lichtgroen, cyaan, lichtcyaan, rood, lichtrood, magenta,
 lichtmagenta, bruin, geel, grijs, wit 
+

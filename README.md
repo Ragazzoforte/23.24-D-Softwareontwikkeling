@@ -12,7 +12,7 @@ By completing this project, We will deliver a fully operational solution with th
 ## Team members
 - Michel Vollmuller
 - Tim Wannet
-- Tijmen Willemsen
+- Tijmen Willems
 
 ## Project workflow
 - **Development Tools**: Visual Studio Code, Git, GitHub Desktop and Gitkraken.

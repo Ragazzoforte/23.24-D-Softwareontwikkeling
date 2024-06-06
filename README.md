@@ -39,12 +39,7 @@ A Branch name should always start with the following prefixes:
 # Manual
 
 ## Graphical Design
-<div class="title_screenshot">
-
-![Screenshot of Doxygen Awesome CSS](HLD.png)
-
-</div>
-
+![](https://github.com/Ragazzoforte/23.24-D-Softwareontwikkeling/blob/main/HLD.png)
 
 ## 3-tier model
 The 3-layer model, also known as the layered architecture, is a software design pattern that separates the functionality of a program into three distinct layers: the user interface (UI) layer, the logic layer, and the I/O (input/output) layer. Each layer has a specific responsibility and interacts with the other layers in a controlled manner.

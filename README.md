@@ -60,10 +60,12 @@ By separating the concerns into different layers. The 3-layer model promotes mod
 and modify.
 
 ## Graphical Design
+
 ![Local Image](./Media/HLD.png)
 
 From the image above you can see the 3-layer model representeted in a high level design.
 As explained in the last chapter the 3-layer model is separated in 4 different parts: User Interface, Logic Layer, VGA Driver and UART Driver.
+
 
 1. User Interface
 The User Interface (blue) is represented by 2 blocks in the HLD: "Translat_string_to_command" and "Execute_command: kiezen()".

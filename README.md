@@ -39,7 +39,11 @@ A Branch name should always start with the following prefixes:
 # Manual
 
 ## Graphical Design
-![Local Image](./HLD.png)
+<div class="title_screenshot">
+
+![Screenshot of Doxygen Awesome CSS](HLD.pn)
+
+</div>
 
 
 ## 3-tier model

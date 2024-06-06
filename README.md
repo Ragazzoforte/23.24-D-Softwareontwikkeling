@@ -41,7 +41,7 @@ A Branch name should always start with the following prefixes:
 ## Graphical Design
 <div class="title_screenshot">
 
-![Screenshot of Doxygen Awesome CSS](HLD.pn)
+![Screenshot of Doxygen Awesome CSS](HLD.png)
 
 </div>
 
